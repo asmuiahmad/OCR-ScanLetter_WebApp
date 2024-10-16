@@ -1,0 +1,139 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Profile {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<!-- [ Main Content ] start -->
+<div class="pcoded-main-container">
+    <div class="pcoded-wrapper">
+        <div class="pcoded-content">
+            <div class="pcoded-inner-content">
+                <div class="main-body">
+                    <div class="page-wrapper">
+                        <!-- [ breadcrumb ] start -->
+                        <div class="page-header">
+                            <div class="page-block">
+                                <div class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <div class="page-header-title">
+                                            <h5 class="m-b-10">Input Surat Keluar</h5>
+                                        </div>
+                                        <ul class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="/"><i
+                                                        class="feather icon-home"></i></a></li>
+                                            <li class="breadcrumb-item"><a href="javascript:">Data Kepegawaian</a></li>
+                                            <li class="breadcrumb-item"><a href="javascript:">Input Surat Keluar</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Display flash messages -->
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="alert alert-success">
+                            {% for message in messages %}
+                            {{ message }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        <!-- [ Main Content ] start -->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Input Surat Keluar</h5>
+                                    </div>
+                                    <div class="card-block">
+                                        <form method="POST" action="{{ url_for('add_surat_keluar') }}">
+                                            <div class="row">
+                                                <div class="col-sm-6 mb-4 form-group">
+                                                    <label for="tanggal_surat">Tanggal Surat</label>
+                                                    <input class="form-control datepicker" data-date-format="mm/dd/yyyy"
+                                                        name="tanggal_surat" id="tanggal_surat"
+                                                        placeholder="Pilih Tanggal" required>
+                                                </div>
+                                                <div class="container col-sm-6 mb-4">
+                                                    <label for="kode_surat">Kode Surat</label>
+                                                    <div class="row align-items-center">
+                                                        <!-- First Input Kode Surat Column -->
+                                                        <div class="col-md-4">
+                                                            <input type="text" class="form-control" name="kode_surat1"
+                                                                placeholder="Kode Surat" required>
+                                                        </div>
+                                                        <div class="text-sm-center col-md-2">
+                                                        <!-- Kode Umum -->
+                                                            <label class="form-label">/KPA/W15-A12/</label>
+                                                        </div>
+                                                        <!-- Second Input Kode Surat Column -->
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" name="kode_surat2"
+                                                                placeholder="Kode Surat">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6 mb-4 form-group">
+                                                    <label>Pengirim Surat</label>
+                                                    <input type="text" class="form-control" name="pengirim_surat"
+                                                        id="pengirim_surat placeholder="Pengirim Surat" required>
+                                                </div>
+                                                <div class="col-sm-6 mb-4 form-group">
+                                                    <label>Penerima Surat</label>
+                                                    <input type="text" class="form-control" name="penerima_surat"
+                                                        id="penerima_surat" placeholder="Penerima Surat" required>
+                                                </div>
+                                                <div class="col-sm-6 mb-4 form-group">
+                                                    <label for="nomor_urut">Nomor Urut</label>
+                                                    <input class="form-control" name="nomor_surat" id="nomor_urut"
+                                                        placeholder="Nomor Urut" required>
+                                                </div>
+                                                <div class="col-sm-6 mb-4 form-group">
+                                                    <label for="keterangan_surat">Keterangan Surat</label>
+                                                    <input class="form-control" name="isi_surat" id="keterangan_surat"
+                                                        placeholder="Keterangan Surat">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="jenis_surat">Jenis Surat</label>
+                                                    <select class="mb-3 form-control" name="jenis_surat" id="jenis_surat">
+                                                        <option value="Umum">Umum</option>
+                                                        <option value="Keuangan">Keuangan</option>
+                                                        <option value="Kepegawaian">Kepegawaian</option>
+                                                        <option value="Perkara">Perkara</option>
+                                                        <option value="Lain-lain">Lain-lain</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-6 mb-4 form-group form-group">
+                                                    <label for="isi_surat">Isi Surat</label>
+                                                    <textarea class="form-control" name="isi_surat" id="isi_surat"
+                                                        rows="10" required></textarea>
+                                                </div>
+
+                                                <div class="col-sm-12 mb-2">
+                                                    <div class="form-group">
+                                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- [ Main Content ] end -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
