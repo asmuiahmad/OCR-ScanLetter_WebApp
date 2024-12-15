@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} UI Tables {% endblock %} 
+{% block title %} Data Surat Keluar {% endblock %} 
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -57,21 +57,21 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <!-- Loop through the surat_records and display each one -->
-                                                        {% for surat in db %}
-                                                        <tr>
-                                                            <td>{{ surat.id_surat }}</td>
-                                                            <td>{{ surat.tanggal_surat }}</td>
-                                                            <td>{{ surat.pengirim_asal }}</td>
-                                                            <td>{{ surat.penerima_tujuan }}</td>
-                                                            <td>{{ surat.nomor_surat }}</td>
-                                                            <td>{{ surat.kode_surat }}</td>
-                                                            <td>{{ surat.isi_surat }}</td>
-                                                        </tr>
+                                                        <!-- Loop through the surat_list and display each one -->
+                                                        {% for surat in surat_list %}
+                                                            <tr>
+                                                                <td>{{ surat.id_surat }}</td>
+                                                                <td>{{ surat.tanggal_surat }}</td>
+                                                                <td>{{ surat.pengirim_surat }}</td>  <!-- Ensure this matches your model attribute -->
+                                                                <td>{{ surat.penerima_surat }}</td>   <!-- Ensure this matches your model attribute -->
+                                                                <td>{{ surat.nomor_surat }}</td>
+                                                                <td>{{ surat.kode_surat }}</td>
+                                                                <td>{{ surat.isi_surat }}</td>
+                                                            </tr>
                                                         {% else %}
-                                                        <tr>
-                                                            <td colspan="8" class="text-center">No records found</td>
-                                                        </tr>
+                                                            <tr>
+                                                                <td colspan="7" class="text-center">No records found</td> <!-- Adjust colspan to match table columns -->
+                                                            </tr>
                                                         {% endfor %}
                                                     </tbody>
                                                 </table>

@@ -19,8 +19,8 @@ class Config(object):
     GITHUB_SECRET  = os.getenv('GITHUB_SECRET', None)
 
     # Enable/Disable Github Social Login    
-    if GITHUB_ID and GITHUB_SECRET:
-         SOCIAL_AUTH_GITHUB  = True        
+    if  GITHUB_ID and GITHUB_SECRET:
+        SOCIAL_AUTH_GITHUB  = True        
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

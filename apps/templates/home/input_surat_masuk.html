@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Profile {% endblock %}
+{% block title %} Input Surat Masuk {% endblock %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -53,10 +53,20 @@
                                         <form method="POST" action="{{ url_for('add_surat_masuk') }}">
                                             <div class="row">
                                                 <div class="col-sm-6 mb-4 form-group">
-                                                    <label for="tanggal_surat">Tanggal Surat</label>
-                                                    <input class="form-control datepicker" data-date-format="mm/dd/yyyy"
-                                                        name="tanggal_surat" id="tanggal_surat"
-                                                        placeholder="Pilih Tanggal" required>
+                                                    <label for="tanggal_surat" style="margin-bottom: 18px;">Tanggal Surat</label>
+                                                    <div class="input-group date" id="datepicker" data-target-input="nearest">
+                                                        <input 
+                                                            type="text" 
+                                                            class="form-control datetimepicker-input datepicker" 
+                                                            name="tanggal_surat" 
+                                                            id="tanggal_surat" 
+                                                            data-target="#datepicker"
+                                                            placeholder="Pilih Tanggal" 
+                                                            required>
+                                                        <div class="input-group-append" data-target="#datepicker" data-toggle="datetimepicker">
+                                                            <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="container col-sm-6 mb-4">
                                                     <label for="kode_surat">Kode Surat</label>
@@ -64,14 +74,14 @@
                                                         <!-- First Input Kode Surat Column -->
                                                         <div class="col-md-4">
                                                             <input type="text" class="form-control" name="kode_surat1"
-                                                                placeholder="Kode Surat" required>
+                                                                placeholder="Nomor Surat" required>
                                                         </div>
-                                                        <div class="text-sm-center col-md-2">
+                                                        <div class="text-sm-center col-md-3">
                                                         <!-- Kode Umum -->
                                                             <label class="form-label">/KPA/W15-A12/</label>
                                                         </div>
                                                         <!-- Second Input Kode Surat Column -->
-                                                        <div class="col-md-6">
+                                                        <div class="col-md-5">
                                                             <input type="text" class="form-control" name="kode_surat2"
                                                                 placeholder="Kode Surat">
                                                         </div>

@@ -47,10 +47,15 @@ Migrate(app, db)
 if not DEBUG:
     Minify(app=app, html=True, js=False, cssless=False)
 
+app.config.from_object(app_config)
+print("Database URI:", app.config['SQLALCHEMY_DATABASE_URI'])
+
 @app.route('/')
 def index():
-    surat_list = db.session.execute('SELECT * FROM surat').fetchall()
-    return render_template('index.html', surat_list=surat_list)
+    # Fetch all records from the `surat_keluar` table
+    surat_list = SuratKeluar.query.all()
+    print("Fetched records:", surat_list)  # Debugging output to verify data fetching
+    return render_template('data_surat_keluar.html', surat_list=surat_list)
 
 @app.route('/add_surat_keluar', methods=['POST'])
 def add_surat_keluar():
