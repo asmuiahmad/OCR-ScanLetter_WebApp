@@ -1,10 +1,9 @@
-flask==2.2.5
+flask
 Werkzeug==2.3.7
 jinja2==3.1.2
 flask-login==0.6.2
 flask-migrate==4.0.4
-WTForms==3.0.1
-flask-wtf==1.2.1
+WTForms==3.0.1flask-wtf==1.2.1
 flask-sqlalchemy==3.0.5
 sqlalchemy==2.0.21
 email-validator==2.0.0
