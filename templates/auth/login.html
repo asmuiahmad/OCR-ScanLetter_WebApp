@@ -1,0 +1,22 @@
+{% extends 'layouts/base-login.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <div class="login">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-success" style="margin-bottom: 20px;">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <h1>Login</h1>
+        <form method="POST" action="{{ url_for('login') }}">
+            {{ form.hidden_tag() }}
+            <input type="email" name="email" placeholder="Email" required="required" autocomplete="email" />
+            <input type="password" name="password" placeholder="Password" required="required" autocomplete="current-password" />
+            <button type="submit" class="btn btn-primary">Let me in.</button>
+        </form>
+    </div>
+{% endblock %}

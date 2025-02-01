@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    {% include 'includes/head-login.html' %}
+
+<body>
+    <div class="container d-flex center justify-content-center align-items-center" style="height: 100vh;">
+        <div class="col-md-6">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% endif %}
+            {% endwith %}
+            <div class="login-box">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

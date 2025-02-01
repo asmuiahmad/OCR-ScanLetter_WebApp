@@ -1,0 +1,169 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Dashboard - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Dashboard</h1>
+    <div class="row-total1">
+        <!-- Total Surat Masuk Section -->
+        <div class="col-md-6 mb-2">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Total Surat Masuk</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Total Surat Keluar Section -->
+        <div class="col-md-6 mb-2">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Total Surat Keluar</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Sections for Surat Masuk and Keluar by Timeframe -->
+    <div class="row-total2">
+        <!-- Total Surat Tahun ini   -->
+        <div class="totalSurat-count">
+            <div>
+                <div class="card">
+                    <h5 class="card-title">Surat Masuk Tahun ini</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_this_year }}</p>
+                    <h5 class="card-title">Surat Keluar Tahun ini</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_this_year }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Total Surat Bulan ini -->
+        <div class="totalSurat-count">
+            <div>
+                <div class="card">
+                    <h5 class="card-title">Surat Masuk Bulan ini</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_this_month }}</p>
+                    <h5 class="card-title">Surat Keluar Tahun ini</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_this_year }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Total Surat Minggu ini -->
+        <div class="totalSurat-count">
+            <div>
+                <div class="card">
+                    <h5 class="card-title">Surat Masuk Minggu ini</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_this_week }}</p>
+                    <h5 class="card-title">Surat Keluar Minggu ini</h5>
+                    <p class="card-text display-4"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_this_week }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-8">
+            <h5 class="mt-4">Recent Surat Masuk and Keluar</h5>
+            <ul class="list-group">
+                {% for surat in recent_surat_masuk %}
+                    <li class="list-group-item border surat-item">
+                        <strong>Surat Masuk:</strong> {{ surat.tanggal_suratMasuk }} - {{ surat.pengirim_suratMasuk }} - {{ surat.nomor_suratMasuk }}
+                    </li>
+                {% endfor %}
+                {% for surat in recent_surat_keluar %}
+                    <li class="list-group-item border surat-item">
+                        <strong>Surat Keluar:</strong> {{ surat.tanggal_suratKeluar }} - {{ surat.pengirim_suratKeluar }} - {{ surat.nomor_suratKeluar }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Last Login Times Section -->
+        <div class="col-md-4 mb-4 mt-4">
+            <h5>Last Login Times</h5>
+            <ul class="list-group">
+                {% for user in users %}
+                    <li class="list-group-item">
+                        <strong>User ID:</strong> {{ user.id }} - 
+                        <strong>Email:</strong> {{ user.email }} - 
+                        <strong>Last Login:</strong> {{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never' }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Surat Masuk vs Surat Keluar</h5>
+                    <div id="chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    try {
+        var suratMasukData = JSON.parse('{{ surat_masuk_data|tojson|safe if surat_masuk_data is defined else "[]" }}');
+        var suratKeluarData = JSON.parse('{{ surat_keluar_data|tojson|safe if surat_keluar_data is defined else "[]" }}');
+        var categories = JSON.parse('{{ categories|tojson|safe if categories is defined else "[]" }}');
+
+        var options = {
+            series: [{
+                name: 'Surat Masuk',
+                data: suratMasukData
+            }, {
+                name: 'Surat Keluar',
+                data: suratKeluarData
+            }],
+            chart: {
+                type: 'bar',
+                height: 350
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            xaxis: {
+                categories: categories
+            },
+            yaxis: {
+                title: {
+                    text: 'Jumlah Surat'
+                }
+            },
+            fill: {
+                opacity: 1
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val + " surat";
+                    }
+                }
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+    } catch (error) {
+        console.error("Error rendering chart:", error);
+    }
+</script>
+{% endblock %}

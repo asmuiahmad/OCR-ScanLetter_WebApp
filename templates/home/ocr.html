@@ -1,0 +1,16 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>OCR Feature</h1>
+    <form id="ocr-form" method="POST" action="{{ url_for('ocr.ocr') }}" enctype="multipart/form-data">
+        <label for="image-upload">Upload Image:</label>
+        <input type="file" id="image-upload" name="image" accept="image/*" required>
+        <button class="btn btn-primary" type="submit">Process OCR</button>
+    </form>
+    <div id="ocr-result">
+        <h2>Extracted Text:</h2>
+        <textarea id="extracted-text" rows="10" cols="50" readonly>{{ extracted_text }}</textarea>
+    </div>
+</div>
+{% endblock %}

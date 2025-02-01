@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>OCR Text Extraction</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" multiple>
+        <button type="submit">Upload Image(s)</button>
+    </form>
+
+    {% if extracted_text %}
+    <div class="ocr-output">
+        <h3>OCR Output (Raw Text):</h3>
+        <pre>{{ extracted_text }}</pre>
+    </div>
+    {% endif %}
+
+    {% if extracted_data_list %}
+    <div class="ocr-data">
+        <h3>Extracted Data:</h3>
+        <table class="table-bordered">
+            <thead>
+                <tr>
+                    <th>Nomor Surat</th>
+                    <th>Kode Surat1</th>
+                    <th>Kode PA</th>
+                    <th>Kode Surat2</th>
+                    <th>Bulan</th>
+                    <th>Tahun</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in extracted_data_list %}
+                <tr>
+                    <td>{{ data['nomorsurat'] }}</td>
+                    <td>{{ data['kodesurat1'] }}</td>
+                    <td>{{ data['kodePA'] }}</td>
+                    <td>{{ data['kodesurat2'] }}</td>
+                    <td>{{ data['bulan'] }}</td>
+                    <td>{{ data['tahun'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    table.table-bordered {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table.table-bordered th, table.table-bordered td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    table.table-bordered th {
+        background-color: #f2f2f2;
+    }
+</style>
+
+{% endblock %}
