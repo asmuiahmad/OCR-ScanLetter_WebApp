@@ -1,6 +1,17 @@
+/* Importing Google font - Poppins */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
 body {
+  min-height: 100vh;
+  background: #f0f4ff;
   font-family: "Roboto", sans-serif;
   margin: 5px;
   padding: 0;
@@ -11,25 +22,18 @@ body {
 }
 
 .card {
-    margin: 10px;
-    padding: 15px 45px;
-    text-transform: uppercase;
-    transition: 0.5s;
-    background-size: 200% auto;
-    color: white;            
-    box-shadow: 0 0 20px #eee;
-    border-radius: 10px;
-    display: block;
+  margin: 10px;
+  padding: 15px 45px;
+  text-transform: uppercase;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: white;
+  box-shadow: 0 0 20px #eee;
+  border-radius: 10px;
+  display: block;
 }
 
-/* Index customize */
-
-.card:hover {
-    background-position: right center;
-    color: #fff;
-    text-decoration: none;
-}
-
+/* Index Customize */
 .totalSurat-count {
   flex: 0 0 33.3333%;
   max-width: 33.3333%;
@@ -42,16 +46,16 @@ body {
 }
 
 .row-total1 {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 .row-total1 > :nth-child(1) .card {
-  background-image: linear-gradient(to right, #A5D6A7 0%, #66BB6A 51%, #A5D6A7 100%);
+  background-image: linear-gradient(to right, #a5d6a7 0%, #66bb6a 51%, #a5d6a7 100%);
 }
 
 .row-total1 > :nth-child(2) .card {
-  background-image: linear-gradient(to right, #1E88E5 0%, #1565C0 51%, #1E88E5 100%);;
+  background-image: linear-gradient(to right, #1e88e5 0%, #1565c0 51%, #1e88e5 100%);
 }
 
 .row-total2 {
@@ -60,15 +64,15 @@ body {
 }
 
 .row-total2 > :nth-child(1) .card {
-  background-image: linear-gradient(to right, #FFF9C4 0%, #FFEB3B 51%, #FFF9C4 100%);
+  background-image: linear-gradient(to right, #fff9c4 0%, #ffeb3b 51%, #fff9c4 100%);
 }
 
 .row-total2 > :nth-child(2) .card {
-  background-image: linear-gradient(to right, #2E7D32 0%, #C8E6C9 51%, #2E7D32 100%);
+  background-image: linear-gradient(to right, #2e7d32 0%, #c8e6c9 51%, #2e7d32 100%);
 }
 
 .row-total2 > :nth-child(3) .card {
-  background-image: linear-gradient(to right, #B71C1C 0%, #FFCDD2 51%, #B71C1C 100%);
+  background-image: linear-gradient(to right, #b71c1c 0%, #ffccd2 51%, #b71c1c 100%);
 }
 
 .list-group-item:nth-child(odd) {
@@ -92,19 +96,20 @@ body {
 }
 
 /* Surat Masuk and Keluar Customize */
-
 @media (max-width: 768px) {
   .content {
     padding: 0.5rem;
   }
 }
+
 .table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
@@ -121,4 +126,169 @@ body {
 
 .pagination {
   margin-top: 20px;
+}
+
+.image-container {
+  width: 300px !important;
+  height: 400px !important;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  border: 1px solid #ddd;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.zoomable-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease-in-out;
+  cursor: zoom-in;
+}
+
+.form-container {
+  flex: 1;
+  padding-left: 15px;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 85px; /* Collapsed width */
+  display: flex;
+  flex-direction: column;
+  background: #161a2d;
+  padding: 25px 10px;
+  transition: all 0.4s ease;
+  overflow: hidden;
+}
+
+.sidebar:hover {
+  width: 260px; /* Expanded width */
+}
+
+.sidebar .sidebar-header {
+  display: flex;
+  align-items: top;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.sidebar .sidebar-header img {
+  width: 42px;
+  border-radius: 50%;
+  justify-content: center;
+}
+
+.sidebar .sidebar-header h2 {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 10px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  justify-content: center;
+  text-align: center;
+}
+
+.sidebar:hover .sidebar-header h2 {
+  opacity: 1;
+}
+
+.sidebar-links {
+  list-style: none;
+  margin-top: 20px;
+  height: 80%;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sidebar-links::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar-links li a {
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Vertically center the content */
+  justify-content: center; /* Horizontally center the content */
+  flex-direction: column; /* Stack icon and text vertically */
+  gap: 5px; /* Space between icon and text */
+  color: #fff;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 12px 8px; /* Reduced padding */
+  white-space: nowrap;
+  transition: all 0.4s ease;
+}
+
+.sidebar-links li a i {
+  font-size: 1rem; /* Reduced icon size */
+  display: flex; /* Ensure icons are treated as flex items */
+  align-items: center; /* Vertically center the icon */
+  justify-content: center; /* Horizontally center the icon */
+  width: 25px; /* Reduced width */
+  height: 25px; /* Reduced height */
+}
+
+.sidebar-links li a span {
+  opacity: 0; /* Hide text by default */
+  transition: opacity 0.4s ease;
+}
+
+.sidebar:hover .sidebar-links li a span {
+  opacity: 1; /* Show text on hover */
+}
+
+.user-account {
+  margin-top: auto;
+  padding: 12px 10px;
+  margin-left: -10px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  color: #161a2d;
+}
+
+.user-profile img {
+  width: 42px;
+  height: 42px; /* Ensure height matches width for a perfect circle */
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.user-profile h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.user-profile span {
+  font-size: 0.775rem;
+  font-weight: 600;
+}
+
+.user-detail {
+  margin-left: 23px;
+  white-space: nowrap;
+}
+
+.sidebar:hover .user-account {
+  background: #fff;
+  border-radius: 4px;
+}
+
+.main-content {
+  margin-left: 85px; /* Matches the collapsed width of the sidebar */
+  transition: margin-left 0.4s ease;
+}
+
+.sidebar:hover + .main-content {
+  margin-left: 260px; /* Matches the expanded width of the sidebar */
 }

@@ -26,6 +26,9 @@ class SuratMasuk(db.Model):
     kode_suratMasuk = db.Column(db.Text, nullable=False)
     jenis_suratMasuk = db.Column(db.Text, nullable=False)
     isi_suratMasuk = db.Column(db.Text, nullable=False)
+    gambar_suratMasuk = db.Column(db.LargeBinary, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ocr_accuracy_suratMasuk = db.Column(db.Float)
 
 class SuratKeluar(db.Model):
     id_suratKeluar = db.Column(db.Integer, primary_key=True)
@@ -33,6 +36,7 @@ class SuratKeluar(db.Model):
     pengirim_suratKeluar = db.Column(db.Text, nullable=False)
     penerima_suratKeluar = db.Column(db.Text, nullable=False)
     nomor_suratKeluar = db.Column(db.Text, nullable=False)
-    kode_suratKeluar = db.Column(db.Text, nullable=False)
-    jenis_suratKeluar = db.Column(db.Text, nullable=False)
     isi_suratKeluar = db.Column(db.Text, nullable=False)
+    gambar_suratKeluar = db.Column(db.LargeBinary, nullable=True) 
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ocr_accuracy_suratKeluar = db.Column(db.Float)

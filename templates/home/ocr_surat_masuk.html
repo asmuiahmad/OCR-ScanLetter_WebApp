@@ -1,0 +1,230 @@
+{% extends "layouts/base.html" %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
+<style>
+    .image-container {
+        text-align: center;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    .zoomable-image {
+        max-width: 100%;
+        height: auto;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .zoomable-image:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>OCR Text Extraction Surat Masuk</h1>
+    <form action="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="edit_mode" value="false">
+        <div class="form-group">
+            <label for="images">Select Images:</label>
+            <input type="file" name="image" id="images" multiple>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload Image(s)</button>
+    </form>
+    {% if extracted_data_list and extracted_data_list|length > 0 %}
+    <button type="button" class="btn btn-secondary" onclick="openModal(0)">View Extracted Data</button>
+    {% else %}
+    <p>No extracted data available. Please upload an image.</p>
+    {% endif %}
+</div>
+<!-- Modal for Viewing Extracted Data -->
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataModalLabel">Extracted Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="image-container">
+                    <img src="#" class="zoomable-image" alt="Image" id="modal-image">
+                </div>
+                <div class="form-container">
+                    <form id="dataForm">
+                        <input type="hidden" name="filename" id="filename">
+
+                        <div class="form-group">
+                            <label for="full_letter_number">Full Letter Number:</label>
+                            <input type="text" class="form-control" name="full_letter_number" id="full_letter_number">
+                        </div>
+                        <div class="form-group">
+                            <label for="pengirim">Nama Pengirim:</label>
+                            <input type="text" class="form-control" name="pengirim" id="pengirim">
+                        </div>
+                        <div class="form-group">
+                            <label for="penerima">Nama Penerima:</label>
+                            <input type="text" class="form-control" name="penerima" id="penerima">
+                        </div>
+                        <div class="form-group">
+                            <label for="selected_date">Tanggal Surat:</label>
+                            <select class="form-control" name="selected_date" id="selected_date"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="kodesurat2">Kode Surat 2:</label>
+                            <input type="text" class="form-control" name="kodesurat2" id="kodesurat2">
+                        </div>
+                        <div class="form-group">
+                            <label for="jenis_surat">Jenis Surat:</label>
+                            <input type="text" class="form-control" name="jenis_surat" id="jenis_surat">
+                        </div>
+                        <div class="form-group">
+                            <label for="isi">Isi:</label>
+                            <textarea class="form-control" name="isi" id="isi" rows="5"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="saveData()">Save</button>
+                        <button type="button" class="btn btn-secondary" onclick="previousModal()">Previous</button>
+                        <button type="button" class="btn btn-secondary" onclick="nextModal()">Next</button>
+                        <input type="hidden" name="entry_id" id="entry_id" value="">
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const suratMasukImageBaseUrl = "{{ url_for('ocr_surat_masuk.surat_masuk_image', id=0) }}";
+    const staticImageBaseUrl = "{{ url_for('static', filename='ocr/surat_masuk/') }}";
+
+    let currentIndex = 0;
+
+    const extractedDataList = {{ extracted_data_list | tojson | safe }};
+
+    function openModal(index) {
+        if (index < 0 || index >= extractedDataList.length) {
+            alert("Index out of bounds.");
+            return;
+        }
+
+        currentIndex = index;
+        const data = extractedDataList[index];
+
+        const imageSrc = data.id_suratMasuk !== null ?
+            suratMasukImageBaseUrl.replace('0', data.id_suratMasuk) :
+            staticImageBaseUrl + data.filename;
+
+        document.getElementById('modal-image').src = imageSrc;
+
+        // Populate form fields
+        document.getElementById('filename').value = data.filename;
+        document.getElementById('full_letter_number').value = data.full_letter_number || '';
+        document.getElementById('pengirim').value = data.pengirim || '';
+        document.getElementById('penerima').value = data.penerima || '';
+        document.getElementById('kodesurat2').value = data.kodesurat2 || '';
+        document.getElementById('jenis_surat').value = data.jenis_surat || '';
+        document.getElementById('isi').value = data.isi || '';
+
+        const dateSelect = document.getElementById('selected_date');
+        dateSelect.innerHTML = '';
+        if (data.dates && data.dates.length > 0) {
+            data.dates.forEach((date) => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                if (data.dates[0] === date) {
+                    option.selected = true;
+                }
+                dateSelect.appendChild(option);
+            });
+        }
+
+        $('#dataModal').modal('show');
+    }
+
+    function nextModal() {
+        if (currentIndex < extractedDataList.length - 1) {
+            openModal(++currentIndex);
+        } else {
+            alert("No more entries to process.");
+        }
+    }
+
+    function previousModal() {
+        if (currentIndex > 0) {
+            openModal(--currentIndex);
+        } else {
+            alert("Already at the first entry.");
+        }
+    }
+
+    function saveData() {
+        const data = extractedDataList[currentIndex];
+        const filename = data.filename;
+        const full_letter_number = document.getElementById("full_letter_number").value.trim();
+        const penerima = document.getElementById("penerima").value.trim();
+        const pengirim = document.getElementById("pengirim").value.trim();
+        const selected_date = document.getElementById("selected_date").value.trim();
+        const kodesurat2 = document.getElementById("kodesurat2").value.trim();
+        const jenis_surat = document.getElementById("jenis_surat").value.trim();
+        const isi = document.getElementById("isi").value.trim();
+
+        // Validation check
+        if (!selected_date || !full_letter_number || !penerima || !pengirim || !kodesurat2 || !jenis_surat || !isi) {
+            alert("All fields must be filled before saving.");
+            return;
+        }
+
+        fetch("{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    filename: filename,
+                    full_letter_number: full_letter_number,
+                    penerima: penerima,
+                    pengirim: pengirim,
+                    selected_date: selected_date,
+                    kodesurat2: kodesurat2,
+                    jenis_surat: jenis_surat,
+                    isi: isi,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Data saved successfully!");
+
+                    if (data.counts) {
+                        if (document.getElementById("count-total")) {
+                            document.getElementById("count-total").innerText = data.counts.total;
+                        }
+                        if (document.getElementById("count-year")) {
+                            document.getElementById("count-year").innerText = data.counts.this_year;
+                        }
+                        if (document.getElementById("count-month")) {
+                            document.getElementById("count-month").innerText = data.counts.this_month;
+                        }
+                        if (document.getElementById("count-week")) {
+                            document.getElementById("count-week").innerText = data.counts.this_week;
+                        }
+                    }
+
+                    nextModal();
+                } else {
+                    alert("Failed to save data: " + (data.error || "Unknown error"));
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Failed to save data.");
+            });
+    }
+</script>
+
+{% endblock %}

@@ -1,9 +1,10 @@
 from flask import render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, extract, func
+from collections import defaultdict
 from config.extensions import db
-from config.ocr import ocr_routes
+from config.ocr import ocr_bp
 from config.models import User, SuratMasuk, SuratKeluar
 from config.forms import LoginForm, RegistrationForm
 from datetime import datetime, timedelta
@@ -11,6 +12,7 @@ from app import app
 from werkzeug.utils import secure_filename
 import os
 import pytesseract
+from calendar import monthrange
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,42 +55,54 @@ def register():
 @app.route('/')
 @login_required
 def index():
-    suratMasuk_count = SuratMasuk.query.count()
-    suratKeluar_count = SuratKeluar.query.count()
+    today = datetime.today()
+    year = today.year
+    month = today.month
+    days_in_month = monthrange(year, month)[1]
 
-    start_of_month = datetime.now().replace(day=1)
-    start_of_year = datetime.now().replace(month=1, day=1)
-    start_of_week = datetime.now() - timedelta(days=datetime.now().weekday())
+    chart_labels = list(range(1, days_in_month + 1))
 
-    suratMasuk_this_month = SuratMasuk.query.filter(SuratMasuk.tanggal_suratMasuk >= start_of_month).count()
-    suratMasuk_this_year = SuratMasuk.query.filter(SuratMasuk.tanggal_suratMasuk >= start_of_year).count()
-    suratMasuk_this_week = SuratMasuk.query.filter(SuratMasuk.tanggal_suratMasuk >= start_of_week).count()
+    surat_masuk_per_day = {day: 0 for day in chart_labels}
+    surat_keluar_per_day = {day: 0 for day in chart_labels}
 
-    suratKeluar_this_month = SuratKeluar.query.filter(SuratKeluar.tanggal_suratKeluar >= start_of_month).count()
-    suratKeluar_this_year = SuratKeluar.query.filter(SuratKeluar.tanggal_suratKeluar >= start_of_year).count()
-    suratKeluar_this_week = SuratKeluar.query.filter(SuratKeluar.tanggal_suratKeluar >= start_of_week).count()
+    surat_masuk_records = SuratMasuk.query.filter(
+        SuratMasuk.tanggal_suratMasuk >= datetime(year, month, 1),
+        SuratMasuk.tanggal_suratMasuk < datetime(year, month, days_in_month) + timedelta(days=1)
+    ).all()
 
-    recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.tanggal_suratMasuk.desc()).limit(5).all()
-    recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.tanggal_suratKeluar.desc()).limit(5).all()
+    for surat in surat_masuk_records:
+        day = surat.tanggal_suratMasuk.day
+        surat_masuk_per_day[day] += 1
 
-    last_login_time = current_user.last_login if current_user.is_authenticated else None
-    users = User.query.order_by(User.last_login.desc()).limit(5).all()
+    surat_keluar_records = SuratKeluar.query.filter(
+        SuratKeluar.tanggal_suratKeluar >= datetime(year, month, 1),
+        SuratKeluar.tanggal_suratKeluar < datetime(year, month, days_in_month) + timedelta(days=1)
+    ).all()
+
+    for surat in surat_keluar_records:
+        day = surat.tanggal_suratKeluar.day
+        surat_keluar_per_day[day] += 1
+
+    chart_data_masuk = [surat_masuk_per_day[day] for day in chart_labels]
+    chart_data_keluar = [surat_keluar_per_day[day] for day in chart_labels]
 
     return render_template('home/index.html',
-                        suratMasuk_count=suratMasuk_count, 
-                        suratKeluar_count=suratKeluar_count,
-                        suratMasuk_this_month=suratMasuk_this_month, 
-                        suratMasuk_this_year=suratMasuk_this_year,
-                        suratMasuk_this_week=suratMasuk_this_week, 
-                        suratKeluar_this_month=suratKeluar_this_month,
-                        suratKeluar_this_year=suratKeluar_this_year, 
-                        suratKeluar_this_week=suratKeluar_this_week,
-                        recent_surat_masuk=recent_surat_masuk, 
-                        recent_surat_keluar=recent_surat_keluar,
-                        last_login_time=last_login_time, 
-                        users=users)
+        suratMasuk_count=SuratMasuk.query.count(),
+        suratKeluar_count=SuratKeluar.query.count(),
+        suratMasuk_this_month = SuratMasuk.query.filter(SuratMasuk.created_at >= datetime(year, month, 1)).count(),
+        suratMasuk_this_year = SuratMasuk.query.filter(SuratMasuk.created_at >= datetime(year, 1, 1)).count(),
+        suratMasuk_this_week = SuratMasuk.query.filter(SuratMasuk.created_at >= (datetime.today() - timedelta(days=datetime.today().weekday()))).count(),
+        suratKeluar_this_month = SuratKeluar.query.filter(SuratKeluar.created_at >= datetime(year, month, 1)).count(),
+        suratKeluar_this_year = SuratKeluar.query.filter(SuratKeluar.created_at >= datetime(year, 1, 1)).count(),
+        suratKeluar_this_week = SuratKeluar.query.filter(SuratKeluar.created_at >= (datetime.today() - timedelta(days=datetime.today().weekday()))).count(),
+        recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.created_at.desc()).limit(5).all(),
+        recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.created_at.desc()).limit(5).all(),
+        users=User.query.order_by(User.last_login.desc()).limit(5).all(),
 
-ocr_routes(app)
+        chart_labels=chart_labels,
+        chart_data_masuk=chart_data_masuk,
+        chart_data_keluar=chart_data_keluar
+    )
 
 @app.route('/last-logins', methods=['GET'])
 def last_logins():
@@ -112,8 +126,6 @@ def show_surat_keluar():
         'pengirim_suratKeluar': SuratKeluar.pengirim_suratKeluar,
         'penerima_suratKeluar': SuratKeluar.penerima_suratKeluar,
         'nomor_suratKeluar': SuratKeluar.nomor_suratKeluar,
-        'kode_suratKeluar': SuratKeluar.kode_suratKeluar,
-        'jenis_suratKeluar': SuratKeluar.jenis_suratKeluar,
         'isi_suratKeluar': SuratKeluar.isi_suratKeluar
     }
 
@@ -196,8 +208,6 @@ def input_surat_keluar():
         pengirim_suratKeluar = request.form['pengirim_suratKeluar']
         penerima_suratKeluar = request.form['penerima_suratKeluar']
         nomor_suratKeluar = request.form['nomor_suratKeluar']
-        kode_suratKeluar = request.form['kode_suratKeluar']
-        jenis_suratKeluar = request.form['jenis_suratKeluar']
         isi_suratKeluar = request.form['isi_suratKeluar']
 
         new_surat_keluar = SuratKeluar(
@@ -205,8 +215,6 @@ def input_surat_keluar():
             pengirim_suratKeluar=pengirim_suratKeluar,
             penerima_suratKeluar=penerima_suratKeluar,
             nomor_suratKeluar=nomor_suratKeluar,
-            kode_suratKeluar=kode_suratKeluar,
-            jenis_suratKeluar=jenis_suratKeluar,
             isi_suratKeluar=isi_suratKeluar
         )
         db.session.add(new_surat_keluar)
@@ -225,12 +233,10 @@ def edit_surat_keluar(id):
 
     entry = SuratKeluar.query.get_or_404(id)
     if request.method == 'POST':
-        entry.tanggal_suratKeluar = datetime.strptime(request.form['tanggal_suratKeluar', '%Y-%m-%d'])
+        entry.tanggal_suratKeluar = datetime.strptime(request.form['tanggal_suratKeluar'], '%Y-%m-%d')
         entry.pengirim_suratKeluar = request.form['pengirim_suratKeluar']
         entry.penerima_suratKeluar = request.form['penerima_suratKeluar']
         entry.nomor_suratKeluar = request.form['nomor_suratKeluar']
-        entry.kode_suratKeluar = request.form['kode_suratKeluar']
-        entry.jenis_suratKeluar = request.form['jenis_suratKeluar']
         entry.isi_suratKeluar = request.form['isi_suratKeluar']
         db.session.commit()
         flash('Surat Keluar has been updated successfully!', 'success')
@@ -255,7 +261,7 @@ def edit_surat_masuk(id):
 
     entry = SuratMasuk.query.get_or_404(id)
     if request.method == 'POST':
-        entry.tanggal_suratMasuk = datetime.strptime(request.form['tanggal_suratMasuk', '%Y-%m-%d'])
+        entry.tanggal_suratMasuk = datetime.strptime(request.form['tanggal_suratMasuk'], '%Y-%m-%d')
         entry.pengirim_suratMasuk = request.form['pengirim_suratMasuk']
         entry.penerima_suratMasuk = request.form['penerima_suratMasuk']
         entry.nomor_suratMasuk = request.form['nomor_suratMasuk']
@@ -275,3 +281,96 @@ def delete_surat_masuk(id):
     db.session.commit()
     flash('Surat Masuk has been deleted successfully!', 'success')
     return redirect(url_for('show_surat_masuk'))
+
+@app.route("/laporan-statistik")
+@login_required
+def laporan_statistik():
+    semua_surat_keluar = SuratKeluar.query.all()
+    semua_surat_masuk = SuratMasuk.query.all()
+
+    # Initialize field 'Not found' counters for SuratKeluar
+    field_stats_keluar = {
+        'nomor_suratKeluar': 0,
+        'pengirim_suratKeluar': 0,
+        'penerima_suratKeluar': 0,
+        'isi_suratKeluar': 0
+    }
+
+    # Initialize field 'Not found' counters for SuratMasuk
+    field_stats_masuk = {
+        'nomor_suratMasuk': 0,
+        'pengirim_suratMasuk': 0,
+        'penerima_suratMasuk': 0,
+        'isi_suratMasuk': 0
+    }
+
+    # Count 'Not found' per field in SuratKeluar
+    for surat in semua_surat_keluar:
+        if surat.nomor_suratKeluar == 'Not found':
+            field_stats_keluar['nomor_suratKeluar'] += 1
+        if surat.pengirim_suratKeluar == 'Not found':
+            field_stats_keluar['pengirim_suratKeluar'] += 1
+        if surat.penerima_suratKeluar == 'Not found':
+            field_stats_keluar['penerima_suratKeluar'] += 1
+        if surat.isi_suratKeluar == 'Not found':
+            field_stats_keluar['isi_suratKeluar'] += 1
+
+    # Count 'Not found' per field in SuratMasuk
+    for surat in semua_surat_masuk:
+        if surat.nomor_suratMasuk == 'Not found':
+            field_stats_masuk['nomor_suratMasuk'] += 1
+        if surat.pengirim_suratMasuk == 'Not found':
+            field_stats_masuk['pengirim_suratMasuk'] += 1
+        if surat.penerima_suratMasuk == 'Not found':
+            field_stats_masuk['penerima_suratMasuk'] += 1
+        if surat.isi_suratMasuk == 'Not found':
+            field_stats_masuk['isi_suratMasuk'] += 1
+
+    # Define components for Full Letter Number
+    full_letter_components_keluar = ['nomor_suratKeluar']  # Add more components if applicable
+    full_letter_components_masuk = ['nomor_suratMasuk', 'kode_suratMasuk']  # Add more components if applicable
+
+    # Count 'Not Found' for each component in Full Letter Number
+    full_letter_not_found_keluar = sum(
+        sum(1 for s in semua_surat_keluar if getattr(s, component) == 'Not found')
+        for component in full_letter_components_keluar
+    )
+    full_letter_not_found_masuk = sum(
+        sum(1 for s in semua_surat_masuk if getattr(s, component) == 'Not found')
+        for component in full_letter_components_masuk
+    )
+
+    # Add Full Letter Number 'Not Found' counts to stats
+    field_stats_keluar['full_letter_number_not_found'] = full_letter_not_found_keluar
+    field_stats_masuk['full_letter_number_not_found'] = full_letter_not_found_masuk
+
+    # Filter surat that failed extraction (accuracy < 100)
+    gagal_ekstraksi = [s for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar is not None and s.ocr_accuracy_suratKeluar < 100]
+    total_surat = len(semua_surat_keluar)
+    berhasil_count = len([s for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar == 100])
+    persentase_berhasil = round((berhasil_count / total_surat) * 100, 2) if total_surat else 0
+
+    # Average OCR accuracy
+    akurasi_keluar = [s.ocr_accuracy_suratKeluar for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar is not None]
+    akurasi_masuk = [s.ocr_accuracy_suratMasuk for s in semua_surat_masuk if s.ocr_accuracy_suratMasuk is not None]
+
+    rata2_akurasi_keluar = round(sum(akurasi_keluar) / len(akurasi_keluar), 2) if akurasi_keluar else 0
+    rata2_akurasi_masuk = round(sum(akurasi_masuk) / len(akurasi_masuk), 2) if akurasi_masuk else 0
+
+    # Optional keyword search on SuratKeluar.isi_suratKeluar
+    keyword = request.args.get('keyword', '')
+    surat_keyword = []
+    if keyword:
+        surat_keyword = SuratKeluar.query.filter(SuratKeluar.isi_suratKeluar.ilike(f'%{keyword}%')).all()
+
+    return render_template(
+        "home/laporan_statistik.html",
+        persentase_berhasil=persentase_berhasil,
+        gagal_ekstraksi=gagal_ekstraksi,
+        keyword=keyword,
+        surat_keyword=surat_keyword,
+        rata2_akurasi_masuk=rata2_akurasi_masuk,
+        rata2_akurasi_keluar=rata2_akurasi_keluar,
+        field_stats_keluar=field_stats_keluar,
+        field_stats_masuk=field_stats_masuk
+    )

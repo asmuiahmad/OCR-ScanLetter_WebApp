@@ -1,0 +1,101 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📊 Statistik Ekstraksi Surat</h2>
+
+    <!-- Persentase Keberhasilan -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">✅ Persentase Keberhasilan Ekstraksi</h5>
+            <p class="card-text">
+                Sebanyak <strong>{{ persentase_berhasil }}%</strong> surat berhasil diekstrak secara lengkap.
+            </p>
+        </div>
+    </div>
+
+    <!-- Rata-Rata Akurasi OCR -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">📈 Rata-Rata Akurasi OCR</h5>
+            <p class="card-text">
+                🔹 Surat Masuk: <strong>{{ rata2_akurasi_masuk }}%</strong><br>
+                🔹 Surat Keluar: <strong>{{ rata2_akurasi_keluar }}%</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Surat Gagal Ekstraksi -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-danger">❌ Surat dengan Kesalahan Ekstraksi</h5>
+            {% if gagal_ekstraksi %}
+            <ul>
+                {% for surat in gagal_ekstraksi %}
+                <li>
+                    <strong>{{ surat.nomor_suratKeluar or 'N/A' }}</strong> –
+                    Pengirim: {{ surat.pengirim_suratKeluar or 'N/A' }},
+                    Penerima: {{ surat.penerima_suratKeluar or 'N/A' }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-success">Semua surat berhasil diekstrak.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Searchable Report -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">🔍 Pencarian Surat berdasarkan Kata Kunci</h5>
+            <form method="get" class="mb-3">
+                <input type="text" name="keyword" placeholder="Kata kunci..." class="form-control"
+                    value="{{ keyword }}">
+                <button type="submit" class="btn btn-primary mt-2">Cari</button>
+            </form>
+
+            {% if keyword %}
+            <h6>Hasil untuk: "<strong>{{ keyword }}</strong>"</h6>
+            {% if surat_keyword %}
+            <ul>
+                {% for surat in surat_keyword %}
+                <li>
+                    <strong>{{ surat.nomor_suratKeluar or 'N/A' }}</strong> –
+                    {{ surat.isi_suratKeluar[:100] }}...
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Tidak ada surat yang mengandung kata tersebut.</p>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Field Not Found Statistics for Surat Keluar -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3>Surat Keluar - Field Not Found Counts</h3>
+            <ul>
+                <li>Nomor Surat: {{ field_stats_keluar.nomor_suratKeluar }}</li>
+                <li>Pengirim: {{ field_stats_keluar.pengirim_suratKeluar }}</li>
+                <li>Penerima: {{ field_stats_keluar.penerima_suratKeluar }}</li>
+                <li>Isi Surat: {{ field_stats_keluar.isi_suratKeluar }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Field Not Found Statistics for Surat Masuk -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3>Surat Masuk - Field Not Found Counts</h3>
+            <ul>
+                <li>Nomor Surat: {{ field_stats_masuk.nomor_suratMasuk }}</li>
+                <li>Pengirim: {{ field_stats_masuk.pengirim_suratMasuk }}</li>
+                <li>Penerima: {{ field_stats_masuk.penerima_suratMasuk }}</li>
+                <li>Isi Surat: {{ field_stats_masuk.isi_suratMasuk }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

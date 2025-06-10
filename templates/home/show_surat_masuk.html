@@ -76,6 +76,8 @@
                         {% endif %}
                     </a>
                 </th>
+                <!-- Added Created At header -->
+                <th class="py-2 px-4 border">Created At</th>
                 <th class="py-2 px-4 border">Actions</th>
             </tr>
         </thead>
@@ -89,6 +91,10 @@
                 <td class="py-2 px-4 border">{{ entry.kode_suratMasuk }}</td>
                 <td class="py-2 px-4 border">{{ entry.jenis_suratMasuk }}</td>
                 <td class="py-2 px-4 border">{{ entry.isi_suratMasuk[:20] }}{% if entry.isi_suratMasuk|length > 20 %}...{% endif %}</td>
+                <!-- Added Created At column -->
+                <td class="py-2 px-4 border">
+                    {{ entry.created_at.strftime('%Y-%m-%d %H:%M') if entry.created_at else 'N/A' }}
+                </td>
                 <td class="py-2 px-4 border">
                     <a href="{{ url_for('edit_surat_masuk', id=entry.id_suratMasuk) }}" class="bg-yellow-500 text-white px-2 py-1 rounded">
                         <i class="feather icon-edit"></i>
