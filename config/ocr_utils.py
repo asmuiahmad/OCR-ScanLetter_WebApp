@@ -70,3 +70,41 @@ def calculate_ocr_accuracy(data):
     )
     return round(((total_fields - not_found) / total_fields) * 100, 2)
 
+def hitung_field_not_found(surat, prefix):
+    """
+    Counts 'Not found' or empty fields for a given surat and prefix (e.g., 'suratMasuk' or 'suratKeluar').
+
+    Args:
+        surat (SQLAlchemy object): The surat record.
+        prefix (str): Prefix like 'suratMasuk' or 'suratKeluar'.
+
+    Returns:
+        dict: Dictionary with count of not found fields.
+    """
+    field_not_found = {
+        f"nomor_{prefix}": 0,
+        f"pengirim_{prefix}": 0,
+        f"penerima_{prefix}": 0,
+        f"isi_{prefix}": 0,
+        "full_letter_number_not_found": 0
+    }
+
+    nomor_field = getattr(surat, f"nomor_{prefix}", "")
+    pengirim_field = getattr(surat, f"pengirim_{prefix}", "")
+    penerima_field = getattr(surat, f"penerima_{prefix}", "")
+    isi_field = getattr(surat, f"isi_{prefix}", "")
+
+    if not nomor_field or "not found" in nomor_field.lower():
+        field_not_found[f"nomor_{prefix}"] += 1
+        field_not_found["full_letter_number_not_found"] += 1
+
+    if not pengirim_field or "not found" in pengirim_field.lower():
+        field_not_found[f"pengirim_{prefix}"] += 1
+
+    if not penerima_field or "not found" in penerima_field.lower():
+        field_not_found[f"penerima_{prefix}"] += 1
+
+    if not isi_field or "not found" in isi_field.lower():
+        field_not_found[f"isi_{prefix}"] += 1
+
+    return field_not_found

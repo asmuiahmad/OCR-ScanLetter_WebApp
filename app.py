@@ -3,9 +3,9 @@ from config.extensions import db, login_manager
 from flask_migrate import Migrate
 from datetime import timedelta
 from config.models import User
-from config.ocr import ocr_bp  # Import the OCR Blueprint
-from config.ocr_surat_masuk import ocr_surat_masuk_bp  # Import the Surat Masuk OCR Blueprint
-from config.ocr_surat_keluar import ocr_surat_keluar_bp  # Import the 
+from config.ocr import ocr_bp
+from config.ocr_surat_masuk import ocr_surat_masuk_bp 
+from config.ocr_surat_keluar import ocr_surat_keluar_bp
 
 app = Flask(__name__)
 

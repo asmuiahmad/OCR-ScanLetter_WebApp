@@ -2,7 +2,7 @@ import os
 import re
 import json
 from flask import (
-    render_template, request, Blueprint, url_for, flash, redirect, jsonify, send_file, send_from_directory
+    render_template, request, Blueprint, url_for, flash, redirect, jsonify, send_file, send_from_directory, session
 )
 from flask_login import login_required
 from werkzeug.utils import secure_filename
@@ -28,10 +28,7 @@ from datetime import date, timedelta
 
 ocr_surat_masuk_bp = Blueprint('ocr_surat_masuk', __name__)
 
-# Load dictionary and other constants
 target_code = "W15-A12"
-
-# Define the path for metadata
 METADATA_PATH = 'metadata.json'
 
 def save_metadata(metadata):
@@ -42,12 +39,10 @@ def load_metadata():
     if os.path.exists(METADATA_PATH):
         with open(METADATA_PATH, 'r') as f:
             metadata = json.load(f)
-        # Ensure the 'surat_masuk' section exists
         if "surat_masuk" not in metadata:
             metadata["surat_masuk"] = {}
         return metadata
     else:
-        # Initialize metadata with the correct structure
         metadata = {
             "surat_masuk": {}
         }
@@ -73,7 +68,7 @@ def extract_ocr_data(file_path):
             'jenis_surat': 'Umum',
             'isi': extract_isi(cleaned_text),
             'filename': os.path.basename(file_path),
-            'id_suratMasuk': None  # Initialize id_suratMasuk
+            'id_suratMasuk': None
         }
         
         match_nomor_surat = re.search(r"(\d+)(?=\s*/)", cleaned_text)
@@ -138,6 +133,14 @@ def ocr_surat_masuk():
                     continue
                 extracted_data = extract_ocr_data(file_path)
                 if extracted_data:
+                    not_found_counts_masuk = {
+                        'nomor_suratMasuk': 1 if extracted_data.get('nomor_surat') == "Not found" else 0,
+                        'pengirim_suratMasuk': 1 if extracted_data.get('pengirim') == "Not found" else 0,
+                        'penerima_suratMasuk': 1 if extracted_data.get('penerima') == "Not found" else 0,
+                        'isi_suratMasuk': 1 if extracted_data.get('isi') == "Not found" else 0
+                    }
+                    session['not_found_masuk'] = not_found_counts_masuk
+
                     extracted_data_list.append(extracted_data)
                     metadata['surat_masuk'][filename] = file_hash
                     image_paths.append(filename)
@@ -145,12 +148,19 @@ def ocr_surat_masuk():
             return render_template('home/ocr_surat_masuk.html', 
                                 extracted_data_list=extracted_data_list,
                                 image_paths=image_paths,
-                                currentIndex=0)
+                                currentIndex=0,
+                                field_stats_masuk=session.get('not_found_masuk'))
         elif 'filename' in request.form:
             try:
                 with open(os.path.join('static/ocr/surat_masuk', request.form['filename']), 'rb') as f:
                     gambar_suratMasuk = f.read()
-                
+
+                # Ambil nilai awal OCR (Not found) dari hidden input
+                initial_nomor = request.form.get('initial_nomor', 'Not found')
+                initial_pengirim = request.form.get('initial_pengirim', 'Not found')
+                initial_penerima = request.form.get('initial_penerima', 'Not found')
+                initial_isi = request.form.get('initial_isi', 'Not found')
+
                 new_surat = SuratMasuk(
                     tanggal_suratMasuk=datetime.strptime(request.form['selected_date'], '%d/%m/%Y'),
                     pengirim_suratMasuk=request.form['pengirim'],
@@ -160,8 +170,15 @@ def ocr_surat_masuk():
                     jenis_suratMasuk=request.form['jenis_surat'],
                     isi_suratMasuk=request.form['isi'],
                     gambar_suratMasuk=gambar_suratMasuk,
-                    created_at=datetime.now()
+                    created_at=datetime.utcnow(),
+
+                    # simpan hasil awal dari OCR
+                    initial_nomor_suratMasuk=initial_nomor,
+                    initial_pengirim_suratMasuk=initial_pengirim,
+                    initial_penerima_suratMasuk=initial_penerima,
+                    initial_isi_suratMasuk=initial_isi
                 )
+
                 db.session.add(new_surat)
                 db.session.commit()
 
@@ -181,8 +198,13 @@ def ocr_surat_masuk():
             except Exception as e:
                 db.session.rollback()
                 return jsonify(success=False, error=str(e))
-            
-    return render_template('home/ocr_surat_masuk.html', extracted_data_list=extracted_data_list, image_paths=image_paths, currentIndex=0)
+
+    return render_template('home/ocr_surat_masuk.html',         
+                        extracted_data_list=extracted_data_list, 
+                        image_paths=image_paths, 
+                        currentIndex=0,
+                        field_stats_masuk=session.get('not_found_masuk')
+                        )
 
 @ocr_surat_masuk_bp.route('/surat_masuk_image/<int:id>')
 @login_required

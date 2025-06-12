@@ -1,10 +1,11 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify
+from flask import render_template, redirect, url_for, flash, request, jsonify, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy import desc, asc, extract, func
 from collections import defaultdict
 from config.extensions import db
 from config.ocr import ocr_bp
+from config.ocr_utils import hitung_field_not_found
 from config.models import User, SuratMasuk, SuratKeluar
 from config.forms import LoginForm, RegistrationForm
 from datetime import datetime, timedelta
@@ -288,32 +289,28 @@ def laporan_statistik():
     semua_surat_keluar = SuratKeluar.query.all()
     semua_surat_masuk = SuratMasuk.query.all()
 
-    # Initialize field 'Not found' counters for SuratKeluar
-    field_stats_keluar = {
-        'nomor_suratKeluar': 0,
-        'pengirim_suratKeluar': 0,
-        'penerima_suratKeluar': 0,
-        'isi_suratKeluar': 0
-    }
+    total_masuk = len(semua_surat_masuk)
+    total_keluar = len(semua_surat_keluar)
 
-    # Initialize field 'Not found' counters for SuratMasuk
+    berhasil_masuk = SuratMasuk.query.filter(~SuratMasuk.isi_suratMasuk.contains("Not found")).count()
+    berhasil_keluar = SuratKeluar.query.filter(~SuratKeluar.isi_suratKeluar.contains("Not found")).count()
+
+    persen_berhasil_masuk = round((berhasil_masuk / total_masuk * 100), 2) if total_masuk else 0
+    persen_berhasil_keluar = round((berhasil_keluar / total_keluar * 100), 2) if total_keluar else 0
+
+    # Init field not found stats
     field_stats_masuk = {
-        'nomor_suratMasuk': 0,
-        'pengirim_suratMasuk': 0,
-        'penerima_suratMasuk': 0,
-        'isi_suratMasuk': 0
+        'nomor_suratMasuk': SuratMasuk.query.filter(SuratMasuk.initial_nomor_suratMasuk == 'Not found').count(),
+        'pengirim_suratMasuk': SuratMasuk.query.filter(SuratMasuk.initial_pengirim_suratMasuk == 'Not found').count(),
+        'penerima_suratMasuk': SuratMasuk.query.filter(SuratMasuk.initial_penerima_suratMasuk == 'Not found').count(),
+        'isi_suratMasuk': SuratMasuk.query.filter(SuratMasuk.initial_isi_suratMasuk == 'Not found').count(),
     }
-
-    # Count 'Not found' per field in SuratKeluar
-    for surat in semua_surat_keluar:
-        if surat.nomor_suratKeluar == 'Not found':
-            field_stats_keluar['nomor_suratKeluar'] += 1
-        if surat.pengirim_suratKeluar == 'Not found':
-            field_stats_keluar['pengirim_suratKeluar'] += 1
-        if surat.penerima_suratKeluar == 'Not found':
-            field_stats_keluar['penerima_suratKeluar'] += 1
-        if surat.isi_suratKeluar == 'Not found':
-            field_stats_keluar['isi_suratKeluar'] += 1
+    field_stats_keluar = {
+        'nomor_suratKeluar': SuratKeluar.query.filter(SuratKeluar.initial_nomor_suratKeluar == 'Not found').count(),
+        'pengirim_suratKeluar': SuratKeluar.query.filter(SuratKeluar.initial_pengirim_suratKeluar == 'Not found').count(),
+        'penerima_suratKeluar': SuratKeluar.query.filter(SuratKeluar.initial_penerima_suratKeluar == 'Not found').count(),
+        'isi_suratKeluar': SuratKeluar.query.filter(SuratKeluar.initial_isi_suratKeluar == 'Not found').count(),
+    }
 
     # Count 'Not found' per field in SuratMasuk
     for surat in semua_surat_masuk:
@@ -326,38 +323,46 @@ def laporan_statistik():
         if surat.isi_suratMasuk == 'Not found':
             field_stats_masuk['isi_suratMasuk'] += 1
 
-    # Define components for Full Letter Number
-    full_letter_components_keluar = ['nomor_suratKeluar']  # Add more components if applicable
-    full_letter_components_masuk = ['nomor_suratMasuk', 'kode_suratMasuk']  # Add more components if applicable
+    # Count 'Not found' per field in SuratKeluar
+    for surat in semua_surat_keluar:
+        if surat.nomor_suratKeluar == 'Not found':
+            field_stats_keluar['nomor_suratKeluar'] += 1
+        if surat.pengirim_suratKeluar == 'Not found':
+            field_stats_keluar['pengirim_suratKeluar'] += 1
+        if surat.penerima_suratKeluar == 'Not found':
+            field_stats_keluar['penerima_suratKeluar'] += 1
+        if surat.isi_suratKeluar == 'Not found':
+            field_stats_keluar['isi_suratKeluar'] += 1
 
-    # Count 'Not Found' for each component in Full Letter Number
-    full_letter_not_found_keluar = sum(
-        sum(1 for s in semua_surat_keluar if getattr(s, component) == 'Not found')
-        for component in full_letter_components_keluar
-    )
+    # Tambahan: full letter number components
+    full_letter_components_masuk = ['nomor_suratMasuk', 'kode_suratMasuk']
+    full_letter_components_keluar = ['nomor_suratKeluar']
+
     full_letter_not_found_masuk = sum(
-        sum(1 for s in semua_surat_masuk if getattr(s, component) == 'Not found')
-        for component in full_letter_components_masuk
+        sum(1 for surat in semua_surat_masuk if getattr(surat, field) == 'Not found')
+        for field in full_letter_components_masuk
+    )
+    full_letter_not_found_keluar = sum(
+        sum(1 for surat in semua_surat_keluar if getattr(surat, field) == 'Not found')
+        for field in full_letter_components_keluar
     )
 
-    # Add Full Letter Number 'Not Found' counts to stats
-    field_stats_keluar['full_letter_number_not_found'] = full_letter_not_found_keluar
     field_stats_masuk['full_letter_number_not_found'] = full_letter_not_found_masuk
+    field_stats_keluar['full_letter_number_not_found'] = full_letter_not_found_keluar
 
-    # Filter surat that failed extraction (accuracy < 100)
-    gagal_ekstraksi = [s for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar is not None and s.ocr_accuracy_suratKeluar < 100]
-    total_surat = len(semua_surat_keluar)
-    berhasil_count = len([s for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar == 100])
-    persentase_berhasil = round((berhasil_count / total_surat) * 100, 2) if total_surat else 0
-
-    # Average OCR accuracy
-    akurasi_keluar = [s.ocr_accuracy_suratKeluar for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar is not None]
+    # Average OCR Accuracy
     akurasi_masuk = [s.ocr_accuracy_suratMasuk for s in semua_surat_masuk if s.ocr_accuracy_suratMasuk is not None]
+    akurasi_keluar = [s.ocr_accuracy_suratKeluar for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar is not None]
 
-    rata2_akurasi_keluar = round(sum(akurasi_keluar) / len(akurasi_keluar), 2) if akurasi_keluar else 0
     rata2_akurasi_masuk = round(sum(akurasi_masuk) / len(akurasi_masuk), 2) if akurasi_masuk else 0
+    rata2_akurasi_keluar = round(sum(akurasi_keluar) / len(akurasi_keluar), 2) if akurasi_keluar else 0
 
-    # Optional keyword search on SuratKeluar.isi_suratKeluar
+    # Failed extractions
+    gagal_ekstraksi = [s for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar and s.ocr_accuracy_suratKeluar < 100]
+    berhasil_count = len([s for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar == 100])
+    persentase_berhasil = round((berhasil_count / total_keluar) * 100, 2) if total_keluar else 0
+
+    # Optional keyword search
     keyword = request.args.get('keyword', '')
     surat_keyword = []
     if keyword:
