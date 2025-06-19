@@ -4,6 +4,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model, UserMixin):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
@@ -19,6 +20,7 @@ class User(db.Model, UserMixin):
 
 class SuratMasuk(db.Model):
     id_suratMasuk = db.Column(db.Integer, primary_key=True)
+    full_letter_number = db.Column(db.String(255))
     tanggal_suratMasuk = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     pengirim_suratMasuk = db.Column(db.Text, nullable=False)
     penerima_suratMasuk = db.Column(db.Text, nullable=False)

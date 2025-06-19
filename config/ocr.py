@@ -14,7 +14,7 @@ from .ocr_utils import (
     extract_pengirim,
     calculate_file_hash
 )
-# Define Blueprint
+
 ocr_bp = Blueprint('ocr', __name__)
 
 @ocr_bp.route('/ocr', methods=['GET', 'POST'])

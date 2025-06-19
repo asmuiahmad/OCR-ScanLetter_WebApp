@@ -2,6 +2,7 @@ import os
 import re
 import json
 import hashlib
+from difflib import SequenceMatcher
 
 def clean_text(text):
     return re.sub(r'\s*\.\s*', '.', re.sub(r'\s*/\s*', '/', text.strip("() ")))
@@ -9,7 +10,7 @@ def clean_text(text):
 def calculate_file_hash(file_path):
     hasher = hashlib.md5()
     with open(file_path, 'rb') as f:
-        for buf in iter(lambda: f.read(65536), b""):  # Read in chunks
+        for buf in iter(lambda: f.read(65536), b""):
             hasher.update(buf)
     return hasher.hexdigest()
 
@@ -34,18 +35,18 @@ def extract_tanggal(text):
     return dates[0] if dates else 'Not found'
 
 def extract_penerima_surat_masuk(text):
-    pattern = r'(?:Kepada[:\s]*(?:Yth\.?|YM\.?)|Yth\.?|YM\.?|Kepada[:\s]+)\s*(.*)' 
+    pattern = r'(?:Kepada[\s:]*)?(Yth\.?|YM\.?)\s*[.:]?\s*(Ketua[^\n]+)'
     match = re.search(pattern, text, re.IGNORECASE)
-    return match.group(1).strip() if match else 'Not found'
+    if match:
+        return match.group(2).strip()
+    return 'Not found'
 
 def extract_penerima_surat_keluar(text):
-    # Try matching when the marker is followed by a newline first.
     pattern = r'(?:Kepada\s*(?:Yth\.?|YM\.?)\s*:\s*\n)([^\n]+)'
     match = re.search(pattern, text, re.IGNORECASE)
     if match:
         return match.group(1).strip()
     
-    # Fallback: marker and address on the same line.
     pattern = r'(?:Kepada\s*(?:Yth\.?|YM\.?)\s*:\s*)([^\n]+)'
     match = re.search(pattern, text, re.IGNORECASE)
     return match.group(1).strip() if match else 'Not found'
@@ -54,15 +55,32 @@ def extract_pengirim(text):
     matches = list(re.finditer(r'\b(?:' + '|'.join(map(re.escape, pengirim_keywords)) + r')\b', text))
     return matches[-1].group(0).strip() if matches else 'Not found'
 
-def extract_isi(text):
+def extract_isi_suratmasuk(text):
     match_isi = re.search(
-        r"(?:Perihal|Hal)\s*:\s*(?:\n\s*)?(.*?)(?=\n\s*\n|$)",
+        r"(?:Perihal|Hal|HaI|Ha1|PERIHAL|HAL)\s*[:\-]?\s*(?:\n\s*)?(.*?)(?=\n\s*\n|$)",
         text,
         re.DOTALL
     )
-    return match_isi.group(1).strip() if match_isi else 'Not found'
+    if match_isi:
+        return match_isi.group(1).strip()
 
-def calculate_ocr_accuracy(data):
+    if re.search(r'FORMULIR PERMINTAAN DAN PEMBERIAN CUTI', text, re.IGNORECASE):
+        return "FORMULIR PERMINTAAN DAN PEMBERIAN CUTI"
+
+    return "Not found"
+
+def extract_isi_suratkeluar(text):
+    pattern = r"perihal\s*[:\-]?\s*(.*)"
+    lines = text.splitlines()
+
+    for line in lines:
+        match = re.search(pattern, line, flags=re.IGNORECASE)
+        if match:
+            isi = match.group(1).strip()
+            return isi if isi else "Not found"
+    return "Not found"
+
+def calculate_ocr_completeness(data):
     total_fields = 4
     not_found = sum(
         1 for key in ['nomor_surat', 'pengirim', 'penerima', 'isi']
@@ -70,17 +88,15 @@ def calculate_ocr_accuracy(data):
     )
     return round(((total_fields - not_found) / total_fields) * 100, 2)
 
+def calculate_ocr_accuracy(original_text, edited_text):
+    if not original_text and not edited_text:
+        return 100.0
+    if not original_text or not edited_text:
+        return 0.0
+    return round(SequenceMatcher(None, original_text, edited_text).ratio() * 100, 2)
+
 def hitung_field_not_found(surat, prefix):
-    """
-    Counts 'Not found' or empty fields for a given surat and prefix (e.g., 'suratMasuk' or 'suratKeluar').
 
-    Args:
-        surat (SQLAlchemy object): The surat record.
-        prefix (str): Prefix like 'suratMasuk' or 'suratKeluar'.
-
-    Returns:
-        dict: Dictionary with count of not found fields.
-    """
     field_not_found = {
         f"nomor_{prefix}": 0,
         f"pengirim_{prefix}": 0,
@@ -108,3 +124,15 @@ def hitung_field_not_found(surat, prefix):
         field_not_found[f"isi_{prefix}"] += 1
 
     return field_not_found
+
+def extract_nomor_surat(text):
+    match = re.search(
+        r'(?:Nomor|Nornor|Nomor\s*>\s*|Nomo|NOMOR)?\s*[:>\-\[]?\s*([\[\(]?[A-Z0-9\-./\s@ ]+)',
+        text,
+        re.IGNORECASE
+    )
+    if match:
+        raw_nomor = match.group(1)
+        cleaned = clean_text(raw_nomor)
+        return cleaned.strip("[]() ")
+    return 'Not found'

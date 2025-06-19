@@ -4,22 +4,36 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
 <style>
     .image-container {
-        text-align: center;
-        margin-bottom: 20px;
+        width: 100%;
+        height: 400px;
         overflow: hidden;
+        position: relative;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        cursor: grab;
     }
 
     .zoomable-image {
-        max-width: 100%;
-        height: auto;
-        transition: transform 0.2s ease-in-out;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: top left;
+        transition: transform 0.1s ease-out;
     }
 
-    .zoomable-image:hover {
-        transform: scale(1.1);
+    .zoom-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .zoom-controls button {
+        min-width: 40px;
     }
 </style>
 {% endblock %}
+
 {% block content %}
 <div class="container">
     <h1>OCR Text Extraction Surat Masuk</h1>
@@ -37,6 +51,7 @@
     <p>No extracted data available. Please upload an image.</p>
     {% endif %}
 </div>
+
 <!-- Modal for Viewing Extracted Data -->
 <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -48,13 +63,20 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="image-container">
+                <div class="image-container" id="image-container">
                     <img src="#" class="zoomable-image" alt="Image" id="modal-image">
+                </div>
+                <div class="zoom-controls">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="zoomImage(-0.1)">-</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="zoomImage(0.1)">+</button>
                 </div>
                 <div class="form-container">
                     <form id="dataForm">
+                        <input type="hidden" name="initial_nomor_suratMasuk" id="initial_nomor_suratMasuk">
+                        <input type="hidden" name="initial_pengirim_suratMasuk" id="initial_pengirim_suratMasuk">
+                        <input type="hidden" name="initial_penerima_suratMasuk" id="initial_penerima_suratMasuk">
+                        <input type="hidden" name="initial_isi_suratMasuk" id="initial_isi_suratMasuk">
                         <input type="hidden" name="filename" id="filename">
-
                         <div class="form-group">
                             <label for="full_letter_number">Full Letter Number:</label>
                             <input type="text" class="form-control" name="full_letter_number" id="full_letter_number">
@@ -102,8 +124,9 @@
     const staticImageBaseUrl = "{{ url_for('static', filename='ocr/surat_masuk/') }}";
 
     let currentIndex = 0;
-
     const extractedDataList = {{ extracted_data_list | tojson | safe }};
+    let zoomLevel = 1;
+    let translateX = 0, translateY = 0;
 
     function openModal(index) {
         if (index < 0 || index >= extractedDataList.length) {
@@ -113,14 +136,13 @@
 
         currentIndex = index;
         const data = extractedDataList[index];
-
         const imageSrc = data.id_suratMasuk !== null ?
             suratMasukImageBaseUrl.replace('0', data.id_suratMasuk) :
             staticImageBaseUrl + data.filename;
 
         document.getElementById('modal-image').src = imageSrc;
 
-        // Populate form fields
+        // Populate fields
         document.getElementById('filename').value = data.filename;
         document.getElementById('full_letter_number').value = data.full_letter_number || '';
         document.getElementById('pengirim').value = data.pengirim || '';
@@ -128,6 +150,10 @@
         document.getElementById('kodesurat2').value = data.kodesurat2 || '';
         document.getElementById('jenis_surat').value = data.jenis_surat || '';
         document.getElementById('isi').value = data.isi || '';
+        document.getElementById('initial_nomor_suratMasuk').value = data.full_letter_number || '';
+        document.getElementById('initial_pengirim_suratMasuk').value = data.pengirim || '';
+        document.getElementById('initial_penerima_suratMasuk').value = data.penerima || '';
+        document.getElementById('initial_isi_suratMasuk').value = data.isi || '';
 
         const dateSelect = document.getElementById('selected_date');
         dateSelect.innerHTML = '';
@@ -136,13 +162,12 @@
                 const option = document.createElement('option');
                 option.value = date;
                 option.textContent = date;
-                if (data.dates[0] === date) {
-                    option.selected = true;
-                }
+                if (data.dates[0] === date) option.selected = true;
                 dateSelect.appendChild(option);
             });
         }
 
+        resetZoomPan();
         $('#dataModal').modal('show');
     }
 
@@ -164,67 +189,107 @@
 
     function saveData() {
         const data = extractedDataList[currentIndex];
-        const filename = data.filename;
-        const full_letter_number = document.getElementById("full_letter_number").value.trim();
-        const penerima = document.getElementById("penerima").value.trim();
-        const pengirim = document.getElementById("pengirim").value.trim();
-        const selected_date = document.getElementById("selected_date").value.trim();
-        const kodesurat2 = document.getElementById("kodesurat2").value.trim();
-        const jenis_surat = document.getElementById("jenis_surat").value.trim();
-        const isi = document.getElementById("isi").value.trim();
+        const payload = {
+            filename: data.filename,
+            full_letter_number: document.getElementById("full_letter_number").value.trim(),
+            penerima: document.getElementById("penerima").value.trim(),
+            pengirim: document.getElementById("pengirim").value.trim(),
+            selected_date: document.getElementById("selected_date").value.trim(),
+            kodesurat2: document.getElementById("kodesurat2").value.trim(),
+            jenis_surat: document.getElementById("jenis_surat").value.trim(),
+            isi: document.getElementById("isi").value.trim(),
+            initial_nomor_suratMasuk: document.getElementById("initial_nomor_suratMasuk").value,
+            initial_pengirim_suratMasuk: document.getElementById("initial_pengirim_suratMasuk").value,
+            initial_penerima_suratMasuk: document.getElementById("initial_penerima_suratMasuk").value,
+            initial_isi_suratMasuk: document.getElementById("initial_isi_suratMasuk").value,
+        };
 
-        // Validation check
-        if (!selected_date || !full_letter_number || !penerima || !pengirim || !kodesurat2 || !jenis_surat || !isi) {
-            alert("All fields must be filled before saving.");
-            return;
+        for (const key in payload) {
+            if (!payload[key]) {
+                alert("All fields must be filled before saving.");
+                return;
+            }
         }
 
         fetch("{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: new URLSearchParams({
-                    filename: filename,
-                    full_letter_number: full_letter_number,
-                    penerima: penerima,
-                    pengirim: pengirim,
-                    selected_date: selected_date,
-                    kodesurat2: kodesurat2,
-                    jenis_surat: jenis_surat,
-                    isi: isi,
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Data saved successfully!");
-
-                    if (data.counts) {
-                        if (document.getElementById("count-total")) {
-                            document.getElementById("count-total").innerText = data.counts.total;
-                        }
-                        if (document.getElementById("count-year")) {
-                            document.getElementById("count-year").innerText = data.counts.this_year;
-                        }
-                        if (document.getElementById("count-month")) {
-                            document.getElementById("count-month").innerText = data.counts.this_month;
-                        }
-                        if (document.getElementById("count-week")) {
-                            document.getElementById("count-week").innerText = data.counts.this_week;
-                        }
-                    }
-
-                    nextModal();
-                } else {
-                    alert("Failed to save data: " + (data.error || "Unknown error"));
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("Failed to save data.");
-            });
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams(payload),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Data saved successfully!");
+                nextModal();
+            } else {
+                alert("Failed to save data: " + (data.error || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Failed to save data.");
+        });
     }
-</script>
 
+    // Zoom logic
+    const img = document.getElementById("modal-image");
+    const container = document.getElementById("image-container");
+
+    container.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        const rect = img.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+
+        const scaleDelta = e.deltaY < 0 ? 1.1 : 0.9;
+        const newZoom = zoomLevel * scaleDelta;
+
+        // Adjust pan to zoom to cursor
+        translateX -= (offsetX / zoomLevel) * (scaleDelta - 1);
+        translateY -= (offsetY / zoomLevel) * (scaleDelta - 1);
+        zoomLevel = Math.max(0.5, Math.min(newZoom, 5));
+        updateTransform();
+    });
+
+    function zoomImage(delta) {
+        zoomLevel = Math.max(0.5, Math.min(zoomLevel + delta, 5));
+        updateTransform();
+    }
+
+    function updateTransform() {
+        img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`;
+    }
+
+    function resetZoomPan() {
+        zoomLevel = 1;
+        translateX = 0;
+        translateY = 0;
+        updateTransform();
+    }
+
+    // Pan functionality
+    let isDragging = false;
+    let startX = 0, startY = 0;
+
+    container.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+        container.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+        container.style.cursor = "grab";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        translateX = e.clientX - startX;
+        translateY = e.clientY - startY;
+        updateTransform();
+    });
+</script>
 {% endblock %}

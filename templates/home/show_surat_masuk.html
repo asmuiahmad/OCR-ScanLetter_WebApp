@@ -9,7 +9,7 @@
         <a href="{{ url_for('input_surat_masuk') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Create Surat Masuk</a>
         <div class="search-btn">
             <form method="GET" action="{{ url_for('show_surat_masuk') }}" class="flex">
-                <input type="text" name="search" placeholder="Search..." class="form-control border rounded px-2 py-1" style="width: 300px; margin-right: 10px;">
+                <input type="text" name="search" placeholder="Search..." value="{{ search }}" class="form-control border rounded px-2 py-1" style="width: 300px; margin-right: 10px;">
                 <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded">
                     <i class="feather icon-search"></i>
                 </button>

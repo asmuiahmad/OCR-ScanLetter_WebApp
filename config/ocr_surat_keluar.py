@@ -2,8 +2,7 @@ import os
 import json
 import re
 from flask import (
-    render_template, request, Blueprint, url_for, flash, redirect, jsonify, send_file, session
-)
+    render_template, request, Blueprint, url_for, flash, redirect, jsonify, send_file, session)
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 import pytesseract
@@ -13,15 +12,7 @@ from datetime import datetime
 from config.extensions import db
 from config.ocr_utils import calculate_ocr_accuracy
 from config.models import SuratKeluar
-from config.ocr_utils import (
-    clean_text,
-    extract_dates,
-    extract_tanggal,
-    extract_penerima_surat_keluar,
-    extract_pengirim,
-    calculate_file_hash,
-    extract_isi
-)
+from config.ocr_utils import (clean_text, extract_dates, extract_tanggal, extract_penerima_surat_keluar, extract_pengirim, calculate_file_hash, extract_isi_suratkeluar)
 import io
 
 ocr_surat_keluar_bp = Blueprint('ocr_surat_keluar', __name__)
@@ -41,7 +32,8 @@ def load_metadata():
 def extract_ocr_data(file_path):
     try:
         img = Image.open(file_path)
-        ocr_output = pytesseract.image_to_string(img)
+        custom_config = r'--oem 3 --psm 6'
+        ocr_output = pytesseract.image_to_string(img, config=custom_config)
         cleaned_text = clean_text(ocr_output)
 
         extracted_data = {
@@ -51,18 +43,17 @@ def extract_ocr_data(file_path):
             'isi': 'Not found',
             'dates': extract_dates(cleaned_text),
             'filename': os.path.basename(file_path),
-            'id_suratKeluar': None
+            'id_suratKeluar': None,
+            'ocr_raw_text': cleaned_text
         }
 
-        # Nomor Surat
         match_nomor_surat = re.search(r'(Nomor|NOMOR|Nomar)\s*:\s*(.*?)\n', cleaned_text, re.DOTALL)
         if match_nomor_surat:
             extracted_data['nomor_surat'] = match_nomor_surat.group(2).strip()
 
-        # Field extraction
         extracted_data['pengirim'] = extract_pengirim(cleaned_text)
         extracted_data['penerima'] = extract_penerima_surat_keluar(cleaned_text)
-        extracted_data['isi'] = extract_isi(cleaned_text)
+        extracted_data['isi'] = extract_isi_suratkeluar(cleaned_text)
 
         return extracted_data
     except Exception as e:
@@ -99,14 +90,12 @@ def ocr_surat_keluar():
                     image_paths.append(filename)
             save_metadata(metadata)
 
-            # ✅ Tambahan: Hitung statistik "Not found" sebelum tampil
             session['not_found_keluar'] = {
                 'nomor_suratKeluar': 0,
                 'pengirim_suratKeluar': 0,
                 'penerima_suratKeluar': 0,
                 'isi_suratKeluar': 0,
             }
-
             for data in extracted_data_list:
                 if data.get('nomor_surat') == 'Not found':
                     session['not_found_keluar']['nomor_suratKeluar'] += 1
@@ -124,37 +113,46 @@ def ocr_surat_keluar():
 
         elif 'filename' in request.form:
             try:
-                with open(os.path.join('static/ocr/surat_keluar', request.form['filename']), 'rb') as f:
-                    gambar_suratKeluar = f.read()
+                filename = request.form['filename']
+                with open(os.path.join('static/ocr/surat_keluar', filename), 'rb') as f:
+                    image_data = f.read()
 
-                initial_nomor = request.form.get('nomor_surat', 'Not found')
-                initial_pengirim = request.form.get('pengirim', 'Not found')
-                initial_penerima = request.form.get('penerima', 'Not found')
-                initial_isi = request.form.get('isi', 'Not found')
+                # Ambil hasil OCR mentah dari hidden inputs
+                initial_nomor = request.form.get('initial_nomor_surat', 'Not found')
+                initial_pengirim = request.form.get('initial_pengirim', 'Not found')
+                initial_penerima = request.form.get('initial_penerima', 'Not found')
+                initial_isi = request.form.get('initial_isi', 'Not found')
 
-                new_surat = SuratKeluar(
-                    tanggal_suratKeluar=datetime.strptime(request.form['selected_date'], '%d/%m/%Y'),
-                    pengirim_suratKeluar=initial_pengirim,
-                    penerima_suratKeluar=initial_penerima,
-                    nomor_suratKeluar=initial_nomor,
-                    isi_suratKeluar=initial_isi,
+                edited_nomor = request.form.get('nomor_surat', initial_nomor)
+                edited_pengirim = request.form.get('pengirim', initial_pengirim)
+                edited_penerima = request.form.get('penerima', initial_penerima)
+                edited_isi = request.form.get('isi', initial_isi)
+
+                ocr_accuracy = (
+                    calculate_ocr_accuracy(initial_nomor, edited_nomor) +
+                    calculate_ocr_accuracy(initial_pengirim, edited_pengirim) +
+                    calculate_ocr_accuracy(initial_penerima, edited_penerima) +
+                    calculate_ocr_accuracy(initial_isi, edited_isi)
+                ) / 4
+
+                surat = SuratKeluar(
+                    nomor_suratKeluar=edited_nomor,
+                    pengirim_suratKeluar=edited_pengirim,
+                    penerima_suratKeluar=edited_penerima,
+                    isi_suratKeluar=edited_isi,
                     initial_nomor_suratKeluar=initial_nomor,
                     initial_pengirim_suratKeluar=initial_pengirim,
                     initial_penerima_suratKeluar=initial_penerima,
                     initial_isi_suratKeluar=initial_isi,
-                    gambar_suratKeluar=gambar_suratKeluar,
+                    ocr_accuracy_suratKeluar=ocr_accuracy,
+                    gambar_suratKeluar=image_data,
+                    tanggal_suratKeluar=datetime.utcnow(),
                     created_at=datetime.utcnow()
                 )
-                db.session.add(new_surat)
+                db.session.add(surat)
                 db.session.commit()
 
                 flash('Data saved successfully!', 'success')
-
-                for data in extracted_data_list:
-                    if data['filename'] == request.form['filename']:
-                        data['id_suratKeluar'] = new_surat.id_suratKeluar
-                        break
-
                 return jsonify(success=True)
             except Exception as e:
                 db.session.rollback()

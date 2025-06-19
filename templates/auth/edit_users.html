@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Edit User</h2>
+
+  <form method="POST" action="{{ url_for('edit_user_view') }}">
+    <!-- Select User -->
+    <div class="form-group mb-3">
+      <label for="userSelect">Select User:</label>
+      <select class="form-control" id="userSelect" name="user_id" onchange="fetchUserData(this.value)" required>
+        <option value="">-- Choose User --</option>
+        {% for u in users %}
+          <option value="{{ u.id }}">{{ u.email }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <p>Loaded {{ users|length }} users</p>
+
+    <!-- Email Field -->
+    <div class="form-group mb-3">
+      <label for="email">Email:</label>
+      <input type="text" class="form-control" name="email" id="email" required />
+    </div>
+
+    <!-- Password Field -->
+    <div class="form-group mb-3">
+      <label for="password">New Password:</label>
+      <input type="password" class="form-control" name="password" id="password" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update User</button>
+  </form>
+</div>
+
+<script>
+  async function fetchUserData(userId) {
+    if (!userId) {
+      document.getElementById("email").value = '';
+      document.getElementById("password").value = '';
+      return;
+    }
+
+    try {
+      const response = await fetch(`/get-user-data/${userId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        document.getElementById("email").value = data.username;
+        document.getElementById("password").value = '';
+      } else {
+        alert("User not found.");
+      }
+    } catch (error) {
+      alert("Error fetching user data.");
+      console.error(error);
+    }
+  }
+</script>
+{% endblock %}

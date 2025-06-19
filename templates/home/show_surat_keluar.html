@@ -119,51 +119,56 @@
         </tbody>
     </table>
 
-    <!-- Pagination Controls -->
-    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-        <div class="flex flex-1 justify-between sm:hidden">
-            {% if entries.has_prev %}
-            <a href="{{ url_for('show_surat_keluar', page=entries.prev_num) }}"
-                class="text-gray-700 hover:text-blue-600">← Previous</a>
-            {% endif %}
-            {% if entries.has_next %}
-            <a href="{{ url_for('show_surat_keluar', page=entries.next_num) }}"
-                class="text-gray-700 hover:text-blue-600">Next →</a>
-            {% endif %}
+<!-- Pagination Controls -->
+<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+    <!-- Mobile pagination (Previous / Next only) -->
+    <div class="flex flex-1 justify-between sm:hidden">
+        {% if entries.has_prev %}
+        <a href="{{ url_for('show_surat_keluar', page=entries.prev_num, search=request.args.get('search'), sort=sort, order=order) }}"
+           class="text-gray-700 hover:text-blue-600">← Previous</a>
+        {% endif %}
+        {% if entries.has_next %}
+        <a href="{{ url_for('show_surat_keluar', page=entries.next_num, search=request.args.get('search'), sort=sort, order=order) }}"
+           class="text-gray-700 hover:text-blue-600">Next →</a>
+        {% endif %}
+    </div>
+
+    <!-- Desktop pagination with page numbers -->
+    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ entries.page }}</span>
+                of
+                <span class="font-medium">{{ entries.pages }}</span>
+            </p>
         </div>
-        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Showing
-                    <span class="font-medium">{{ entries.page }}</span>
-                    of
-                    <span class="font-medium">{{ entries.pages }}</span>
-                </p>
-            </div>
-            <div>
-                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                    {% if entries.page > 1 %}
-                    <a href="{{ url_for('show_surat_keluar', page=1) }}"
-                        class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 pagination">1</a>
-                    {% endif %}
-                    {% if entries.page > 3 %}
-                    <span
-                        class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 pagination">...</span>
-                    {% endif %}
-                    {% for page_num in range(max(1, entries.page - 1), min(entries.pages + 1, entries.page + 2)) %}
-                    <a href="{{ url_for('show_surat_keluar', page=page_num) }}"
-                        class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 {% if page_num == entries.page %}bg-indigo-600 text-white{% endif %} pagination">{{ page_num }}</a>
-                    {% endfor %}
-                    {% if entries.page < entries.pages - 2 %}
-                    <span
-                        class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 pagination">...</span>
-                    <a href="{{ url_for('show_surat_keluar', page=entries.pages) }}"
-                        class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 pagination">{{ entries.pages }}</a>
-                    {% endif %}
-                </nav>
-            </div>
+        <div>
+            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                {% if entries.page > 1 %}
+                <a href="{{ url_for('show_surat_keluar', page=1, search=request.args.get('search'), sort=sort, order=order) }}"
+                   class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">1</a>
+                {% endif %}
+
+                {% if entries.page > 3 %}
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>
+                {% endif %}
+
+                {% for page_num in range(max(1, entries.page - 1), min(entries.pages + 1, entries.page + 2)) %}
+                <a href="{{ url_for('show_surat_keluar', page=page_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                   class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {% if page_num == entries.page %}bg-indigo-600 text-white{% else %}text-gray-900 hover:bg-gray-50{% endif %} ring-1 ring-inset ring-gray-300">{{ page_num }}</a>
+                {% endfor %}
+
+                {% if entries.page < entries.pages - 2 %}
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>
+                <a href="{{ url_for('show_surat_keluar', page=entries.pages, search=request.args.get('search'), sort=sort, order=order) }}"
+                   class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">{{ entries.pages }}</a>
+                {% endif %}
+            </nav>
         </div>
     </div>
+</div>
+
 </div>
 
 <script>

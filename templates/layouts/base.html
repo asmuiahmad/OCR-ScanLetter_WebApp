@@ -17,25 +17,24 @@
           <i class="fas fa-inbox"></i><span>Surat Masuk</span></a>
       </li>
       <li>
+        <a href="{{ url_for('show_surat_keluar') }}">
+          <i class="fas fa-paper-plane"></i><span>Surat Keluar</span></a>
+      </li>
+      <li>
         <a href="{{ url_for('input_surat_masuk') }}">
           <i class="fas fa-edit"></i><span>Input Surat Masuk</span></a>
       </li>
       <li>
-        <a href="{{ url_for('show_surat_keluar') }}">
-          <i class="fas fa-paper-plane"></i><span>Surat Keluar</span></a>
+        <a href="{{ url_for('input_surat_keluar') }}">
+          <i class="fas fa-edit"></i><span>Input Surat Keluar</span></a>
       </li>
-      
-      <!-- ✅ Added Laporan Statistik menu item -->
+
       <li>
         <a href="{{ url_for('laporan_statistik') }}">
           <i class="fas fa-chart-bar"></i><span>Laporan Statistik</span>
         </a>
       </li>
       
-      <li>
-        <a href="{{ url_for('input_surat_keluar') }}">
-          <i class="fas fa-edit"></i><span>Input Surat Keluar</span></a>
-      </li>
       <li>
         <a href="{{ url_for('ocr.ocr') }}">
           <i class="fas fa-file-alt"></i><span>OCR</span></a>
@@ -53,15 +52,17 @@
           <i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
       </li>
     </ul>
-    <div class="user-account">
-      <div class="user-profile">
-        <img src="{{ url_for('static', filename='images/profile-img.jpg') }}" alt="Profile Image" />
-        <div class="user-detail">
-          <h3>{{ current_user.username }}</h3>
-          <span>{{ current_user.role }}</span>
-        </div>
+    <a href="{{ url_for('edit_user', user_id=current_user.id) }}">
+  <div class="user-account">
+    <div class="user-profile">
+      <img src="{{ url_for('static', filename='images/profile-img.jpg') }}" alt="Profile Image" />
+      <div class="user-detail">
+        <h3>{{ current_user.username }}</h3>
+        <span>{{ current_user.role }}</span>
       </div>
     </div>
+  </div>
+</a>
   </aside>
 
   <!-- Main Content -->

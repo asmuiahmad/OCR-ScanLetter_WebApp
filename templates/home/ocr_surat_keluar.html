@@ -3,20 +3,37 @@
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
     <style>
-        .image-container {
-            text-align: center;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .zoomable-image {
-            max-width: 100%;
-            height: auto;
-            transition: transform 0.2s ease-in-out;
-        }
-        .zoomable-image:hover {
-            transform: scale(1.1);
-        }
-    </style>
+    .image-container {
+        width: 100%;
+        height: 400px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        cursor: grab;
+    }
+
+    .zoomable-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: top left;
+        transition: transform 0.1s ease-out;
+    }
+
+    .zoom-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .zoom-controls button {
+        min-width: 40px;
+        padding: 5px 10px;
+        font-size: 16px;
+    }
+</style>
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -35,6 +52,7 @@
         <p>No extracted data available. Please upload an image.</p>
     {% endif %}
 </div>
+
 <!-- Modal for Viewing Extracted Data -->
 <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -52,6 +70,11 @@
                 <div class="form-container">
                     <form id="dataForm">
                         <input type="hidden" name="filename" id="filename">
+                        <!-- Hidden raw OCR values -->
+                        <input type="hidden" name="initial_nomor_surat" id="initial_nomor_surat">
+                        <input type="hidden" name="initial_pengirim" id="initial_pengirim">
+                        <input type="hidden" name="initial_penerima" id="initial_penerima">
+                        <input type="hidden" name="initial_isi" id="initial_isi">
                         
                         <div class="form-group">
                             <label for="nomor_surat">Nomor Surat:</label>
@@ -76,7 +99,6 @@
                         <button type="button" class="btn btn-primary" onclick="saveData()">Save</button>
                         <button type="button" class="btn btn-secondary" onclick="previousModal()">Previous</button>
                         <button type="button" class="btn btn-secondary" onclick="nextModal()">Next</button>
-                        <input type="hidden" name="entry_id" id="entry_id" value="">
                     </form>
                 </div>
             </div>
@@ -87,9 +109,7 @@
     </div>
 </div>
 <script>
-    // Base URL for saved images from the database (id will be appended)
     const suratKeluarImageBaseUrl = "{{ url_for('ocr_surat_keluar.surat_keluar_image', id=0) }}";
-    // Base URL for static images (filename will be appended)
     const staticImageBaseUrl = "{{ url_for('static', filename='ocr/surat_keluar/') }}";
     let currentIndex = 0;
     const extractedDataList = {{ extracted_data_list | tojson }};
@@ -99,24 +119,29 @@
             alert("Index out of bounds.");
             return;
         }
-        
+
+        resetZoom(); // 🔁 Reset zoom saat ganti gambar
+
         currentIndex = index;
         const data = extractedDataList[index];
-        console.log("Extracted Data:", data);  // Debugging line
-        // Use dynamic route if id_suratKeluar exists; otherwise, use static image folder.
         const imageSrc = data.id_suratKeluar !== null ? 
             suratKeluarImageBaseUrl.replace('0', data.id_suratKeluar) : 
             staticImageBaseUrl + data.filename;
-        console.log("Image Source:", imageSrc);  // Debugging line
         document.getElementById('modal-image').src = imageSrc;
-        
+
+        // Populate hidden initial fields
+        document.getElementById('initial_nomor_surat').value = data.nomor_surat || '';
+        document.getElementById('initial_pengirim').value = data.pengirim || '';
+        document.getElementById('initial_penerima').value = data.penerima || '';
+        document.getElementById('initial_isi').value = data.isi || '';
+
         // Populate form fields
         document.getElementById('filename').value = data.filename;
         document.getElementById('nomor_surat').value = data.nomor_surat || '';
         document.getElementById('pengirim').value = data.pengirim || '';
         document.getElementById('penerima').value = data.penerima || '';
         document.getElementById('isi').value = data.isi || '';
-        
+
         // Populate the date select options
         const dateSelect = document.getElementById('selected_date');
         dateSelect.innerHTML = '';
@@ -131,9 +156,10 @@
                 dateSelect.appendChild(option);
             });
         }
-        
+
         $('#dataModal').modal('show');
     }
+
     function nextModal() {
         if (currentIndex < extractedDataList.length - 1) {
             openModal(++currentIndex);
@@ -141,6 +167,7 @@
             alert("No more entries to process.");
         }
     }
+
     function previousModal() {
         if (currentIndex > 0) {
             openModal(--currentIndex);
@@ -148,6 +175,7 @@
             alert("Already at the first entry.");
         }
     }
+
     function saveData() {
         const data = extractedDataList[currentIndex];
         const filename = data.filename;
@@ -156,7 +184,6 @@
         const pengirim = document.getElementById("pengirim").value.trim();
         const selected_date = document.getElementById("selected_date").value.trim();
         const isi = document.getElementById("isi").value.trim();
-        // Validation check
         if (!selected_date || !nomor_surat || !penerima || !pengirim || !isi) {
             alert("All fields must be filled before saving.");
             return;
@@ -168,6 +195,10 @@
             },
             body: new URLSearchParams({
                 filename: filename,
+                initial_nomor_surat: document.getElementById('initial_nomor_surat').value,
+                initial_pengirim: document.getElementById('initial_pengirim').value,
+                initial_penerima: document.getElementById('initial_penerima').value,
+                initial_isi: document.getElementById('initial_isi').value,
                 nomor_surat: nomor_surat,
                 penerima: penerima,
                 pengirim: pengirim,
@@ -179,7 +210,6 @@
         .then(data => {
             if (data.success) {
                 alert("Data saved successfully!");
-                // Navigate to the next entry
                 nextModal();
             } else {
                 alert("Failed to save data: " + (data.error || "Unknown error"));
@@ -189,6 +219,68 @@
             console.error("Error:", error);
             alert("Failed to save data.");
         });
+    }
+
+    // 🔍 Zoom / Drag functionality
+    let scale = 1;
+    let originX = 0;
+    let originY = 0;
+    let startX, startY;
+    let isDragging = false;
+
+    const image = document.getElementById("modal-image");
+    const imageContainer = document.querySelector(".image-container");
+
+    imageContainer.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        const scaleAmount = 0.1;
+        if (e.deltaY < 0) {
+            scale += scaleAmount;
+        } else {
+            scale = Math.max(scale - scaleAmount, 0.1);
+        }
+        updateTransform();
+    });
+
+    imageContainer.addEventListener("mousedown", function (e) {
+        isDragging = true;
+        startX = e.clientX - originX;
+        startY = e.clientY - originY;
+        imageContainer.style.cursor = "grabbing";
+    });
+
+    document.addEventListener("mousemove", function (e) {
+        if (isDragging) {
+            originX = e.clientX - startX;
+            originY = e.clientY - startY;
+            updateTransform();
+        }
+    });
+
+    document.addEventListener("mouseup", function () {
+        isDragging = false;
+        imageContainer.style.cursor = "grab";
+    });
+
+    function updateTransform() {
+        image.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+    }
+
+    function resetZoom() {
+        scale = 1;
+        originX = 0;
+        originY = 0;
+        updateTransform();
+    }
+
+    function zoomIn() {
+        scale += 0.1;
+        updateTransform();
+    }
+
+    function zoomOut() {
+        scale = Math.max(scale - 0.1, 0.1);
+        updateTransform();
     }
 </script>
 {% endblock %}

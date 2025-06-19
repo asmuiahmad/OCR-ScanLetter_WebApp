@@ -8,7 +8,7 @@ report_bp = Blueprint('report', __name__)
 @app.route('/laporan_statistik')
 @login_required
 def laporan_statistik():
-    # Contoh pengambilan data gagal dan berhasil
+
     semua_surat_keluar = SuratKeluar.query.all()
     semua_surat_masuk = SuratMasuk.query.all()
 
@@ -18,7 +18,6 @@ def laporan_statistik():
 
     persentase_berhasil = round((berhasil_count / total_surat) * 100, 2) if total_surat else 0
 
-    # Akurasi rata-rata
     akurasi_keluar = [s.ocr_accuracy_suratKeluar for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar is not None]
     akurasi_masuk = [s.ocr_accuracy_suratMasuk for s in semua_surat_masuk if s.ocr_accuracy_suratMasuk is not None]
 
@@ -30,7 +29,7 @@ def laporan_statistik():
         persentase_berhasil=persentase_berhasil,
         gagal_ekstraksi=gagal_ekstraksi,
         keyword=request.args.get('keyword', ''),
-        surat_keyword=[],  # Sesuaikan kalau ada fitur pencarian
+        surat_keyword=[],
         rata2_akurasi_masuk=rata2_akurasi_masuk,
         rata2_akurasi_keluar=rata2_akurasi_keluar
     )
