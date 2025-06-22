@@ -61,10 +61,8 @@ def extract_ocr_data(file_path):
             'id_suratMasuk': None
         }
 
-        # ✅ Bersihkan semua varian spasi yang salah di sekitar kode target (misal: "W1 5-A12")
         cleaned_text = re.sub(r"W\s*1\s*5\s*[-\s]*A\s*1\s*2", target_code, cleaned_text, flags=re.IGNORECASE)
 
-        # ✅ Gunakan regex utama untuk ekstraksi berdasarkan target_code
         pattern_full = rf"(\d+)[/\s-]+([\w.\-]+)[/\s.-]+{re.escape(target_code)}[/\s-]+([\w.\-]+)[/\s-]+([A-ZIX0-9]{{1,4}})[/\s-]+(\d{{4}})"
         match = re.search(pattern_full, cleaned_text, re.IGNORECASE)
 

@@ -1,0 +1,80 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
+/* General styles for login and register */
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to right, #004d00, #66ff66); /* Updated gradient background */
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex; /* Use flexbox */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  height: 100vh; /* Full viewport height */
+}
+
+.login {
+  max-width: 400px;
+  margin: 0 auto; /* Center horizontally */
+  padding: 40px; /* Increased padding */
+  background-color: rgba(255, 255, 255, 0.3); /* More translucent white */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+  display: flex; /* Use flexbox for centering */
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center children horizontally */
+}
+
+.login h1 {
+  text-align: center;
+  margin-bottom: 30px; /* Increased margin */
+}
+
+.btn-primary {
+  margin-top: 10px; /* Increased margin */
+  background-color: #007bff;
+  border-color: #007bff;
+  width: 100%; /* Full width for buttons */
+  padding: 10px; /* Padding for button */
+  border-radius: 5px; /* Rounded button */
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Input fields */
+input[type=text],
+input[type=password],
+input[type=email] {
+  width: 100%; /* Set width to 80px */
+  height: 40px; /* Set a fixed height */
+  padding: 10px; /* Adjust padding */
+  margin: 10px 0; /* Centered margin */
+  border: 1px solid #ced4da;
+  border-radius: 5px; /* Rounded corners */
+  margin-bottom: 10px;
+}
+
+input[type=text]:focus,
+input[type=password]:focus,
+input[type=email]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+label {
+  margin-bottom: 5px;
+  display: block;
+  text-align: center; /* Center label text */
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875em;
+  margin-top: 5px;
+}
+
+/*# sourceMappingURL=styles-login.css.map */

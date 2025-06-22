@@ -1,0 +1,52 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Input Surat Keluar - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<div class="container">
+<h1>Input Surat Keluar</h1>
+<form method="POST" enctype="multipart/form-data" class="form-horizontal">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="tanggal_suratKeluar" style="margin-bottom: 3px;">Tanggal Surat Keluar:</label>
+                <input type="date" name="tanggal_suratKeluar" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
+            </div>
+            <div class="form-group">
+                <label for="pengirim_suratKeluar" style="margin-bottom: 3px;">Pengirim:</label>
+                <input type="text" name="pengirim_suratKeluar" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
+            </div>
+            <div class="form-group">
+                <label for="penerima_suratKeluar" style="margin-bottom: 3px;">Penerima:</label>
+                <input type="text" name="penerima_suratKeluar" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
+            </div>
+            <div class="form-group">
+                <label for="nomor_suratKeluar" style="margin-bottom: 3px;">Nomor Surat:</label>
+                <input type="text" name="nomor_suratKeluar" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="kode_suratKeluar" style="margin-bottom: 3px;">Kode Surat:</label>
+                <input type="text" name="kode_suratKeluar" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
+            </div>
+            <div class="form-group">
+                <label for="jenis_suratKeluar" style="margin-bottom: 3px;">Jenis Surat:</label>
+                <input type="text" name="jenis_suratKeluar" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
+            </div>
+            <div class="form-group">
+                <label for="isi_suratKeluar" style="margin-bottom: 3px;">Isi Surat:</label>
+                <textarea name="isi_suratKeluar" class="form-control" style="height: 38px;" {% if not current_user.is_admin %}disabled{% endif %} required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="image" style="margin-bottom: 3px;">Upload Image:</label>
+                <input type="file" name="image" class="form-control" accept="image/*" {% if not current_user.is_admin %}disabled{% endif %} required>
+            </div>
+        </div>
+    </div>
+    <div class="form-group" style="margin-top: 8px;">
+        <button type="submit" class="btn btn-primary" {% if not current_user.is_admin %}disabled{% endif %}>Submit</button>
+    </div>
+</form>
+</div>
+{% endblock %}
