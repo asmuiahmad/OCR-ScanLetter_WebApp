@@ -1,0 +1,94 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Formulir Permintaan Cuti</h2>
+    <form method="POST" action="{{ url_for('generate_cuti') }}">
+        <div class="row">
+            <!-- Kolom Kiri -->
+            <div class="col-md-6 pe-md-4 border-end">
+                <div class="mb-3">
+                    <label for="nama" class="form-label">Nama</label>
+                    <input name="nama" id="nama" required class="form-control" placeholder="Nama Lengkap">
+                </div>
+                <div class="mb-3">
+                    <label for="nip" class="form-label">NIP</label>
+                    <input name="nip" id="nip" required class="form-control" placeholder="NIP">
+                </div>
+                <div class="mb-3">
+                    <label for="jabatan" class="form-label">Jabatan</label>
+                    <input name="jabatan" id="jabatan" required class="form-control" placeholder="Jabatan">
+                </div>
+                <div class="mb-3">
+                    <label for="gol_ruang" class="form-label">Gol. Ruang</label>
+                    <input name="gol_ruang" id="gol_ruang" required class="form-control" placeholder="Golongan Ruang">
+                </div>
+                <div class="mb-3">
+                    <label for="unit_kerja" class="form-label">Unit Kerja</label>
+                    <input name="unit_kerja" id="unit_kerja" required class="form-control" placeholder="Unit Kerja">
+                </div>
+                <div class="mb-3">
+                    <label for="masa_kerja" class="form-label">Masa Kerja</label>
+                    <input name="masa_kerja" id="masa_kerja" required class="form-control"
+                        placeholder="Contoh: 2 Tahun 4 Bulan">
+                </div>
+                <div class="mb-3">
+                    <label for="alamat" class="form-label">Alamat</label>
+                    <textarea name="alamat" id="alamat" rows="3" required class="form-control"
+                        placeholder="Alamat selama cuti"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="no_suratmasuk" class="form-label">Nomor Surat Masuk</label>
+                    <input name="no_suratmasuk" id="no_suratmasuk" required class="form-control"
+                        placeholder="Misal: 123">
+                </div>
+                <div class="mb-3">
+                    <label for="tgl_ajuan_cuti" class="form-label">Tanggal Ajuan Cuti</label>
+                    <input name="tgl_ajuan_cuti" id="tgl_ajuan_cuti" type="date" required class="form-control">
+                </div>
+            </div>
+
+            <!-- Kolom Kanan -->
+            <div class="col-md-6 ps-md-4">
+                <div class="mb-3">
+                    <label for="tanggal_cuti" class="form-label">Tanggal Mulai Cuti</label>
+                    <input name="tanggal_cuti" id="tanggal_cuti" type="date" required class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="sampai_cuti" class="form-label">Tanggal Selesai Cuti</label>
+                    <input name="sampai_cuti" id="sampai_cuti" type="date" required class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="telp" class="form-label">Nomor Telepon</label>
+                    <input name="telp" id="telp" required class="form-control" placeholder="Contoh: 081234567890">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Jenis Cuti</label>
+                    <div class="border rounded p-3">
+                        {% for field in ['c_tahun', 'c_besar', 'c_sakit', 'c_lahir', 'c_penting', 'c_luarnegara'] %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="jenis_cuti" value="{{ field }}"
+                                id="{{ field }}" required>
+                            <label class="form-check-label" for="{{ field }}">
+                                {{ field.replace('c_', '').capitalize().replace('_', ' ') }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="alasan_cuti" class="form-label">Alasan Cuti</label>
+                    <textarea name="alasan_cuti" id="alasan_cuti" rows="3" required class="form-control"
+                        placeholder="Alasan Cuti"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="lama_cuti" class="form-label">Lama Cuti</label>
+                    <input name="lama_cuti" id="lama_cuti" required class="form-control" placeholder="Contoh: 3 Hari">
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary">Generate Surat Cuti</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

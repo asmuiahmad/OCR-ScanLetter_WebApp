@@ -3,107 +3,384 @@
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
     <style>
+
+    .modal-xl {
+        max-width: 1400px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .row-equal-height {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .row-equal-height > [class*='col-'] {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Area gambar */
+    .image-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
     .image-container {
-        width: 100%;
-        height: 400px;
+        flex-grow: 1;
+        min-height: 500px;
+        max-height: 600px;
         overflow: hidden;
         position: relative;
-        border: 1px solid #ccc;
-        margin-bottom: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        background-color: #fff;
         cursor: grab;
     }
-
+    
     .zoomable-image {
         position: absolute;
         top: 0;
         left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
         transform-origin: top left;
         transition: transform 0.1s ease-out;
     }
-
+    
     .zoom-controls {
         display: flex;
         justify-content: center;
         gap: 10px;
-        margin-top: 10px;
+        margin-top: 15px;
     }
-
+    
     .zoom-controls button {
         min-width: 40px;
-        padding: 5px 10px;
+        padding: 5px 12px;
         font-size: 16px;
+        border-radius: 4px;
+    }
+    
+    /* Area form */
+    .form-section {
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .form-section h5 {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #dee2e6;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .form-grid .form-group {
+        margin-bottom: 0;
+    }
+    
+    .full-width {
+        grid-column: span 2;
+    }
+    
+    .form-group {
+        margin-bottom: 18px;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #495057;
+    }
+    
+    .form-control {
+        border-radius: 4px;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-control:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    select.form-control {
+        height: 38px;
+    }
+    
+    /* Tombol */
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        gap: 12px;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+        border-color: #3498db;
+        padding: 8px 20px;
+        font-weight: 500;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        padding: 8px 16px;
+        font-weight: 500;
+    }
+    
+    .btn-primary:hover, .btn-secondary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+    
+    /* Responsif */
+    @media (max-width: 1200px) {
+        .form-grid {
+            gap: 15px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .image-container {
+            min-height: 400px;
+            max-height: 500px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .full-width {
+            grid-column: span 1;
+        }
+        
+        .nav-buttons {
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .modal-xl {
+            max-width: 95%;
+            margin: 10px auto;
+        }
+        
+        .image-container {
+            min-height: 350px;
+            max-height: 400px;
+        }
+        
+        .form-section {
+            padding: 15px;
+        }
+        
+        .button-group {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .nav-buttons {
+            flex-direction: row;
+            gap: 10px;
+        }
     }
 </style>
 {% endblock %}
 {% block content %}
 <div class="container">
-    <h1>OCR Text Extraction Surat Keluar</h1>
+    <h1 class="mb-4">OCR Text Extraction Surat Keluar</h1>
     <form action="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="edit_mode" value="false">
-        <div class="form-group">
-            <label for="images">Select Images:</label>
-            <input type="file" name="image" id="images" multiple>
+        <div class="form-row align-items-center">
+            <div class="col-md-8">
+                <div class="form-group mb-2">
+                    <label for="images">Pilih Gambar:</label>
+                    <input type="file" name="image" id="images" class="form-control-file" multiple>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary btn-block mt-4">Upload Gambar</button>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Upload Image(s)</button>
     </form>
+    
     {% if extracted_data_list and extracted_data_list|length > 0 %}
-        <button type="button" class="btn btn-secondary" onclick="openModal(0)">View Extracted Data</button>
+        <div class="mt-4 text-center">
+            <button type="button" class="btn btn-lg btn-secondary" onclick="openModal(0)">
+                <i class="fas fa-eye mr-2"></i>Lihat Data Terekstrak
+            </button>
+        </div>
     {% else %}
-        <p>No extracted data available. Please upload an image.</p>
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle mr-2"></i>Tidak ada data terekstrak. Silakan upload gambar.
+        </div>
     {% endif %}
 </div>
 
 <!-- Modal for Viewing Extracted Data -->
 <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Extracted Data</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="dataModalLabel">
+                    <i class="fas fa-file-alt mr-2"></i>Data Terekstrak
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="image-container">
-                    <img src="#" class="zoomable-image" alt="Image" id="modal-image">
-                </div>
-                <div class="form-container">
-                    <form id="dataForm">
-                        <input type="hidden" name="filename" id="filename">
-                        <!-- Hidden raw OCR values -->
-                        <input type="hidden" name="initial_nomor_surat" id="initial_nomor_surat">
-                        <input type="hidden" name="initial_pengirim" id="initial_pengirim">
-                        <input type="hidden" name="initial_penerima" id="initial_penerima">
-                        <input type="hidden" name="initial_isi" id="initial_isi">
-                        
-                        <div class="form-group">
-                            <label for="nomor_surat">Nomor Surat:</label>
-                            <input type="text" class="form-control" name="nomor_surat" id="nomor_surat">
+                <div class="row row-equal-height">
+                    <!-- Bagian Gambar -->
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <div class="image-section">
+                            <h5 class="text-center">
+                                <i class="fas fa-image mr-2"></i>Pratinjau Gambar
+                            </h5>
+                            <div class="image-container">
+                                <img src="#" class="zoomable-image" alt="Surat Keluar" id="modal-image">
+                            </div>
+                            <div class="zoom-controls">
+                                <button class="btn btn-outline-primary" onclick="zoomIn()">
+                                    <i class="fas fa-search-plus"></i> Zoom In
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="zoomOut()">
+                                    <i class="fas fa-search-minus"></i> Zoom Out
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="resetZoom()">
+                                    <i class="fas fa-sync"></i> Reset
+                                </button>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="pengirim">Nama Pengirim:</label>
-                            <input type="text" class="form-control" name="pengirim" id="pengirim">
-                        </div>
-                        <div class="form-group">
-                            <label for="penerima">Nama Penerima:</label>
-                            <input type="text" class="form-control" name="penerima" id="penerima">
-                        </div>
-                        <div class="form-group">
-                            <label for="selected_date">Tanggal Surat:</label>
-                            <select class="form-control" name="selected_date" id="selected_date"></select>
-                        </div>                        
-                        <div class="form-group">
-                            <label for="isi">Isi:</label>
-                            <textarea class="form-control" name="isi" id="isi" rows="5"></textarea>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="saveData()">Save</button>
-                        <button type="button" class="btn btn-secondary" onclick="previousModal()">Previous</button>
-                        <button type="button" class="btn btn-secondary" onclick="nextModal()">Next</button>
-                    </form>
+                    </div>
+                    
+                    <!-- Bagian Form -->
+                    <div class="col-lg-6">
+                        <form id="dataForm">
+                            <input type="hidden" name="filename" id="filename">
+                            <!-- Hidden raw OCR values -->
+                            <input type="hidden" name="initial_nomor_surat" id="initial_nomor_surat">
+                            <input type="hidden" name="initial_pengirim" id="initial_pengirim">
+                            <input type="hidden" name="initial_penerima" id="initial_penerima">
+                            <input type="hidden" name="initial_isi" id="initial_isi">
+                            <input type="hidden" name="initial_acara" id="initial_acara">
+                            <input type="hidden" name="initial_tempat" id="initial_tempat">
+                            <input type="hidden" name="initial_tanggal_acara" id="initial_tanggal_acara">
+                            <input type="hidden" name="initial_jam" id="initial_jam">
+                            
+                            <!-- Bagian Surat Keluar -->
+                            <div class="form-section">
+                                <h5>
+                                    <i class="fas fa-envelope mr-2"></i>Detail Surat Keluar
+                                </h5>
+                                <div class="form-group">
+                                    <label for="nomor_surat">Nomor Surat:</label>
+                                    <input type="text" class="form-control" name="nomor_surat" id="nomor_surat" placeholder="Masukkan nomor surat">
+                                </div>
+                                
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="pengirim">Pengirim:</label>
+                                        <input type="text" class="form-control" name="pengirim" id="pengirim" placeholder="Nama pengirim">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="penerima">Penerima:</label>
+                                        <input type="text" class="form-control" name="penerima" id="penerima" placeholder="Nama penerima">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="selected_date">Tanggal Surat:</label>
+                                    <select class="form-control" name="selected_date" id="selected_date">
+                                        <option value="">Pilih tanggal</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="isi">Isi Surat:</label>
+                                    <textarea class="form-control" name="isi" id="isi" rows="3" placeholder="Isi surat"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Bagian Detail Acara -->
+                            <div class="form-section">
+                                <h5>
+                                    <i class="fas fa-calendar-alt mr-2"></i>Detail Acara
+                                </h5>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="acara">Acara:</label>
+                                        <input type="text" class="form-control" name="acara" id="acara" placeholder="Nama acara">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tempat">Tempat:</label>
+                                        <input type="text" class="form-control" name="tempat" id="tempat" placeholder="Lokasi acara">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tanggal_acara">Tanggal Acara:</label>
+                                        <input type="text" class="form-control" name="tanggal_acara" id="tanggal_acara" placeholder="Tanggal pelaksanaan">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="jam">Jam:</label>
+                                        <input type="text" class="form-control" name="jam" id="jam" placeholder="Waktu pelaksanaan">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="button-group">
+                                <button type="button" class="btn btn-primary" onclick="saveData()">
+                                    <i class="fas fa-save mr-2"></i>Simpan Data
+                                </button>
+                                <div class="nav-buttons">
+                                    <button type="button" class="btn btn-secondary" onclick="previousModal()">
+                                        <i class="fas fa-arrow-left mr-2"></i>Sebelumnya
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="nextModal()">
+                                        Selanjutnya <i class="fas fa-arrow-right ml-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>Tutup
+                </button>
             </div>
         </div>
     </div>
@@ -113,38 +390,47 @@
     const staticImageBaseUrl = "{{ url_for('static', filename='ocr/surat_keluar/') }}";
     let currentIndex = 0;
     const extractedDataList = {{ extracted_data_list | tojson }};
-    
+
     function openModal(index) {
         if (index < 0 || index >= extractedDataList.length) {
-            alert("Index out of bounds.");
+            alert("Indeks di luar batas.");
             return;
         }
 
-        resetZoom(); // 🔁 Reset zoom saat ganti gambar
-
+        resetZoom();
         currentIndex = index;
         const data = extractedDataList[index];
+        
+        // Atur sumber gambar
         const imageSrc = data.id_suratKeluar !== null ? 
             suratKeluarImageBaseUrl.replace('0', data.id_suratKeluar) : 
             staticImageBaseUrl + data.filename;
         document.getElementById('modal-image').src = imageSrc;
 
-        // Populate hidden initial fields
+        // Isi nilai awal (hidden)
         document.getElementById('initial_nomor_surat').value = data.nomor_surat || '';
         document.getElementById('initial_pengirim').value = data.pengirim || '';
         document.getElementById('initial_penerima').value = data.penerima || '';
         document.getElementById('initial_isi').value = data.isi || '';
+        document.getElementById('initial_acara').value = data.acara || '';
+        document.getElementById('initial_tempat').value = data.tempat || '';
+        document.getElementById('initial_tanggal_acara').value = data.tanggal_acara || '';
+        document.getElementById('initial_jam').value = data.jam || '';
 
-        // Populate form fields
+        // Isi form
         document.getElementById('filename').value = data.filename;
         document.getElementById('nomor_surat').value = data.nomor_surat || '';
         document.getElementById('pengirim').value = data.pengirim || '';
         document.getElementById('penerima').value = data.penerima || '';
         document.getElementById('isi').value = data.isi || '';
+        document.getElementById('acara').value = data.acara || '';
+        document.getElementById('tempat').value = data.tempat || '';
+        document.getElementById('tanggal_acara').value = data.tanggal_acara || '';
+        document.getElementById('jam').value = data.jam || '';
 
-        // Populate the date select options
+        // Isi opsi tanggal
         const dateSelect = document.getElementById('selected_date');
-        dateSelect.innerHTML = '';
+        dateSelect.innerHTML = '<option value="">Pilih tanggal</option>';
         if (data.dates && data.dates.length > 0) {
             data.dates.forEach((date) => {
                 const option = document.createElement('option');
@@ -162,17 +448,17 @@
 
     function nextModal() {
         if (currentIndex < extractedDataList.length - 1) {
-            openModal(++currentIndex);
+            openModal(currentIndex + 1);
         } else {
-            alert("No more entries to process.");
+            alert("Tidak ada entri lagi untuk diproses.");
         }
     }
 
     function previousModal() {
         if (currentIndex > 0) {
-            openModal(--currentIndex);
+            openModal(currentIndex - 1);
         } else {
-            alert("Already at the first entry.");
+            alert("Sudah di entri pertama.");
         }
     }
 
@@ -184,10 +470,32 @@
         const pengirim = document.getElementById("pengirim").value.trim();
         const selected_date = document.getElementById("selected_date").value.trim();
         const isi = document.getElementById("isi").value.trim();
-        if (!selected_date || !nomor_surat || !penerima || !pengirim || !isi) {
-            alert("All fields must be filled before saving.");
+        const acara = document.getElementById("acara").value.trim();
+        const tempat = document.getElementById("tempat").value.trim();
+        const tanggal_acara = document.getElementById("tanggal_acara").value.trim();
+        const jam = document.getElementById("jam").value.trim();
+
+        // Validasi field wajib
+        const requiredFields = {
+            "Nomor Surat": nomor_surat,
+            "Pengirim": pengirim,
+            "Penerima": penerima,
+            "Isi": isi,
+            "Tanggal Surat": selected_date
+        };
+        
+        const missingFields = [];
+        for (const [fieldName, value] of Object.entries(requiredFields)) {
+            if (!value) {
+                missingFields.push(fieldName);
+            }
+        }
+        
+        if (missingFields.length > 0) {
+            alert(`Harap isi semua field wajib:\n- ${missingFields.join('\n- ')}`);
             return;
         }
+
         fetch("{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}", {
             method: "POST",
             headers: {
@@ -199,29 +507,42 @@
                 initial_pengirim: document.getElementById('initial_pengirim').value,
                 initial_penerima: document.getElementById('initial_penerima').value,
                 initial_isi: document.getElementById('initial_isi').value,
+                initial_acara: document.getElementById('initial_acara').value,
+                initial_tempat: document.getElementById('initial_tempat').value,
+                initial_tanggal_acara: document.getElementById('initial_tanggal_acara').value,
+                initial_jam: document.getElementById('initial_jam').value,
                 nomor_surat: nomor_surat,
                 penerima: penerima,
                 pengirim: pengirim,
                 selected_date: selected_date,
                 isi: isi,
+                acara: acara,
+                tempat: tempat,
+                tanggal_acara: tanggal_acara,
+                jam: jam
             }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("Data saved successfully!");
-                nextModal();
+                // Auto navigate to next entry
+                if (currentIndex < extractedDataList.length - 1) {
+                    openModal(currentIndex + 1);
+                } else {
+                    $('#dataModal').modal('hide');
+                    alert('Semua data berhasil disimpan!');
+                }
             } else {
-                alert("Failed to save data: " + (data.error || "Unknown error"));
+                alert(`Gagal menyimpan data: ${data.error || "Kesalahan tidak diketahui"}`);
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("Failed to save data.");
+            alert("Gagal menyimpan data. Silakan coba lagi.");
         });
     }
 
-    // 🔍 Zoom / Drag functionality
+    // Fungsi zoom gambar
     let scale = 1;
     let originX = 0;
     let originY = 0;
@@ -234,11 +555,20 @@
     imageContainer.addEventListener("wheel", function (e) {
         e.preventDefault();
         const scaleAmount = 0.1;
+        const rect = imageContainer.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
         if (e.deltaY < 0) {
             scale += scaleAmount;
         } else {
             scale = Math.max(scale - scaleAmount, 0.1);
         }
+        
+        // Sesuaikan origin untuk zoom di posisi kursor
+        originX = mouseX - (mouseX - originX) * (scale / (scale - scaleAmount));
+        originY = mouseY - (mouseY - originY) * (scale / (scale - scaleAmount));
+        
         updateTransform();
     });
 
@@ -274,12 +604,12 @@
     }
 
     function zoomIn() {
-        scale += 0.1;
+        scale += 0.2;
         updateTransform();
     }
 
     function zoomOut() {
-        scale = Math.max(scale - 0.1, 0.1);
+        scale = Math.max(scale - 0.2, 0.5);
         updateTransform();
     }
 </script>

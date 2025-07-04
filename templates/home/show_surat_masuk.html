@@ -87,7 +87,7 @@
                 <td class="py-2 px-4 border">{{ entry.tanggal_suratMasuk.strftime('%Y-%m-%d') }}</td>
                 <td class="py-2 px-4 border">{{ entry.pengirim_suratMasuk }}</td>
                 <td class="py-2 px-4 border">{{ entry.penerima_suratMasuk }}</td>
-                <td class="py-2 px-4 border">{{ entry.nomor_suratMasuk }}</td>
+                <td class="py-2 px-4 border">{{ entry.full_letter_number }}</td>
                 <td class="py-2 px-4 border">{{ entry.kode_suratMasuk }}</td>
                 <td class="py-2 px-4 border">{{ entry.jenis_suratMasuk }}</td>
                 <td class="py-2 px-4 border">{{ entry.isi_suratMasuk[:20] }}{% if entry.isi_suratMasuk|length > 20 %}...{% endif %}</td>

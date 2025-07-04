@@ -1,0 +1,83 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Formulir Data Pegawai</h2>
+    <form method="POST" action="{{ url_for('kelola_pegawai') }}">
+        <div class="row">
+            <!-- Kolom Kiri -->
+            <div class="col-md-6 pe-md-4 border-end">
+                <div class="mb-3">
+                    <label for="nama" class="form-label">Nama</label>
+                    <input name="nama" id="nama" required class="form-control" placeholder="Nama Lengkap">
+                </div>
+                <div class="mb-3">
+                    <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                    <input name="tanggal_lahir" id="tanggal_lahir" type="date" required class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="nip" class="form-label">NIP</label>
+                    <input name="nip" id="nip" required class="form-control" placeholder="NIP Pegawai">
+                </div>
+                <div class="mb-3">
+                    <label for="golongan" class="form-label">Golongan / Pangkat</label>
+                    <input name="golongan" id="golongan" required class="form-control" placeholder="Contoh: III/a">
+                </div>
+                <div class="mb-3">
+                    <label for="jabatan" class="form-label">Jabatan</label>
+                    <input name="jabatan" id="jabatan" required class="form-control" placeholder="Contoh: Staf TU">
+                </div>
+                <div class="mb-3">
+                    <label for="agama" class="form-label">Agama</label>
+                    <select name="agama" id="agama" required class="form-select">
+                        <option value="" disabled selected>Pilih Agama</option>
+                        <option value="Islam">Islam</option>
+                        <option value="Kristen">Kristen</option>
+                        <option value="Katolik">Katolik</option>
+                        <option value="Hindu">Hindu</option>
+                        <option value="Budha">Budha</option>
+                        <option value="Konghucu">Konghucu</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Jenis Kelamin</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="jenis_kelamin" value="Laki-laki"
+                                id="laki" required>
+                            <label class="form-check-label" for="laki">Laki-laki</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="jenis_kelamin" value="Perempuan"
+                                id="perempuan" required>
+                            <label class="form-check-label" for="perempuan">Perempuan</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan -->
+            <div class="col-md-6 ps-md-4">
+                <div class="mb-3">
+                    <label for="riwayat_pendidikan" class="form-label">Riwayat Pendidikan</label>
+                    <textarea name="riwayat_pendidikan" id="riwayat_pendidikan" rows="4" required class="form-control"
+                        placeholder="Contoh: SDN 1, SMPN 3, SMAN 1, S1 Ilmu Komputer"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="riwayat_pekerjaan" class="form-label">Riwayat Pekerjaan</label>
+                    <textarea name="riwayat_pekerjaan" id="riwayat_pekerjaan" rows="4" required class="form-control"
+                        placeholder="Contoh: CPNS 2018 - sekarang, Staf TU, dst."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="nomor_telpon" class="form-label">Nomor Telepon</label>
+                    <input name="nomor_telpon" id="nomor_telpon" required class="form-control"
+                        placeholder="Contoh: 081234567890">
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary">Simpan Data Pegawai</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

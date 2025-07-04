@@ -1,7 +1,7 @@
 /* Importing Google font - Poppins */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
-/* General Reset */
+/* General Reset and Base Styles */
 * {
   margin: 0;
   padding: 0;
@@ -12,7 +12,6 @@
 body {
   min-height: 100vh;
   background: #f0f4ff;
-  font-family: "Roboto", sans-serif;
   margin: 5px;
   padding: 0;
 }
@@ -37,7 +36,6 @@ body {
 .totalSurat-count {
   flex: 0 0 33.3333%;
   max-width: 33.3333%;
-  font-size: 5px;
 }
 
 .totalSurat-count p {
@@ -45,7 +43,7 @@ body {
   margin: 0;
 }
 
-.row-total1 {
+.row-total1, .row-total2 {
   display: flex;
   justify-content: space-between;
 }
@@ -56,11 +54,6 @@ body {
 
 .row-total1 > :nth-child(2) .card {
   background-image: linear-gradient(to right, #1e88e5 0%, #1565c0 51%, #1e88e5 100%);
-}
-
-.row-total2 {
-  display: flex;
-  justify-content: space-between;
 }
 
 .row-total2 > :nth-child(1) .card {
@@ -75,27 +68,21 @@ body {
   background-image: linear-gradient(to right, #b71c1c 0%, #ffccd2 51%, #b71c1c 100%);
 }
 
-.list-group-item:nth-child(odd) {
-  background-color: #a4adb4;
-}
-
-.list-group-item:nth-child(even) {
-  background-color: #ffffff;
-}
-
+.list-group-item:nth-child(odd),
 .surat-item:nth-child(odd) {
   background-color: #a4adb4;
 }
 
+.list-group-item:nth-child(even),
 .surat-item:nth-child(even) {
-  background-color: white;
+  background-color: #ffffff;
 }
 
 .surat-item {
   border-color: yellow;
 }
 
-/* Surat Masuk and Keluar Customize */
+/* Table Styles */
 @media (max-width: 768px) {
   .content {
     padding: 0.5rem;
@@ -128,6 +115,7 @@ body {
   margin-top: 20px;
 }
 
+/* Image and Form Styles */
 .image-container {
   width: 300px !important;
   height: 400px !important;
@@ -214,35 +202,37 @@ body {
 }
 
 .sidebar-links li a {
-  display: flex; /* Use flexbox for alignment */
-  align-items: center; /* Vertically center the content */
-  justify-content: center; /* Horizontally center the content */
-  flex-direction: column; /* Stack icon and text vertically */
-  gap: 5px; /* Space between icon and text */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   color: #fff;
   font-weight: 500;
   text-decoration: none;
-  padding: 12px 8px; /* Reduced padding */
+  padding: 12px 8px;
   white-space: nowrap;
   transition: all 0.4s ease;
 }
 
 .sidebar-links li a i {
-  font-size: 1rem; /* Reduced icon size */
-  display: flex; /* Ensure icons are treated as flex items */
-  align-items: center; /* Vertically center the icon */
-  justify-content: center; /* Horizontally center the icon */
-  width: 25px; /* Reduced width */
-  height: 25px; /* Reduced height */
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
 }
 
-.sidebar-links li a span {
-  opacity: 0; /* Hide text by default */
+.sidebar-links li a span,
+.sidebar-links li a .nav-label {
+  opacity: 0;
   transition: opacity 0.4s ease;
 }
 
-.sidebar:hover .sidebar-links li a span {
-  opacity: 1; /* Show text on hover */
+.sidebar:hover .sidebar-links li a span,
+.sidebar:hover .sidebar-links li a .nav-label {
+  opacity: 1;
 }
 
 .user-account {
@@ -259,7 +249,7 @@ body {
 
 .user-profile img {
   width: 42px;
-  height: 42px; /* Ensure height matches width for a perfect circle */
+  height: 42px;
   border-radius: 50%;
   border: 2px solid #fff;
 }
@@ -285,10 +275,48 @@ body {
 }
 
 .main-content {
-  margin-left: 85px; /* Matches the collapsed width of the sidebar */
+  margin-left: 85px;
   transition: margin-left 0.4s ease;
 }
 
 .sidebar:hover + .main-content {
-  margin-left: 260px; /* Matches the expanded width of the sidebar */
+  margin-left: 260px;
+}
+
+/* Submenu Styles */
+.sidebar-links .collapse,
+.sidebar-submenu {
+  background-color: #1d2239;
+  margin-top: 5px;
+  border-left: 2px solid #4a90e2;
+  padding-left: 10px;
+  border-radius: 4px;
+}
+
+.sidebar-submenu {
+  padding-left: 0;
+  margin-left: 0;
+  list-style: none;
+}
+
+.sidebar-links .collapse a,
+.sidebar-submenu li a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+  padding: 8px 5px;
+  color: #fff;
+}
+
+.sidebar-links .collapse a i,
+.sidebar-submenu li a i {
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+/* Heading Styles */
+.sidebar-links li a.nav-heading {
+  font-size: 0.85rem;
+  font-weight: 600;
 }

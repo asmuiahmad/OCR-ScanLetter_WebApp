@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% include 'includes/head.html' %}
+
 <body>
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -12,57 +13,109 @@
         <a href="{{ url_for('index') }}">
           <i class="fas fa-home"></i><span>Home</span></a>
       </li>
+
+      <!-- Dropdown Show Surat -->
       <li>
-        <a href="{{ url_for('show_surat_masuk') }}">
-          <i class="fas fa-inbox"></i><span>Surat Masuk</span></a>
-      </li>
-      <li>
-        <a href="{{ url_for('show_surat_keluar') }}">
-          <i class="fas fa-paper-plane"></i><span>Surat Keluar</span></a>
-      </li>
-      <li>
-        <a href="{{ url_for('input_surat_masuk') }}">
-          <i class="fas fa-edit"></i><span>Input Surat Masuk</span></a>
-      </li>
-      <li>
-        <a href="{{ url_for('input_surat_keluar') }}">
-          <i class="fas fa-edit"></i><span>Input Surat Keluar</span></a>
+        <a href="#showSuratSubmenu" data-toggle="collapse" class="nav-heading">
+          <i class="fas fa-envelope-open-text"></i>
+          <span class="nav-label">Show Surat</span>
+        </a>
+        <ul class="collapse sidebar-submenu" id="showSuratSubmenu">
+          <li><a href="{{ url_for('show_surat_masuk') }}"><i class="fas fa-inbox"></i> <span class="nav-label">Surat
+                Masuk</span></a></li>
+          <li><a href="{{ url_for('show_surat_keluar') }}"><i class="fas fa-paper-plane"></i> <span
+                class="nav-label">Surat Keluar</span></a></li>
+        </ul>
       </li>
 
+      <!-- Dropdown Templates Surat -->
+      <li>
+        <a href="#templatesSubmenu" data-toggle="collapse" class="nav-heading">
+          <i class="fas fa-folder"></i>
+          <span class="nav-label">Templates Surat</span>
+        </a>
+        <ul class="collapse sidebar-submenu" id="templatesSubmenu">
+          <li><a href="{{ url_for('generate_cuti') }}"><i class="fas fa-file-alt"></i> <span class="nav-label">Generate
+                Cuti</span></a></li>
+        </ul>
+      </li>
+
+      {% if current_user.role != 'karyawan' %}
+      <!-- Dropdown Input Surat -->
+      <li>
+        <a href="#inputSuratSubmenu" data-toggle="collapse" class="nav-heading">
+          <i class="fas fa-edit"></i>
+          <span class="nav-label">Input Surat</span>
+        </a>
+        <ul class="collapse sidebar-submenu" id="inputSuratSubmenu">
+          <li><a href="{{ url_for('input_surat_masuk') }}"><i class="fas fa-plus"></i> <span class="nav-label">Surat
+                Masuk</span></a></li>
+          <li><a href="{{ url_for('input_surat_keluar') }}"><i class="fas fa-plus"></i> <span class="nav-label">Surat
+                Keluar</span></a></li>
+        </ul>
+      </li>
+
+      <!-- Dropdown OCR -->
+      <li>
+        <a href="#ocrSubmenu" data-toggle="collapse" class="nav-heading">
+          <i class="fas fa-eye"></i>
+          <span class="nav-label">OCR</span>
+        </a>
+        <ul class="collapse sidebar-submenu" id="ocrSubmenu">
+          <li><a href="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}"><i class="fas fa-file-alt"></i> <span
+                class="nav-label">OCR Surat Masuk</span></a></li>
+          <li><a href="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}"><i class="fas fa-file-alt"></i> <span
+                class="nav-label">OCR Surat Keluar</span></a></li>
+        </ul>
+      </li>
+
+      <!-- Statistik -->
       <li>
         <a href="{{ url_for('laporan_statistik') }}">
-          <i class="fas fa-chart-bar"></i><span>Laporan Statistik</span>
+          <i class="fas fa-chart-bar"></i><span>Laporan Statistik</span></a>
+      </li>
+
+      <!-- Dropdown Pegawai -->
+      <li>
+        <a href="#pegawaiSubmenu" data-toggle="collapse" class="nav-heading">
+          <i class="fas fa-users"></i>
+          <span class="nav-label">Pegawai</span>
         </a>
+        <ul class="collapse sidebar-submenu" id="pegawaiSubmenu">
+          <li><a href="{{ url_for('pegawai_list') }}"><i class="fas fa-list"></i> <span class="nav-label">List Pegawai</span></a></li>
+          <li><a href="{{ url_for('kelola_pegawai') }}"><i class="fas fa-user-plus"></i> <span class="nav-label">Pegawai</span></a></li>
+        </ul>
       </li>
-      
+      {% endif %}
+
+      {% if current_user.is_admin %}
+      <!-- User Management (Admin Only) -->
       <li>
-        <a href="{{ url_for('ocr.ocr') }}">
-          <i class="fas fa-file-alt"></i><span>OCR</span></a>
+        <a href="{{ url_for('edit_user_view') }}">
+          <i class="fas fa-user-cog"></i><span>Manajemen User</span></a>
       </li>
-      <li>
-        <a href="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}">
-          <i class="fas fa-file-alt"></i><span>OCR Surat Masuk</span></a>
-      </li>
-      <li>
-        <a href="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}">
-          <i class="fas fa-file-alt"></i><span>OCR Surat Keluar</span></a>
-      </li>
+      {% endif %}
+
+      <!-- Logout -->
       <li>
         <a href="{{ url_for('logout') }}">
           <i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
       </li>
     </ul>
+
+
+
     <a href="{{ url_for('edit_user', user_id=current_user.id) }}">
-  <div class="user-account">
-    <div class="user-profile">
-      <img src="{{ url_for('static', filename='images/profile-img.jpg') }}" alt="Profile Image" />
-      <div class="user-detail">
-        <h3>{{ current_user.username }}</h3>
-        <span>{{ current_user.role }}</span>
+      <div class="user-account">
+        <div class="user-profile">
+          <img src="{{ url_for('static', filename='images/profile-img.jpg') }}" alt="Profile Image" />
+          <div class="user-detail">
+            <h3>{{ current_user.username }}</h3>
+            <span>{{ current_user.role }}</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</a>
+    </a>
   </aside>
 
   <!-- Main Content -->
@@ -95,4 +148,5 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.3/viewer.min.js"></script>
 </body>
+
 </html>

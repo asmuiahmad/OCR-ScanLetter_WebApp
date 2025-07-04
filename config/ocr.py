@@ -1,10 +1,11 @@
 import os
 import json
-from flask import render_template, request, Blueprint
-from flask_login import login_required
+from flask import render_template, request, Blueprint, url_for, flash, redirect
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import pytesseract
 from PIL import Image
+from functools import wraps
 from .ocr_utils import (
     clean_text,
     extract_dates,
@@ -17,8 +18,21 @@ from .ocr_utils import (
 
 ocr_bp = Blueprint('ocr', __name__)
 
+# Role required decorator for blueprints
+def role_required(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if current_user.role not in roles:
+                flash('You do not have permission to access this page.', 'error')
+                return redirect(url_for('index'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
+
 @ocr_bp.route('/ocr', methods=['GET', 'POST'])
 @login_required
+@role_required('admin', 'pimpinan')
 def ocr():
     extracted_text = ""
     if request.method == 'POST':

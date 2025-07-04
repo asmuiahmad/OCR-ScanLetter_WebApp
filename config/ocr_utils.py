@@ -56,17 +56,30 @@ def extract_pengirim(text):
     return matches[-1].group(0).strip() if matches else 'Not found'
 
 def extract_isi_suratmasuk(text):
-    match_isi = re.search(
-        r"(?:Perihal|Hal|HaI|Ha1|PERIHAL|HAL)\s*[:\-]?\s*(?:\n\s*)?(.*?)(?=\n\s*\n|$)",
-        text,
-        re.DOTALL
-    )
-    if match_isi:
-        return match_isi.group(1).strip()
-
-    if re.search(r'FORMULIR PERMINTAAN DAN PEMBERIAN CUTI', text, re.IGNORECASE):
-        return "FORMULIR PERMINTAAN DAN PEMBERIAN CUTI"
-
+    pattern_perihal = r"(?:Perihal|Hal|HaI|Ha1|PERIHAL|HAL)\s*[:\-]?\s*(.*?)\n"
+    match_perihal = re.search(pattern_perihal, text, re.DOTALL | re.IGNORECASE)
+    
+    if match_perihal:
+        isi = match_perihal.group(1).strip()
+        if '\n' in isi:
+            isi = isi.split('\n')[0].strip()
+        return isi
+    
+    pattern_awal = r"(?:Di-|Tempat)\s*\n(.*?)\n"
+    match_awal = re.search(pattern_awal, text, re.DOTALL | re.IGNORECASE)
+    
+    if match_awal:
+        isi = match_awal.group(1).strip()
+        if '\n' in isi:
+            isi = isi.split('\n')[0].strip()
+        return isi
+    
+    lines = text.split('\n')
+    for i, line in enumerate(lines):
+        line = line.strip()
+        if len(line.split()) > 3 and not any(word in line for word in ["Assalamu", "Wr.Wb", "Yth"]):
+            return line
+    
     return "Not found"
 
 def extract_isi_suratkeluar(text):
@@ -96,7 +109,6 @@ def calculate_ocr_accuracy(original_text, edited_text):
     return round(SequenceMatcher(None, original_text, edited_text).ratio() * 100, 2)
 
 def hitung_field_not_found(surat, prefix):
-
     field_not_found = {
         f"nomor_{prefix}": 0,
         f"pengirim_{prefix}": 0,
@@ -136,3 +148,72 @@ def extract_nomor_surat(text):
         cleaned = clean_text(raw_nomor)
         return cleaned.strip("[]() ")
     return 'Not found'
+
+def extract_acara(text):
+    pattern = r"(?:Acara|acara)\s*[:\-]?\s*(.*?)(?=\n|tempat|tanggal|jam|pukul|$)"
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else "Not found"
+
+def extract_tempat(text):
+    # Pola utama: Mencari "Tempat :" diikuti teks hingga akhir baris
+    pattern_main = r"Tempat\s*:\s*(.*?)\n"
+    match = re.search(pattern_main, text, flags=re.IGNORECASE)
+    
+    if match:
+        tempat = match.group(1).strip()
+        
+        # Filter khusus untuk menghindari salam
+        if not any(salam in tempat for salam in ["Assalamu", "Wassalamu", "Warahmatullahi"]):
+            return tempat
+    
+    pattern_alt1 = r"Tempat\s*:?\s*(.*?)\n"
+    match_alt1 = re.search(pattern_alt1, text, flags=re.IGNORECASE)
+    if match_alt1:
+        tempat = match_alt1.group(1).strip()
+        if not any(salam in tempat for salam in ["Assalamu", "Wassalamu", "Warahmatullahi"]):
+            return tempat
+    
+    pattern_alt2 = r"(?:Tempat|tempat|lokasi)\s*[:\-]?\s*(.*?)(?=\n|$|Hari|Tanggal|Pukul|Jam)"
+    match_alt2 = re.search(pattern_alt2, text, flags=re.IGNORECASE)
+    if match_alt2:
+        tempat = match_alt2.group(1).strip()
+        if not any(salam in tempat for salam in ["Assalamu", "Wassalamu", "Warahmatullahi"]):
+            return tempat
+    
+    return "Not found"
+
+def extract_tanggal_acara(text):
+    pattern = r"(?:Tanggal Acara|Tanggal|tanggal acara|tgl)\s*[:\-]?\s*(.*?)(?=\n|jam|pukul|$)"
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else "Not found"
+
+def extract_jam(text):
+    pattern = r"(?:Pukul|Jam|Waktu)\s*[:\-]?\s*(\d{1,2}[.:]\d{2})"
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else "Not found"
+
+# Fungsi baru untuk deteksi formulir cuti
+def is_formulir_cuti(text):
+    """Deteksi apakah teks mengandung formulir permintaan cuti"""
+    pattern = r"FORMULIR\s+PERMINTAAN\s+DAN\s+PEMBERIAN\s+CUTI"
+    return re.search(pattern, text, re.IGNORECASE) is not None
+
+def extract_formulir_cuti_data(text):
+    """Ekstrak data khusus dari formulir cuti dengan lebih akurat"""
+    # Pola untuk ekstraksi data pegawai
+    nama_pattern = r"(?:Nama\s*[:.]?\s*|Nama\s+Lengkap\s*[:.]?\s*)([A-Z\s]+)"
+    nip_pattern = r"(?:NIP\s*[:.]?\s*|Nomor\s+Induk\s+Pegawai\s*[:.]?\s*)(\d+)"
+    tanggal_pattern = r"(?:Tanggal\s*[:.]?\s*)(\d{1,2}[/-]\d{1,2}[/-]\d{4})"
+    jenis_cuti_pattern = r"(?:Jenis\s*Cuti\s*[:.]?\s*|Macam\s+Cuti\s*[:.]?\s*)([A-Za-z\s]+)"
+    
+    nama = re.search(nama_pattern, text, re.IGNORECASE)
+    nip = re.search(nip_pattern, text, re.IGNORECASE)
+    tanggal = re.search(tanggal_pattern, text, re.IGNORECASE)
+    jenis_cuti = re.search(jenis_cuti_pattern, text, re.IGNORECASE)
+    
+    return {
+        'nama': nama.group(1).strip() if nama else 'N/A',
+        'nip': nip.group(1) if nip else 'N/A',
+        'tanggal': tanggal.group(1) if tanggal else 'N/A',
+        'jenis_cuti': jenis_cuti.group(1).strip() if jenis_cuti else 'N/A'
+    }
