@@ -38,6 +38,9 @@ class SuratMasuk(db.Model):
     initial_penerima_suratMasuk = db.Column(db.String(255))
     initial_isi_suratMasuk = db.Column(db.Text)
     initial_nomor_suratMasuk = db.Column(db.String(255))
+    
+    # New status field
+    status_suratMasuk = db.Column(db.String(20), default='pending', nullable=False)
 
 class SuratKeluar(db.Model):
     id_suratKeluar = db.Column(db.Integer, primary_key=True)
@@ -53,6 +56,15 @@ class SuratKeluar(db.Model):
     initial_pengirim_suratKeluar = db.Column(db.String(255))
     initial_penerima_suratKeluar = db.Column(db.String(255))
     initial_isi_suratKeluar = db.Column(db.Text)
+    
+    # Tambahan field untuk Surat Keluar
+    acara_suratKeluar = db.Column(db.Text, nullable=True)
+    tempat_suratKeluar = db.Column(db.Text, nullable=True)
+    tanggal_acara_suratKeluar = db.Column(db.Date, nullable=True)
+    jam_suratKeluar = db.Column(db.String(10), nullable=True)
+    
+    # New status field
+    status_suratKeluar = db.Column(db.String(20), default='pending', nullable=False)
 
 class Pegawai(db.Model):
     __tablename__ = 'pegawai'

@@ -17,7 +17,7 @@
         {% endif %}
     {% endwith %}
     
-    <form method="POST" action="{{ url_for('register') }}">
+    <form method="POST" action="{{ url_for('auth.register') }}">
         {{ form.hidden_tag() }}
         
         <div class="form-group mb-3">
@@ -41,7 +41,7 @@
             Akun Anda akan aktif setelah disetujui oleh admin.
         </div>
 
-        <p class="mt-2">Sudah punya akun? <a href="{{ url_for('login') }}">Login di sini</a></p>
+        <p class="mt-2">Sudah punya akun? <a href="{{ url_for('auth.login') }}">Login di sini</a></p>
 
         <button type="submit" class="btn btn-primary btn-block btn-large">Register</button>
     </form>

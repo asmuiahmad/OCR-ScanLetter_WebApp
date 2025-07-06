@@ -83,14 +83,33 @@ def extract_isi_suratmasuk(text):
     return "Not found"
 
 def extract_isi_suratkeluar(text):
-    pattern = r"perihal\s*[:\-]?\s*(.*)"
-    lines = text.splitlines()
+    # Pola untuk mencari perihal atau isi surat
+    patterns = [
+        r"perihal\s*[:\-]?\s*(.*)",
+        r"hal\s*[:\-]?\s*(.*)",
+        r"tentang\s*[:\-]?\s*(.*)",
+        r"maksud\s*[:\-]?\s*(.*)"
+    ]
 
+    # Coba setiap pola
+    for pattern in patterns:
+        lines = text.splitlines()
+        for line in lines:
+            match = re.search(pattern, line, flags=re.IGNORECASE)
+            if match:
+                isi = match.group(1).strip()
+                if isi and len(isi) > 3:
+                    return isi
+
+    # Jika pola spesifik tidak ditemukan, cari paragraf pertama yang cukup panjang
+    lines = text.splitlines()
     for line in lines:
-        match = re.search(pattern, line, flags=re.IGNORECASE)
-        if match:
-            isi = match.group(1).strip()
-            return isi if isi else "Not found"
+        line = line.strip()
+        # Cari baris yang memiliki lebih dari 10 kata dan bukan salam/header
+        if (len(line.split()) > 10 and 
+            not any(word in line.lower() for word in ['assalamu', 'yth', 'kepada', 'dengan', 'hormat'])):
+            return line
+
     return "Not found"
 
 def calculate_ocr_completeness(data):

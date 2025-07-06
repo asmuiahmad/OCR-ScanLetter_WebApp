@@ -3,38 +3,64 @@
 {% block title %}Edit Surat Masuk - PA Banjarbaru{% endblock %}
 
 {% block content %}
-<div class="container">
-<h1>Edit Surat Masuk</h1>
-<form method="POST">
-    <div class="form-group">
-        <label for="tanggal_suratMasuk">Tanggal Surat Masuk:</label>
-        <input type="date" class="form-control" name="tanggal_suratMasuk" value="{{ entry.tanggal_suratMasuk.strftime('%Y-%m-%d') }}" {% if not current_user.is_admin %}disabled{% endif %} required>
-    </div>
-    <div class="form-group">
-        <label for="pengirim_suratMasuk">Pengirim:</label>
-        <input type="text" class="form-control" name="pengirim_suratMasuk" value="{{ entry.pengirim_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
-    </div>
-    <div class="form-group">
-        <label for="penerima_suratMasuk">Penerima:</label>
-        <input type="text" class="form-control" name="penerima_suratMasuk" value="{{ entry.penerima_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
-    </div>
-    <div class="form-group">
-        <label for="nomor_suratMasuk">Nomor Surat:</label>
-        <input type="text" class="form-control" name="nomor_suratMasuk" value="{{ entry.nomor_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
-    </div>
-    <div class="form-group">
-        <label for="kode_suratMasuk">Kode Surat:</label>
-        <input type="text" class="form-control" name="kode_suratMasuk" value="{{ entry.kode_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
-    </div>
-    <div class="form-group">
-        <label for="jenis_suratMasuk">Jenis Surat:</label>
-        <input type="text" class="form-control" name="jenis_suratMasuk" value="{{ entry.jenis_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
-    </div>
-    <div class="form-group">
-        <label for="isi_suratMasuk">Isi Surat:</label>
-        <textarea class="form-control" name="isi_suratMasuk" {% if not current_user.is_admin %}disabled{% endif %} required>{{ entry.isi_suratMasuk }}</textarea>
-    </div>
-    <button type="submit" class="btn btn-primary" {% if not current_user.is_admin %}disabled{% endif %}>Update</button>
-</form>
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">Edit Surat Masuk</h1>
+    
+    <form action="{{ url_for('edit_surat_masuk', id_suratMasuk=surat.id_suratMasuk) }}" method="POST" enctype="multipart/form-data" class="bg-white shadow-md rounded-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="nomor_suratMasuk" class="block text-gray-700 font-semibold mb-2">Nomor Surat</label>
+                <input type="text" id="nomor_suratMasuk" name="nomor_suratMasuk" 
+                       value="{{ surat.nomor_suratMasuk }}" 
+                       class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div>
+                <label for="tanggal_suratMasuk" class="block text-gray-700 font-semibold mb-2">Tanggal Surat</label>
+                <input type="date" id="tanggal_suratMasuk" name="tanggal_suratMasuk" 
+                       value="{{ surat.tanggal_suratMasuk.strftime('%Y-%m-%d') }}" 
+                       class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div>
+                <label for="pengirim_suratMasuk" class="block text-gray-700 font-semibold mb-2">Pengirim</label>
+                <input type="text" id="pengirim_suratMasuk" name="pengirim_suratMasuk" 
+                       value="{{ surat.pengirim_suratMasuk }}" 
+                       class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div>
+                <label for="penerima_suratMasuk" class="block text-gray-700 font-semibold mb-2">Penerima</label>
+                <input type="text" id="penerima_suratMasuk" name="penerima_suratMasuk" 
+                       value="{{ surat.penerima_suratMasuk }}" 
+                       class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="col-span-1 md:col-span-2">
+                <label for="isi_suratMasuk" class="block text-gray-700 font-semibold mb-2">Isi Surat</label>
+                <textarea id="isi_suratMasuk" name="isi_suratMasuk" 
+                          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                          rows="4">{{ surat.isi_suratMasuk }}</textarea>
+            </div>
+            
+            <div class="col-span-1 md:col-span-2">
+                <label for="gambar_suratMasuk" class="block text-gray-700 font-semibold mb-2">Dokumen Surat</label>
+                <input type="file" id="gambar_suratMasuk" name="gambar_suratMasuk" 
+                       class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {% if surat.gambar_suratMasuk %}
+                <p class="text-sm text-gray-600 mt-2">Dokumen saat ini sudah tersimpan</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-6 flex space-x-4">
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+                <i class="fas fa-save mr-2"></i> Simpan Perubahan
+            </button>
+            <a href="{{ url_for('show_surat_masuk') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali
+            </a>
+        </div>
+    </form>
 </div>
 {% endblock %}

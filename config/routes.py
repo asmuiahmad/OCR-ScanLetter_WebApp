@@ -11,7 +11,7 @@ from functools import wraps
 import pytesseract
 from flask import (
     render_template, request, send_file, redirect, url_for,
-    flash, jsonify, session, Blueprint
+    flash, jsonify, session, Blueprint, g
 )
 from flask_login import (
     login_user, login_required, logout_user, current_user
@@ -19,8 +19,8 @@ from flask_login import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import desc, asc, extract, func
-from mailmerge import MailMerge
 from docx import Document
+from mailmerge import MailMerge
 
 # 🔹 Local Application Imports
 from app import app
@@ -31,17 +31,19 @@ from config.models import User, SuratMasuk, SuratKeluar, Pegawai
 from config.forms import LoginForm, RegistrationForm
 
 def role_required(*roles):
-    def wrapper(f):
+    def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if current_user.role not in roles:
-                flash('You do not have permission to access this page.', 'error')
-                return redirect(url_for('index'))
+            if not current_user.is_authenticated or current_user.role not in roles:
+                return jsonify({"error": "Unauthorized"}), 403
             return f(*args, **kwargs)
         return decorated_function
-    return wrapper
+    return decorator
 
-@app.route('/login', methods=['GET', 'POST'])
+# Create auth blueprint
+auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -61,13 +63,13 @@ def login():
         flash('Invalid email or password', 'error')
     return render_template('auth/login.html', form=form)
 
-@app.route('/logout')
+@auth_bp.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('auth.login'))
 
-@app.route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -89,64 +91,81 @@ def register():
             db.session.add(new_user)
             db.session.commit()
             flash('Registration successful! Your account is pending approval by an administrator.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
         except Exception as e:
             db.session.rollback()
             flash(f'An error occurred during registration: {str(e)}', 'error')
     return render_template('auth/register.html', form=form)
 
+@app.before_request
+def set_pending_surat_counts():
+    # Initialize default values
+    g.pending_surat_masuk_count = 0
+    g.pending_surat_keluar_count = 0
+    
+    # Only set counts for authenticated pimpinan users
+    if current_user.is_authenticated and current_user.role == 'pimpinan':
+        g.pending_surat_masuk_count = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
+        g.pending_surat_keluar_count = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+
 @app.route('/')
 @login_required
 def index():
+    # Total surat
+    suratMasuk_count = SuratMasuk.query.count()
+    suratKeluar_count = SuratKeluar.query.count()
+
+    # Statistik tahunan
     today = datetime.today()
     year = today.year
     month = today.month
-    days_in_month = monthrange(year, month)[1]
+    week_start = today - timedelta(days=today.weekday())
 
-    chart_labels = list(range(1, days_in_month + 1))
+    suratMasuk_this_year = SuratMasuk.query.filter(
+        extract('year', SuratMasuk.tanggal_suratMasuk) == year
+    ).count()
+    suratKeluar_this_year = SuratKeluar.query.filter(
+        extract('year', SuratKeluar.tanggal_suratKeluar) == year
+    ).count()
 
-    surat_masuk_per_day = {day: 0 for day in chart_labels}
-    surat_keluar_per_day = {day: 0 for day in chart_labels}
+    # Statistik bulanan
+    suratMasuk_this_month = SuratMasuk.query.filter(
+        extract('year', SuratMasuk.tanggal_suratMasuk) == year,
+        extract('month', SuratMasuk.tanggal_suratMasuk) == month
+    ).count()
+    suratKeluar_this_month = SuratKeluar.query.filter(
+        extract('year', SuratKeluar.tanggal_suratKeluar) == year,
+        extract('month', SuratKeluar.tanggal_suratKeluar) == month
+    ).count()
 
-    surat_masuk_records = SuratMasuk.query.filter(
-        SuratMasuk.tanggal_suratMasuk >= datetime(year, month, 1),
-        SuratMasuk.tanggal_suratMasuk < datetime(year, month, days_in_month) + timedelta(days=1)
-    ).all()
+    # Statistik mingguan
+    suratMasuk_this_week = SuratMasuk.query.filter(
+        SuratMasuk.tanggal_suratMasuk >= week_start
+    ).count()
+    suratKeluar_this_week = SuratKeluar.query.filter(
+        SuratKeluar.tanggal_suratKeluar >= week_start
+    ).count()
 
-    for surat in surat_masuk_records:
-        if surat.tanggal_suratMasuk:
-            day = surat.tanggal_suratMasuk.day
-            surat_masuk_per_day[day] += 1
+    # Surat terbaru
+    recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.tanggal_suratMasuk.desc()).limit(5).all()
+    recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.tanggal_suratKeluar.desc()).limit(5).all()
 
-    surat_keluar_records = SuratKeluar.query.filter(
-        SuratKeluar.tanggal_suratKeluar >= datetime(year, month, 1),
-        SuratKeluar.tanggal_suratKeluar < datetime(year, month, days_in_month) + timedelta(days=1)
-    ).all()
+    # Pengguna terbaru
+    users = User.query.order_by(User.last_login.desc()).limit(5).all()
 
-    for surat in surat_keluar_records:
-        if surat.tanggal_suratKeluar:
-            day = surat.tanggal_suratKeluar.day
-            surat_keluar_per_day[day] += 1
-
-    chart_data_masuk = [surat_masuk_per_day[day] for day in chart_labels]
-    chart_data_keluar = [surat_keluar_per_day[day] for day in chart_labels]
-
-    return render_template('home/index.html',
-        suratMasuk_count=SuratMasuk.query.count(),
-        suratKeluar_count=SuratKeluar.query.count(),
-        suratMasuk_this_month = SuratMasuk.query.filter(SuratMasuk.created_at >= datetime(year, month, 1)).count(),
-        suratMasuk_this_year = SuratMasuk.query.filter(SuratMasuk.created_at >= datetime(year, 1, 1)).count(),
-        suratMasuk_this_week = SuratMasuk.query.filter(SuratMasuk.created_at >= (datetime.today() - timedelta(days=datetime.today().weekday()))).count(),
-        suratKeluar_this_month = SuratKeluar.query.filter(SuratKeluar.created_at >= datetime(year, month, 1)).count(),
-        suratKeluar_this_year = SuratKeluar.query.filter(SuratKeluar.created_at >= datetime(year, 1, 1)).count(),
-        suratKeluar_this_week = SuratKeluar.query.filter(SuratKeluar.created_at >= (datetime.today() - timedelta(days=datetime.today().weekday()))).count(),
-        recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.created_at.desc()).limit(5).all(),
-        recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.created_at.desc()).limit(5).all(),
-        users=User.query.order_by(User.last_login.desc()).limit(5).all(),
-
-        chart_labels=chart_labels,
-        chart_data_masuk=chart_data_masuk,
-        chart_data_keluar=chart_data_keluar
+    return render_template(
+        'home/index.html', 
+        suratMasuk_count=suratMasuk_count,
+        suratKeluar_count=suratKeluar_count,
+        suratMasuk_this_year=suratMasuk_this_year,
+        suratKeluar_this_year=suratKeluar_this_year,
+        suratMasuk_this_month=suratMasuk_this_month,
+        suratKeluar_this_month=suratKeluar_this_month,
+        suratMasuk_this_week=suratMasuk_this_week,
+        suratKeluar_this_week=suratKeluar_this_week,
+        recent_surat_masuk=recent_surat_masuk,
+        recent_surat_keluar=recent_surat_keluar,
+        users=users
     )
 
 @app.route('/users', methods=['GET'])
@@ -246,11 +265,7 @@ def show_surat_masuk():
 @login_required
 @role_required('admin', 'pimpinan')
 def input_surat_masuk():
-    # 🔒 Batasi akses hanya untuk admin
-    if not current_user.is_admin:
-        flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
-
+    # 🔒 Ensure access for admin and pimpinan
     if request.method == 'POST':
         try:
             # ✅ Ambil dan validasi input dari form
@@ -281,7 +296,8 @@ def input_surat_masuk():
                 jenis_suratMasuk=jenis,
                 isi_suratMasuk=isi,
                 full_letter_number=full_letter_number,
-                gambar_suratMasuk=file_data
+                gambar_suratMasuk=file_data,
+                status_suratMasuk='pending'  # Set default status
             )
 
             db.session.add(new_surat)
@@ -302,28 +318,31 @@ def input_surat_masuk():
 @login_required
 @role_required('admin', 'pimpinan')
 def input_surat_keluar():
-    if not current_user.is_admin:
-        flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
-
+    # 🔒 Ensure access for admin and pimpinan
     if request.method == 'POST':
-        tanggal_suratKeluar = request.form['tanggal_suratKeluar']
-        pengirim_suratKeluar = request.form['pengirim_suratKeluar']
-        penerima_suratKeluar = request.form['penerima_suratKeluar']
-        nomor_suratKeluar = request.form['nomor_suratKeluar']
-        isi_suratKeluar = request.form['isi_suratKeluar']
+        try:
+            tanggal_suratKeluar = request.form['tanggal_suratKeluar']
+            pengirim_suratKeluar = request.form['pengirim_suratKeluar']
+            penerima_suratKeluar = request.form['penerima_suratKeluar']
+            nomor_suratKeluar = request.form['nomor_suratKeluar']
+            isi_suratKeluar = request.form['isi_suratKeluar']
 
-        new_surat_keluar = SuratKeluar(
-            tanggal_suratKeluar=datetime.strptime(tanggal_suratKeluar, '%Y-%m-%d'),
-            pengirim_suratKeluar=pengirim_suratKeluar,
-            penerima_suratKeluar=penerima_suratKeluar,
-            nomor_suratKeluar=nomor_suratKeluar,
-            isi_suratKeluar=isi_suratKeluar
-        )
-        db.session.add(new_surat_keluar)
-        db.session.commit()
-        flash('Surat Keluar has been added successfully!', 'success')
-        return redirect(url_for('show_surat_keluar'))
+            new_surat_keluar = SuratKeluar(
+                tanggal_suratKeluar=datetime.strptime(tanggal_suratKeluar, '%Y-%m-%d'),
+                pengirim_suratKeluar=pengirim_suratKeluar,
+                penerima_suratKeluar=penerima_suratKeluar,
+                nomor_suratKeluar=nomor_suratKeluar,
+                isi_suratKeluar=isi_suratKeluar,
+                status_suratKeluar='pending'  # Set default status
+            )
+            db.session.add(new_surat_keluar)
+            db.session.commit()
+            flash('Surat Keluar has been added successfully!', 'success')
+            return redirect(url_for('show_surat_keluar'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding Surat Keluar: {str(e)}', 'danger')
+            return render_template('home/input_surat_keluar.html')
 
     return render_template('home/input_surat_keluar.html')
 
@@ -355,34 +374,48 @@ def delete_surat_keluar(id):
     flash('Surat Keluar has been deleted successfully!', 'success')
     return redirect(url_for('show_surat_keluar'))
 
-@app.route('/edit_surat_masuk/<int:id>', methods=['GET', 'POST'])
+@app.route('/edit_surat_masuk/<int:id_suratMasuk>', methods=['GET', 'POST'])
 @login_required
-def edit_surat_masuk(id):
-    if not current_user.is_admin:
-        flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
-
-    entry = SuratMasuk.query.get_or_404(id)
+def edit_surat_masuk(id_suratMasuk):
+    surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
+    
     if request.method == 'POST':
-        entry.tanggal_suratMasuk = datetime.strptime(request.form['tanggal_suratMasuk'], '%Y-%m-%d')
-        entry.pengirim_suratMasuk = request.form['pengirim_suratMasuk']
-        entry.penerima_suratMasuk = request.form['penerima_suratMasuk']
-        entry.nomor_suratMasuk = request.form['nomor_suratMasuk']
-        entry.kode_suratMasuk = request.form['kode_suratMasuk']
-        entry.jenis_suratMasuk = request.form['jenis_suratMasuk']
-        entry.isi_suratMasuk = request.form['isi_suratMasuk']
-        db.session.commit()
-        flash('Surat Masuk has been updated successfully!', 'success')
-        return redirect(url_for('show_surat_masuk'))
-    return render_template('home/edit_surat_masuk.html', entry=entry)
+        try:
+            # Update fields from form
+            surat_masuk.nomor_suratMasuk = request.form.get('nomor_suratMasuk')
+            surat_masuk.pengirim_suratMasuk = request.form.get('pengirim_suratMasuk')
+            surat_masuk.penerima_suratMasuk = request.form.get('penerima_suratMasuk')
+            surat_masuk.isi_suratMasuk = request.form.get('isi_suratMasuk')
+            
+            # Handle file upload if present
+            if 'gambar_suratMasuk' in request.files:
+                file = request.files['gambar_suratMasuk']
+                if file and file.filename != '':
+                    # Save file logic here
+                    pass
+            
+            db.session.commit()
+            flash('Surat masuk berhasil diperbarui.', 'success')
+            return redirect(url_for('show_surat_masuk'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Gagal memperbarui surat masuk: {str(e)}', 'error')
+    
+    return render_template('home/edit_surat_masuk.html', surat=surat_masuk)
 
-@app.route('/delete_surat_masuk/<int:id>', methods=['POST'])
+@app.route('/delete_surat_masuk/<int:id_suratMasuk>', methods=['POST'])
 @login_required
-def delete_surat_masuk(id):
-    entry = SuratMasuk.query.get_or_404(id)
-    db.session.delete(entry)
-    db.session.commit()
-    flash('Surat Masuk has been deleted successfully!', 'success')
+def delete_surat_masuk(id_suratMasuk):
+    surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
+    
+    try:
+        db.session.delete(surat_masuk)
+        db.session.commit()
+        flash('Surat masuk berhasil dihapus.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Gagal menghapus surat masuk: {str(e)}', 'error')
+    
     return redirect(url_for('show_surat_masuk'))
 
 from sqlalchemy import or_
@@ -760,10 +793,8 @@ def edit_pegawai(id):
         pegawai.riwayat_pendidikan = request.form['riwayat_pendidikan']
         pegawai.riwayat_pekerjaan = request.form['riwayat_pekerjaan']
         db.session.commit()
-        flash('Data pegawai berhasil diperbarui!', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Gagal memperbarui data: {str(e)}', 'danger')
     return redirect(url_for('pegawai_list'))
 
 @app.route('/pegawai/hapus/<int:id>', methods=['POST'])
@@ -774,8 +805,202 @@ def hapus_pegawai(id):
     try:
         db.session.delete(pegawai)
         db.session.commit()
-        flash('Data pegawai berhasil dihapus.', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Gagal menghapus data: {str(e)}', 'danger')
     return redirect(url_for('pegawai_list'))
+
+@app.route('/surat-masuk/list', methods=['GET'])
+@login_required
+@role_required('pimpinan', 'admin')
+def surat_masuk_list():
+    # Ambil parameter halaman dan jumlah item per halaman
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Hitung jumlah surat masuk pending
+    pending_surat_masuk_count = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
+    
+    # Filter untuk status pending jika pimpinan
+    if current_user.role == 'pimpinan':
+        query = SuratMasuk.query.filter_by(status_suratMasuk='pending')
+    else:
+        query = SuratMasuk.query
+    
+    # Lakukan paginasi
+    pagination = query.order_by(SuratMasuk.created_at.desc()).paginate(page=page, per_page=per_page)
+    
+    # Konversi ke list dictionary untuk serialisasi
+    surat_masuk_list = [{
+        'id': surat.id_suratMasuk,
+        'nomor_surat': surat.nomor_suratMasuk,
+        'pengirim': surat.pengirim_suratMasuk,
+        'penerima': surat.penerima_suratMasuk,
+        'tanggal': surat.tanggal_suratMasuk.strftime('%Y-%m-%d'),
+        'status': surat.status_suratMasuk
+    } for surat in pagination.items]
+    
+    return render_template('home/list_surat_masuk.html', 
+                           surat_masuk_list=surat_masuk_list, 
+                           pagination=pagination,
+                           pending_surat_masuk_count=pending_surat_masuk_count)
+
+@app.route('/surat-keluar/list', methods=['GET'])
+@login_required
+@role_required('pimpinan', 'admin')
+def surat_keluar_list():
+    # Ambil parameter halaman dan jumlah item per halaman
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Hitung jumlah surat keluar pending
+    pending_surat_keluar_count = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+    
+    # Filter untuk status pending jika pimpinan
+    if current_user.role == 'pimpinan':
+        query = SuratKeluar.query.filter_by(status_suratKeluar='pending')
+    else:
+        query = SuratKeluar.query
+    
+    # Lakukan paginasi
+    pagination = query.order_by(SuratKeluar.created_at.desc()).paginate(page=page, per_page=per_page)
+    
+    # Konversi ke list dictionary untuk serialisasi
+    surat_keluar_list = [{
+        'id': surat.id_suratKeluar,
+        'nomor_surat': surat.nomor_suratKeluar,
+        'pengirim': surat.pengirim_suratKeluar,
+        'penerima': surat.penerima_suratKeluar,
+        'tanggal': surat.tanggal_suratKeluar.strftime('%Y-%m-%d'),
+        'status': surat.status_suratKeluar
+    } for surat in pagination.items]
+    
+    return render_template('home/list_surat_keluar.html', 
+                           surat_keluar_list=surat_keluar_list, 
+                           pagination=pagination,
+                           pending_surat_keluar_count=pending_surat_keluar_count)
+
+@app.route('/surat-masuk/approve/<int:id_suratMasuk>', methods=['POST'])
+@login_required
+@role_required('pimpinan')
+def approve_surat_masuk(id_suratMasuk):
+    surat = SuratMasuk.query.get_or_404(id_suratMasuk)
+    surat.status_suratMasuk = 'approved'
+    
+    try:
+        db.session.commit()
+        return jsonify({"success": True, "message": "Surat masuk berhasil disetujui"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/surat-keluar/approve/<int:surat_id>', methods=['POST'])
+@login_required
+@role_required('pimpinan')
+def approve_surat_keluar(surat_id):
+    surat = SuratKeluar.query.get_or_404(surat_id)
+    surat.status_suratKeluar = 'approved'
+    
+    try:
+        db.session.commit()
+        return jsonify({"success": True, "message": "Surat keluar berhasil disetujui"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/surat-masuk/reject/<int:id_suratMasuk>', methods=['POST'])
+@login_required
+@role_required('pimpinan')
+def reject_surat_masuk(id_suratMasuk):
+    surat = SuratMasuk.query.get_or_404(id_suratMasuk)
+    surat.status_suratMasuk = 'rejected'
+    
+    try:
+        db.session.commit()
+        return jsonify({"success": True, "message": "Surat masuk berhasil ditolak"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/surat-keluar/reject/<int:surat_id>', methods=['POST'])
+@login_required
+@role_required('pimpinan')
+def reject_surat_keluar(surat_id):
+    surat = SuratKeluar.query.get_or_404(surat_id)
+    surat.status_suratKeluar = 'rejected'
+    
+    try:
+        db.session.commit()
+        return jsonify({"success": True, "message": "Surat keluar berhasil ditolak"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/list-pending-surat-masuk')
+@login_required
+@role_required('pimpinan')
+def list_pending_surat_masuk():
+    # Ambil daftar surat masuk yang masih pending
+    pending_surat_masuk = SuratMasuk.query.filter_by(status_suratMasuk='pending').all()
+    return render_template('home/list_pending_surat_masuk.html', pending_surat_masuk=pending_surat_masuk)
+
+@app.route('/list-pending-surat-keluar')
+@login_required
+@role_required('pimpinan')
+def list_pending_surat_keluar():
+    # Ambil daftar surat keluar yang masih pending
+    pending_surat_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending').all()
+    return render_template('home/list_pending_surat_keluar.html', pending_surat_keluar=pending_surat_keluar)
+
+@app.route('/surat-masuk/detail/<int:id_suratMasuk>')
+@login_required
+@role_required('pimpinan')
+def detail_surat_masuk(id_suratMasuk):
+    surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
+    return render_template('home/detail_surat_masuk.html', surat=surat_masuk)
+
+@app.route('/surat-keluar/detail/<int:id>')
+@login_required
+@role_required('pimpinan')
+def detail_surat_keluar(id):
+    surat_keluar = SuratKeluar.query.get_or_404(id)
+    return render_template('home/detail_surat_keluar.html', surat=surat_keluar)
+
+@app.route('/surat-masuk/download/<int:id_suratMasuk>')
+@login_required
+@role_required('pimpinan')
+def download_surat_masuk(id_suratMasuk):
+    surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
+    
+    if not surat_masuk.file_suratMasuk:
+        flash('Dokumen tidak tersedia.', 'error')
+        return redirect(url_for('detail_surat_masuk', id_suratMasuk=id_suratMasuk))
+    
+    try:
+        return send_file(
+            surat_masuk.file_suratMasuk, 
+            as_attachment=True, 
+            download_name=f"Surat_Masuk_{surat_masuk.nomor_suratMasuk}.pdf"
+        )
+    except Exception as e:
+        flash('Gagal mengunduh dokumen.', 'error')
+        return redirect(url_for('detail_surat_masuk', id_suratMasuk=id_suratMasuk))
+
+@app.route('/surat-keluar/download/<int:id>')
+@login_required
+@role_required('pimpinan')
+def download_surat_keluar(id):
+    surat_keluar = SuratKeluar.query.get_or_404(id)
+    
+    if not surat_keluar.file_suratKeluar:
+        flash('Dokumen tidak tersedia.', 'error')
+        return redirect(url_for('detail_surat_keluar', id=id))
+    
+    try:
+        return send_file(
+            surat_keluar.file_suratKeluar, 
+            as_attachment=True, 
+            download_name=f"Surat_Keluar_{surat_keluar.nomor_suratKeluar}.pdf"
+        )
+    except Exception as e:
+        flash('Gagal mengunduh dokumen.', 'error')
+        return redirect(url_for('detail_surat_keluar', id=id))

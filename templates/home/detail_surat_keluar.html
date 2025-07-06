@@ -1,0 +1,71 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold mb-4">Detail Surat Keluar</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="text-gray-600 font-semibold">Nomor Surat</p>
+                    <p class="text-lg">{{ surat.nomor_suratKeluar }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 font-semibold">Tanggal Surat</p>
+                    <p class="text-lg">{{ surat.tanggal_suratKeluar.strftime('%d %B %Y') }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 font-semibold">Pengirim</p>
+                    <p class="text-lg">{{ surat.pengirim_suratKeluar }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 font-semibold">Penerima</p>
+                    <p class="text-lg">{{ surat.penerima_suratKeluar }}</p>
+                </div>
+                <div class="col-span-1 md:col-span-2">
+                    <p class="text-gray-600 font-semibold">Perihal</p>
+                    <p class="text-lg">{{ surat.perihal_suratKeluar }}</p>
+                </div>
+                <div class="col-span-1 md:col-span-2">
+                    <p class="text-gray-600 font-semibold">Status</p>
+                    {% if surat.status_suratKeluar == 'pending' %}
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">Pending</span>
+                    {% elif surat.status_suratKeluar == 'approved' %}
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full">Disetujui</span>
+                    {% else %}
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full">Ditolak</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if surat.file_suratKeluar %}
+            <div class="mt-6">
+                <h2 class="text-xl font-semibold mb-2">Dokumen</h2>
+                <a href="{{ url_for('download_surat_keluar', id=surat.id) }}" 
+                   class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+                    <i class="fas fa-download mr-2"></i> Download Dokumen
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="mt-6 flex space-x-4">
+                {% if surat.status_suratKeluar == 'pending' %}
+                <a href="{{ url_for('approve_surat_keluar', id=surat.id) }}" 
+                   class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300">
+                    <i class="fas fa-check mr-2"></i> Setujui
+                </a>
+                <a href="{{ url_for('reject_surat_keluar', id=surat.id) }}" 
+                   class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">
+                    <i class="fas fa-times mr-2"></i> Tolak
+                </a>
+                {% endif %}
+                <a href="{{ url_for('list_pending_surat_keluar') }}" 
+                   class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300">
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

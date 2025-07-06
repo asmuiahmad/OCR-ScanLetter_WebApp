@@ -1,11 +1,22 @@
 {
     "surat_masuk": {
-        "3.jpg": "c2e50ba802fb507ca706b35b3252a86f",
-        "5.jpg": "db9b0296cc308f6b8b1d8f0e8264bbe7",
         "14.jpg": "db9b0296cc308f6b8b1d8f0e8264bbe7",
-        "6.jpg": "c2e50ba802fb507ca706b35b3252a86f"
+        "4.jpg": "a3bc271b337fb9895c0585823f4d2ecb",
+        "15.jpg": "30b51670dc4a956c863e1e182c2c867e",
+        "16.jpg": "74583a06f13eb146ae2fa1fd23d8848a",
+        "8.jpg": {
+            "id": 1,
+            "nomor_surat": "1944/KPA.W15-A12/HK2.6/X/2024",
+            "kode_surat": "",
+            "saved_at": "2025-07-07T00:57:39.830049"
+        }
     },
     "surat_keluar": {
-        "uniskatest.jpg": "c941f960e7002ffe7307592f1217e604"
+        "11.jpg": {
+            "id": 1,
+            "nomor_surat": "1111",
+            "kode_surat": "Not found",
+            "saved_at": "2025-07-07T01:06:54.506971"
+        }
     }
 }

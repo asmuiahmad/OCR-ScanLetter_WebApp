@@ -5,45 +5,50 @@
     <h2 class="mb-4">📊 Statistik Ekstraksi Surat</h2>
 
     <!-- Line Chart Surat Masuk & Keluar -->
-    <div class="container mt-5">
+    <div class="container mt-5 bg-light p-3 rounded">
         <h4 class="mb-3">📅 Grafik Harian Surat Masuk & Keluar</h4>
         <canvas id="suratChart" height="90"></canvas>
     </div>
 
     <!-- Row: Persentase dan Akurasi OCR -->
-    <div class="row">
+    <div class="row mt-4">
         <!-- Card 1: Persentase -->
         <div class="col-md-6 mb-4">
-            <div class="card h-100">
+            <div class="card h-100 border-primary">
                 <div class="card-body">
-                    <h5 class="card-title">✅ Persentase Keberhasilan Ekstraksi</h5>
-                    <p class="card-text">
-                        Sebanyak <strong>{{ persentase_berhasil }}%</strong> surat berhasil diekstrak secara lengkap.
-                    </p>
+                    <h5 class="card-title text-primary">✅ Persentase Keberhasilan Ekstraksi</h5>
+                    <div class="card-text">
+                        <p class="text-dark">
+                            Surat Masuk: <strong>{{ persentase_berhasil_masuk }}%</strong><br>
+                            Surat Keluar: <strong>{{ persentase_berhasil_keluar }}%</strong>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Card 2: Akurasi -->
         <div class="col-md-6 mb-4">
-            <div class="card h-100">
+            <div class="card h-100 border-success">
                 <div class="card-body">
-                    <h5 class="card-title">📈 Rata-Rata Akurasi OCR</h5>
-                    <p class="card-text">
-                        🔹 Surat Masuk: <strong>{{ rata2_akurasi_masuk }}%</strong><br>
-                        🔹 Surat Keluar: <strong>{{ rata2_akurasi_keluar }}%</strong>
-                    </p>
+                    <h5 class="card-title text-success">📈 Rata-Rata Akurasi OCR</h5>
+                    <div class="card-text">
+                        <p class="text-dark">
+                            🔹 Surat Masuk: <strong>{{ rata2_akurasi_masuk }}%</strong><br>
+                            🔹 Surat Keluar: <strong>{{ rata2_akurasi_keluar }}%</strong>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Surat Masuk Gagal Ekstraksi -->
-    <div class="card mb-4">
+    <div class="card mb-4 border-danger">
         <div class="card-body">
             <h5 class="card-title text-danger">❌ Surat Masuk OCR Fails</h5>
             {% if gagal_ekstraksi_suratMasuk %}
-            <ul>
+            <ul class="text-dark">
                 {% for surat in gagal_ekstraksi_suratMasuk %}
                 <li>
                     <strong>{{ surat.nomor_suratMasuk or 'N/A' }}</strong> - {{ surat.pengirim_suratMasuk or 'Tidak diketahui' }}
@@ -59,11 +64,11 @@
     </div>
 
     <!-- Surat Keluar Gagal Ekstraksi -->
-    <div class="card mb-4">
+    <div class="card mb-4 border-danger">
         <div class="card-body">
             <h5 class="card-title text-danger">❌ Surat Keluar OCR Fails</h5>
             {% if gagal_ekstraksi_suratKeluar %}
-            <ul>
+            <ul class="text-dark">
                 {% for surat in gagal_ekstraksi_suratKeluar %}
                 <li>
                     <strong>{{ surat.nomor_suratKeluar or 'N/A' }}</strong> - {{ surat.pengirim_suratKeluar or 'Tidak diketahui' }}
@@ -81,13 +86,13 @@
     <!-- Field Not Found Summary -->
     <div class="card mb-4">
         <div class="card-body">
-            <h3 class="mb-4">Field "Not Found" Statistics</h3>
+            <h3 class="mb-4 text-primary">Field "Not Found" Statistics</h3>
 
             <div class="row">
                 <!-- Surat Masuk -->
                 <div class="col-md-6">
-                    <h5>📥 Surat Masuk</h5>
-                    <ul>
+                    <h5 class="text-info">📥 Surat Masuk</h5>
+                    <ul class="text-dark">
                         <li><strong>Total Surat Masuk:</strong> {{ total_masuk or 0 }}</li>
                         <li><strong>Nomor Surat:</strong> {{ field_stats_masuk.nomor_suratMasuk or 0 }}</li>
                         <li><strong>Pengirim:</strong> {{ field_stats_masuk.pengirim_suratMasuk or 0 }}</li>
@@ -98,8 +103,8 @@
 
                 <!-- Surat Keluar -->
                 <div class="col-md-6">
-                    <h5>📤 Surat Keluar</h5>
-                    <ul>
+                    <h5 class="text-info">📤 Surat Keluar</h5>
+                    <ul class="text-dark">
                         <li><strong>Total Surat Keluar:</strong> {{ total_keluar or 0 }}</li>
                         <li><strong>Nomor Surat:</strong> {{ field_stats_keluar.nomor_suratKeluar or 0 }}</li>
                         <li><strong>Pengirim:</strong> {{ field_stats_keluar.pengirim_suratKeluar or 0 }}</li>

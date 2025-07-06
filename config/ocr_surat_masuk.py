@@ -14,7 +14,7 @@ from PIL import Image
 import hashlib
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
-from config.extensions import db
+from config.extensions import db, load_metadata, save_metadata
 from config.models import SuratMasuk
 from config.ocr_utils import (
     clean_text, extract_dates, extract_penerima_surat_masuk, extract_pengirim,
@@ -162,13 +162,28 @@ def extract_ocr_data(file_path):
             if match_kodesurat1:
                 extracted_data['kodesurat1'] = match_kodesurat1.group(1).strip()
 
-            match_kodesurat2 = re.search(re.escape(target_code) + r"\s*/\s*([\w.\-]+)\s*/", cleaned_text)
-            if match_kodesurat2:
-                extracted_data['kodesurat2'] = match_kodesurat2.group(1).strip()
+            # Log the full cleaned text for debugging kode surat
+            logger.info(f"Full cleaned text for kode surat extraction:\n{cleaned_text}")
+
+            # Tambahkan pola tambahan untuk ekstraksi kode surat
+            match_kodesurat = re.search(r'(HK\d+\.\d+)', cleaned_text)
+            if match_kodesurat:
+                extracted_data['kodesurat2'] = match_kodesurat.group(1).strip()
+                logger.info(f"Extracted kodesurat2 (direct HK match): {extracted_data['kodesurat2']}")
                 if extracted_data['kodesurat2'].startswith('HK'):
                     extracted_data['jenis_surat'] = 'Perkara'
-                elif extracted_data['kodesurat2'].startswith('KP'):
-                    extracted_data['jenis_surat'] = 'Kepegawaian'
+            
+            # Fallback untuk kode surat jika belum terisi
+            if extracted_data.get('kodesurat2', 'Not found') == 'Not found':
+                # Coba pola lain untuk kode surat
+                match_kodesurat_alt = re.search(r'/([A-Z]+\d+\.\d+)/', cleaned_text)
+                if match_kodesurat_alt:
+                    extracted_data['kodesurat2'] = match_kodesurat_alt.group(1).strip()
+                    logger.info(f"Extracted kodesurat2 (alt match): {extracted_data['kodesurat2']}")
+                    if extracted_data['kodesurat2'].startswith('HK'):
+                        extracted_data['jenis_surat'] = 'Perkara'
+                else:
+                    logger.warning("No kodesurat2 found in the text")
 
             match_bulan = re.search(r"/\s*([A-Za-z0-9]+)\s*/", cleaned_text)
             if match_bulan:
@@ -200,125 +215,35 @@ def extract_ocr_data(file_path):
 @login_required
 @role_required('admin', 'pimpinan')
 def ocr_surat_masuk():
-    # Jika ini adalah permintaan AJAX untuk menyimpan data (dari modal)
-    if request.method == 'POST' and 'filename' in request.form:
-        try:
-            # Ambil data dari form
-            filename = request.form['filename']
-            full_letter_number = request.form.get('full_letter_number', 'Not found')
-            pengirim_suratMasuk = request.form.get('pengirim_suratMasuk', 'Not found')
-            penerima_suratMasuk = request.form.get('penerima_suratMasuk', 'Not found')
-            isi_suratMasuk = request.form.get('isi_suratMasuk', 'Not found')
-            kodesurat2 = request.form.get('kodesurat2', 'Not found')
-            jenis_surat = request.form.get('jenis_surat', 'Not found')
-            selected_date = request.form.get('selected_date', '')
-            
-            # Ambil nilai awal untuk perhitungan akurasi
-            initial_full_letter_number = request.form.get('initial_full_letter_number', 'Not found')
-            initial_pengirim = request.form.get('initial_pengirim_suratMasuk', 'Not found')
-            initial_penerima = request.form.get('initial_penerima_suratMasuk', 'Not found')
-            initial_isi = request.form.get('initial_isi_suratMasuk', 'Not found')
-
-            # Validasi field penting
-            if not full_letter_number or full_letter_number == 'Not found':
-                return jsonify(success=False, error="Nomor surat lengkap wajib diisi")
-            if not pengirim_suratMasuk or pengirim_suratMasuk == 'Not found':
-                return jsonify(success=False, error="Pengirim surat wajib diisi")
-            if not penerima_suratMasuk or penerima_suratMasuk == 'Not found':
-                return jsonify(success=False, error="Penerima surat wajib diisi")
-            if not selected_date:
-                return jsonify(success=False, error="Tanggal surat wajib dipilih")
-
-            # Hitung akurasi OCR
-            ocr_accuracy = (
-                calculate_ocr_accuracy(initial_full_letter_number, full_letter_number) +
-                calculate_ocr_accuracy(initial_pengirim, pengirim_suratMasuk) +
-                calculate_ocr_accuracy(initial_penerima, penerima_suratMasuk) +
-                calculate_ocr_accuracy(initial_isi, isi_suratMasuk)
-            ) / 4
-
-            # Tangani tanggal
-            try:
-                # Format tanggal: DD/MM/YYYY
-                tanggal_surat = datetime.strptime(selected_date, '%d/%m/%Y')
-            except ValueError:
-                return jsonify(success=False, error="Format tanggal tidak valid. Gunakan format DD/MM/YYYY.")
-
-            # Baca file gambar
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            if not os.path.exists(file_path):
-                return jsonify(success=False, error="File gambar tidak ditemukan")
-            
-            with open(file_path, 'rb') as f:
-                gambar_suratMasuk = f.read()
-
-            # Periksa ukuran gambar (maks 10MB)
-            MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
-            if len(gambar_suratMasuk) > MAX_IMAGE_SIZE:
-                return jsonify(success=False, error="Ukuran gambar terlalu besar (maks 10MB)")
-
-            # Buat objek SuratMasuk
-            new_surat = SuratMasuk(
-                full_letter_number=full_letter_number,
-                tanggal_suratMasuk=tanggal_surat,
-                pengirim_suratMasuk=pengirim_suratMasuk,
-                penerima_suratMasuk=penerima_suratMasuk,
-                kode_suratMasuk=kodesurat2,
-                jenis_suratMasuk=jenis_surat,
-                isi_suratMasuk=isi_suratMasuk,
-                gambar_suratMasuk=gambar_suratMasuk,
-                created_at=datetime.utcnow(),
-                
-                # Simpan hasil OCR mentah
-                initial_full_letter_number=initial_full_letter_number,
-                initial_pengirim_suratMasuk=initial_pengirim,
-                initial_penerima_suratMasuk=initial_penerima,
-                initial_isi_suratMasuk=initial_isi,
-                ocr_accuracy_suratMasuk=ocr_accuracy
-            )
-
-            db.session.add(new_surat)
-            db.session.commit()
-
-            return jsonify(success=True)
-            
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            logger.error(f"Database error: {str(e)}\n{traceback.format_exc()}")
-            return jsonify(success=False, error="Gagal menyimpan ke database: " + str(e))
-        except Exception as e:
-            logger.error(f"Error saving data: {str(e)}\n{traceback.format_exc()}")
-            return jsonify(success=False, error="Kesalahan server: " + str(e))
+    extracted_data_list = []
+    image_paths = []
+    extracted_text = ""
+    processed_files = 0
     
-    # Jika ini adalah permintaan upload gambar
-    elif request.method == 'POST':
-        extracted_data_list = []
-        image_paths = []
+    if request.method == 'POST':
+        # Log all available files in the request
+        logger.info(f"Request files: {list(request.files.keys())}")
+        
         metadata = load_metadata()
         
         # Tangani kasus tidak ada file yang dipilih
-        if 'image' not in request.files:
-            flash('Tidak ada file yang dipilih', 'warning')
-            return redirect(url_for('ocr_surat_masuk.ocr_surat_masuk'))
-            
-        files = request.files.getlist('image')
-        if not files or all(file.filename == '' for file in files):
-            flash('Tidak ada file yang dipilih', 'warning')
-            return redirect(url_for('ocr_surat_masuk.ocr_surat_masuk'))
-
-        processed_files = 0
-        not_found_counts = {
-            'full_letter_number': 0,
-            'pengirim_suratMasuk': 0,
-            'penerima_suratMasuk': 0,
-            'isi_suratMasuk': 0,
-        }
+        files = request.files.getlist('image') or request.files.getlist('file')
         
+        logger.info(f"Found {len(files)} files in upload")
+        
+        if not files or all(file.filename == '' for file in files):
+            logger.warning("No files selected for upload")
+            return render_template('home/ocr_surat_masuk.html',
+                                   extracted_data_list=extracted_data_list,
+                                   image_paths=image_paths,
+                                   extracted_text=extracted_text,
+                                   currentIndex=0)
+
         for file in files:
             if file.filename == '':
                 continue
                 
-            filename = secure_filename(file.filename)
+            filename = secure_filename(file.filename or '')
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             
             try:
@@ -328,46 +253,35 @@ def ocr_surat_masuk():
                 
                 # Cek apakah file sudah diproses sebelumnya
                 if filename in metadata.get("surat_masuk", {}) and metadata["surat_masuk"][filename] == file_hash:
-                    flash(f"File '{filename}' sudah diproses sebelumnya.", 'info')
+                    logger.info(f"File '{filename}' already processed")
                     continue
                     
                 extracted_data = extract_ocr_data(file_path)
                 if extracted_data:
-                    # Hitung field yang tidak ditemukan
-                    if extracted_data['full_letter_number'] == 'Not found':
-                        not_found_counts['full_letter_number'] += 1
-                    if extracted_data['pengirim_suratMasuk'] == 'Not found':
-                        not_found_counts['pengirim_suratMasuk'] += 1
-                    if extracted_data['penerima_suratMasuk'] == 'Not found':
-                        not_found_counts['penerima_suratMasuk'] += 1
-                    if extracted_data['isi_suratMasuk'] == 'Not found':
-                        not_found_counts['isi_suratMasuk'] += 1
-                    
                     extracted_data_list.append(extracted_data)
                     metadata.setdefault("surat_masuk", {})[filename] = file_hash
                     image_paths.append(filename)
                     processed_files += 1
+                    
+                    # Tambahkan teks yang diekstrak ke extracted_text
+                    extracted_text += f"--- Dokumen: {filename} ---\n{extracted_data.get('isi_suratMasuk', 'Tidak ada teks')}\n\n"
+                else:
+                    logger.warning(f"No data extracted from file: {filename}")
             except Exception as e:
                 logger.error(f"Error processing file {filename}: {str(e)}\n{traceback.format_exc()}")
-                flash(f"Error processing file {filename}: {e}", 'danger')
 
         save_metadata(metadata)
-        
-        if processed_files == 0:
-            flash("Tidak ada file baru yang diproses", 'info')
-        else:
-            session['not_found_masuk'] = not_found_counts
-            flash(f"Berhasil memproses {processed_files} file", 'success')
 
         return render_template('home/ocr_surat_masuk.html',
                                extracted_data_list=extracted_data_list,
                                image_paths=image_paths,
+                               extracted_text=extracted_text,
                                currentIndex=0)
 
-    # GET request
     return render_template('home/ocr_surat_masuk.html',
-                           extracted_data_list=[],
-                           image_paths=[],
+                           extracted_data_list=extracted_data_list,
+                           image_paths=image_paths,
+                           extracted_text=extracted_text,
                            currentIndex=0)
 
 @ocr_surat_masuk_bp.route('/surat_masuk_image/<int:id>')
@@ -380,3 +294,73 @@ def surat_masuk_image(id):
 @login_required
 def uploaded_file_surat_masuk(filename):
     return send_from_directory('static/ocr/surat_masuk', filename)
+
+@ocr_surat_masuk_bp.route('/save_extracted_data', methods=['POST'])
+@login_required
+@role_required('admin', 'pimpinan')
+def save_extracted_data():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "No data provided"})
+
+        # Load existing metadata
+        metadata = load_metadata()
+        
+        # Inisialisasi kunci jika belum ada
+        if "surat_masuk" not in metadata:
+            metadata["surat_masuk"] = {}
+
+        # Proses setiap item data
+        for item in data:
+            try:
+                # Tentukan kode surat
+                kode_surat = (
+                    item.get('kodesurat2', 'Not found') if item.get('kodesurat2', 'Not found') != 'Not found'
+                    else item.get('kode_suratMasuk', 'Not found')
+                )
+
+                # Buat objek SuratMasuk baru
+                surat_masuk = SuratMasuk(
+                    full_letter_number=item.get('full_letter_number', 'Not found'),
+                    nomor_suratMasuk=item.get('full_letter_number', 'Not found'),
+                    pengirim_suratMasuk=item.get('pengirim_suratMasuk', 'Not found'),
+                    penerima_suratMasuk=item.get('penerima_suratMasuk', 'Not found'),
+                    kode_suratMasuk=kode_surat,
+                    jenis_suratMasuk=item.get('jenis_surat', 'Umum'),
+                    isi_suratMasuk=item.get('isi_suratMasuk', 'Not found'),
+                    tanggal_suratMasuk=datetime.strptime(item.get('tanggal_suratMasuk'), '%Y-%m-%d') if item.get('tanggal_suratMasuk') else datetime.utcnow(),
+                    initial_full_letter_number=item.get('full_letter_number', 'Not found'),
+                    initial_nomor_suratMasuk=item.get('full_letter_number', 'Not found'),
+                    initial_pengirim_suratMasuk=item.get('pengirim_suratMasuk', 'Not found'),
+                    initial_penerima_suratMasuk=item.get('penerima_suratMasuk', 'Not found'),
+                    initial_isi_suratMasuk=item.get('isi_suratMasuk', 'Not found'),
+                    status_suratMasuk='pending'  # Set initial status to pending
+                )
+
+                # Simpan ke database
+                db.session.add(surat_masuk)
+                db.session.commit()
+
+                # Update metadata untuk file yang berhasil disimpan
+                if item.get('filename'):
+                    metadata['surat_masuk'][item['filename']] = {
+                        'id': surat_masuk.id_suratMasuk,
+                        'nomor_surat': surat_masuk.nomor_suratMasuk,
+                        'kode_surat': kode_surat,
+                        'saved_at': datetime.now().isoformat()
+                    }
+
+            except Exception as e:
+                db.session.rollback()
+                logger.error(f"Error saving Surat Masuk: {str(e)}")
+                return jsonify({"success": False, "error": str(e)})
+
+        # Simpan metadata yang diperbarui
+        save_metadata(metadata)
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        logger.error(f"Error in save_extracted_data: {str(e)}")
+        return jsonify({"success": False, "error": str(e)})

@@ -7,7 +7,6 @@ class Breadcrumb:
 
 # Dictionary mapping route names to breadcrumb text
 route_breadcrumbs = {
-    'index': 'Dashboard',
     'show_surat_masuk': 'Surat Masuk',
     'show_surat_keluar': 'Surat Keluar',
     'input_surat_masuk': 'Input Surat Masuk',
@@ -26,20 +25,20 @@ route_breadcrumbs = {
 
 # Dictionary defining parent-child relationships for routes
 route_hierarchy = {
-    'show_surat_masuk': ['index'],
-    'show_surat_keluar': ['index'],
-    'input_surat_masuk': ['index'],
-    'input_surat_keluar': ['index'],
-    'edit_surat_masuk': ['index', 'show_surat_masuk'],
-    'edit_surat_keluar': ['index', 'show_surat_keluar'],
-    'generate_cuti': ['index'],
-    'laporan_statistik': ['index'],
-    'pegawai_list': ['index'],
-    'kelola_pegawai': ['index'],
-    'ocr_surat_masuk.ocr_surat_masuk': ['index'],
-    'ocr_surat_keluar.ocr_surat_keluar': ['index'],
-    'edit_user_view': ['index'],
-    'edit_user': ['index', 'edit_user_view'],
+    'show_surat_masuk': [],
+    'show_surat_keluar': [],
+    'input_surat_masuk': [],
+    'input_surat_keluar': [],
+    'edit_surat_masuk': ['show_surat_masuk'],
+    'edit_surat_keluar': ['show_surat_keluar'],
+    'generate_cuti': [],
+    'laporan_statistik': [],
+    'pegawai_list': [],
+    'kelola_pegawai': [],
+    'ocr_surat_masuk.ocr_surat_masuk': [],
+    'ocr_surat_keluar.ocr_surat_keluar': [],
+    'edit_user_view': [],
+    'edit_user': ['edit_user_view'],
 }
 
 def generate_breadcrumbs(endpoint, **kwargs):
@@ -61,10 +60,11 @@ def generate_breadcrumbs(endpoint, **kwargs):
             )
     
     # Add current page breadcrumb (without URL since it's the current page)
-    breadcrumbs.append(
-        Breadcrumb(
-            text=route_breadcrumbs.get(endpoint, endpoint)
+    if endpoint in route_breadcrumbs:
+        breadcrumbs.append(
+            Breadcrumb(
+                text=route_breadcrumbs[endpoint]
+            )
         )
-    )
     
     return breadcrumbs 
