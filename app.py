@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from config.extensions import db, login_manager
 from flask_migrate import Migrate
 from datetime import timedelta
@@ -6,6 +6,7 @@ from config.models import User
 from config.ocr import ocr_bp
 from config.ocr_surat_masuk import ocr_surat_masuk_bp 
 from config.ocr_surat_keluar import ocr_surat_keluar_bp
+from config.breadcrumbs import generate_breadcrumbs
 
 app = Flask(__name__)
 
@@ -30,6 +31,15 @@ app.register_blueprint(ocr_surat_keluar_bp, url_prefix='/ocr_surat_keluar')
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# Add breadcrumb context processor
+@app.context_processor
+def inject_breadcrumbs():
+    """Inject breadcrumbs into all templates"""
+    endpoint = request.endpoint
+    view_args = request.view_args or {}
+    breadcrumbs = generate_breadcrumbs(endpoint, **view_args)
+    return dict(breadcrumbs=breadcrumbs)
 
 # Add utilities to Jinja2
 app.jinja_env.globals['zip'] = zip

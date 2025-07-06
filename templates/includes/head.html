@@ -2,22 +2,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/styles.css') }}">
+    
+    <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='assets/images/favicon.svg') }}" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        blue: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
+    
+    <!-- Icon Fonts -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/tabler-icons.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/feather.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/fontawesome.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/material.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
+    <!-- Viewer.js for image viewing -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.3/viewer.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GOOGLE_TAG"></script>
+    
+    <!-- Custom styles for sidebar -->
+    <style>
+        /* Fix untuk sidebar scroll dan dropdown */
+        .sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+        
+        /* Fix untuk dropdown menu */
+        .sidebar-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .sidebar-submenu.show {
+            max-height: 500px;
+            overflow: visible;
+        }
+        
+        /* Fix untuk konten utama */
+        .content {
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+        
+        /* Fix untuk hover state pada sidebar */
+        .sidebar:hover .sidebar-link-text,
+        .sidebar:hover .sidebar-header-text {
+            opacity: 1 !important;
+        }
+        
+        /* --- SIDEBAR MODERN (from CodePen) --- */
+        .modern-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: #11101d;
+            padding: 20px 0;
+            transition: width 0.2s;
+            z-index: 100;
+            overflow-y: auto;
+        }
+        .modern-sidebar .logo-details {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modern-sidebar .logo-details i {
+            font-size: 30px;
+            color: #fff;
+            min-width: 60px;
+            text-align: center;
+        }
+        .modern-sidebar .logo-details .logo_name {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .modern-sidebar ul.nav-links {
+            margin-top: 20px;
+            padding-left: 0;
+        }
+        .modern-sidebar ul.nav-links li {
+            position: relative;
+            list-style: none;
+            width: 100%;
+        }
+        .modern-sidebar ul.nav-links li a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #fff;
+            padding: 12px 30px;
+            transition: 0.4s;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .modern-sidebar ul.nav-links li a:hover {
+            background: #1d1b31;
+        }
+        .modern-sidebar ul.nav-links li i {
+            min-width: 40px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .modern-sidebar ul.nav-links li .links_name {
+            font-size: 16px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+        .modern-sidebar ul.nav-links li.active a,
+        .modern-sidebar ul.nav-links li a.active {
+            background: #1d1b31;
+        }
+        .modern-sidebar ul.nav-links li .dropdown {
+            display: none;
+            background: #23213a;
+            margin-left: 40px;
+            border-radius: 0 0 8px 8px;
+        }
+        .modern-sidebar ul.nav-links li.showMenu .dropdown {
+            display: block;
+        }
+        .modern-sidebar ul.nav-links li .dropdown a {
+            padding: 10px 30px 10px 50px;
+            font-size: 15px;
+        }
+    </style>
 </head>

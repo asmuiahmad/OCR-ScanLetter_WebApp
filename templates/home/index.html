@@ -3,75 +3,196 @@
 {% block title %}Dashboard - PA Banjarbaru{% endblock %}
 
 {% block content %}
-<div class="container mx-auto py-6">
-    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+<div class="container mx-auto py-6 px-4">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 border-b pb-2">Dashboard</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Total Surat Masuk Section -->
-        <div class="bg-white shadow-md rounded-lg p-4 border-l-4 border-yellow-500">
-            <h5 class="text-lg font-semibold">Total Surat Masuk</h5>
-            <p id="count-total" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_count }}</p>
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Total Surat Masuk Card -->
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg overflow-hidden">
+            <div class="px-6 py-5 flex items-center">
+                <div class="flex items-center justify-center p-3 rounded-full bg-blue-100 bg-opacity-30">
+                    <i class="fas fa-envelope-open-text text-white text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-xl font-semibold text-white">Total Surat Masuk</h5>
+                    <p class="text-4xl font-bold text-white">{{ suratMasuk_count }}</p>
+                </div>
+            </div>
         </div>
-        <!-- Total Surat Keluar Section -->
-        <div class="bg-white shadow-md rounded-lg p-4 border-l-4 border-yellow-500">
-            <h5 class="text-lg font-semibold">Total Surat Keluar</h5>
-            <p id="count-total-keluar" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_count }}</p>
+        
+        <!-- Total Surat Keluar Card -->
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg overflow-hidden">
+            <div class="px-6 py-5 flex items-center">
+                <div class="flex items-center justify-center p-3 rounded-full bg-green-100 bg-opacity-30">
+                    <i class="fas fa-paper-plane text-white text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-xl font-semibold text-white">Total Surat Keluar</h5>
+                    <p class="text-4xl font-bold text-white">{{ suratKeluar_count }}</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- New Sections for Surat Masuk and Keluar by Timeframe -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <!-- Total Surat Tahun ini -->
-        <div class="bg-white shadow-md rounded-lg p-4">
-            <h5 class="text-lg font-semibold">Surat Masuk Tahun ini</h5>
-            <p id="count-year" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_this_year }}</p>
-            <h5 class="text-lg font-semibold">Surat Keluar Tahun ini</h5>
-            <p id="count-year-keluar" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_this_year }}</p>
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Yearly Stats -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-indigo-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-indigo-700">Statistik Tahunan</h3>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Surat Masuk</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_year }}</p>
+                    </div>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
+                        <i class="fas fa-inbox text-indigo-600"></i>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-gray-500">Surat Keluar</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_year }}</p>
+                    </div>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
+                        <i class="fas fa-paper-plane text-indigo-600"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- Total Surat Bulan ini -->
-        <div class="bg-white shadow-md rounded-lg p-4">
-            <h5 class="text-lg font-semibold">Surat Masuk Bulan ini</h5>
-            <p id="count-month" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_this_month }}</p>
-            <h5 class="text-lg font-semibold">Surat Keluar Bulan ini</h5>
-            <p id="count-month-keluar" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_this_year }}</p>
+        
+        <!-- Monthly Stats -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-amber-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-amber-700">Statistik Bulanan</h3>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Surat Masuk</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_month }}</p>
+                    </div>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
+                        <i class="fas fa-inbox text-amber-600"></i>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-gray-500">Surat Keluar</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_month }}</p>
+                    </div>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
+                        <i class="fas fa-paper-plane text-amber-600"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- Total Surat Minggu ini -->
-        <div class="bg-white shadow-md rounded-lg p-4">
-            <h5 class="text-lg font-semibold">Surat Masuk Minggu ini</h5>
-            <p id="count-week" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratMasuk_this_week }}</p>
-            <h5 class="text-lg font-semibold">Surat Keluar Minggu ini</h5>
-            <p id="count-week-keluar" class="text-4xl font-bold"><i class="fa-regular fa-envelope"></i> {{ suratKeluar_this_week }}</p>
+        
+        <!-- Weekly Stats -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-emerald-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-emerald-700">Statistik Mingguan</h3>
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Surat Masuk</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_week }}</p>
+                    </div>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
+                        <i class="fas fa-inbox text-emerald-600"></i>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm text-gray-500">Surat Keluar</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_week }}</p>
+                    </div>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
+                        <i class="fas fa-paper-plane text-emerald-600"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        <div>
-            <h5 class="text-xl font-semibold mb-4">Recent Surat Masuk and Keluar</h5>
-            <ul class="list-disc pl-5">
-                {% for surat in recent_surat_masuk %}
-                    <li class="mb-2">
-                        <strong>Surat Masuk:</strong> {{ surat.tanggal_suratMasuk.strftime('%Y-%m-%d') }} - {{ surat.pengirim_suratMasuk }} - {{ surat.nomor_suratMasuk }}
-                    </li>
-                {% endfor %}
-                {% for surat in recent_surat_keluar %}
-                    <li class="mb-2">
-                        <strong>Surat Keluar:</strong> {{ surat.tanggal_suratKeluar.strftime('%Y-%m-%d') }} - {{ surat.pengirim_suratKeluar }} - {{ surat.nomor_suratKeluar }}
-                    </li>
-                {% endfor %}
-            </ul>
+    <!-- Recent Activity and User Login -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Surat -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-700">Surat Terbaru</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    {% for surat in recent_surat_masuk %}
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
+                                <i class="fas fa-inbox text-blue-600 text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ surat.pengirim_suratMasuk }}
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                {{ surat.tanggal_suratMasuk.strftime('%d %b %Y') }} - {{ surat.nomor_suratMasuk }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% for surat in recent_surat_keluar %}
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
+                                <i class="fas fa-paper-plane text-green-600 text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ surat.pengirim_suratKeluar }}
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                {{ surat.tanggal_suratKeluar.strftime('%d %b %Y') }} - {{ surat.nomor_suratKeluar }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        <!-- Last Login Times Section -->
-        <div>
-            <h5 class="text-xl font-semibold mb-4">Last Login Times</h5>
-            <ul class="list-disc pl-5">
-                {% for user in users %}
-                    <li class="mb-2">
-                        <strong>User ID:</strong> {{ user.id }} - 
-                        <strong>Email:</strong> {{ user.email }} - 
-                        <strong>Last Login:</strong> {{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never' }}
-                    </li>
-                {% endfor %}
-            </ul>
+        
+        <!-- User Login Activity -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-700">Aktivitas Login Pengguna</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    {% for user in users %}
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="flex items-center justify-center h-8 w-8 rounded-full bg-purple-100">
+                                <i class="fas fa-user text-purple-600 text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ user.email }}
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                Login terakhir: {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Belum pernah' }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
