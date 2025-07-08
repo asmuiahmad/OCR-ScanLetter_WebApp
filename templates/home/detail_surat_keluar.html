@@ -42,23 +42,25 @@
             {% if surat.file_suratKeluar %}
             <div class="mt-6">
                 <h2 class="text-xl font-semibold mb-2">Dokumen</h2>
-                <a href="{{ url_for('download_surat_keluar', id=surat.id) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
-                    <i class="fas fa-download mr-2"></i> Download Dokumen
+                <a href="{{ url_for('download_surat_keluar', id=surat.id_suratKeluar) }}"
+                    class="bg-blue-500 text-white px-4 py-2 rounded inline-block mb-2">
+                    <i class="fas fa-download mr-2"></i>Download
                 </a>
             </div>
             {% endif %}
 
             <div class="mt-6 flex space-x-4">
                 {% if surat.status_suratKeluar == 'pending' %}
-                <a href="{{ url_for('approve_surat_keluar', id=surat.id) }}" 
-                   class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300">
-                    <i class="fas fa-check mr-2"></i> Setujui
-                </a>
-                <a href="{{ url_for('reject_surat_keluar', id=surat.id) }}" 
-                   class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">
-                    <i class="fas fa-times mr-2"></i> Tolak
-                </a>
+                <div class="flex space-x-2">
+                    <button onclick="approveSurat({{ surat.id_suratKeluar }})"
+                        class="bg-green-500 text-white px-4 py-2 rounded inline-block">
+                        <i class="fas fa-check mr-2"></i>Setujui
+                    </button>
+                    <button onclick="rejectSurat({{ surat.id_suratKeluar }})"
+                        class="bg-red-500 text-white px-4 py-2 rounded inline-block">
+                        <i class="fas fa-times mr-2"></i>Tolak
+                    </button>
+                </div>
                 {% endif %}
                 <a href="{{ url_for('list_pending_surat_keluar') }}" 
                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300">
@@ -68,4 +70,68 @@
         </div>
     </div>
 </div>
+
+<script>
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+function approveSurat(suratId) {
+    console.log('Approving surat with ID:', suratId);
+    fetch(`/surat-keluar/approve/${suratId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            alert('Surat berhasil disetujui');
+            location.reload();
+        } else {
+            alert('Gagal menyetujui surat: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Full error:', error);
+        alert('Terjadi kesalahan: ' + error.message);
+    });
+}
+
+function rejectSurat(suratId) {
+    console.log('Rejecting surat with ID:', suratId);
+    if (confirm('Apakah Anda yakin ingin menolak surat ini?')) {
+        fetch(`/surat-keluar/reject/${suratId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                alert('Surat berhasil ditolak');
+                location.reload();
+            } else {
+                alert('Gagal menolak surat: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Full error:', error);
+            alert('Terjadi kesalahan: ' + error.message);
+        });
+    }
+}
+</script>
 {% endblock %} 

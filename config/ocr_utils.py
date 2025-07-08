@@ -3,9 +3,34 @@ import re
 import json
 import hashlib
 from difflib import SequenceMatcher
+import logging
+import pytesseract
+from PIL import Image
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def clean_text(text):
-    return re.sub(r'\s*\.\s*', '.', re.sub(r'\s*/\s*', '/', text.strip("() ")))
+    """
+    Enhanced text cleaning function
+    """
+    if not text:
+        return ''
+    
+    # Remove extra whitespaces
+    text = re.sub(r'\s+', ' ', text)
+    
+    # Remove non-printable characters
+    text = re.sub(r'[^\x20-\x7E\n\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]', '', text)
+    
+    # Normalize common OCR mistakes
+    text = text.replace('1', 'I').replace('0', 'O')
+    
+    # Remove leading/trailing whitespaces
+    text = text.strip()
+    
+    return text
 
 def calculate_file_hash(file_path):
     hasher = hashlib.md5()
@@ -24,21 +49,50 @@ indonesian_months = dictionary.get('indonesian_months', [])
 pengirim_keywords = dictionary.get('pengirim_keywords', [])
 
 def extract_dates(text):
-    months_pattern = '|'.join(indonesian_months)
-    return [
-        f"{d.zfill(2)}/{str(indonesian_months.index(m) + 1).zfill(2)}/{y}"
-        for d, m, y in re.findall(rf'(\d{{1,2}})\s+({months_pattern})\s+(\d{{4}})', text)
+    """
+    More robust date extraction
+    """
+    # Multiple date formats
+    date_patterns = [
+        r'\d{1,2}\s*(?:Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)[a-z]*\s*\d{4}',
+        r'\d{1,2}[-/]\d{1,2}[-/]\d{4}',
+        r'\d{4}[-/]\d{1,2}[-/]\d{1,2}'
     ]
+    
+    dates = []
+    for pattern in date_patterns:
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        dates.extend(matches)
+    
+    return dates if dates else ['Not found']
 
 def extract_tanggal(text):
     dates = extract_dates(text)
     return dates[0] if dates else 'Not found'
 
 def extract_penerima_surat_masuk(text):
-    pattern = r'(?:Kepada[\s:]*)?(Yth\.?|YM\.?)\s*[.:]?\s*(Ketua[^\n]+)'
-    match = re.search(pattern, text, re.IGNORECASE)
-    if match:
-        return match.group(2).strip()
+    """
+    Enhanced penerima extraction with multiple patterns and improved matching
+    """
+    # Pola pencarian yang lebih komprehensif
+    patterns = [
+        r'(?:Kepada[\s:]*)?(Yth\.?|YM\.?)\s*[.:]?\s*(Ketua[^\n]+)',
+        r'Kepada\s*:\s*([^\n]+)',
+        r'Ditujukan\s*[Kk]epada\s*:\s*([^\n]+)',
+        r'(?:Kepada|Yang\s*Mulia)\s*(?:Yth\.?|YM\.?)\s*[.:]?\s*([^\n]+)',
+        r'(?:Penerima|Alamat)\s*:\s*([^\n]+)'
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        if match:
+            # Bersihkan dan saring teks penerima
+            penerima = match.group(1).strip()
+            
+            # Filter untuk menghindara salam atau kata kunci yang tidak relevan
+            if not any(irrelevant in penerima.lower() for irrelevant in ['assalamu', 'dengan', 'hormat']):
+                return penerima
+    
     return 'Not found'
 
 def extract_penerima_surat_keluar(text):
@@ -52,32 +106,60 @@ def extract_penerima_surat_keluar(text):
     return match.group(1).strip() if match else 'Not found'
 
 def extract_pengirim(text):
-    matches = list(re.finditer(r'\b(?:' + '|'.join(map(re.escape, pengirim_keywords)) + r')\b', text))
-    return matches[-1].group(0).strip() if matches else 'Not found'
+    """
+    Enhanced pengirim extraction with multiple patterns and improved matching
+    """
+    patterns = [
+        r'Dari\s*:\s*([^\n]+)',
+        r'Pengirim\s*:\s*([^\n]+)',
+        r'Yang\s*[Bb]ersangkutan\s*:\s*([^\n]+)',
+        r'(?:Nama|Penulis)\s*[:\-]?\s*([A-Z\s]+)',
+        r'Perihal\s*[:\-]?\s*([^\n]+)'
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        if match:
+            # Bersihkan dan saring teks pengirim
+            pengirim = match.group(1).strip()
+            
+            # Filter untuk menghindari kata kunci yang tidak relevan
+            if not any(irrelevant in pengirim.lower() for irrelevant in ['assalamu', 'dengan', 'hormat']):
+                return pengirim
+    
+    return 'Not found'
 
 def extract_isi_suratmasuk(text):
-    pattern_perihal = r"(?:Perihal|Hal|HaI|Ha1|PERIHAL|HAL)\s*[:\-]?\s*(.*?)\n"
-    match_perihal = re.search(pattern_perihal, text, re.DOTALL | re.IGNORECASE)
+    """
+    More comprehensive isi surat extraction with multiple patterns
+    """
+    # Prioritized patterns for extracting content
+    patterns = [
+        r"(?:Perihal|Hal|HaI|Ha1|PERIHAL|HAL)\s*[:\-]?\s*(.*?)\n",
+        r"(?:Isi\s*[Ss]urat|Maksud)\s*[:\-]?\s*(.*?)\n",
+        r"Tentang\s*[:\-]?\s*(.*?)\n",
+        r"(?:Di-|Tempat)\s*\n(.*?)\n"
+    ]
     
-    if match_perihal:
-        isi = match_perihal.group(1).strip()
-        if '\n' in isi:
-            isi = isi.split('\n')[0].strip()
-        return isi
+    for pattern in patterns:
+        match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+        if match:
+            isi = match.group(1).strip()
+            
+            # Bersihkan dan filter isi surat
+            if '\n' in isi:
+                isi = isi.split('\n')[0].strip()
+            
+            # Filter untuk menghindari salam atau header
+            if not any(irrelevant in isi.lower() for irrelevant in ['assalamu', 'yth', 'dengan', 'hormat']):
+                return isi
     
-    pattern_awal = r"(?:Di-|Tempat)\s*\n(.*?)\n"
-    match_awal = re.search(pattern_awal, text, re.DOTALL | re.IGNORECASE)
-    
-    if match_awal:
-        isi = match_awal.group(1).strip()
-        if '\n' in isi:
-            isi = isi.split('\n')[0].strip()
-        return isi
-    
+    # Fallback: Find first meaningful line
     lines = text.split('\n')
-    for i, line in enumerate(lines):
+    for line in lines:
         line = line.strip()
-        if len(line.split()) > 3 and not any(word in line for word in ["Assalamu", "Wr.Wb", "Yth"]):
+        if (len(line.split()) > 3 and 
+            not any(word in line.lower() for word in ["assalamu", "wr.wb", "yth"])):
             return line
     
     return "Not found"
@@ -236,3 +318,103 @@ def extract_formulir_cuti_data(text):
         'tanggal': tanggal.group(1) if tanggal else 'N/A',
         'jenis_cuti': jenis_cuti.group(1).strip() if jenis_cuti else 'N/A'
     }
+
+def preprocess_image(image_path):
+    """
+    Preprocess image to improve OCR accuracy
+    """
+    try:
+        # Open the image
+        img = Image.open(image_path)
+        
+        # Convert to grayscale
+        img_gray = img.convert('L')
+        
+        # Optional: Enhance contrast
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Contrast(img_gray)
+        img_enhanced = enhancer.enhance(2.0)  # Increase contrast
+        
+        return img_enhanced
+    except Exception as e:
+        logger.error(f"Error preprocessing image {image_path}: {str(e)}")
+        return None
+
+def extract_text_with_multiple_configs(file_path):
+    """
+    Extract text from image using multiple Tesseract configurations
+    with comprehensive logging and debugging
+    """
+    import pytesseract
+    from PIL import Image
+    import logging
+    import re
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    # Konfigurasi Tesseract yang berbeda
+    configs = [
+        r'--oem 3 --psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/.,:-',  # Default
+        r'--oem 3 --psm 11',  # Sparse text. Find as much text as possible
+        r'--oem 3 --psm 3',   # Fully automatic page segmentation
+        r'--oem 3 --psm 1',   # Automatic page segmentation with OSD
+    ]
+
+    # Preprocessing untuk meningkatkan kualitas OCR
+    def preprocess_image(image):
+        # Convert to grayscale
+        gray = image.convert('L')
+        
+        # Optional: Enhance contrast
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Contrast(gray)
+        gray = enhancer.enhance(2.5)  # Meningkatkan kontras lebih tinggi
+        
+        # Optional: Sharpen image
+        from PIL import ImageFilter
+        gray = gray.filter(ImageFilter.SHARPEN)
+        
+        return gray
+
+    try:
+        # Buka gambar
+        img = Image.open(file_path)
+        
+        # Preprocessing gambar
+        preprocessed_img = preprocess_image(img)
+        
+        # Simpan log detail gambar
+        logger.info(f"Image Details:")
+        logger.info(f"  Path: {file_path}")
+        logger.info(f"  Format: {img.format}")
+        logger.info(f"  Mode: {img.mode}")
+        logger.info(f"  Size: {img.size}")
+
+        # Ekstraksi teks dengan konfigurasi berbeda
+        extracted_texts = []
+        for config in configs:
+            try:
+                text = pytesseract.image_to_string(preprocessed_img, config=config, lang='ind')
+                
+                # Log detail ekstraksi
+                logger.info(f"Extraction with config '{config}':")
+                logger.info(f"  Text length: {len(text)}")
+                
+                if text.strip():
+                    extracted_texts.append(text)
+            except Exception as config_error:
+                logger.error(f"Error with config {config}: {str(config_error)}")
+
+        # Gabungkan teks dari berbagai konfigurasi
+        combined_text = "\n".join(extracted_texts)
+        
+        # Log teks gabungan
+        logger.info("Combined Extracted Text:")
+        logger.info(combined_text)
+
+        return combined_text if combined_text else None
+
+    except Exception as e:
+        logger.error(f"Error extracting text from {file_path}: {str(e)}")
+        return None

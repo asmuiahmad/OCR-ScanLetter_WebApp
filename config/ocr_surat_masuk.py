@@ -5,7 +5,7 @@ import logging
 import traceback
 from flask import (
     render_template, request, Blueprint, url_for, flash, redirect, 
-    jsonify, send_file, session, current_app, send_from_directory
+    jsonify, send_file, session, current_app, send_from_directory, abort
 )
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -19,10 +19,11 @@ from config.models import SuratMasuk
 from config.ocr_utils import (
     clean_text, extract_dates, extract_penerima_surat_masuk, extract_pengirim,
     calculate_file_hash, extract_isi_suratmasuk, calculate_ocr_accuracy,
-    is_formulir_cuti, extract_formulir_cuti_data  # Impor fungsi baru
+    is_formulir_cuti, extract_formulir_cuti_data, extract_text_with_multiple_configs
 )
 import io
 from functools import wraps
+from config.forms import OCRSuratMasukForm
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -73,11 +74,14 @@ def load_metadata():
 def extract_ocr_data(file_path):
     try:
         logger.debug(f"Processing file: {file_path}")
-        img = Image.open(file_path)
         
-        # Konfigurasi Tesseract
-        custom_config = r'--oem 3 --psm 6'
-        ocr_output = pytesseract.image_to_string(img, config=custom_config)
+        # Use new text extraction method
+        ocr_output = extract_text_with_multiple_configs(file_path)
+        
+        if not ocr_output:
+            logger.warning(f"No text extracted from {file_path}")
+            return None
+        
         cleaned_text = clean_text(ocr_output)
         logger.debug(f"Cleaned OCR Text:\n{cleaned_text}")
 
@@ -99,7 +103,6 @@ def extract_ocr_data(file_path):
                 'isi_suratMasuk': f"Permohonan cuti: {cuti_data['jenis_cuti']}",
                 'filename': os.path.basename(file_path),
                 'id_suratMasuk': None,
-                'full_letter_number': 'FORMULIR CUTI'
             }
 
         # Ekstraksi normal untuk surat masuk
@@ -118,78 +121,68 @@ def extract_ocr_data(file_path):
             'isi_suratMasuk': extract_isi_suratmasuk(cleaned_text),
             'filename': os.path.basename(file_path),
             'id_suratMasuk': None,
-            'full_letter_number': 'Not found'
+            'full_letter_number': 'Not found',
+            'ocr_raw_text': cleaned_text  # Tambahkan raw text untuk debugging
         }
 
+        # Log extracted data for debugging
+        logger.info("Initial Extracted Data:")
+        for key, value in extracted_data.items():
+            logger.info(f"{key}: {value}")
+
+        # Proses lanjutan untuk ekstraksi detail surat
         cleaned_text = re.sub(r"W\s*1\s*5\s*[-\s]*A\s*1\s*2", target_code, cleaned_text, flags=re.IGNORECASE)
 
-        pattern_full = rf"(\d+)[/\s-]+([\w.\-]+?)\.?{re.escape(target_code)}[/\s-]+([\w.\-]+)[/\s-]+([A-Za-z0-9]+)[/\s-]+(\d{{4}})"
-        match = re.search(pattern_full, cleaned_text, re.IGNORECASE)
+        # Tambahkan berbagai pola pencarian untuk nomor surat dengan pola yang lebih fleksibel
+        nomor_patterns = [
+            r'(\d+)[/\s-]+([\w.\-]+?)\.?W15-A12',
+            r'Nomor\s*:\s*(\d+)[/\s-]+([\w.\-]+)',
+            r'No\.\s*(\d+)[/\s-]+([\w.\-]+)',
+            r'Nomor\s*Surat\s*[:\-]?\s*(\d+)[/\s-]+([\w.\-]+)',
+            r'(?:Surat|Dokumen)\s*[Nn]omor\s*[:\-]?\s*(\d+)[/\s-]+([\w.\-]+)'
+        ]
 
-        if match:
-            extracted_data['nomor_suratMasuk'] = match.group(1).strip()
-            extracted_data['kodesurat1'] = match.group(2).strip()
-            extracted_data['kodePA'] = target_code
-            extracted_data['kodesurat2'] = match.group(3).strip()
-            extracted_data['bulan'] = match.group(4).strip().replace('1', 'I')
-            extracted_data['tahun'] = match.group(5).strip()
+        for pattern in nomor_patterns:
+            match = re.search(pattern, cleaned_text, re.IGNORECASE)
+            if match:
+                extracted_data['nomor_suratMasuk'] = match.group(1).strip()
+                extracted_data['kodesurat1'] = match.group(2).strip()
+                extracted_data['kodePA'] = target_code
+                break
 
-            # Tentukan jenis surat berdasarkan awalan kode surat 2
+        # Tambahkan pola tambahan untuk kode surat dengan pencarian yang lebih luas
+        match_kodesurat = re.search(r'(HK\d+\.\d+)', cleaned_text)
+        if not match_kodesurat:
+            # Coba pola alternatif jika HK tidak ditemukan
+            match_kodesurat = re.search(r'[/\.]([A-Z]+\d+\.\d+)[/\.]', cleaned_text)
+        
+        if match_kodesurat:
+            extracted_data['kodesurat2'] = match_kodesurat.group(1).strip()
             if extracted_data['kodesurat2'].startswith('HK'):
                 extracted_data['jenis_surat'] = 'Perkara'
-            elif extracted_data['kodesurat2'].startswith('KP'):
-                extracted_data['jenis_surat'] = 'Kepegawaian'
-                
-            # Bangun full_letter_number dengan format yang benar
-            extracted_data['full_letter_number'] = (
-                f"{extracted_data['nomor_suratMasuk']}/"
-                f"{extracted_data['kodesurat1']}."
-                f"{extracted_data['kodePA']}/"
-                f"{extracted_data['kodesurat2']}/"
-                f"{extracted_data['bulan']}/"
-                f"{extracted_data['tahun']}"
-            )
-        else:
-            # Fallback jika regex utama gagal
-            if target_code in cleaned_text:
-                extracted_data['kodePA'] = target_code
 
-            match_nomor = re.search(r"(\d+)(?=\s*/)", cleaned_text)
-            if match_nomor:
-                extracted_data['nomor_suratMasuk'] = match_nomor.group(1)
-
-            match_kodesurat1 = re.search(r"/\s*([\w\-.]+)\s*(?:\.|\s)" + re.escape(target_code), cleaned_text)
-            if match_kodesurat1:
-                extracted_data['kodesurat1'] = match_kodesurat1.group(1).strip()
-
-            # Log the full cleaned text for debugging kode surat
-            logger.info(f"Full cleaned text for kode surat extraction:\n{cleaned_text}")
-
-            # Tambahkan pola tambahan untuk ekstraksi kode surat
-            match_kodesurat = re.search(r'(HK\d+\.\d+)', cleaned_text)
-            if match_kodesurat:
-                extracted_data['kodesurat2'] = match_kodesurat.group(1).strip()
-                logger.info(f"Extracted kodesurat2 (direct HK match): {extracted_data['kodesurat2']}")
-                if extracted_data['kodesurat2'].startswith('HK'):
-                    extracted_data['jenis_surat'] = 'Perkara'
-            
-            # Fallback untuk kode surat jika belum terisi
-            if extracted_data.get('kodesurat2', 'Not found') == 'Not found':
-                # Coba pola lain untuk kode surat
-                match_kodesurat_alt = re.search(r'/([A-Z]+\d+\.\d+)/', cleaned_text)
-                if match_kodesurat_alt:
-                    extracted_data['kodesurat2'] = match_kodesurat_alt.group(1).strip()
-                    logger.info(f"Extracted kodesurat2 (alt match): {extracted_data['kodesurat2']}")
-                    if extracted_data['kodesurat2'].startswith('HK'):
-                        extracted_data['jenis_surat'] = 'Perkara'
-                else:
-                    logger.warning("No kodesurat2 found in the text")
-
+        # Ekstraksi bulan dan tahun dengan pola yang lebih fleksibel
             match_bulan = re.search(r"/\s*([A-Za-z0-9]+)\s*/", cleaned_text)
             if match_bulan:
                 extracted_data['bulan'] = match_bulan.group(1).strip().replace('1', 'I')
+        else:
+            # Coba pola alternatif untuk bulan
+            bulan_patterns = [
+                r'(?:Bulan|Pada)\s*:\s*([A-Za-z]+)',
+                r'[Bb]ulan\s*([A-Za-z]+)'
+            ]
+            for pattern in bulan_patterns:
+                match = re.search(pattern, cleaned_text)
+                if match:
+                    extracted_data['bulan'] = match.group(1).strip()
+                    break
 
+        # Ekstraksi tahun dengan pola yang lebih komprehensif
             match_tahun = re.search(r"/\s*" + re.escape(extracted_data.get('bulan', '')) + r"\s*/\s*(\d{4})", cleaned_text)
+        if not match_tahun:
+            # Coba pola alternatif untuk tahun
+            match_tahun = re.search(r'\b(\d{4})\b', cleaned_text)
+        
             if match_tahun:
                 extracted_data['tahun'] = match_tahun.group(1)
 
@@ -204,84 +197,110 @@ def extract_ocr_data(file_path):
                     f"{extracted_data['tahun']}"
                 )
 
-        logger.debug(f"Extracted data: {json.dumps(extracted_data, indent=2, ensure_ascii=False)}")
+        # Log final extracted data
+        logger.info("Final Extracted Data:")
+        for key, value in extracted_data.items():
+            logger.info(f"{key}: {value}")
+
         return extracted_data
 
     except Exception as e:
-        logger.error(f"Error during OCR processing: {str(e)}\n{traceback.format_exc()}")
+        logger.error(f"Error extracting OCR data from {file_path}: {str(e)}")
+        logger.error(traceback.format_exc())
         return None
 
 @ocr_surat_masuk_bp.route('/ocr_surat_masuk', methods=['GET', 'POST'])
 @login_required
 @role_required('admin', 'pimpinan')
 def ocr_surat_masuk():
+    # Extensive logging for debugging
+    logger.info("=== OCR Surat Masuk Route Started ===")
+    logger.info(f"Request method: {request.method}")
+    logger.info(f"Request content type: {request.content_type}")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    
+    # Debug all form data
+    logger.info("Form Data:")
+    for key, value in request.form.items():
+        logger.info(f"  {key}: {value}")
+    
+    # Debug all files in request
+    logger.info("Request Files:")
+    for key in request.files:
+        files = request.files.getlist(key)
+        logger.info(f"  Key '{key}' files: {[file.filename for file in files]}")
+    
     extracted_data_list = []
     image_paths = []
     extracted_text = ""
     processed_files = 0
     
     if request.method == 'POST':
-        # Log all available files in the request
-        logger.info(f"Request files: {list(request.files.keys())}")
-        
-        metadata = load_metadata()
-        
-        # Tangani kasus tidak ada file yang dipilih
-        files = request.files.getlist('image') or request.files.getlist('file')
-        
-        logger.info(f"Found {len(files)} files in upload")
-        
+        # Comprehensive file input debugging
+        files = (
+            request.files.getlist('image') or
+            request.files.getlist('file') or
+            request.files.getlist('files') or
+            request.files.getlist('uploaded_files')
+        )
+
+        logger.info(f"Total files found: {len(files)}")
+
+        for i, file in enumerate(files, 1):
+            logger.info(f"File {i} Details:")
+            logger.info(f"  Filename: {file.filename}")
+            logger.info(f"  Content Type: {file.content_type}")
+            logger.info(f"  Size: {len(file.read())} bytes")
+            file.seek(0)
+
         if not files or all(file.filename == '' for file in files):
             logger.warning("No files selected for upload")
+            flash('Silakan pilih dokumen terlebih dahulu', 'warning')
             return render_template('home/ocr_surat_masuk.html',
-                                   extracted_data_list=extracted_data_list,
-                                   image_paths=image_paths,
-                                   extracted_text=extracted_text,
+                                   extracted_data_list=[],
+                                   image_paths=[],
+                                   extracted_text='',
                                    currentIndex=0)
+
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
         for file in files:
             if file.filename == '':
                 continue
-                
-            filename = secure_filename(file.filename or '')
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            
             try:
+                filename = secure_filename(file.filename or '')
+                file_path = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(file_path)
                 logger.debug(f"File saved to: {file_path}")
                 file_hash = calculate_file_hash(file_path)
-                
-                # Cek apakah file sudah diproses sebelumnya
-                if filename in metadata.get("surat_masuk", {}) and metadata["surat_masuk"][filename] == file_hash:
-                    logger.info(f"File '{filename}' already processed")
-                    continue
-                    
                 extracted_data = extract_ocr_data(file_path)
+                
                 if extracted_data:
                     extracted_data_list.append(extracted_data)
-                    metadata.setdefault("surat_masuk", {})[filename] = file_hash
                     image_paths.append(filename)
                     processed_files += 1
                     
-                    # Tambahkan teks yang diekstrak ke extracted_text
+                    # Add extracted text
                     extracted_text += f"--- Dokumen: {filename} ---\n{extracted_data.get('isi_suratMasuk', 'Tidak ada teks')}\n\n"
                 else:
                     logger.warning(f"No data extracted from file: {filename}")
+        
             except Exception as e:
-                logger.error(f"Error processing file {filename}: {str(e)}\n{traceback.format_exc()}")
+                logger.error(f'Error processing file {file.filename}: {e}')
+                flash(f'Gagal memproses dokumen {filename}: {str(e)}', 'error')
 
-        save_metadata(metadata)
-
+        # Render template with extracted data
         return render_template('home/ocr_surat_masuk.html',
                                extracted_data_list=extracted_data_list,
                                image_paths=image_paths,
                                extracted_text=extracted_text,
                                currentIndex=0)
 
+    # GET request handling
     return render_template('home/ocr_surat_masuk.html',
-                           extracted_data_list=extracted_data_list,
-                           image_paths=image_paths,
-                           extracted_text=extracted_text,
+                           extracted_data_list=[],
+                           image_paths=[],
+                           extracted_text='',
                            currentIndex=0)
 
 @ocr_surat_masuk_bp.route('/surat_masuk_image/<int:id>')
@@ -300,9 +319,13 @@ def uploaded_file_surat_masuk(filename):
 @role_required('admin', 'pimpinan')
 def save_extracted_data():
     try:
+        # Validate CSRF token
+        if not request.headers.get('X-CSRFToken'):
+            return jsonify({"success": False, "error": "CSRF token is missing"}), 400
+
         data = request.get_json()
         if not data:
-            return jsonify({"success": False, "error": "No data provided"})
+            return jsonify({"success": False, "error": "No data provided"}), 400
 
         # Load existing metadata
         metadata = load_metadata()

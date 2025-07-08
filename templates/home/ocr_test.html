@@ -1,0 +1,248 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}OCR Test - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Test</h1>
+    <p class="text-gray-600 mb-6">Upload an image to test OCR text extraction without saving to database.</p>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span id="toastMessage">File berhasil diproses!</span>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form action="{{ url_for('main.ocr_test') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="uploadForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- File Upload Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Unggah Dokumen</label>
+                    <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition">
+                        <input 
+                            type="file" 
+                            name="image" 
+                            id="fileInput" 
+                            accept="image/jpeg,image/png,image/webp" 
+                            class="hidden"
+                            onchange="updateFileName(this)"
+                        >
+                        <div id="dropzoneText" class="text-gray-500">
+                            <p>Seret dan lepas dokumen di sini</p>
+                            <p class="mt-2">atau</p>
+                            <button 
+                                type="button"
+                                id="uploadButton"
+                                class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition inline-block cursor-pointer"
+                            >
+                                Pilih Dokumen
+                            </button>
+                        </div>
+                        <div id="filePreview" class="mt-4 hidden">
+                            <p id="selectedFiles" class="text-sm text-gray-700"></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Informasi Tambahan -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Petunjuk Unggah</h3>
+                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-2">
+                        <li>Hanya dokumen gambar yang dapat diunggah</li>
+                        <li>Ukuran maksimal dokumen: 10 MB</li>
+                        <li>Format yang didukung: JPG, PNG, WEBP</li>
+                        <li>Hasil OCR akan ditampilkan di textarea</li>
+                        <li>Data tidak akan disimpan ke database</li>
+                    </ul>
+        </div>
+</div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
+                    Test OCR
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">Hasil Ekstraksi OCR</h2>
+        <div class="space-y-4">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Teks yang Diekstrak:</label>
+                <textarea 
+                    class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    readonly
+                    placeholder="Hasil OCR akan muncul di sini..."
+                >{{ extracted_text or '' }}</textarea>
+            </div>
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    <span class="font-medium">Karakter:</span> {{ (extracted_text or '')|length }}
+                </div>
+                <button 
+                    onclick="copyToClipboard()" 
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+                >
+                    Salin Teks
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateFileName(input) {
+    const file = input.files[0];
+    const selectedFiles = document.getElementById('selectedFiles');
+    const filePreview = document.getElementById('filePreview');
+    
+    if (file) {
+        selectedFiles.textContent = file.name;
+        filePreview.classList.remove('hidden');
+    } else {
+        selectedFiles.textContent = '';
+        filePreview.classList.add('hidden');
+    }
+}
+
+function copyToClipboard() {
+    const textarea = document.querySelector('textarea');
+    textarea.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = 'Tersalin!';
+    button.classList.remove('bg-green-500', 'hover:bg-green-600');
+    button.classList.add('bg-green-600');
+    
+    setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('bg-green-600');
+        button.classList.add('bg-green-500', 'hover:bg-green-600');
+    }, 2000);
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    // Set message
+    toastMessage.textContent = message;
+    
+    // Set color based on type
+    if (type === 'success') {
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50';
+    } else if (type === 'error') {
+        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50';
+    }
+    
+    // Show toast
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Hide toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+    }, 3000);
+}
+
+// Drag and drop functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const selectedFiles = document.getElementById('selectedFiles');
+
+    // Handle drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropzone.classList.add('border-blue-500', 'bg-blue-50');
+    }
+
+    function unhighlight(e) {
+        dropzone.classList.remove('border-blue-500', 'bg-blue-50');
+    }
+
+    dropzone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            fileInput.files = files;
+            updateFileName(fileInput);
+        }
+    }
+
+    // Click to upload - but don't interfere with button clicks
+    dropzone.addEventListener('click', (e) => {
+        // Only trigger if clicking on the dropzone background itself
+        if (e.target === dropzone) {
+            e.preventDefault();
+            e.stopPropagation();
+            fileInput.click();
+        }
+    });
+    
+    // Prevent button clicks from bubbling up to dropzone
+    const uploadButton = dropzone.querySelector('#uploadButton');
+    if (uploadButton) {
+        uploadButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fileInput.click();
+        });
+    }
+    
+        // Prevent form double submission
+    const form = document.getElementById('uploadForm');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Memproses...';
+    });
+    
+    // Show appropriate toast based on server response
+    {% if has_error %}
+    setTimeout(() => {
+        showToast('Error saat memproses gambar', 'error');
+    }, 100);
+    {% elif has_success %}
+    setTimeout(() => {
+        showToast('File berhasil diproses!', 'success');
+    }, 100);
+    {% endif %}
+});
+</script>
+{% endblock %} 

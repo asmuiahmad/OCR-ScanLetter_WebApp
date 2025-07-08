@@ -1,5 +1,65 @@
+# Git
 .git
-__pycache__
+.gitignore
+
+# Documentation
+README.md
+QUICK_START.md
+CHANGELOG.md
+LICENSE
+
+# Development files
+.env
+.venv
+venv/
+env/
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
+.Python
+*.so
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated files
+generated/
+static/ocr/uploads/*
+!static/ocr/uploads/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Backup files
+*.bak
+*.backup
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore

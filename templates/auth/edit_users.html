@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2>Manajemen User</h2>
+  <h2>{% if single_user %}Edit User Profile{% else %}Manajemen User{% endif %}</h2>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -15,6 +15,7 @@
     {% endif %}
   {% endwith %}
 
+  {% if not single_user %}
   <div class="card mb-4">
     <div class="card-header">
       <h4>Daftar Pengguna</h4>
@@ -64,13 +65,20 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
   <div class="card">
     <div class="card-header">
-      <h4>Edit User</h4>
+      <h4>{% if single_user %}Edit Profile{% else %}Edit User{% endif %}</h4>
     </div>
     <div class="card-body">
-      <form method="POST" action="{{ url_for('edit_user_view') }}">
+      {% if single_user %}
+        <form method="POST" action="{{ url_for('edit_user', user_id=users[0].id) }}">
+      {% else %}
+        <form method="POST" action="{{ url_for('main.edit_user_view') }}">
+      {% endif %}
+        
+        {% if not single_user %}
         <!-- Select User -->
         <div class="form-group mb-3">
           <label for="userSelect">Select User:</label>
@@ -81,32 +89,37 @@
             {% endfor %}
           </select>
         </div>
+        {% endif %}
 
         <!-- Email Field -->
         <div class="form-group mb-3">
           <label for="email">Email:</label>
-          <input type="text" class="form-control" name="email" id="email" required />
+          <input type="text" class="form-control" name="email" id="email" 
+                 value="{% if single_user %}{{ users[0].email }}{% endif %}" required />
         </div>
 
+        {% if not single_user %}
         <!-- Role Field -->
         <div class="form-group mb-3">
           <label for="role">Role:</label>
           <select class="form-control" name="role" id="role" required>
-            <option value="karyawan">Karyawan</option>
-            <option value="pimpinan">Pimpinan</option>
-            <option value="admin">Admin</option>
+            <option value="karyawan" {% if single_user and users[0].role == 'karyawan' %}selected{% endif %}>Karyawan</option>
+            <option value="pimpinan" {% if single_user and users[0].role == 'pimpinan' %}selected{% endif %}>Pimpinan</option>
+            <option value="admin" {% if single_user and users[0].role == 'admin' %}selected{% endif %}>Admin</option>
           </select>
         </div>
 
         <!-- Status Field -->
         <div class="form-group mb-3">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="is_approved" id="is_approved" value="1">
+            <input class="form-check-input" type="checkbox" name="is_approved" id="is_approved" value="1"
+                   {% if single_user and users[0].is_approved %}checked{% endif %}>
             <label class="form-check-label" for="is_approved">
               Approved
             </label>
           </div>
         </div>
+        {% endif %}
 
         <!-- Password Field -->
         <div class="form-group mb-3">
@@ -116,12 +129,16 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Update User</button>
+        {% if single_user %}
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Dashboard</a>
+        {% endif %}
       </form>
     </div>
   </div>
 </div>
 
 <script>
+  {% if not single_user %}
   function selectUser(userId, email) {
     document.getElementById("userSelect").value = userId;
     fetchUserData(userId);
@@ -153,5 +170,16 @@
       console.error(error);
     }
   }
+
+  // Add event listener for user selection
+  document.addEventListener('DOMContentLoaded', function() {
+    const userSelect = document.getElementById('userSelect');
+    if (userSelect) {
+      userSelect.addEventListener('change', function() {
+        fetchUserData(this.value);
+      });
+    }
+  });
+  {% endif %}
 </script>
 {% endblock %}

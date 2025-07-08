@@ -16,7 +16,7 @@ route_breadcrumbs = {
     'generate_cuti': 'Generate Cuti',
     'laporan_statistik': 'Laporan Statistik',
     'pegawai_list': 'List Pegawai',
-    'kelola_pegawai': 'Kelola Pegawai',
+    'pegawai': 'Kelola Pegawai',
     'ocr_surat_masuk.ocr_surat_masuk': 'OCR Surat Masuk',
     'ocr_surat_keluar.ocr_surat_keluar': 'OCR Surat Keluar',
     'edit_user_view': 'Manajemen User',
@@ -34,7 +34,7 @@ route_hierarchy = {
     'generate_cuti': [],
     'laporan_statistik': [],
     'pegawai_list': [],
-    'kelola_pegawai': [],
+    'pegawai': [],
     'ocr_surat_masuk.ocr_surat_masuk': [],
     'ocr_surat_keluar.ocr_surat_keluar': [],
     'edit_user_view': [],
@@ -42,29 +42,42 @@ route_hierarchy = {
 }
 
 def generate_breadcrumbs(endpoint, **kwargs):
-    """Generate breadcrumb navigation based on the current endpoint"""
+    """Generate breadcrumbs based on endpoint"""
     breadcrumbs = []
     
-    # If the endpoint is not in our mapping, return empty breadcrumbs
-    if endpoint not in route_breadcrumbs and endpoint not in route_hierarchy:
-        return breadcrumbs
+    # Map endpoints to breadcrumb titles
+    if endpoint == 'show_surat_masuk':
+        breadcrumbs.append(('Surat Masuk', url_for('main.show_surat_masuk')))
+    elif endpoint == 'show_surat_keluar':
+        breadcrumbs.append(('Surat Keluar', url_for('main.show_surat_keluar')))
+    elif endpoint == 'ocr_surat_masuk.ocr_surat_masuk':
+        breadcrumbs.append(('OCR Surat Masuk', url_for('ocr_surat_masuk.ocr_surat_masuk')))
+    elif endpoint == 'ocr_surat_keluar.ocr_surat_keluar':
+        breadcrumbs.append(('OCR Surat Keluar', url_for('ocr_surat_keluar.ocr_surat_keluar')))
+    elif endpoint == 'input_surat_masuk':
+        breadcrumbs.append(('Input Surat Masuk', url_for('main.input_surat_masuk')))
+    elif endpoint == 'input_surat_keluar':
+        breadcrumbs.append(('Input Surat Keluar', url_for('main.input_surat_keluar')))
+    elif endpoint == 'pegawai':
+        breadcrumbs.append(('Kelola Pegawai', url_for('main.pegawai')))
+    elif endpoint == 'pegawai_list':
+        breadcrumbs.append(('List Pegawai', url_for('main.pegawai_list')))
+    elif endpoint == 'auth.login':
+        breadcrumbs = [('Login', url_for('auth.login'))]  # Only show login, not home
+    elif endpoint == 'auth.register':
+        breadcrumbs.append(('Register', url_for('auth.register')))
     
-    # Add parent breadcrumbs if they exist
-    if endpoint in route_hierarchy:
-        for parent in route_hierarchy[endpoint]:
-            breadcrumbs.append(
-                Breadcrumb(
-                    text=route_breadcrumbs.get(parent, parent),
-                    url=url_for(parent, **{k: v for k, v in kwargs.items() if k in ['user_id', 'id']})
-                )
-            )
+    return breadcrumbs
+
+def register_breadcrumbs(app):
+    @app.context_processor
+    def inject_breadcrumbs():
+        """Inject breadcrumbs into all templates"""
+        endpoint = request.endpoint
+        view_args = request.view_args or {}
+        breadcrumbs = generate_breadcrumbs(endpoint, **view_args)
+        return dict(breadcrumbs=breadcrumbs)
     
-    # Add current page breadcrumb (without URL since it's the current page)
-    if endpoint in route_breadcrumbs:
-        breadcrumbs.append(
-            Breadcrumb(
-                text=route_breadcrumbs[endpoint]
-            )
-        )
-    
-    return breadcrumbs 
+    # Add utilities to Jinja2
+    app.jinja_env.globals['zip'] = zip
+    app.jinja_env.globals.update(max=max, min=min) 

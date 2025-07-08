@@ -165,60 +165,48 @@
     <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Keluar</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6">
-        <form action="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="uploadForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- File Upload Section -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Unggah Dokumen</label>
-                    <div class="flex items-center justify-center w-full">
-                        <label class="flex flex-col w-full h-32 border-4 border-dashed hover:bg-gray-100 hover:border-blue-300 group transition duration-300 ease-in-out cursor-pointer">
-                            <div class="flex flex-col items-center justify-center pt-7">
-                                <svg class="w-10 h-10 text-gray-400 group-hover:text-blue-500 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <p class="pt-1 text-sm tracking-wider text-gray-500 group-hover:text-blue-600 transition duration-300">
-                                    Pilih file atau seret ke sini
-                                </p>
-                            </div>
-                            <input type="file" name="image" id="fileInput" accept="image/*" class="opacity-0 z-50 absolute" multiple>
+                    <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition">
+                        <input 
+                            type="file" 
+                            name="image" 
+                            id="fileInput" 
+                            multiple 
+                            accept="image/jpeg,image/png,image/webp" 
+                            class="hidden"
+                            onchange="document.getElementById('selectedFiles').textContent = Array.from(this.files).map(f => f.name).join(', '); document.getElementById('filePreview').classList.remove('hidden');"
+                        >
+                        <div id="dropzoneText" class="text-gray-500">
+                            <p>Seret dan lepas dokumen di sini</p>
+                            <p class="mt-2">atau</p>
+                            <label 
+                                for="fileInput" 
+                                class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition inline-block cursor-pointer"
+                            >
+                                Pilih Dokumen
                         </label>
                     </div>
-                    
-                    <!-- Tambahan tombol upload manual -->
-                    <div class="flex justify-center mt-4 space-x-4">
-                        <button type="button" id="manualUploadBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300 flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                            </svg>
-                            Pilih File
-                        </button>
+                        <div id="filePreview" class="mt-4 hidden">
+                            <p id="selectedFiles" class="text-sm text-gray-700"></p>
                     </div>
-
-                    <!-- Notifikasi file yang dipilih -->
-                    <div id="fileNotification" class="text-sm text-gray-600 mt-2 text-center">
-                        <p id="selectedFilesText">Belum ada file dipilih</p>
                     </div>
                 </div>
 
-                <!-- OCR Options Section -->
+                <!-- Informasi Tambahan -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Pengaturan OCR</label>
-                    <div class="space-y-4">
-                        <div class="flex items-center">
-                            <input type="checkbox" name="preprocess" id="preprocess" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="preprocess" class="ml-2 block text-sm text-gray-900">
-                                Preprocessing Gambar
-                            </label>
+                    <h3 class="text-lg font-semibold mb-4">Petunjuk Unggah</h3>
+                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-2">
+                        <li>Hanya dokumen gambar yang dapat diunggah</li>
+                        <li>Ukuran maksimal dokumen: 10 MB</li>
+                        <li>Format yang didukung: JPG, PNG, WEBP</li>
+                    </ul>
+                </div>
             </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" name="enhance_contrast" id="enhance_contrast" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="enhance_contrast" class="ml-2 block text-sm text-gray-900">
-                                Tingkatkan Kontras
-                            </label>
-            </div>
-        </div>
-        </div>
-</div>
 
             <!-- Proses OCR Button -->
             <div class="text-center mt-6">
@@ -286,7 +274,7 @@
                                             <textarea name="isi_suratKeluar" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"></textarea>
                                         </div>
 
-                                        <div class="grid grid-cols-3 gap-4">
+                                        <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Jenis Surat</label>
                                                 <input type="text" name="jenis_surat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
@@ -295,24 +283,27 @@
                                                 <label class="block text-sm font-medium text-gray-700">Tanggal</label>
                                                 <input type="date" name="tanggal_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
                                             </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Nama File</label>
-                                                <input type="text" name="filename" readonly class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm">
-                                </div>
-                            </div>
+                                        </div>
                         </form>
                     </div>
                 </div>
             </div>
                     </div>
                 </div>
+                <!-- Tombol Navigasi & Simpan di Modal -->
                 <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 sticky bottom-0">
                     <button type="button" id="saveExtractedData" class="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition">
                         Simpan
                     </button>
-                    <button type="button" id="closeModal" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
+                    <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
                         Tutup
-                </button>
+                    </button>
+                    <button type="button" id="prevModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
+                        Sebelumnya
+                    </button>
+                    <button type="button" id="nextModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
+                        Selanjutnya
+                    </button>
                 </div>
             </div>
         </div>
@@ -325,18 +316,54 @@ document.addEventListener('DOMContentLoaded', function() {
     const extractedDataList = {{ extracted_data_list | tojson | safe }};
     const imagePaths = {{ image_paths | tojson | safe }};
     const extractedDataModal = document.getElementById('extractedDataModal');
+    let currentIndex = 0;
 
-    // Tampilkan modal secara otomatis jika ada data yang diekstrak
-    if (extractedDataList.length > 0) {
-        // Ambil data pertama dari list
-        const data = extractedDataList[0];
-        const filename = data.filename;
-
-        // Atur pratinjau gambar
+    // Fungsi untuk mengisi form dengan data
+    function fillFormWithData(data) {
+        const form = document.getElementById('extractedDataForm');
+        const inputs = form.querySelectorAll('input, textarea');
+        
+        inputs.forEach(input => {
+            const name = input.name;
+            let value = '';
+            
+            // Explicit mapping for different field names
+            switch(name) {
+                case 'full_letter_number':
+                    value = data['nomor_surat'] || '';
+                    break;
+                case 'pengirim_suratKeluar':
+                    value = data['pengirim'] || '';
+                    break;
+                case 'penerima_suratKeluar':
+                    value = data['penerima'] || '';
+                    break;
+                case 'isi_suratKeluar':
+                    value = data['isi'] || '';
+                    break;
+                case 'kode_suratKeluar':
+                    value = data['kodesurat2'] || '';
+                    break;
+                case 'jenis_surat':
+                    value = data['jenis_surat'] || '';
+                    break;
+                case 'tanggal_suratKeluar':
+                    if (data['dates'] && data['dates'].length > 0) {
+                        value = data['dates'][0];
+                    }
+                    break;
+                default:
+                    value = data[name] || '';
+            }
+            
+            input.value = value;
+        });
+        
+        // Update gambar preview
         const imagePreview = document.getElementById('imagePreview');
         const noImageText = document.getElementById('noImageText');
-        if (filename) {
-            const imagePath = `/static/ocr/surat_keluar/${filename}`;
+        if (data.filename) {
+            const imagePath = `/static/ocr/surat_keluar/${data.filename}`;
             imagePreview.src = imagePath;
             imagePreview.classList.remove('hidden');
             noImageText.classList.add('hidden');
@@ -344,17 +371,83 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.classList.add('hidden');
             noImageText.classList.remove('hidden');
         }
+    }
 
-        // Isi form dengan data yang diekstrak
-        const form = document.getElementById('extractedDataForm');
-        const inputs = form.querySelectorAll('input, textarea');
-        inputs.forEach(input => {
-            const name = input.name;
-            input.value = data[name] || (name === 'filename' ? filename : '');
+    // Tampilkan tombol "View Extracted Data" jika ada data yang diekstrak
+    if (extractedDataList.length > 0) {
+        // Buat tombol "View Extracted Data" jika belum ada
+        let viewDataBtn = document.getElementById('viewExtractedDataBtn');
+        if (!viewDataBtn) {
+            viewDataBtn = document.createElement('button');
+            viewDataBtn.id = 'viewExtractedDataBtn';
+            viewDataBtn.className = 'bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg';
+            viewDataBtn.innerHTML = `
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                View Extracted Data (${extractedDataList.length} items)
+            `;
+            
+            // Tambahkan tombol setelah form upload
+            const uploadForm = document.querySelector('form[enctype="multipart/form-data"]');
+            if (uploadForm) {
+                // Tambahkan div container untuk tombol dengan margin
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'mt-6 text-center';
+                buttonContainer.appendChild(viewDataBtn);
+                uploadForm.parentNode.insertBefore(buttonContainer, uploadForm.nextSibling);
+            }
+        }
+        
+        // Event handler untuk tombol "View Extracted Data"
+        viewDataBtn.addEventListener('click', function() {
+            // Isi form dengan data pertama
+            fillFormWithData(extractedDataList[0]);
+            
+            // Tampilkan modal
+            extractedDataModal.classList.remove('hidden');
         });
+    }
 
-        // Tampilkan modal
-        extractedDataModal.classList.remove('hidden');
+    // Navigation buttons
+    const prevBtn = document.getElementById('prevModalBtn');
+    const nextBtn = document.getElementById('nextModalBtn');
+
+    function updateNavButtons() {
+        if (!extractedDataList || extractedDataList.length <= 1) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-block';
+            prevBtn.disabled = (currentIndex === 0);
+            nextBtn.disabled = (currentIndex === extractedDataList.length - 1);
+        }
+    }
+
+    // Call updateNavButtons when modal is shown or index changes
+    if (extractedDataModal) {
+        // If you have code that shows the modal, call updateNavButtons() there too
+        updateNavButtons();
+    }
+
+    // Example: update on navigation
+    if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                // ... update modal content ...
+                updateNavButtons();
+            }
+        });
+        nextBtn.addEventListener('click', function() {
+            if (currentIndex < extractedDataList.length - 1) {
+                currentIndex++;
+                // ... update modal content ...
+                updateNavButtons();
+            }
+        });
     }
 
     // Prevent scrolling of background when modal is open
@@ -367,11 +460,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Modify close modal logic
-    const closeModalBtn = document.getElementById('closeModal');
-    closeModalBtn.addEventListener('click', function() {
-        extractedDataModal.classList.add('hidden');
-        allowBackgroundScroll();
-    });
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function() {
+            extractedDataModal.classList.add('hidden');
+            allowBackgroundScroll();
+        });
+    }
 
     // Close modal if clicking outside
     extractedDataModal.addEventListener('click', function(event) {
@@ -386,6 +481,8 @@ document.addEventListener('DOMContentLoaded', function() {
     saveExtractedDataBtn.addEventListener('click', function() {
         const formData = new FormData(document.getElementById('extractedDataForm'));
         const extractedData = [];
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         // Ambil data dari form
         const rowData = {};
@@ -399,7 +496,9 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
             },
+            credentials: 'same-origin',
             body: JSON.stringify(extractedData)
         })
         .then(response => response.json())

@@ -24,18 +24,20 @@
                     <td class="px-4 py-2">{{ surat.penerima_suratKeluar }}</td>
                     <td class="px-4 py-2">{{ surat.tanggal_suratKeluar.strftime('%d %B %Y') }}</td>
                     <td class="px-4 py-2">
-                        <a href="{{ url_for('detail_surat_keluar', id=surat.id) }}" 
-                           class="text-blue-500 hover:text-blue-700 mr-2">
-                            <i class="fas fa-eye"></i> Lihat Detail
+                        <div class="flex space-x-2">
+                            <a href="{{ url_for('detail_surat_keluar', id=surat.id_suratKeluar) }}"
+                                class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i>
                         </a>
-                        <a href="{{ url_for('approve_surat_keluar', id=surat.id) }}" 
-                           class="text-green-500 hover:text-green-700 mr-2">
-                            <i class="fas fa-check"></i> Setujui
-                        </a>
-                        <a href="{{ url_for('reject_surat_keluar', id=surat.id) }}" 
-                           class="text-red-500 hover:text-red-700">
-                            <i class="fas fa-times"></i> Tolak
-                        </a>
+                            <button onclick="approveSurat({{ surat.id_suratKeluar }})"
+                                class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button onclick="rejectSurat({{ surat.id_suratKeluar }})"
+                                class="btn btn-sm btn-danger">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -48,42 +50,68 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
-function approveSuratKeluar(suratId) {
-    fetch(`/surat-keluar/approve/${suratId}`, { method: 'POST' })
-        .then(response => response.json())
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+function approveSurat(suratId) {
+    console.log('Approving surat with ID:', suratId);
+    fetch(`/surat-keluar/approve/${suratId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
         .then(data => {
+        console.log('Response data:', data);
             if (data.success) {
-                alert('Surat keluar berhasil disetujui');
+            alert('Surat berhasil disetujui');
                 location.reload();
             } else {
-                alert('Gagal menyetujui surat keluar');
+            alert('Gagal menyetujui surat: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan');
+        console.error('Full error:', error);
+        alert('Terjadi kesalahan: ' + error.message);
         });
 }
 
-function rejectSuratKeluar(suratId) {
-    fetch(`/surat-keluar/reject/${suratId}`, { method: 'POST' })
-        .then(response => response.json())
+function rejectSurat(suratId) {
+    console.log('Rejecting surat with ID:', suratId);
+    if (confirm('Apakah Anda yakin ingin menolak surat ini?')) {
+        fetch(`/surat-keluar/reject/${suratId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
-                alert('Surat keluar berhasil ditolak');
+                alert('Surat berhasil ditolak');
                 location.reload();
             } else {
-                alert('Gagal menolak surat keluar');
+                alert('Gagal menolak surat: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan');
+            console.error('Full error:', error);
+            alert('Terjadi kesalahan: ' + error.message);
         });
+    }
 }
 </script>
 {% endblock %} 

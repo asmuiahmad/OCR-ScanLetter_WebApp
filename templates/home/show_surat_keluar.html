@@ -6,10 +6,10 @@
 <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Surat Keluar</h1>
     <div class="flex justify-between mb-3">
-        <a href="{{ url_for('input_surat_keluar') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Create Surat
+        <a href="{{ url_for('main.input_surat_keluar') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Create Surat
             Keluar</a>
         <div class="search-btn">
-            <form method="GET" action="{{ url_for('show_surat_keluar') }}" class="flex">
+            <form method="GET" action="{{ url_for('main.show_surat_keluar') }}" class="flex">
                 <input type="text" name="search" placeholder="Search..." class="form-control border rounded px-2 py-1"
                     style="width: 300px; margin-right: 10px;">
                 <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded">
@@ -23,7 +23,7 @@
         <thead>
             <tr class="bg-gray-200">
                 <th class="py-2 px-4 border">
-                    <a href="{{ url_for('show_surat_keluar', sort='tanggal_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
+                    <a href="{{ url_for('main.show_surat_keluar', sort='tanggal_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
                         style="color: black; text-decoration: none;">
                         Tanggal
                         {% if sort == 'tanggal_suratKeluar' %}
@@ -32,7 +32,7 @@
                     </a>
                 </th>
                 <th class="py-2 px-4 border">
-                    <a href="{{ url_for('show_surat_keluar', sort='pengirim_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
+                    <a href="{{ url_for('main.show_surat_keluar', sort='pengirim_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
                         style="color: black; text-decoration: none;">
                         Pengirim
                         {% if sort == 'pengirim_suratKeluar' %}
@@ -41,7 +41,7 @@
                     </a>
                 </th>
                 <th class="py-2 px-4 border">
-                    <a href="{{ url_for('show_surat_keluar', sort='penerima_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
+                    <a href="{{ url_for('main.show_surat_keluar', sort='penerima_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
                         style="color: black; text-decoration: none;">
                         Penerima
                         {% if sort == 'penerima_suratKeluar' %}
@@ -50,7 +50,7 @@
                     </a>
                 </th>
                 <th class="py-2 px-4 border">
-                    <a href="{{ url_for('show_surat_keluar', sort='nomor_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
+                    <a href="{{ url_for('main.show_surat_keluar', sort='nomor_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
                         style="color: black; text-decoration: none;">
                         Nomor Surat
                         {% if sort == 'nomor_suratKeluar' %}
@@ -59,7 +59,7 @@
                     </a>
                 </th>
                 <th class="py-2 px-4 border">
-                    <a href="{{ url_for('show_surat_keluar', sort='isi_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
+                    <a href="{{ url_for('main.show_surat_keluar', sort='isi_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
                         style="color: black; text-decoration: none;">
                         Isi Surat
                         {% if sort == 'isi_suratKeluar' %}
@@ -70,10 +70,21 @@
 
                 <!-- ✅ New Created At column header -->
                 <th class="py-2 px-4 border">
-                    <a href="{{ url_for('show_surat_keluar', sort='created_at', order='asc' if order == 'desc' else 'desc') }}"
+                    <a href="{{ url_for('main.show_surat_keluar', sort='created_at', order='asc' if order == 'desc' else 'desc') }}"
                         style="color: black; text-decoration: none;">
                         Created At
                         {% if sort == 'created_at' %}
+                        <span>{{ '▼' if order == 'asc' else '▲' }}</span>
+                        {% endif %}
+                    </a>
+                </th>
+
+                <!-- ✅ New Status column header -->
+                <th class="py-2 px-4 border">
+                    <a href="{{ url_for('main.show_surat_keluar', sort='status_suratKeluar', order='asc' if order == 'desc' else 'desc') }}"
+                        style="color: black; text-decoration: none;">
+                        Status
+                        {% if sort == 'status_suratKeluar' %}
                         <span>{{ '▼' if order == 'asc' else '▲' }}</span>
                         {% endif %}
                     </a>
@@ -102,12 +113,25 @@
                     {% endif %}
                 </td>
 
+                <!-- ✅ New Status cell -->
                 <td class="py-2 px-4 border">
-                    <a href="{{ url_for('edit_surat_keluar', id=entry.id_suratKeluar) }}"
+                    {% if entry.status_suratKeluar == 'pending' %}
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Pending</span>
+                    {% elif entry.status_suratKeluar == 'approved' %}
+                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Disetujui</span>
+                    {% elif entry.status_suratKeluar == 'rejected' %}
+                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Ditolak</span>
+                    {% else %}
+                    <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">{{ entry.status_suratKeluar or 'N/A' }}</span>
+                    {% endif %}
+                </td>
+
+                <td class="py-2 px-4 border">
+                    <a href="{{ url_for('main.edit_surat_keluar', id=entry.id_suratKeluar) }}"
                         class="bg-yellow-500 text-white px-2 py-1 rounded">
                         <i class="feather icon-edit"></i>
                     </a>
-                    <form action="{{ url_for('delete_surat_keluar', id=entry.id_suratKeluar) }}" method="POST"
+                    <form action="{{ url_for('main.delete_surat_keluar', id=entry.id_suratKeluar) }}" method="POST"
                         style="display:inline;" onsubmit="return confirmDelete();">
                         <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded">
                             <i class="feather icon-trash"></i>
@@ -124,11 +148,11 @@
     <!-- Mobile pagination (Previous / Next only) -->
     <div class="flex flex-1 justify-between sm:hidden">
         {% if entries.has_prev %}
-        <a href="{{ url_for('show_surat_keluar', page=entries.prev_num, search=request.args.get('search'), sort=sort, order=order) }}"
+        <a href="{{ url_for('main.show_surat_keluar', page=entries.prev_num, search=request.args.get('search'), sort=sort, order=order) }}"
            class="text-gray-700 hover:text-blue-600">← Previous</a>
         {% endif %}
         {% if entries.has_next %}
-        <a href="{{ url_for('show_surat_keluar', page=entries.next_num, search=request.args.get('search'), sort=sort, order=order) }}"
+        <a href="{{ url_for('main.show_surat_keluar', page=entries.next_num, search=request.args.get('search'), sort=sort, order=order) }}"
            class="text-gray-700 hover:text-blue-600">Next →</a>
         {% endif %}
     </div>
@@ -146,7 +170,7 @@
         <div>
             <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                 {% if entries.page > 1 %}
-                <a href="{{ url_for('show_surat_keluar', page=1, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('main.show_surat_keluar', page=1, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">1</a>
                 {% endif %}
 
@@ -155,13 +179,13 @@
                 {% endif %}
 
                 {% for page_num in range(max(1, entries.page - 1), min(entries.pages + 1, entries.page + 2)) %}
-                <a href="{{ url_for('show_surat_keluar', page=page_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('main.show_surat_keluar', page=page_num, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {% if page_num == entries.page %}bg-indigo-600 text-white{% else %}text-gray-900 hover:bg-gray-50{% endif %} ring-1 ring-inset ring-gray-300">{{ page_num }}</a>
                 {% endfor %}
 
                 {% if entries.page < entries.pages - 2 %}
                 <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>
-                <a href="{{ url_for('show_surat_keluar', page=entries.pages, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('main.show_surat_keluar', page=entries.pages, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">{{ entries.pages }}</a>
                 {% endif %}
             </nav>

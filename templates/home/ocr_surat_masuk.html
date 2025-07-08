@@ -1,6 +1,7 @@
 {% extends "layouts/base.html" %}
 {% block head %}
     {{ super() }}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
     <style>
         /* Modern OCR Page Design */
@@ -32,18 +33,13 @@
         }
 
         .drag-drop-area {
-            border: 2px dashed #3498db;
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
-            background-color: #ffffff;
             transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
+            border: 2px dashed #d1d5db;
         }
 
         .drag-drop-area.dragover {
-            background-color: #f1f8ff;
-            border-color: #2980b9;
+            border-color: #3b82f6;
+            background-color: #eff6ff;
         }
 
         .drag-drop-area input[type="file"] {
@@ -165,68 +161,51 @@
     <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Masuk</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6">
-        <form action="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="uploadForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- File Upload Section -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Unggah Dokumen</label>
-                    <div class="flex items-center justify-center w-full">
-                        <label class="flex flex-col w-full h-32 border-4 border-dashed hover:bg-gray-100 hover:border-blue-300 group transition duration-300 ease-in-out cursor-pointer">
-                            <div class="flex flex-col items-center justify-center pt-7">
-                                <svg class="w-10 h-10 text-gray-400 group-hover:text-blue-500 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <p class="pt-1 text-sm tracking-wider text-gray-500 group-hover:text-blue-600 transition duration-300">
-                                    Pilih file atau seret ke sini
-                                </p>
-                            </div>
-                            <input type="file" name="image" id="fileInput" accept="image/*" class="opacity-0 z-50 absolute" multiple>
+                    <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition">
+                        <input 
+                            type="file" 
+                            name="image" 
+                            id="fileInput" 
+                            multiple 
+                            accept="image/jpeg,image/png,image/webp" 
+                            class="hidden"
+                            onchange="document.getElementById('selectedFiles').textContent = Array.from(this.files).map(f => f.name).join(', '); document.getElementById('filePreview').classList.remove('hidden');"
+                        >
+                        <div id="dropzoneText" class="text-gray-500">
+                            <p>Seret dan lepas dokumen di sini</p>
+                            <p class="mt-2">atau</p>
+                            <label 
+                                for="fileInput" 
+                                class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition inline-block cursor-pointer"
+                            >
+                                Pilih Dokumen
                         </label>
                     </div>
-                    
-                    <!-- Tambahan tombol upload manual -->
-                    <div class="flex justify-center mt-4 space-x-4">
-                        <button type="button" id="manualUploadBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300 flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                            </svg>
-                            Pilih File
-                        </button>
+                        <div id="filePreview" class="mt-4 hidden">
+                            <p id="selectedFiles" class="text-sm text-gray-700"></p>
                     </div>
-
-                    <!-- Notifikasi file yang dipilih -->
-                    <div id="fileNotification" class="text-sm text-gray-600 mt-2 text-center">
-                        <p id="selectedFilesText">Belum ada file dipilih</p>
                     </div>
                 </div>
-
-                <!-- OCR Options Section -->
+                <!-- Informasi Tambahan -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Pengaturan OCR</label>
-                    <div class="space-y-4">
-                        <div class="flex items-center">
-                            <input type="checkbox" name="preprocess" id="preprocess" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="preprocess" class="ml-2 block text-sm text-gray-900">
-                                Preprocessing Gambar
-                            </label>
-            </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" name="enhance_contrast" id="enhance_contrast" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="enhance_contrast" class="ml-2 block text-sm text-gray-900">
-                                Tingkatkan Kontras
-                            </label>
-            </div>
-        </div>
+                    <h3 class="text-lg font-semibold mb-4">Petunjuk Unggah</h3>
+                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-2">
+                        <li>Hanya dokumen gambar yang dapat diunggah</li>
+                        <li>Ukuran maksimal dokumen: 10 MB</li>
+                        <li>Format yang didukung: JPG, PNG, WEBP</li>
+                    </ul>
         </div>
 </div>
 
-            <!-- Proses OCR Button -->
-            <div class="text-center mt-6">
-                <button type="submit" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    Proses OCR
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
+                    Proses Dokumen
                 </button>
             </div>
         </form>
@@ -239,6 +218,18 @@
         
         <div class="flex items-center justify-center min-h-screen w-full px-4 pt-4 pb-20 text-center absolute top-0 left-0 right-0 bottom-0">
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl w-[95%] md:w-[90%] max-h-[90vh] relative z-[10000]">
+                <!-- Close Button -->
+                <button 
+                    type="button" 
+                    id="closeModalBtn" 
+                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-50"
+                    aria-label="Close Modal"
+                >
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 overflow-y-auto max-h-[75vh]">
                     <div class="sm:flex sm:items-start">
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
@@ -259,6 +250,7 @@
                                 <!-- Kolom Input -->
                                 <div class="col-span-2">
                                     <form id="extractedDataForm" class="space-y-4">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Nomor Surat</label>
@@ -267,9 +259,9 @@
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Kode Surat</label>
                                                 <input type="text" name="kode_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                    </div>
+                                            </div>
                                 </div>
-                                
+                                        
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Pengirim</label>
@@ -278,15 +270,15 @@
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Penerima</label>
                                                 <input type="text" name="penerima_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                </div>
-                            </div>
-                            
+                                            </div>
+                                        </div>
+                                        
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Isi Surat</label>
                                             <textarea name="isi_suratMasuk" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"></textarea>
                                         </div>
 
-                                        <div class="grid grid-cols-3 gap-4">
+                                        <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Jenis Surat</label>
                                                 <input type="text" name="jenis_surat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
@@ -295,24 +287,28 @@
                                                 <label class="block text-sm font-medium text-gray-700">Tanggal</label>
                                                 <input type="date" name="tanggal_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
                                             </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Nama File</label>
-                                                <input type="text" name="filename" readonly class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm">
-                                </div>
-                            </div>
-                        </form>
+                                        </div>
+                                    </form>
                     </div>
                 </div>
             </div>
                     </div>
                 </div>
+
+                <!-- Tombol Navigasi & Simpan di Modal -->
                 <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 sticky bottom-0">
                     <button type="button" id="saveExtractedData" class="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition">
                         Simpan
                     </button>
-                    <button type="button" id="closeModal" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
+                    <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
                         Tutup
-                </button>
+                    </button>
+                    <button type="button" id="prevModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
+                        Sebelumnya
+                    </button>
+                    <button type="button" id="nextModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
+                        Selanjutnya
+                    </button>
                 </div>
             </div>
         </div>
@@ -322,21 +318,122 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const filePreview = document.getElementById('file-preview');
+    
+    // Open file dialog on click
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    // Handle file selection
+    fileInput.addEventListener('change', function() {
+        filePreview.innerHTML = '';
+        Array.from(this.files).forEach(file => {
+            const preview = document.createElement('div');
+            preview.className = 'flex items-center p-3 bg-white rounded-lg border';
+            preview.innerHTML = `
+                <div class="flex-shrink-0">
+                    <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
+                    <p class="text-sm text-gray-500">${(file.size / 1024).toFixed(2)} KB</p>
+                </div>
+            `;
+            filePreview.appendChild(preview);
+        });
+    });
+    
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.add('border-blue-500', 'bg-blue-50');
+        }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+        }, false);
+    });
+    
+    dropZone.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        
+        // Trigger change event
+        const event = new Event('change');
+        fileInput.dispatchEvent(event);
+    }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
     const extractedDataList = {{ extracted_data_list | tojson | safe }};
     const imagePaths = {{ image_paths | tojson | safe }};
     const extractedDataModal = document.getElementById('extractedDataModal');
+    let currentIndex = 0;
 
-    // Tampilkan modal secara otomatis jika ada data yang diekstrak
-    if (extractedDataList.length > 0) {
-        // Ambil data pertama dari list
-        const data = extractedDataList[0];
-        const filename = data.filename;
-
-        // Atur pratinjau gambar
+    // Fungsi untuk mengisi form dengan data
+    function fillFormWithData(data) {
+        const form = document.getElementById('extractedDataForm');
+        const inputs = form.querySelectorAll('input, textarea');
+        
+        inputs.forEach(input => {
+            const name = input.name;
+            
+            // Mapping khusus untuk field-field tambahan
+            const specialMappings = {
+                'full_letter_number': () => {
+                    const components = [
+                        data['nomor_suratMasuk'] || 'Not found',
+                        (data['kodesurat1'] || 'Not found') + '.W15-A12',
+                        data['kodesurat2'] || 'Not found',
+                        data['bulan'] || 'Not found',
+                        data['tahun'] || new Date().getFullYear().toString()
+                    ];
+                    return components.join('/');
+                },
+                'kode_suratMasuk': () => data['kodesurat1'] || '',
+                'pengirim_suratMasuk': () => data['pengirim_suratMasuk'] || '',
+                'penerima_suratMasuk': () => data['penerima_suratMasuk'] || '',
+                'isi_suratMasuk': () => data['isi_suratMasuk'] || '',
+                'jenis_surat': () => data['jenis_surat'] || '',
+                'tanggal_suratMasuk': () => {
+                    if (data['dates'] && data['dates'].length > 0) {
+                        return data['dates'][0];
+                    }
+                    return '';
+                }
+            };
+            
+            if (specialMappings[name]) {
+                input.value = specialMappings[name]();
+            } else {
+                input.value = data[name] || (name === 'filename' ? data.filename : '');
+            }
+        });
+        
+        // Update gambar preview
         const imagePreview = document.getElementById('imagePreview');
         const noImageText = document.getElementById('noImageText');
-        if (filename) {
-            const imagePath = `/static/ocr/surat_masuk/${filename}`;
+        if (data.filename) {
+            const imagePath = `/static/ocr/surat_masuk/${data.filename}`;
             imagePreview.src = imagePath;
             imagePreview.classList.remove('hidden');
             noImageText.classList.add('hidden');
@@ -344,17 +441,43 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.classList.add('hidden');
             noImageText.classList.remove('hidden');
         }
+    }
 
-        // Isi form dengan data yang diekstrak
-        const form = document.getElementById('extractedDataForm');
-        const inputs = form.querySelectorAll('input, textarea');
-        inputs.forEach(input => {
-            const name = input.name;
-            input.value = data[name] || (name === 'filename' ? filename : '');
+    // Tampilkan tombol "View Extracted Data" jika ada data yang diekstrak
+    if (extractedDataList.length > 0) {
+        // Buat tombol "View Extracted Data" jika belum ada
+        let viewDataBtn = document.getElementById('viewExtractedDataBtn');
+        if (!viewDataBtn) {
+            viewDataBtn = document.createElement('button');
+            viewDataBtn.id = 'viewExtractedDataBtn';
+            viewDataBtn.className = 'bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg';
+            viewDataBtn.innerHTML = `
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                View Extracted Data (${extractedDataList.length} items)
+            `;
+            
+            // Tambahkan tombol setelah form upload
+            const uploadForm = document.querySelector('form[enctype="multipart/form-data"]');
+            if (uploadForm) {
+                // Tambahkan div container untuk tombol dengan margin
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'mt-6 text-center';
+                buttonContainer.appendChild(viewDataBtn);
+                uploadForm.parentNode.insertBefore(buttonContainer, uploadForm.nextSibling);
+            }
+        }
+        
+        // Event handler untuk tombol "View Extracted Data"
+        viewDataBtn.addEventListener('click', function() {
+            // Isi form dengan data pertama
+            fillFormWithData(extractedDataList[0]);
+            
+            // Tampilkan modal
+            extractedDataModal.classList.remove('hidden');
         });
-
-        // Tampilkan modal
-        extractedDataModal.classList.remove('hidden');
     }
 
     // Prevent scrolling of background when modal is open
@@ -367,11 +490,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Modify close modal logic
-    const closeModalBtn = document.getElementById('closeModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
     closeModalBtn.addEventListener('click', function() {
         extractedDataModal.classList.add('hidden');
         allowBackgroundScroll();
     });
+    
+    // Event handler untuk tombol close yang ada di modal
+    const closeModalBtn2 = document.getElementById('closeModalBtn');
+    if (closeModalBtn2) {
+        closeModalBtn2.addEventListener('click', function() {
+            extractedDataModal.classList.add('hidden');
+            allowBackgroundScroll();
+        });
+    }
 
     // Close modal if clicking outside
     extractedDataModal.addEventListener('click', function(event) {
@@ -381,33 +513,101 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Event handler untuk tombol navigasi
+    const prevModalBtn = document.getElementById('prevModalBtn');
+    const nextModalBtn = document.getElementById('nextModalBtn');
+    
+    if (prevModalBtn) {
+        prevModalBtn.addEventListener('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                fillFormWithData(extractedDataList[currentIndex]);
+            } else {
+                alert('Sudah di entri pertama.');
+            }
+        });
+    }
+    
+    if (nextModalBtn) {
+        nextModalBtn.addEventListener('click', function() {
+            if (currentIndex < extractedDataList.length - 1) {
+                currentIndex++;
+                fillFormWithData(extractedDataList[currentIndex]);
+            } else {
+                alert('Tidak ada entri lagi untuk diproses.');
+            }
+        });
+    }
+    
     // Simpan data
     const saveExtractedDataBtn = document.getElementById('saveExtractedData');
     saveExtractedDataBtn.addEventListener('click', function() {
-        const formData = new FormData(document.getElementById('extractedDataForm'));
+        const form = document.getElementById('extractedDataForm');
+        const formData = new FormData(form);
         const extractedData = [];
+
+        // Ambil data dari extractedDataList untuk komponen yang tidak ditampilkan di form
+        const currentData = extractedDataList[currentIndex];
+        
+        // Konstruksi full_letter_number secara dinamis
+        const nomor_suratMasuk = formData.get('full_letter_number') || 'Not found';
+        const kodesurat1 = formData.get('kode_suratMasuk') || 'Not found';
+        const kodePA = 'W15-A12';  // Sesuaikan dengan kode PA yang diinginkan
+        
+        // Ambil data dari backend untuk komponen yang tidak ditampilkan di form
+        const kodesurat2 = currentData['kodesurat2'] || 'Not found';
+        const bulan = currentData['bulan'] || 'Not found';
+        const tahun = currentData['tahun'] || new Date().getFullYear().toString();
+
+        // Konstruksi full_letter_number
+        const full_letter_number = [
+            nomor_suratMasuk,
+            kodesurat1 + '.' + kodePA,
+            kodesurat2,
+            bulan,
+            tahun
+        ].join('/');
 
         // Ambil data dari form
         const rowData = {};
         formData.forEach((value, key) => {
             rowData[key] = value;
         });
+
+        // Tambahkan full_letter_number yang baru dikonstruksi
+        rowData['full_letter_number'] = full_letter_number;
+
         extractedData.push(rowData);
+
+        // Ambil CSRF token dari input tersembunyi
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
         // Kirim data ke server
         fetch("{{ url_for('ocr_surat_masuk.save_extracted_data') }}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken  // Gunakan token dari input tersembunyi
             },
-            body: JSON.stringify(extractedData)
+            body: JSON.stringify(extractedData),
+            credentials: 'same-origin'  // Penting untuk mengirim cookies
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                // Log error response
+                console.error('Response status:', response.status);
+                return response.text().then(text => {
+                    console.error('Response text:', text);
+                    throw new Error('Network response was not ok');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 alert('Data berhasil disimpan');
                 extractedDataModal.classList.add('hidden');
-                    window.location.reload();
+                window.location.reload();
             } else {
                 alert('Gagal menyimpan data: ' + data.error);
             }
@@ -416,66 +616,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             alert('Terjadi kesalahan saat menyimpan data');
         });
-    });
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const fileInput = document.getElementById('fileInput');
-    const manualUploadBtn = document.getElementById('manualUploadBtn');
-    const selectedFilesText = document.getElementById('selectedFilesText');
-
-    // Trigger file input when manual upload button is clicked
-    manualUploadBtn.addEventListener('click', function() {
-        fileInput.click();
-    });
-
-    // Update file selection notification
-    fileInput.addEventListener('change', function() {
-        if (this.files.length > 0) {
-            const fileNames = Array.from(this.files)
-                .map(file => file.name)
-                .join(', ');
-            
-            selectedFilesText.textContent = `Dipilih: ${fileNames}`;
-            selectedFilesText.classList.remove('text-gray-600');
-            selectedFilesText.classList.add('text-green-600');
-        } else {
-            selectedFilesText.textContent = 'Belum ada file dipilih';
-            selectedFilesText.classList.remove('text-green-600');
-            selectedFilesText.classList.add('text-gray-600');
-        }
-    });
-
-    // Drag and drop functionality
-    const dropZone = document.querySelector('label');
-
-    dropZone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        this.classList.add('border-blue-500', 'bg-blue-50');
-    });
-
-    dropZone.addEventListener('dragleave', function(e) {
-        this.classList.remove('border-blue-500', 'bg-blue-50');
-    });
-
-    dropZone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.classList.remove('border-blue-500', 'bg-blue-50');
-        
-        const droppedFiles = e.dataTransfer.files;
-        fileInput.files = droppedFiles;
-        
-        if (droppedFiles.length > 0) {
-            const fileNames = Array.from(droppedFiles)
-                .map(file => file.name)
-                .join(', ');
-            
-            selectedFilesText.textContent = `Dipilih: ${fileNames}`;
-            selectedFilesText.classList.remove('text-gray-600');
-            selectedFilesText.classList.add('text-green-600');
-        }
     });
 });
 </script>

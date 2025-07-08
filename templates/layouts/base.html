@@ -3,7 +3,7 @@
 {% include 'includes/head.html' %}
 
 <body class="bg-gray-50">
-  <div class="modern-sidebar">
+  <div class="modern-sidebar sidebar-collapsed">
     <div class="logo-details">
       <i class="fas fa-envelope-open-text"></i>
       <span class="logo_name">Surat App</span>
@@ -13,7 +13,7 @@
     </div>
     <ul class="nav-links">
       <li>
-        <a href="{{ url_for('index') }}">
+        <a href="{{ url_for('main.index') }}">
           <i class="fas fa-home"></i>
           <span class="links_name">Dashboard</span>
         </a>
@@ -25,8 +25,8 @@
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="showSuratMenu">
-          <a href="{{ url_for('show_surat_masuk') }}">Surat Masuk</a>
-          <a href="{{ url_for('show_surat_keluar') }}">Surat Keluar</a>
+          <a href="{{ url_for('main.show_surat_masuk') }}">Surat Masuk</a>
+          <a href="{{ url_for('main.show_surat_keluar') }}">Surat Keluar</a>
         </div>
       </li>
       <li>
@@ -36,7 +36,7 @@
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="templatesMenu">
-          <a href="{{ url_for('generate_cuti') }}">Generate Cuti</a>
+          <a href="{{ url_for('main.generate_cuti') }}">Generate Cuti</a>
         </div>
       </li>
       {% if current_user.role != 'karyawan' %}
@@ -47,8 +47,8 @@
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="inputSuratMenu">
-          <a href="{{ url_for('input_surat_masuk') }}">Surat Masuk</a>
-          <a href="{{ url_for('input_surat_keluar') }}">Surat Keluar</a>
+          <a href="{{ url_for('main.input_surat_masuk') }}">Surat Masuk</a>
+          <a href="{{ url_for('main.input_surat_keluar') }}">Surat Keluar</a>
         </div>
       </li>
       <li>
@@ -60,10 +60,11 @@
         <div class="dropdown" id="ocrMenu">
           <a href="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}">OCR Surat Masuk</a>
           <a href="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}">OCR Surat Keluar</a>
+          <a href="{{ url_for('main.ocr_test') }}">OCR Test</a>
         </div>
       </li>
       <li>
-        <a href="{{ url_for('laporan_statistik') }}">
+        <a href="{{ url_for('main.laporan_statistik') }}">
           <i class="fas fa-chart-bar"></i>
           <span class="links_name">Laporan Statistik</span>
         </a>
@@ -75,14 +76,14 @@
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="pegawaiMenu">
-          <a href="{{ url_for('pegawai_list') }}">List Pegawai</a>
-          <a href="{{ url_for('kelola_pegawai') }}">Pegawai</a>
+          <a href="{{ url_for('main.pegawai_list') }}">List Pegawai</a>
+          <a href="{{ url_for('main.pegawai') }}">Pegawai</a>
         </div>
       </li>
       {% endif %}
       {% if current_user.is_admin %}
       <li>
-        <a href="{{ url_for('edit_user_view') }}">
+        <a href="{{ url_for('main.edit_user_view') }}">
           <i class="fas fa-user-cog"></i>
           <span class="links_name">Manajemen User</span>
         </a>
@@ -94,13 +95,15 @@
           <span class="links_name">Logout</span>
         </a>
       </li>
+      {% if current_user.is_authenticated %}
       <li>
-        <a href="{{ url_for('edit_user', user_id=current_user.id) }}" class="user-profile-link">
+        <a href="{{ url_for('main.edit_user', user_id=current_user.id) }}" class="user-profile-link">
           <i class="fas fa-user"></i>
-          <span class="links_name">{{ current_user.username }}</span>
+          <span class="links_name">{{ current_user.email }}</span>
           <span class="user-role-badge" data-role="{{ current_user.role }}">{{ current_user.role.upper() }}</span>
         </a>
       </li>
+      {% endif %}
       {% if current_user.role == 'pimpinan' %}
       <li class="dropdown">
         <a href="#" class="dropdown-toggle">
@@ -110,16 +113,7 @@
         </a>
         <ul class="dropdown-menu">
           <li>
-            <a href="{{ url_for('list_pending_surat_masuk') }}">
-              <i class="fas fa-envelope-open-text"></i>
-              <span class="links_name">Surat Masuk Pending</span>
-              {% if g.pending_surat_masuk_count > 0 %}
-              <span class="badge bg-danger">{{ g.pending_surat_masuk_count }}</span>
-              {% endif %}
-            </a>
-          </li>
-          <li>
-            <a href="{{ url_for('list_pending_surat_keluar') }}">
+            <a href="{{ url_for('main.list_pending_surat_keluar') }}">
               <i class="fas fa-paper-plane"></i>
               <span class="links_name">Surat Keluar Pending</span>
               {% if g.pending_surat_keluar_count > 0 %}
@@ -132,13 +126,13 @@
       {% endif %}
     </ul>
   </div>
-  <div class="main-content" style="margin-left:260px;">
+  <div class="main-content" style="margin-left:80px;">
     <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-20">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <a class="flex items-center text-lg font-semibold text-gray-800" href="{{ url_for('index') }}">
+            <a class="flex items-center text-lg font-semibold text-gray-800" href="{{ url_for('main.index') }}">
               <i class="fas fa-envelope-open-text text-blue-600 mr-2"></i>
               Surat Masuk dan Surat Keluar
             </a>
@@ -147,9 +141,9 @@
             <div class="relative mr-4">
               <button class="notification-bell-btn relative">
                 <i class="fas fa-bell text-gray-600 hover:text-blue-600 transition-colors duration-200"></i>
-                {% if g.pending_surat_masuk_count > 0 or g.pending_surat_keluar_count > 0 %}
+                {% if g.pending_surat_keluar_count > 0 %}
                 <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {{ g.pending_surat_masuk_count + g.pending_surat_keluar_count }}
+                  {{ g.pending_surat_keluar_count }}
                 </span>
                 {% endif %}
               </button>
@@ -158,16 +152,8 @@
               <div class="notification-dropdown hidden absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                 <div class="p-4">
                   <h3 class="text-sm font-semibold text-gray-700 mb-2">Notifikasi</h3>
-                  {% if g.pending_surat_masuk_count > 0 %}
-                  <a href="{{ url_for('list_pending_surat_masuk') }}" class="block py-2 hover:bg-gray-100">
-                    <div class="flex items-center">
-                      <i class="fas fa-envelope mr-2 text-blue-500"></i>
-                      <span class="text-sm">Surat Masuk Pending: {{ g.pending_surat_masuk_count }}</span>
-                    </div>
-                  </a>
-                  {% endif %}
                   {% if g.pending_surat_keluar_count > 0 %}
-                  <a href="{{ url_for('list_pending_surat_keluar') }}" class="block py-2 hover:bg-gray-100">
+                  <a href="{{ url_for('main.list_pending_surat_keluar') }}" class="block py-2 hover:bg-gray-100">
                     <div class="flex items-center">
                       <i class="fas fa-paper-plane mr-2 text-green-500"></i>
                       <span class="text-sm">Surat Keluar Pending: {{ g.pending_surat_keluar_count }}</span>
@@ -208,24 +194,26 @@
     <!-- Breadcrumb -->
     <nav class="bg-white px-4 py-3 border-b border-gray-200">
       <ol class="flex flex-wrap items-center text-sm text-gray-600">
+        {% if request.endpoint != 'main.index' %}
         <li class="flex items-center">
-          <a href="{{ url_for('index') }}" class="hover:text-blue-600 transition-colors duration-200">
+          <a href="{{ url_for('main.index') }}" class="hover:text-blue-600 transition-colors duration-200">
             <i class="fas fa-home mr-1"></i>
             Home
           </a>
         </li>
+        {% endif %}
         {% if breadcrumbs %}
-          {% for breadcrumb in breadcrumbs %}
+          {% for text, url in breadcrumbs %}
             <li class="flex items-center">
               <svg class="mx-2 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
               </svg>
               {% if not loop.last %}
-                <a href="{{ breadcrumb.url }}" class="hover:text-blue-600 transition-colors duration-200">
-                  {{ breadcrumb.text }}
+                <a href="{{ url }}" class="hover:text-blue-600 transition-colors duration-200">
+                  {{ text }}
                 </a>
               {% else %}
-                <span class="font-medium text-gray-800">{{ breadcrumb.text }}</span>
+                <span class="font-medium text-gray-800">{{ text }}</span>
               {% endif %}
             </li>
           {% endfor %}
@@ -247,14 +235,47 @@
     // Dropdown menu toggle for modern sidebar
     function toggleMenu(e, id) {
       e.preventDefault();
-      document.querySelectorAll('.modern-sidebar .dropdown').forEach(function(el) {
-        if (el.id !== id) el.parentElement.classList.remove('showMenu');
-      });
-      var el = document.getElementById(id);
-      if (el) {
-        el.parentElement.classList.toggle('showMenu');
+      const dropdown = document.getElementById(id);
+      const chevron = e.currentTarget.querySelector('.fa-chevron-down');
+      
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        chevron.style.transform = 'rotate(0deg)';
+      } else {
+        dropdown.classList.add('show');
+        chevron.style.transform = 'rotate(180deg)';
       }
     }
+
+    // Sidebar toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.querySelector('.modern-sidebar');
+      const sidebarToggle = document.querySelector('.sidebar-toggle');
+      const mainContent = document.querySelector('.main-content');
+
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('sidebar-collapsed');
+        mainContent.style.marginLeft = sidebar.classList.contains('sidebar-collapsed') ? '80px' : '250px';
+      });
+
+      // Notification bell toggle
+      const notificationBell = document.querySelector('.notification-bell-btn');
+      const notificationDropdown = document.querySelector('.notification-dropdown');
+
+      if (notificationBell && notificationDropdown) {
+        notificationBell.addEventListener('click', function() {
+          notificationDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
+            notificationDropdown.classList.add('hidden');
+          }
+        });
+      }
+    });
+
     // Mobile menu toggle
     document.addEventListener('DOMContentLoaded', function() {
       const mobileMenuButton = document.querySelector('.mobile-menu-button');
@@ -265,86 +286,6 @@
         });
       }
     });
-
-    // Sidebar toggle functionality
-    const sidebar = document.querySelector('.modern-sidebar');
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
-    const mainContent = document.querySelector('.main-content');
-    const sidebarLinks = document.querySelectorAll('.nav-links li a');
-    const logoIcon = document.querySelector('.logo-details i');
-    const logoName = document.querySelector('.logo-details .logo_name');
-
-    sidebarToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('collapsed');
-        
-        // Adjust main content margin
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '80px';
-            
-            // Hide text, keep icons
-            sidebarLinks.forEach(link => {
-                const textSpan = link.querySelector('.links_name');
-                const dropdownToggle = link.querySelector('.fa-chevron-down');
-                
-                if (textSpan) {
-                    textSpan.style.display = 'none';
-                }
-                
-                if (dropdownToggle) {
-                    dropdownToggle.style.display = 'none';
-                }
-            });
-
-            // Adjust logo
-            if (logoIcon) {
-                logoIcon.style.fontSize = '24px';
-                logoIcon.style.textAlign = 'center';
-                logoIcon.style.width = '100%';
-            }
-            if (logoName) {
-                logoName.style.opacity = '0';
-                logoName.style.width = '0';
-            }
-        } else {
-            mainContent.style.marginLeft = '260px';
-            
-            // Restore text and dropdown toggles
-            sidebarLinks.forEach(link => {
-                const textSpan = link.querySelector('.links_name');
-                const dropdownToggle = link.querySelector('.fa-chevron-down');
-                
-                if (textSpan) {
-                    textSpan.style.display = 'inline';
-                }
-                
-                if (dropdownToggle) {
-                    dropdownToggle.style.display = 'inline';
-                }
-            });
-
-            // Restore logo
-            if (logoIcon) {
-                logoIcon.style.fontSize = '28px';
-                logoIcon.style.textAlign = 'center';
-                logoIcon.style.width = 'auto';
-            }
-            if (logoName) {
-                logoName.style.opacity = '1';
-                logoName.style.width = 'auto';
-            }
-        }
-    });
-
-    // Mobile responsiveness
-    const mobileMenuButton = document.querySelector('.mobile-menu-button');
-    const mobileMenu = document.querySelector('.mobile-menu');
-
-    if (mobileMenuButton) {
-      mobileMenuButton.addEventListener('click', function() {
-        mobileMenu.classList.toggle('hidden');
-        sidebar.classList.toggle('mobile-open');
-      });
-    }
 
     // Close mobile sidebar when clicking outside
     document.addEventListener('click', function(e) {
@@ -375,6 +316,13 @@
   });
   </script>
   {% endblock %}
+
+  <!-- Include global JavaScript files -->
+  <script src="{{ url_for('static', filename='assets/js/pcoded.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/plugins/bootstrap.min.js') }}"></script>
+  
+  <!-- Page-specific scripts -->
+  {% block scripts %}{% endblock %}
 </body>
 
 </html>

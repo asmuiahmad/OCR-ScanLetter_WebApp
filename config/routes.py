@@ -11,24 +11,29 @@ from functools import wraps
 import pytesseract
 from flask import (
     render_template, request, send_file, redirect, url_for,
-    flash, jsonify, session, Blueprint, g
+    flash, jsonify, session, Blueprint, g, current_app
 )
 from flask_login import (
     login_user, login_required, logout_user, current_user
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from sqlalchemy import desc, asc, extract, func
+from sqlalchemy import desc, asc, extract, func, or_
 from docx import Document
 from mailmerge import MailMerge
 
 # 🔹 Local Application Imports
-from app import app
 from config.extensions import db
 from config.ocr import ocr_bp
 from config.ocr_utils import hitung_field_not_found
 from config.models import User, SuratMasuk, SuratKeluar, Pegawai
-from config.forms import LoginForm, RegistrationForm
+from config.forms import LoginForm, RegistrationForm, SuratMasukForm
+
+# Create main blueprint for routes
+main_bp = Blueprint('main', __name__)
+
+# Create auth blueprint
+auth_bp = Blueprint('auth', __name__)
 
 def role_required(*roles):
     def decorator(f):
@@ -40,15 +45,12 @@ def role_required(*roles):
         return decorated_function
     return decorator
 
-# Create auth blueprint
-auth_bp = Blueprint('auth', __name__)
-
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and check_password_hash(user.password, form.password.data):
+        if user and form.password.data and check_password_hash(user.password, form.password.data):
             if not user.is_approved:
                 flash('Your account is pending approval by an administrator.', 'warning')
                 return render_template('auth/login.html', form=form)
@@ -59,7 +61,7 @@ def login():
             user.login_count += 1
             db.session.commit()
             login_user(user)
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
         flash('Invalid email or password', 'error')
     return render_template('auth/login.html', form=form)
 
@@ -97,18 +99,16 @@ def register():
             flash(f'An error occurred during registration: {str(e)}', 'error')
     return render_template('auth/register.html', form=form)
 
-@app.before_request
+@main_bp.before_app_request
 def set_pending_surat_counts():
     # Initialize default values
-    g.pending_surat_masuk_count = 0
     g.pending_surat_keluar_count = 0
     
     # Only set counts for authenticated pimpinan users
     if current_user.is_authenticated and current_user.role == 'pimpinan':
-        g.pending_surat_masuk_count = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
         g.pending_surat_keluar_count = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
 
-@app.route('/')
+@main_bp.route('/')
 @login_required
 def index():
     # Total surat
@@ -168,136 +168,180 @@ def index():
         users=users
     )
 
-@app.route('/users', methods=['GET'])
+@main_bp.route('/users', methods=['GET'])
 @login_required
 def user_list():
     users = User.query.all()
     return render_template('auth/user_list.html', users=users)
 
-@app.route('/last-logins', methods=['GET'])
+@main_bp.route('/last-logins', methods=['GET'])
 def last_logins():
     users = User.query.order_by(User.last_login.desc()).limit(10).all()
     result = [{"username": user.email, "last_login": user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never'} for user in users]
     return jsonify(result)
 
-@app.route('/show_surat_keluar', methods=['GET'])
+@main_bp.route('/show_surat_keluar', methods=['GET'])
 @login_required
 def show_surat_keluar():
-    sort = request.args.get('sort', 'tanggal_suratKeluar')
-    order = request.args.get('order', 'asc')
-    page = request.args.get('page', 1, type=int)
-    search = request.args.get('search', '', type=str).strip()
+    try:
+        # Ambil parameter pencarian
+        search_query = request.args.get('search', '')
+        
+        # Ambil parameter sorting
+        sort = request.args.get('sort', 'created_at')
+        order = request.args.get('order', 'desc')
+        
+        # Daftar kolom yang valid untuk sorting
+        valid_sort_columns = [
+            'tanggal_suratKeluar', 'pengirim_suratKeluar', 'penerima_suratKeluar', 
+            'nomor_suratKeluar', 'isi_suratKeluar', 'created_at', 'status_suratKeluar'
+        ]
+        
+        # Validasi kolom sorting
+        if sort not in valid_sort_columns:
+            sort = 'created_at'
+        
+        # Tentukan arah sorting
+        order = 'desc' if order == 'desc' else 'asc'
+        
+        # Buat query dasar
+        query = SuratKeluar.query
 
-    sort_options = {
-        'tanggal_suratKeluar': SuratKeluar.tanggal_suratKeluar,
-        'pengirim_suratKeluar': SuratKeluar.pengirim_suratKeluar,
-        'penerima_suratKeluar': SuratKeluar.penerima_suratKeluar,
-        'nomor_suratKeluar': SuratKeluar.nomor_suratKeluar,
-        'isi_suratKeluar': SuratKeluar.isi_suratKeluar,
-        'created_at': SuratKeluar.created_at
-    }
+        # Tambahkan filter pencarian jika ada
+        if search_query:
+            search_filter = f'%{search_query}%'
+            query = query.filter(
+                or_(
+                    SuratKeluar.nomor_suratKeluar.ilike(search_filter),
+                    SuratKeluar.pengirim_suratKeluar.ilike(search_filter),
+                    SuratKeluar.penerima_suratKeluar.ilike(search_filter),
+                    SuratKeluar.isi_suratKeluar.ilike(search_filter)
+                )
+            )
+        
+        # Tambahkan sorting
+        if sort == 'tanggal_suratKeluar':
+            query = query.order_by(SuratKeluar.tanggal_suratKeluar.desc() if order == 'desc' else SuratKeluar.tanggal_suratKeluar.asc())
+        elif sort == 'pengirim_suratKeluar':
+            query = query.order_by(SuratKeluar.pengirim_suratKeluar.desc() if order == 'desc' else SuratKeluar.pengirim_suratKeluar.asc())
+        elif sort == 'penerima_suratKeluar':
+            query = query.order_by(SuratKeluar.penerima_suratKeluar.desc() if order == 'desc' else SuratKeluar.penerima_suratKeluar.asc())
+        elif sort == 'nomor_suratKeluar':
+            query = query.order_by(SuratKeluar.nomor_suratKeluar.desc() if order == 'desc' else SuratKeluar.nomor_suratKeluar.asc())
+        elif sort == 'isi_suratKeluar':
+            query = query.order_by(SuratKeluar.isi_suratKeluar.desc() if order == 'desc' else SuratKeluar.isi_suratKeluar.asc())
+        elif sort == 'status_suratKeluar':
+            query = query.order_by(SuratKeluar.status_suratKeluar.desc() if order == 'desc' else SuratKeluar.status_suratKeluar.asc())
+        else:
+            # Default sorting by created_at
+            query = query.order_by(SuratKeluar.created_at.desc() if order == 'desc' else SuratKeluar.created_at.asc())
+        
+        # Lakukan paginasi
+        page = request.args.get('page', 1, type=int)
+        per_page = 10  # Jumlah item per halaman
+        entries = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    sort_column = sort_options.get(sort, SuratKeluar.tanggal_suratKeluar)
-    order_by = asc(sort_column) if order == 'asc' else desc(sort_column)
+        # Debugging: Log query details
+        current_app.logger.info(f"Showing Surat Keluar - Page: {page}, Sort: {sort}, Order: {order}")
 
-    query = SuratKeluar.query
+        return render_template('home/show_surat_keluar.html',
+                               entries=entries, 
+                               sort=sort,
+                               order=order)
+    except Exception as e:
+        # Log the full error details with traceback
+        current_app.logger.error(f"Error in show_surat_keluar: {str(e)}", exc_info=True)
+        
+        # Flash a user-friendly error message
+        flash('An error occurred while retrieving Surat Keluar. Please try again later.', 'error')
+        
+        # Redirect to a safe page
+        return redirect(url_for('main.index'))
 
-    if search:
-        query = query.filter(
-            SuratKeluar.pengirim_suratKeluar.ilike(f'%{search}%') |
-            SuratKeluar.penerima_suratKeluar.ilike(f'%{search}%') |
-            SuratKeluar.nomor_suratKeluar.ilike(f'%{search}%') |
-            SuratKeluar.isi_suratKeluar.ilike(f'%{search}%')
-        )
-
-    surat_keluar = query.order_by(order_by).paginate(page=page, per_page=10)
-
-    return render_template('home/show_surat_keluar.html',
-                           entries=surat_keluar,
-                           sort=sort,
-                           order=order,
-                           search=search)
-
-@app.route('/show_surat_masuk', methods=['GET'])
+@main_bp.route('/show_surat_masuk', methods=['GET'])
 @login_required
 def show_surat_masuk():
-    sort = request.args.get('sort', 'tanggal_suratMasuk')
-    order = request.args.get('order', 'asc')
-    page = request.args.get('page', 1, type=int)
-    search = request.args.get('search', '').strip()
-    sort_options = {
-        'tanggal_suratMasuk': SuratMasuk.tanggal_suratMasuk,
-        'pengirim_suratMasuk': SuratMasuk.pengirim_suratMasuk,
-        'penerima_suratMasuk': SuratMasuk.penerima_suratMasuk,
-        'nomor_suratMasuk': SuratMasuk.nomor_suratMasuk,
-        'kode_suratMasuk': SuratMasuk.kode_suratMasuk,
-        'jenis_suratMasuk': SuratMasuk.jenis_suratMasuk,
-        'isi_suratMasuk': SuratMasuk.isi_suratMasuk
-    }
+    try:
+        sort = request.args.get('sort', 'tanggal_suratMasuk')
+        order = request.args.get('order', 'desc')
+        page = request.args.get('page', 1, type=int)
+        search = request.args.get('search', '').strip()
+        
+        sort_options = {
+            'tanggal_suratMasuk': SuratMasuk.tanggal_suratMasuk,
+            'pengirim_suratMasuk': SuratMasuk.pengirim_suratMasuk,
+            'penerima_suratMasuk': SuratMasuk.penerima_suratMasuk,
+            'nomor_suratMasuk': SuratMasuk.nomor_suratMasuk,
+            'isi_suratMasuk': SuratMasuk.isi_suratMasuk,
+            'created_at': SuratMasuk.created_at,
+            'status_suratMasuk': SuratMasuk.status_suratMasuk
+        }
 
-    sort_column = sort_options.get(sort, SuratMasuk.tanggal_suratMasuk)
-    order_by = asc(sort_column) if order == 'asc' else desc(sort_column)
+        sort_column = sort_options.get(sort, SuratMasuk.tanggal_suratMasuk)
+        order_by = asc(sort_column) if order == 'asc' else desc(sort_column)
 
-    query = SuratMasuk.query
+        query = SuratMasuk.query
 
-    if search:
-        like_pattern = f"%{search}%"
-        query = query.filter(
-            (SuratMasuk.pengirim_suratMasuk.ilike(like_pattern)) |
-            (SuratMasuk.penerima_suratMasuk.ilike(like_pattern)) |
-            (SuratMasuk.nomor_suratMasuk.ilike(like_pattern)) |
-            (SuratMasuk.kode_suratMasuk.ilike(like_pattern)) |
-            (SuratMasuk.jenis_suratMasuk.ilike(like_pattern)) |
-            (SuratMasuk.isi_suratMasuk.ilike(like_pattern))
+        if search:
+            like_pattern = f"%{search}%"
+            query = query.filter(
+                (SuratMasuk.pengirim_suratMasuk.ilike(like_pattern)) |
+                (SuratMasuk.penerima_suratMasuk.ilike(like_pattern)) |
+                (SuratMasuk.nomor_suratMasuk.ilike(like_pattern)) |
+                (SuratMasuk.isi_suratMasuk.ilike(like_pattern))
+            )
+
+        surat_masuk_entries = query.order_by(order_by).paginate(page=page, per_page=20)
+
+        return render_template(
+            'home/show_surat_masuk.html',
+            entries=surat_masuk_entries,
+            sort=sort,
+            order=order,
+            search=search
         )
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
-    surat_masuk_entries = query.order_by(order_by).paginate(page=page, per_page=20)
+@main_bp.route('/test_surat_masuk', methods=['GET'])
+def test_surat_masuk():
+    # Test route without login requirement
+    try:
+        surat_masuk_entries = SuratMasuk.query.paginate(page=1, per_page=20)
+        return render_template(
+            'home/show_surat_masuk.html',
+            entries=surat_masuk_entries,
+            sort='tanggal_suratMasuk',
+            order='asc',
+            search=''
+        )
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
-    return render_template(
-        'home/show_surat_masuk.html',
-        entries=surat_masuk_entries,
-        sort=sort,
-        order=order,
-        search=search
-    )
-
-@app.route('/input_surat_masuk', methods=['GET', 'POST'])
+@main_bp.route('/input_surat_masuk', methods=['GET', 'POST'])
 @login_required
 @role_required('admin', 'pimpinan')
 def input_surat_masuk():
-    # 🔒 Ensure access for admin and pimpinan
-    if request.method == 'POST':
+    form = SuratMasukForm()
+    if form.validate_on_submit():
         try:
-            # ✅ Ambil dan validasi input dari form
-            tanggal_str = request.form.get('tanggal_suratMasuk')
-            pengirim = request.form.get('pengirim_suratMasuk')
-            penerima = request.form.get('penerima_suratMasuk')
-            nomor = request.form.get('nomor_suratMasuk')
-            kode = request.form.get('kode_suratMasuk')
-            jenis = request.form.get('jenis_suratMasuk')
-            isi = request.form.get('isi_suratMasuk')
-            file = request.files.get('image')
+            # Get file data
+            file_data = None
+            if form.image.data:
+                file_data = form.image.data.read()
 
-            if not all([tanggal_str, pengirim, penerima, nomor, kode, jenis, isi]):
-                flash("All fields are required.", 'warning')
-                return redirect(request.url)
-
-            tanggal_obj = datetime.strptime(tanggal_str, '%Y-%m-%d')
-
-            full_letter_number = nomor  # Kamu bisa tambahkan format lain jika perlu
-            file_data = file.read() if file and file.filename else None
-
+            # Create new SuratMasuk object
             new_surat = SuratMasuk(
-                tanggal_suratMasuk=tanggal_obj,
-                pengirim_suratMasuk=pengirim,
-                penerima_suratMasuk=penerima,
-                nomor_suratMasuk=nomor,
-                kode_suratMasuk=kode,
-                jenis_suratMasuk=jenis,
-                isi_suratMasuk=isi,
-                full_letter_number=full_letter_number,
+                tanggal_suratMasuk=form.tanggal_suratMasuk.data,
+                pengirim_suratMasuk=form.pengirim_suratMasuk.data,
+                penerima_suratMasuk=form.penerima_suratMasuk.data,
+                nomor_suratMasuk=form.nomor_suratMasuk.data,
+                kode_suratMasuk=form.kode_suratMasuk.data,
+                jenis_suratMasuk=form.jenis_suratMasuk.data,
+                isi_suratMasuk=form.isi_suratMasuk.data,
+                full_letter_number=form.nomor_suratMasuk.data,
                 gambar_suratMasuk=file_data,
-                status_suratMasuk='pending'  # Set default status
+                status_suratMasuk='approved'
             )
 
             db.session.add(new_surat)
@@ -305,16 +349,13 @@ def input_surat_masuk():
             flash('Surat Masuk has been added successfully!', 'success')
             return redirect(url_for('show_surat_masuk'))
 
-        except ValueError:
-            flash('Invalid date format. Please use YYYY-MM-DD.', 'danger')
         except Exception as e:
             db.session.rollback()
             flash(f'Error adding Surat Masuk: {str(e)}', 'danger')
 
-    return render_template('home/input_surat_masuk.html')
+    return render_template('home/input_surat_masuk.html', form=form)
 
-
-@app.route('/input_surat_keluar', methods=['GET', 'POST'])
+@main_bp.route('/input_surat_keluar', methods=['GET', 'POST'])
 @login_required
 @role_required('admin', 'pimpinan')
 def input_surat_keluar():
@@ -346,12 +387,12 @@ def input_surat_keluar():
 
     return render_template('home/input_surat_keluar.html')
 
-@app.route('/edit_surat_keluar/<int:id>', methods=['GET', 'POST'])
+@main_bp.route('/edit_surat_keluar/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_surat_keluar(id):
     if not current_user.is_admin:
         flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
 
     entry = SuratKeluar.query.get_or_404(id)
     if request.method == 'POST':
@@ -365,7 +406,7 @@ def edit_surat_keluar(id):
         return redirect(url_for('show_surat_keluar'))
     return render_template('home/edit_surat_keluar.html', entry=entry)
 
-@app.route('/delete_surat_keluar/<int:id>', methods=['POST'])
+@main_bp.route('/delete_surat_keluar/<int:id>', methods=['POST'])
 @login_required
 def delete_surat_keluar(id):
     entry = SuratKeluar.query.get_or_404(id)
@@ -374,7 +415,7 @@ def delete_surat_keluar(id):
     flash('Surat Keluar has been deleted successfully!', 'success')
     return redirect(url_for('show_surat_keluar'))
 
-@app.route('/edit_surat_masuk/<int:id_suratMasuk>', methods=['GET', 'POST'])
+@main_bp.route('/edit_surat_masuk/<int:id_suratMasuk>', methods=['GET', 'POST'])
 @login_required
 def edit_surat_masuk(id_suratMasuk):
     surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
@@ -403,7 +444,7 @@ def edit_surat_masuk(id_suratMasuk):
     
     return render_template('home/edit_surat_masuk.html', surat=surat_masuk)
 
-@app.route('/delete_surat_masuk/<int:id_suratMasuk>', methods=['POST'])
+@main_bp.route('/delete_surat_masuk/<int:id_suratMasuk>', methods=['POST'])
 @login_required
 def delete_surat_masuk(id_suratMasuk):
     surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
@@ -420,7 +461,7 @@ def delete_surat_masuk(id_suratMasuk):
 
 from sqlalchemy import or_
 
-@app.route("/laporan-statistik")
+@main_bp.route("/laporan-statistik")
 @login_required
 @role_required('admin', 'pimpinan')
 def laporan_statistik():
@@ -525,29 +566,34 @@ def laporan_statistik():
             total_keluar=total_keluar
     )
 
-@app.route('/edit-user/<int:user_id>', methods=['GET', 'POST'])
+@main_bp.route('/edit-user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def edit_user(user_id):
+    # Check if current user is admin or editing their own profile
+    if not current_user.is_admin and current_user.id != user_id:
+        flash('You do not have permission to edit this user.', 'error')
+        return redirect(url_for('main.index'))
+    
     user = User.query.get_or_404(user_id)
 
     if request.method == 'POST':
-        user.username = request.form['username']
+        user.email = request.form['email']
         new_password = request.form['password']
         if new_password:
             user.password = generate_password_hash(new_password)
         db.session.commit()
         flash('User updated successfully!')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
 
-    return render_template('auth/edit_users.html', user=user)
+    return render_template('auth/edit_users.html', users=[user], single_user=True)
 
-@app.route('/edit-user', methods=['GET', 'POST'])
+@main_bp.route('/edit-user', methods=['GET', 'POST'])
 @login_required
 def edit_user_view():
     # Check if current user is admin
     if not current_user.is_admin:
         flash('You do not have permission to edit users.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     users = User.query.all()
 
@@ -557,6 +603,10 @@ def edit_user_view():
         password = request.form.get('password')
         role = request.form.get('role')
         is_approved = 'is_approved' in request.form
+
+        if not user_id:
+            flash('Please select a user to edit.', 'error')
+            return redirect(url_for('main.edit_user_view'))
 
         user = User.query.get(user_id)
         if user:
@@ -575,11 +625,11 @@ def edit_user_view():
         else:
             flash('User not found.', 'error')
 
-        return redirect(url_for('edit_user_view'))
+        return redirect(url_for('main.edit_user_view'))
 
-    return render_template('auth/edit_users.html', users=users)
+    return render_template('auth/edit_users.html', users=users, single_user=False)
 
-@app.route('/get-user-data/<int:user_id>')
+@main_bp.route('/get-user-data/<int:user_id>')
 @login_required
 def get_user_data(user_id):
     user = User.query.get(user_id)
@@ -593,13 +643,13 @@ def get_user_data(user_id):
     else:
         return jsonify({"success": False}), 404
 
-@app.route('/approve-user/<int:user_id>', methods=['POST'])
+@main_bp.route('/approve-user/<int:user_id>', methods=['POST'])
 @login_required
 def approve_user(user_id):
     # Check if current user is admin
     if not current_user.is_admin:
         flash('You do not have permission to approve users.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     user = User.query.get_or_404(user_id)
     user.is_approved = True
@@ -607,13 +657,13 @@ def approve_user(user_id):
     flash(f'User {user.email} has been approved.', 'success')
     return redirect(url_for('edit_user_view'))
 
-@app.route('/delete-user/<int:user_id>', methods=['POST'])
+@main_bp.route('/delete-user/<int:user_id>', methods=['POST'])
 @login_required
 def delete_user(user_id):
     # Check if current user is admin
     if not current_user.is_admin:
         flash('You do not have permission to delete users.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     # Prevent deleting yourself
     if user_id == current_user.id:
@@ -626,7 +676,7 @@ def delete_user(user_id):
     flash(f'User {user.email} has been deleted.', 'success')
     return redirect(url_for('edit_user_view'))
 
-@app.route('/chart-data')
+@main_bp.route('/chart-data')
 @login_required
 def chart_data():
 
@@ -654,7 +704,7 @@ def chart_data():
 
     return jsonify(data)
 
-@app.route('/generate-cuti', methods=['GET', 'POST'])
+@main_bp.route('/generate-cuti', methods=['GET', 'POST'])
 @login_required
 def generate_cuti():
     if request.method == 'GET':
@@ -730,7 +780,7 @@ def generate_cuti():
     except Exception as e:
         return f"Error during PDF generation: {str(e)}", 500
 
-@app.route('/surat_masuk')
+@main_bp.route('/surat_masuk')
 @login_required
 def surat_masuk():
     # Ambil semua surat masuk dari database, termasuk field full_letter_number
@@ -740,10 +790,10 @@ def surat_masuk():
     return render_template('home/surat_masuk.html', daftar_surat=daftar_surat)
 
 
-@app.route('/pegawai', methods=['GET', 'POST'])
+@main_bp.route('/pegawai', methods=['GET', 'POST'])
 @login_required
 @role_required('admin', 'pimpinan')
-def kelola_pegawai():
+def pegawai():
     if request.method == 'POST':
         try:
             pegawai_baru = Pegawai(
@@ -761,7 +811,7 @@ def kelola_pegawai():
             db.session.add(pegawai_baru)
             db.session.commit()
             flash('Pegawai berhasil ditambahkan!', 'success')
-            return redirect(url_for('pegawai_list'))
+            return redirect(url_for('main.pegawai_list'))
         except Exception as e:
             db.session.rollback()
             flash(f'Gagal menambahkan pegawai: {str(e)}', 'danger')
@@ -769,14 +819,14 @@ def kelola_pegawai():
     daftar_pegawai = Pegawai.query.all()
     return render_template('home/pegawai.html', pegawais=daftar_pegawai)
 
-@app.route('/pegawai/list', methods=['GET'])
+@main_bp.route('/pegawai/list', methods=['GET'])
 @login_required
 @role_required('admin', 'pimpinan')
 def pegawai_list():
     pegawais = Pegawai.query.all()
     return render_template('home/list_pegawai.html', daftar_pegawai=pegawais)
 
-@app.route('/pegawai/edit/<int:id>', methods=['POST'])
+@main_bp.route('/pegawai/edit/<int:id>', methods=['POST'])
 @login_required
 @role_required('admin', 'pimpinan')
 def edit_pegawai(id):
@@ -797,7 +847,7 @@ def edit_pegawai(id):
         db.session.rollback()
     return redirect(url_for('pegawai_list'))
 
-@app.route('/pegawai/hapus/<int:id>', methods=['POST'])
+@main_bp.route('/pegawai/hapus/<int:id>', methods=['POST'])
 @login_required
 @role_required('admin', 'pimpinan')
 def hapus_pegawai(id):
@@ -809,42 +859,9 @@ def hapus_pegawai(id):
         db.session.rollback()
     return redirect(url_for('pegawai_list'))
 
-@app.route('/surat-masuk/list', methods=['GET'])
-@login_required
-@role_required('pimpinan', 'admin')
-def surat_masuk_list():
-    # Ambil parameter halaman dan jumlah item per halaman
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
-    
-    # Hitung jumlah surat masuk pending
-    pending_surat_masuk_count = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
-    
-    # Filter untuk status pending jika pimpinan
-    if current_user.role == 'pimpinan':
-        query = SuratMasuk.query.filter_by(status_suratMasuk='pending')
-    else:
-        query = SuratMasuk.query
-    
-    # Lakukan paginasi
-    pagination = query.order_by(SuratMasuk.created_at.desc()).paginate(page=page, per_page=per_page)
-    
-    # Konversi ke list dictionary untuk serialisasi
-    surat_masuk_list = [{
-        'id': surat.id_suratMasuk,
-        'nomor_surat': surat.nomor_suratMasuk,
-        'pengirim': surat.pengirim_suratMasuk,
-        'penerima': surat.penerima_suratMasuk,
-        'tanggal': surat.tanggal_suratMasuk.strftime('%Y-%m-%d'),
-        'status': surat.status_suratMasuk
-    } for surat in pagination.items]
-    
-    return render_template('home/list_surat_masuk.html', 
-                           surat_masuk_list=surat_masuk_list, 
-                           pagination=pagination,
-                           pending_surat_masuk_count=pending_surat_masuk_count)
 
-@app.route('/surat-keluar/list', methods=['GET'])
+
+@main_bp.route('/surat-keluar/list', methods=['GET'])
 @login_required
 @role_required('pimpinan', 'admin')
 def surat_keluar_list():
@@ -866,7 +883,7 @@ def surat_keluar_list():
     
     # Konversi ke list dictionary untuk serialisasi
     surat_keluar_list = [{
-        'id': surat.id_suratKeluar,
+        'id_suratKeluar': surat.id_suratKeluar,
         'nomor_surat': surat.nomor_suratKeluar,
         'pengirim': surat.pengirim_suratKeluar,
         'penerima': surat.penerima_suratKeluar,
@@ -879,71 +896,41 @@ def surat_keluar_list():
                            pagination=pagination,
                            pending_surat_keluar_count=pending_surat_keluar_count)
 
-@app.route('/surat-masuk/approve/<int:id_suratMasuk>', methods=['POST'])
-@login_required
-@role_required('pimpinan')
-def approve_surat_masuk(id_suratMasuk):
-    surat = SuratMasuk.query.get_or_404(id_suratMasuk)
-    surat.status_suratMasuk = 'approved'
-    
-    try:
-        db.session.commit()
-        return jsonify({"success": True, "message": "Surat masuk berhasil disetujui"})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/surat-keluar/approve/<int:surat_id>', methods=['POST'])
+
+@main_bp.route('/surat-keluar/approve/<int:surat_id>', methods=['POST'])
 @login_required
 @role_required('pimpinan')
 def approve_surat_keluar(surat_id):
-    surat = SuratKeluar.query.get_or_404(surat_id)
-    surat.status_suratKeluar = 'approved'
-    
     try:
+        surat = SuratKeluar.query.get_or_404(surat_id)
+        surat.status_suratKeluar = 'approved'
+        
         db.session.commit()
         return jsonify({"success": True, "message": "Surat keluar berhasil disetujui"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/surat-masuk/reject/<int:id_suratMasuk>', methods=['POST'])
-@login_required
-@role_required('pimpinan')
-def reject_surat_masuk(id_suratMasuk):
-    surat = SuratMasuk.query.get_or_404(id_suratMasuk)
-    surat.status_suratMasuk = 'rejected'
-    
-    try:
-        db.session.commit()
-        return jsonify({"success": True, "message": "Surat masuk berhasil ditolak"})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/surat-keluar/reject/<int:surat_id>', methods=['POST'])
+
+@main_bp.route('/surat-keluar/reject/<int:surat_id>', methods=['POST'])
 @login_required
 @role_required('pimpinan')
 def reject_surat_keluar(surat_id):
-    surat = SuratKeluar.query.get_or_404(surat_id)
-    surat.status_suratKeluar = 'rejected'
-    
     try:
+        surat = SuratKeluar.query.get_or_404(surat_id)
+        surat.status_suratKeluar = 'rejected'
+        
         db.session.commit()
         return jsonify({"success": True, "message": "Surat keluar berhasil ditolak"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/list-pending-surat-masuk')
-@login_required
-@role_required('pimpinan')
-def list_pending_surat_masuk():
-    # Ambil daftar surat masuk yang masih pending
-    pending_surat_masuk = SuratMasuk.query.filter_by(status_suratMasuk='pending').all()
-    return render_template('home/list_pending_surat_masuk.html', pending_surat_masuk=pending_surat_masuk)
 
-@app.route('/list-pending-surat-keluar')
+
+@main_bp.route('/list-pending-surat-keluar')
 @login_required
 @role_required('pimpinan')
 def list_pending_surat_keluar():
@@ -951,41 +938,18 @@ def list_pending_surat_keluar():
     pending_surat_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending').all()
     return render_template('home/list_pending_surat_keluar.html', pending_surat_keluar=pending_surat_keluar)
 
-@app.route('/surat-masuk/detail/<int:id_suratMasuk>')
-@login_required
-@role_required('pimpinan')
-def detail_surat_masuk(id_suratMasuk):
-    surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
-    return render_template('home/detail_surat_masuk.html', surat=surat_masuk)
 
-@app.route('/surat-keluar/detail/<int:id>')
+
+@main_bp.route('/surat-keluar/detail/<int:id>')
 @login_required
 @role_required('pimpinan')
 def detail_surat_keluar(id):
     surat_keluar = SuratKeluar.query.get_or_404(id)
     return render_template('home/detail_surat_keluar.html', surat=surat_keluar)
 
-@app.route('/surat-masuk/download/<int:id_suratMasuk>')
-@login_required
-@role_required('pimpinan')
-def download_surat_masuk(id_suratMasuk):
-    surat_masuk = SuratMasuk.query.get_or_404(id_suratMasuk)
-    
-    if not surat_masuk.file_suratMasuk:
-        flash('Dokumen tidak tersedia.', 'error')
-        return redirect(url_for('detail_surat_masuk', id_suratMasuk=id_suratMasuk))
-    
-    try:
-        return send_file(
-            surat_masuk.file_suratMasuk, 
-            as_attachment=True, 
-            download_name=f"Surat_Masuk_{surat_masuk.nomor_suratMasuk}.pdf"
-        )
-    except Exception as e:
-        flash('Gagal mengunduh dokumen.', 'error')
-        return redirect(url_for('detail_surat_masuk', id_suratMasuk=id_suratMasuk))
 
-@app.route('/surat-keluar/download/<int:id>')
+
+@main_bp.route('/surat-keluar/download/<int:id>')
 @login_required
 @role_required('pimpinan')
 def download_surat_keluar(id):
@@ -1004,3 +968,48 @@ def download_surat_keluar(id):
     except Exception as e:
         flash('Gagal mengunduh dokumen.', 'error')
         return redirect(url_for('detail_surat_keluar', id=id))
+
+@main_bp.route('/ocr-test', methods=['GET', 'POST'])
+@login_required
+def ocr_test():
+    extracted_text = ""
+    
+    if request.method == 'POST':
+        try:
+            # Get uploaded file
+            if 'image' not in request.files:
+                return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=True, has_success=False)
+            
+            file = request.files['image']
+            if file.filename == '':
+                return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=True, has_success=False)
+            
+            # Check file type
+            allowed_extensions = {'png', 'jpg', 'jpeg', 'webp'}
+            if not file.filename or '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+                return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=True, has_success=False)
+            
+            # Read image using PIL instead of cv2
+            from PIL import Image
+            import io
+            
+            # Convert file to image using PIL
+            image = Image.open(file.stream)
+            
+            # Extract text using pytesseract
+            import pytesseract
+            try:
+                extracted_text = pytesseract.image_to_string(image, lang='ind')
+                if not extracted_text.strip():
+                    extracted_text = "Tidak ada teks yang dapat diekstrak dari gambar ini."
+            except Exception as e:
+                extracted_text = "Error saat memproses gambar."
+                return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=True, has_success=False)
+            
+            # Don't use flash message, we'll use toast instead
+            return render_template('home/ocr_test.html', extracted_text=extracted_text, has_success=True, has_error=False)
+            
+        except Exception as e:
+            return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=True, has_success=False)
+    
+    return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=False, has_success=False)
