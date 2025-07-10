@@ -4,54 +4,54 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="mb-4">Input Surat Masuk</h2>
+  <h1 class="mb-5 text-center font-bold text-2xl">Input Surat Masuk</h1>
 
-  <form method="POST" enctype="multipart/form-data">
+  <form method="POST" enctype="multipart/form-data" class="form-horizontal">
     {{ form.csrf_token }}
     <div class="row">
       <!-- Kolom Kiri -->
       <div class="col-md-6">
         <div class="form-group">
-          {{ form.tanggal_suratMasuk.label }}
-          {{ form.tanggal_suratMasuk(class="form-control", type="date") }}
+          {{ form.tanggal_suratMasuk.label(style="margin-bottom: 3px;") }}
+          {{ form.tanggal_suratMasuk(class="form-control", type="date", required=true) }}
         </div>
         <div class="form-group">
-          {{ form.pengirim_suratMasuk.label }}
-          {{ form.pengirim_suratMasuk(class="form-control") }}
+          {{ form.pengirim_suratMasuk.label(style="margin-bottom: 3px;") }}
+          {{ form.pengirim_suratMasuk(class="form-control", required=true) }}
         </div>
         <div class="form-group">
-          {{ form.penerima_suratMasuk.label }}
-          {{ form.penerima_suratMasuk(class="form-control") }}
+          {{ form.penerima_suratMasuk.label(style="margin-bottom: 3px;") }}
+          {{ form.penerima_suratMasuk(class="form-control", required=true) }}
         </div>
         <div class="form-group">
-          {{ form.nomor_suratMasuk.label }}
-          {{ form.nomor_suratMasuk(class="form-control") }}
+          {{ form.nomor_suratMasuk.label(style="margin-bottom: 3px;") }}
+          {{ form.nomor_suratMasuk(class="form-control", required=true) }}
         </div>
       </div>
 
       <!-- Kolom Kanan -->
       <div class="col-md-6">
         <div class="form-group">
-          {{ form.kode_suratMasuk.label }}
-          {{ form.kode_suratMasuk(class="form-control") }}
+          {{ form.kode_suratMasuk.label(style="margin-bottom: 3px;") }}
+          {{ form.kode_suratMasuk(class="form-control", required=true) }}
         </div>
         <div class="form-group">
-          {{ form.jenis_suratMasuk.label }}
-          {{ form.jenis_suratMasuk(class="form-control") }}
+          {{ form.jenis_suratMasuk.label(style="margin-bottom: 3px;") }}
+          {{ form.jenis_suratMasuk(class="form-control", required=true) }}
         </div>
         <div class="form-group">
-          {{ form.isi_suratMasuk.label }}
-          {{ form.isi_suratMasuk(class="form-control") }}
+          {{ form.isi_suratMasuk.label(style="margin-bottom: 3px;") }}
+          {{ form.isi_suratMasuk(class="form-control", style="height: 38px;", required=true) }}
         </div>
         <div class="form-group">
-          {{ form.image.label }}
-          {{ form.image(class="form-control-file") }}
+          {{ form.image.label(style="margin-bottom: 3px;") }}
+          {{ form.image(class="form-control", accept="image/*", required=true) }}
         </div>
       </div>
     </div>
 
     <!-- Tombol Submit -->
-    <div class="form-group mt-3">
+    <div class="form-group" style="margin-top: 8px;">
       {{ form.submit(class="btn btn-primary") }}
     </div>
   </form>

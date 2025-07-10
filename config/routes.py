@@ -706,7 +706,7 @@ def chart_data():
 
 @main_bp.route('/generate-cuti', methods=['GET', 'POST'])
 @login_required
-def generate_cuti():
+def generate_cuti():  # Keep the function name as generate_cuti for url_for to work
     if request.method == 'GET':
         return render_template('home/generate_cuti_form.html')
 
@@ -717,68 +717,114 @@ def generate_cuti():
         }
         return romawi.get(bulan, '')
 
-    # Ambil semua data dari form
-    context = {
-        "nama": request.form.get("nama"),
-        "nip": request.form.get("nip"),
-        "jabatan": request.form.get("jabatan"),
-        "gol_ruang": request.form.get("gol_ruang"),
-        "unit_kerja": request.form.get("unit_kerja"),
-        "masa_kerja": request.form.get("masa_kerja"),
-        "c_tahun": "✓" if request.form.get("jenis_cuti") == "c_tahun" else "",
-        "c_besar": "✓" if request.form.get("jenis_cuti") == "c_besar" else "",
-        "c_sakit": "✓" if request.form.get("jenis_cuti") == "c_sakit" else "",
-        "c_lahir": "✓" if request.form.get("jenis_cuti") == "c_lahir" else "",
-        "c_penting": "✓" if request.form.get("jenis_cuti") == "c_penting" else "",
-        "c_luarnegara": "✓" if request.form.get("jenis_cuti") == "c_luarnegara" else "",
-        "alasan_cuti": request.form.get("alasan_cuti"),
-        "lama_cuti": request.form.get("lama_cuti"),
-        "tanggal_cuti": request.form.get("tanggal_cuti"),
-        "sampai_cuti": request.form.get("sampai_cuti"),
-        "telp": request.form.get("telp"),
-        "alamat": request.form.get("alamat"),
-        "no_suratmasuk": request.form.get("no_suratmasuk"),
-    }
-
     try:
-        tgl_obj = datetime.strptime(request.form.get("tgl_ajuan_cuti"), "%Y-%m-%d")
-        context["tgl_ajuan_cuti"] = tgl_obj.strftime("%d")
-        context["bulan_ajuan_cuti"] = romawi_bulan(tgl_obj.month)
-        context["tahun_ajuan_cuti"] = str(tgl_obj.year)
-        context["tgl_lengkap_ajuan_cuti"] = tgl_obj.strftime("%d %B %Y")
-    except Exception:
-        context["tgl_ajuan_cuti"] = ""
-        context["bulan_ajuan_cuti"] = ""
-        context["tahun_ajuan_cuti"] = ""
-        context["tgl_lengkap_ajuan_cuti"] = ""
+        # Ambil semua data dari form
+        context = {
+            "nama": request.form.get("nama"),
+            "nip": request.form.get("nip"),
+            "jabatan": request.form.get("jabatan"),
+            "gol_ruang": request.form.get("gol_ruang"),
+            "unit_kerja": request.form.get("unit_kerja"),
+            "masa_kerja": request.form.get("masa_kerja"),
+            "c_tahun": "✓" if request.form.get("jenis_cuti") == "c_tahun" else "",
+            "c_besar": "✓" if request.form.get("jenis_cuti") == "c_besar" else "",
+            "c_sakit": "✓" if request.form.get("jenis_cuti") == "c_sakit" else "",
+            "c_lahir": "✓" if request.form.get("jenis_cuti") == "c_lahir" else "",
+            "c_penting": "✓" if request.form.get("jenis_cuti") == "c_penting" else "",
+            "c_luarnegara": "✓" if request.form.get("jenis_cuti") == "c_luarnegara" else "",
+            "alasan_cuti": request.form.get("alasan_cuti"),
+            "lama_cuti": request.form.get("lama_cuti"),
+            "tanggal_cuti": request.form.get("tanggal_cuti"),
+            "sampai_cuti": request.form.get("sampai_cuti"),
+            "telp": request.form.get("telp"),
+            "alamat": request.form.get("alamat"),
+            "no_suratmasuk": request.form.get("no_suratmasuk"),
+        }
 
-    template_path = 'static/assets/templates/form_permintaan_cuti.docx'
-    document = MailMerge(template_path)
-    document.merge(**context)
+        # Validate required fields
+        required_fields = ["nama", "nip", "jabatan", "gol_ruang", "unit_kerja", "masa_kerja", 
+                         "alasan_cuti", "lama_cuti", "tanggal_cuti", "sampai_cuti", "telp", 
+                         "alamat", "no_suratmasuk"]
+        missing_fields = [field for field in required_fields if not context[field]]
+        if missing_fields:
+            flash(f"Fields required: {', '.join(missing_fields)}", "error")
+            return render_template('home/generate_cuti_form.html')
 
-    temp_dir = tempfile.gettempdir()
-    docx_filename = f"Cuti_{context['nama'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}.docx"
-    docx_path = os.path.join(temp_dir, docx_filename)
-    document.write(docx_path)
-    document.close()
+        try:
+            tgl_obj = datetime.strptime(request.form.get("tgl_ajuan_cuti"), "%Y-%m-%d")
+            context["tgl_ajuan_cuti"] = tgl_obj.strftime("%d")
+            context["bulan_ajuan_cuti"] = romawi_bulan(tgl_obj.month)
+            context["tahun_ajuan_cuti"] = str(tgl_obj.year)
+            context["tgl_lengkap_ajuan_cuti"] = tgl_obj.strftime("%d %B %Y")
+        except Exception:
+            flash("Invalid date format for tgl_ajuan_cuti", "error")
+            return render_template('home/generate_cuti_form.html')
 
-    try:
-        subprocess.run([
-            "/Applications/LibreOffice.app/Contents/MacOS/soffice",
-            "--headless", "--convert-to", "pdf",
-            "--outdir", temp_dir,
-            docx_path
-        ], check=True)
+        # Get absolute path to template
+        template_path = os.path.join(current_app.root_path, 'static/assets/templates/form_permintaan_cuti.docx')
+        if not os.path.exists(template_path):
+            flash("Template file not found. Please contact administrator.", "error")
+            return render_template('home/generate_cuti_form.html')
+
+        document = MailMerge(template_path)
+        document.merge(**context)
+
+        temp_dir = tempfile.gettempdir()
+        docx_filename = f"Cuti_{context['nama'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}.docx"
+        docx_path = os.path.join(temp_dir, docx_filename)
+        document.write(docx_path)
+        document.close()
+
+        # Try different LibreOffice paths based on OS
+        libreoffice_paths = [
+            "/usr/bin/soffice",  # Linux
+            "/usr/local/bin/soffice",  # Linux/macOS alternative
+            "/Applications/LibreOffice.app/Contents/MacOS/soffice",  # macOS
+            "C:\\Program Files\\LibreOffice\\program\\soffice.exe",  # Windows
+            "/opt/homebrew/bin/soffice",  # macOS Homebrew
+        ]
+
+        conversion_successful = False
+        conversion_error = None
+        for libreoffice_path in libreoffice_paths:
+            if os.path.exists(libreoffice_path):
+                try:
+                    subprocess.run([
+                        libreoffice_path,
+                        "--headless", "--convert-to", "pdf",
+                        "--outdir", temp_dir,
+                        docx_path
+                    ], check=True, capture_output=True)
+                    conversion_successful = True
+                    break
+                except subprocess.CalledProcessError as e:
+                    conversion_error = f"LibreOffice error: {e.stderr.decode()}"
+                    continue
+                except Exception as e:
+                    conversion_error = str(e)
+                    continue
+
+        if not conversion_successful:
+            if os.path.exists(docx_path):
+                os.remove(docx_path)
+            flash(f"Could not convert document to PDF. Please ensure LibreOffice is installed. Error: {conversion_error}", "error")
+            return render_template('home/generate_cuti_form.html')
 
         if os.path.exists(docx_path):
             os.remove(docx_path)
 
         pdf_filename = docx_filename.replace('.docx', '.pdf')
         pdf_path = os.path.join(temp_dir, pdf_filename)
-        return send_file(pdf_path, as_attachment=True)
+        
+        if not os.path.exists(pdf_path):
+            flash("PDF file was not generated. Please try again.", "error")
+            return render_template('home/generate_cuti_form.html')
+
+        return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
 
     except Exception as e:
-        return f"Error during PDF generation: {str(e)}", 500
+        flash(f"An error occurred: {str(e)}", "error")
+        return render_template('home/generate_cuti_form.html')
 
 @main_bp.route('/surat_masuk')
 @login_required
@@ -911,8 +957,6 @@ def approve_surat_keluar(surat_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
-
-
 
 @main_bp.route('/surat-keluar/reject/<int:surat_id>', methods=['POST'])
 @login_required

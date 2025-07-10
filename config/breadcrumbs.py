@@ -7,6 +7,7 @@ class Breadcrumb:
 
 # Dictionary mapping route names to breadcrumb text
 route_breadcrumbs = {
+    'index': 'Home',
     'show_surat_masuk': 'Surat Masuk',
     'show_surat_keluar': 'Surat Keluar',
     'input_surat_masuk': 'Input Surat Masuk',
@@ -21,51 +22,37 @@ route_breadcrumbs = {
     'ocr_surat_keluar.ocr_surat_keluar': 'OCR Surat Keluar',
     'edit_user_view': 'Manajemen User',
     'edit_user': 'Edit User',
+    'ocr_test': 'OCR Test',
 }
 
-# Dictionary defining parent-child relationships for routes
-route_hierarchy = {
-    'show_surat_masuk': [],
-    'show_surat_keluar': [],
-    'input_surat_masuk': [],
-    'input_surat_keluar': [],
-    'edit_surat_masuk': ['show_surat_masuk'],
-    'edit_surat_keluar': ['show_surat_keluar'],
-    'generate_cuti': [],
-    'laporan_statistik': [],
-    'pegawai_list': [],
-    'pegawai': [],
-    'ocr_surat_masuk.ocr_surat_masuk': [],
-    'ocr_surat_keluar.ocr_surat_keluar': [],
-    'edit_user_view': [],
-    'edit_user': ['edit_user_view'],
-}
+def get_breadcrumb_title(endpoint):
+    """Get the breadcrumb title for a given endpoint"""
+    if '.' in endpoint:
+        endpoint = endpoint.split('.')[-1]
+    return route_breadcrumbs.get(endpoint, endpoint.replace('_', ' ').title())
 
 def generate_breadcrumbs(endpoint, **kwargs):
     """Generate breadcrumbs based on endpoint"""
     breadcrumbs = []
     
-    # Map endpoints to breadcrumb titles
-    if endpoint == 'show_surat_masuk':
-        breadcrumbs.append(('Surat Masuk', url_for('main.show_surat_masuk')))
-    elif endpoint == 'show_surat_keluar':
-        breadcrumbs.append(('Surat Keluar', url_for('main.show_surat_keluar')))
-    elif endpoint == 'ocr_surat_masuk.ocr_surat_masuk':
-        breadcrumbs.append(('OCR Surat Masuk', url_for('ocr_surat_masuk.ocr_surat_masuk')))
-    elif endpoint == 'ocr_surat_keluar.ocr_surat_keluar':
-        breadcrumbs.append(('OCR Surat Keluar', url_for('ocr_surat_keluar.ocr_surat_keluar')))
-    elif endpoint == 'input_surat_masuk':
-        breadcrumbs.append(('Input Surat Masuk', url_for('main.input_surat_masuk')))
-    elif endpoint == 'input_surat_keluar':
-        breadcrumbs.append(('Input Surat Keluar', url_for('main.input_surat_keluar')))
-    elif endpoint == 'pegawai':
-        breadcrumbs.append(('Kelola Pegawai', url_for('main.pegawai')))
-    elif endpoint == 'pegawai_list':
-        breadcrumbs.append(('List Pegawai', url_for('main.pegawai_list')))
-    elif endpoint == 'auth.login':
-        breadcrumbs = [('Login', url_for('auth.login'))]  # Only show login, not home
-    elif endpoint == 'auth.register':
-        breadcrumbs.append(('Register', url_for('auth.register')))
+    # Always add home as first item unless it's the home page
+    if endpoint != 'main.index':
+        breadcrumbs.append(('Home', url_for('main.index')))
+    
+    # Get the endpoint without blueprint prefix
+    clean_endpoint = endpoint.split('.')[-1]
+    
+    # Add the current page breadcrumb
+    if clean_endpoint in route_breadcrumbs:
+        # Special handling for edit pages to show the parent page first
+        if clean_endpoint.startswith('edit_'):
+            parent_endpoint = clean_endpoint.replace('edit_', 'show_')
+            if parent_endpoint in route_breadcrumbs:
+                breadcrumbs.append((route_breadcrumbs[parent_endpoint], url_for(f'main.{parent_endpoint}')))
+        
+        # Add the current page
+        current_url = url_for(endpoint, **kwargs) if endpoint != 'main.index' else None
+        breadcrumbs.append((route_breadcrumbs[clean_endpoint], current_url))
     
     return breadcrumbs
 
