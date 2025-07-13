@@ -116,6 +116,67 @@
         </div>
     </div>
 
+    <!-- OCR Accuracy Details -->
+    <div class="card mb-4 border-warning">
+        <div class="card-body">
+            <h3 class="mb-4 text-warning">🎯 Detail Akurasi OCR</h3>
+            
+            <div class="row">
+                <!-- Surat Masuk Accuracy -->
+                <div class="col-md-6">
+                    <h5 class="text-info">📥 Akurasi Surat Masuk</h5>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ rata2_akurasi_masuk }}%" 
+                             aria-valuenow="{{ rata2_akurasi_masuk }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ rata2_akurasi_masuk }}%
+                        </div>
+                    </div>
+                    <p class="text-muted">
+                        <small>
+                            🔹 Akurasi tinggi (90-100%): {{ akurasi_tinggi_masuk or 0 }} dokumen<br>
+                            🔹 Akurasi sedang (70-89%): {{ akurasi_sedang_masuk or 0 }} dokumen<br>
+                            🔹 Akurasi rendah (0-69%): {{ akurasi_rendah_masuk or 0 }} dokumen
+                        </small>
+                    </p>
+                </div>
+
+                <!-- Surat Keluar Accuracy -->
+                <div class="col-md-6">
+                    <h5 class="text-info">📤 Akurasi Surat Keluar</h5>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ rata2_akurasi_keluar }}%" 
+                             aria-valuenow="{{ rata2_akurasi_keluar }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ rata2_akurasi_keluar }}%
+                        </div>
+                    </div>
+                    <p class="text-muted">
+                        <small>
+                            🔹 Akurasi tinggi (90-100%): {{ akurasi_tinggi_keluar or 0 }} dokumen<br>
+                            🔹 Akurasi sedang (70-89%): {{ akurasi_sedang_keluar or 0 }} dokumen<br>
+                            🔹 Akurasi rendah (0-69%): {{ akurasi_rendah_keluar or 0 }} dokumen
+                        </small>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Accuracy Improvement Tips -->
+            <div class="mt-4 p-3 bg-light rounded">
+                <h6 class="text-primary">💡 Tips Meningkatkan Akurasi OCR:</h6>
+                <ul class="text-dark mb-0">
+                    <li>Pastikan gambar dokumen memiliki resolusi tinggi (minimal 300 DPI)</li>
+                    <li>Gunakan pencahayaan yang baik saat scanning</li>
+                    <li>Hindari bayangan dan distorsi pada gambar</li>
+                    <li>Pastikan teks dalam dokumen jelas dan tidak blur</li>
+                    <li>Gunakan format file yang didukung (JPG, PNG, TIFF)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Chart.js CDN -->

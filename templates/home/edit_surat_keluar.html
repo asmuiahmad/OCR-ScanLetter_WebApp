@@ -34,6 +34,22 @@
         <label for="isi_suratKeluar">Isi Surat:</label>
         <textarea class="form-control" name="isi_suratKeluar" {% if not current_user.is_admin %}disabled{% endif %} required>{{ entry.isi_suratKeluar }}</textarea>
     </div>
+    <div class="form-group">
+        <label for="acara_suratKeluar">Acara (Opsional):</label>
+        <input type="text" class="form-control" name="acara_suratKeluar" value="{{ entry.acara_suratKeluar or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+    </div>
+    <div class="form-group">
+        <label for="tempat_suratKeluar">Tempat (Opsional):</label>
+        <input type="text" class="form-control" name="tempat_suratKeluar" value="{{ entry.tempat_suratKeluar or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+    </div>
+    <div class="form-group">
+        <label for="tanggal_acara_suratKeluar">Tanggal Acara (Opsional):</label>
+        <input type="date" class="form-control" name="tanggal_acara_suratKeluar" value="{{ entry.tanggal_acara_suratKeluar.strftime('%Y-%m-%d') if entry.tanggal_acara_suratKeluar else '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+    </div>
+    <div class="form-group">
+        <label for="jam_suratKeluar">Jam Acara (Opsional):</label>
+        <input type="time" class="form-control" name="jam_suratKeluar" value="{{ entry.jam_suratKeluar or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+    </div>
     <button type="submit" class="btn btn-primary" {% if not current_user.is_admin %}disabled{% endif %}>Update</button>
 </form>
 </div>

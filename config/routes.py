@@ -1,5 +1,6 @@
 # 🔹 Standard Library Imports
 import os
+import io
 import tempfile
 import subprocess
 from collections import defaultdict
@@ -11,7 +12,7 @@ from functools import wraps
 import pytesseract
 from flask import (
     render_template, request, send_file, redirect, url_for,
-    flash, jsonify, session, Blueprint, g, current_app
+    flash, jsonify, session, Blueprint, g, current_app, send_from_directory
 )
 from flask_login import (
     login_user, login_required, logout_user, current_user
@@ -28,6 +29,7 @@ from config.ocr import ocr_bp
 from config.ocr_utils import hitung_field_not_found
 from config.models import User, SuratMasuk, SuratKeluar, Pegawai
 from config.forms import LoginForm, RegistrationForm, SuratMasukForm
+from config.ocr_cuti import ocr_cuti_bp
 
 # Create main blueprint for routes
 main_bp = Blueprint('main', __name__)
@@ -55,7 +57,7 @@ def login():
                 flash('Your account is pending approval by an administrator.', 'warning')
                 return render_template('auth/login.html', form=form)
             
-            user.last_login = datetime.utcnow()
+            user.last_login = datetime.now()
             if user.login_count is None:
                 user.login_count = 0
             user.login_count += 1
@@ -76,27 +78,40 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         try:
-            if form.email.data and form.password.data:
-                hashed_password = generate_password_hash(form.password.data, method='pbkdf2:sha256')
-                new_user = User(
-                    email=form.email.data, 
-                    password=hashed_password,
-                    role=form.role.data,
-                    is_approved=False
-                )
-                # Set is_admin flag if role is admin
-                if form.role.data == 'admin':
-                    new_user.is_admin = True
-            else:
-                flash('Email and password are required', 'error')
+            # Check if user already exists
+            existing_user = User.query.filter_by(email=form.email.data).first()
+            if existing_user:
+                flash('Email already registered. Please use a different email or login.', 'error')
                 return render_template('auth/register.html', form=form)
+            
+            # Create new user
+            hashed_password = generate_password_hash(form.password.data, method='pbkdf2:sha256')
+            new_user = User(
+                email=form.email.data, 
+                password=hashed_password,
+                role=form.role.data,
+                is_approved=False
+            )
+            
+            # Set is_admin flag if role is admin
+            if form.role.data == 'admin':
+                new_user.is_admin = True
+            
             db.session.add(new_user)
             db.session.commit()
             flash('Registration successful! Your account is pending approval by an administrator.', 'success')
             return redirect(url_for('auth.login'))
         except Exception as e:
             db.session.rollback()
-            flash(f'An error occurred during registration: {str(e)}', 'error')
+            current_app.logger.error(f'Registration error: {str(e)}')
+            flash(f'An error occurred during registration. Please try again.', 'error')
+    elif form.errors:
+        # Log form validation errors
+        current_app.logger.warning(f'Registration form validation errors: {form.errors}')
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'{field}: {error}', 'error')
+    
     return render_template('auth/register.html', form=form)
 
 @main_bp.before_app_request
@@ -104,9 +119,17 @@ def set_pending_surat_counts():
     # Initialize default values
     g.pending_surat_keluar_count = 0
     
-    # Only set counts for authenticated pimpinan users
-    if current_user.is_authenticated and current_user.role == 'pimpinan':
-        g.pending_surat_keluar_count = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+    # Set counts for authenticated users who can see notifications
+    try:
+        if current_user.is_authenticated:
+            # Show count for pimpinan and admin users
+            if current_user.role in ['pimpinan', 'admin']:
+                g.pending_surat_keluar_count = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+                current_app.logger.debug(f"Pending count for {current_user.email}: {g.pending_surat_keluar_count}")
+    except Exception as e:
+        # Log the error but don't break the application
+        current_app.logger.warning(f"Error in set_pending_surat_counts: {str(e)}")
+        g.pending_surat_keluar_count = 0
 
 @main_bp.route('/')
 @login_required
@@ -116,7 +139,7 @@ def index():
     suratKeluar_count = SuratKeluar.query.count()
 
     # Statistik tahunan
-    today = datetime.today()
+    today = datetime.now()
     year = today.year
     month = today.month
     week_start = today - timedelta(days=today.weekday())
@@ -179,6 +202,96 @@ def last_logins():
     users = User.query.order_by(User.last_login.desc()).limit(10).all()
     result = [{"username": user.email, "last_login": user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never'} for user in users]
     return jsonify(result)
+
+@main_bp.route('/api/notifications/count', methods=['GET'])
+@login_required
+def get_notification_count():
+    """API endpoint untuk mendapatkan jumlah notifikasi pending"""
+    try:
+        if current_user.role in ['pimpinan', 'admin']:
+            pending_count = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+            return jsonify({
+                'success': True,
+                'pending_count': pending_count
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Unauthorized'
+            }), 403
+    except Exception as e:
+        current_app.logger.error(f"Error getting notification count: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Internal server error'
+        }), 500
+
+@main_bp.route('/api/test', methods=['GET'])
+@login_required
+def test_api():
+    """Test endpoint untuk memeriksa apakah API berfungsi"""
+    return jsonify({
+        'success': True,
+        'message': 'API berfungsi dengan baik',
+        'user': current_user.email,
+        'role': current_user.role
+    })
+
+@main_bp.route('/api/surat-keluar/detail/<int:surat_id>', methods=['GET'])
+@login_required
+@role_required('pimpinan')
+def get_surat_keluar_detail(surat_id):
+    """API endpoint untuk mendapatkan detail surat keluar dalam format JSON"""
+    try:
+        # Check if surat exists
+        surat = SuratKeluar.query.get(surat_id)
+        if not surat:
+            return jsonify({
+                'success': False,
+                'message': f'Surat dengan ID {surat_id} tidak ditemukan'
+            }), 404
+        
+        # Safely format date
+        try:
+            tanggal_str = surat.tanggal_suratKeluar.strftime('%d/%m/%Y') if surat.tanggal_suratKeluar else ''
+        except Exception as e:
+            current_app.logger.error(f"Error formatting date: {str(e)}")
+            tanggal_str = ''
+        
+        # Safely format created_at
+        try:
+            created_at_str = surat.created_at.strftime('%Y-%m-%d %H:%M') if surat.created_at else ''
+        except Exception as e:
+            current_app.logger.error(f"Error formatting created_at: {str(e)}")
+            created_at_str = ''
+        
+        # Build surat data with safe string conversion
+        surat_data = {
+            'id_suratKeluar': surat.id_suratKeluar,
+            'nomor_suratKeluar': str(surat.nomor_suratKeluar) if surat.nomor_suratKeluar else '',
+            'tanggal_suratKeluar': tanggal_str,
+            'pengirim_suratKeluar': str(surat.pengirim_suratKeluar) if surat.pengirim_suratKeluar else '',
+            'penerima_suratKeluar': str(surat.penerima_suratKeluar) if surat.penerima_suratKeluar else '',
+            'isi_suratKeluar': str(surat.isi_suratKeluar) if surat.isi_suratKeluar else '',
+            'status_suratKeluar': str(surat.status_suratKeluar) if surat.status_suratKeluar else 'pending',
+            'file_suratKeluar': bool(surat.file_suratKeluar),
+            'has_gambar': bool(surat.gambar_suratKeluar),
+            'created_at': created_at_str
+        }
+        
+        current_app.logger.info(f"Successfully retrieved surat data for ID {surat_id}")
+        
+        return jsonify({
+            'success': True,
+            'surat': surat_data
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error getting surat keluar detail for ID {surat_id}: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f'Gagal memuat detail surat: {str(e)}'
+        }), 500
 
 @main_bp.route('/show_surat_keluar', methods=['GET'])
 @login_required
@@ -301,7 +414,8 @@ def show_surat_masuk():
             search=search
         )
     except Exception as e:
-        return f"Error: {str(e)}", 500
+        flash(f'Error: {str(e)}', 'error')
+        return redirect(url_for('show_surat_masuk'))
 
 @main_bp.route('/test_surat_masuk', methods=['GET'])
 def test_surat_masuk():
@@ -367,6 +481,19 @@ def input_surat_keluar():
             penerima_suratKeluar = request.form['penerima_suratKeluar']
             nomor_suratKeluar = request.form['nomor_suratKeluar']
             isi_suratKeluar = request.form['isi_suratKeluar']
+            
+            # Field acara (opsional)
+            acara_suratKeluar = request.form.get('acara_suratKeluar', '')
+            tempat_suratKeluar = request.form.get('tempat_suratKeluar', '')
+            jam_suratKeluar = request.form.get('jam_suratKeluar', '')
+            
+            # Tanggal acara (opsional)
+            tanggal_acara_suratKeluar = None
+            if request.form.get('tanggal_acara_suratKeluar'):
+                try:
+                    tanggal_acara_suratKeluar = datetime.strptime(request.form['tanggal_acara_suratKeluar'], '%Y-%m-%d').date()
+                except ValueError:
+                    tanggal_acara_suratKeluar = None
 
             new_surat_keluar = SuratKeluar(
                 tanggal_suratKeluar=datetime.strptime(tanggal_suratKeluar, '%Y-%m-%d'),
@@ -374,6 +501,10 @@ def input_surat_keluar():
                 penerima_suratKeluar=penerima_suratKeluar,
                 nomor_suratKeluar=nomor_suratKeluar,
                 isi_suratKeluar=isi_suratKeluar,
+                acara_suratKeluar=acara_suratKeluar,
+                tempat_suratKeluar=tempat_suratKeluar,
+                tanggal_acara_suratKeluar=tanggal_acara_suratKeluar,
+                jam_suratKeluar=jam_suratKeluar,
                 status_suratKeluar='pending'  # Set default status
             )
             db.session.add(new_surat_keluar)
@@ -396,14 +527,40 @@ def edit_surat_keluar(id):
 
     entry = SuratKeluar.query.get_or_404(id)
     if request.method == 'POST':
-        entry.tanggal_suratKeluar = datetime.strptime(request.form['tanggal_suratKeluar'], '%Y-%m-%d')
-        entry.pengirim_suratKeluar = request.form['pengirim_suratKeluar']
-        entry.penerima_suratKeluar = request.form['penerima_suratKeluar']
-        entry.nomor_suratKeluar = request.form['nomor_suratKeluar']
-        entry.isi_suratKeluar = request.form['isi_suratKeluar']
-        db.session.commit()
-        flash('Surat Keluar has been updated successfully!', 'success')
-        return redirect(url_for('show_surat_keluar'))
+        try:
+            # Update fields
+            entry.tanggal_suratKeluar = datetime.strptime(request.form['tanggal_suratKeluar'], '%Y-%m-%d')
+            entry.pengirim_suratKeluar = request.form['pengirim_suratKeluar']
+            entry.penerima_suratKeluar = request.form['penerima_suratKeluar']
+            entry.nomor_suratKeluar = request.form['nomor_suratKeluar']
+            entry.isi_suratKeluar = request.form['isi_suratKeluar']
+            
+            # Update field acara (opsional)
+            entry.acara_suratKeluar = request.form.get('acara_suratKeluar', '')
+            entry.tempat_suratKeluar = request.form.get('tempat_suratKeluar', '')
+            entry.jam_suratKeluar = request.form.get('jam_suratKeluar', '')
+            
+            # Update tanggal acara (opsional)
+            if request.form.get('tanggal_acara_suratKeluar'):
+                try:
+                    entry.tanggal_acara_suratKeluar = datetime.strptime(request.form['tanggal_acara_suratKeluar'], '%Y-%m-%d').date()
+                except ValueError:
+                    entry.tanggal_acara_suratKeluar = None
+            else:
+                entry.tanggal_acara_suratKeluar = None
+            
+            # Calculate OCR accuracy
+            from config.ocr_utils import calculate_overall_ocr_accuracy
+            entry.ocr_accuracy_suratKeluar = calculate_overall_ocr_accuracy(entry, 'suratKeluar')
+            
+            db.session.commit()
+            flash('Surat Keluar has been updated successfully!', 'success')
+            return redirect(url_for('show_surat_keluar'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating Surat Keluar: {str(e)}', 'error')
+            return render_template('home/edit_surat_keluar.html', entry=entry)
+    
     return render_template('home/edit_surat_keluar.html', entry=entry)
 
 @main_bp.route('/delete_surat_keluar/<int:id>', methods=['POST'])
@@ -427,6 +584,10 @@ def edit_surat_masuk(id_suratMasuk):
             surat_masuk.pengirim_suratMasuk = request.form.get('pengirim_suratMasuk')
             surat_masuk.penerima_suratMasuk = request.form.get('penerima_suratMasuk')
             surat_masuk.isi_suratMasuk = request.form.get('isi_suratMasuk')
+            
+            # Calculate OCR accuracy
+            from config.ocr_utils import calculate_overall_ocr_accuracy
+            surat_masuk.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(surat_masuk, 'suratMasuk')
             
             # Handle file upload if present
             if 'gambar_suratMasuk' in request.files:
@@ -532,6 +693,15 @@ def laporan_statistik():
     rata2_akurasi_masuk = round(sum(akurasi_masuk) / len(akurasi_masuk), 2) if akurasi_masuk else 0
     rata2_akurasi_keluar = round(sum(akurasi_keluar) / len(akurasi_keluar), 2) if akurasi_keluar else 0
 
+    # Calculate accuracy distribution
+    akurasi_tinggi_masuk = len([a for a in akurasi_masuk if a >= 90])
+    akurasi_sedang_masuk = len([a for a in akurasi_masuk if 70 <= a < 90])
+    akurasi_rendah_masuk = len([a for a in akurasi_masuk if a < 70])
+
+    akurasi_tinggi_keluar = len([a for a in akurasi_keluar if a >= 90])
+    akurasi_sedang_keluar = len([a for a in akurasi_keluar if 70 <= a < 90])
+    akurasi_rendah_keluar = len([a for a in akurasi_keluar if a < 70])
+
     gagal_ekstraksi_suratKeluar = [
         s for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar and s.ocr_accuracy_suratKeluar < 100
     ]
@@ -563,7 +733,13 @@ def laporan_statistik():
             field_stats_keluar=field_stats_keluar,
             field_stats_masuk=field_stats_masuk,
             total_masuk=total_masuk,
-            total_keluar=total_keluar
+            total_keluar=total_keluar,
+            akurasi_tinggi_masuk=akurasi_tinggi_masuk,
+            akurasi_sedang_masuk=akurasi_sedang_masuk,
+            akurasi_rendah_masuk=akurasi_rendah_masuk,
+            akurasi_tinggi_keluar=akurasi_tinggi_keluar,
+            akurasi_sedang_keluar=akurasi_sedang_keluar,
+            akurasi_rendah_keluar=akurasi_rendah_keluar
     )
 
 @main_bp.route('/edit-user/<int:user_id>', methods=['GET', 'POST'])
@@ -590,44 +766,51 @@ def edit_user(user_id):
 @main_bp.route('/edit-user', methods=['GET', 'POST'])
 @login_required
 def edit_user_view():
-    # Check if current user is admin
-    if not current_user.is_admin:
-        flash('You do not have permission to edit users.', 'error')
-        return redirect(url_for('main.index'))
-    
-    users = User.query.all()
+    try:
+        # Check if current user is admin
+        if not current_user.is_admin:
+            flash('You do not have permission to edit users.', 'error')
+            return redirect(url_for('main.index'))
+        
+        users = User.query.all()
 
-    if request.method == 'POST':
-        user_id = request.form.get('user_id')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        role = request.form.get('role')
-        is_approved = 'is_approved' in request.form
+        if request.method == 'POST':
+            user_id = request.form.get('user_id')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            role = request.form.get('role')
+            is_approved = 'is_approved' in request.form
 
-        if not user_id:
-            flash('Please select a user to edit.', 'error')
+            if not user_id:
+                flash('Please select a user to edit.', 'error')
+                return redirect(url_for('main.edit_user_view'))
+
+            user = User.query.get(user_id)
+            if user:
+                user.email = email
+                user.role = role
+                user.is_approved = is_approved
+                
+                # Set is_admin flag based on role
+                user.is_admin = (role == 'admin')
+                
+                if password:
+                    user.set_password(password)
+                
+                db.session.commit()
+                current_app.logger.info(f"User {user.email} updated by {current_user.email}")
+                flash('User updated successfully!', 'success')
+            else:
+                flash('User not found.', 'error')
+
             return redirect(url_for('main.edit_user_view'))
 
-        user = User.query.get(user_id)
-        if user:
-            user.email = email
-            user.role = role
-            user.is_approved = is_approved
-            
-            # Set is_admin flag based on role
-            user.is_admin = (role == 'admin')
-            
-            if password:
-                user.set_password(password)
-            
-            db.session.commit()
-            flash('User updated successfully!', 'success')
-        else:
-            flash('User not found.', 'error')
-
+        return render_template('auth/edit_users.html', users=users, single_user=False)
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error in edit_user_view: {str(e)}")
+        flash(f'Error updating user: {str(e)}', 'error')
         return redirect(url_for('main.edit_user_view'))
-
-    return render_template('auth/edit_users.html', users=users, single_user=False)
 
 @main_bp.route('/get-user-data/<int:user_id>')
 @login_required
@@ -646,35 +829,49 @@ def get_user_data(user_id):
 @main_bp.route('/approve-user/<int:user_id>', methods=['POST'])
 @login_required
 def approve_user(user_id):
-    # Check if current user is admin
-    if not current_user.is_admin:
-        flash('You do not have permission to approve users.', 'error')
-        return redirect(url_for('main.index'))
-    
-    user = User.query.get_or_404(user_id)
-    user.is_approved = True
-    db.session.commit()
-    flash(f'User {user.email} has been approved.', 'success')
-    return redirect(url_for('edit_user_view'))
+    try:
+        # Check if current user is admin
+        if not current_user.is_admin:
+            return jsonify({"success": False, "message": "You do not have permission to approve users."}), 403
+        
+        user = User.query.get_or_404(user_id)
+        user.is_approved = True
+        db.session.commit()
+        
+        current_app.logger.info(f"User {user.email} approved by {current_user.email}")
+        return jsonify({"success": True, "message": f"User {user.email} has been approved."})
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error approving user {user_id}: {str(e)}")
+        return jsonify({"success": False, "message": f"Error approving user: {str(e)}"}), 500
 
 @main_bp.route('/delete-user/<int:user_id>', methods=['POST'])
 @login_required
 def delete_user(user_id):
-    # Check if current user is admin
-    if not current_user.is_admin:
-        flash('You do not have permission to delete users.', 'error')
-        return redirect(url_for('main.index'))
-    
-    # Prevent deleting yourself
-    if user_id == current_user.id:
-        flash('You cannot delete your own account.', 'error')
-        return redirect(url_for('edit_user_view'))
-    
-    user = User.query.get_or_404(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash(f'User {user.email} has been deleted.', 'success')
-    return redirect(url_for('edit_user_view'))
+    try:
+        # Check if current user is admin
+        if not current_user.is_admin:
+            flash('You do not have permission to delete users.', 'error')
+            return redirect(url_for('main.edit_user_view'))
+        
+        # Prevent deleting yourself
+        if user_id == current_user.id:
+            flash('You cannot delete your own account.', 'error')
+            return redirect(url_for('main.edit_user_view'))
+        
+        user = User.query.get_or_404(user_id)
+        user_email = user.email
+        db.session.delete(user)
+        db.session.commit()
+        
+        current_app.logger.info(f"User {user_email} deleted by {current_user.email}")
+        flash(f'User {user_email} has been deleted.', 'success')
+        return redirect(url_for('main.edit_user_view'))
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error deleting user {user_id}: {str(e)}")
+        flash(f'Error deleting user: {str(e)}', 'error')
+        return redirect(url_for('main.edit_user_view'))
 
 @main_bp.route('/chart-data')
 @login_required
@@ -707,8 +904,19 @@ def chart_data():
 @main_bp.route('/generate-cuti', methods=['GET', 'POST'])
 @login_required
 def generate_cuti():  # Keep the function name as generate_cuti for url_for to work
+    from config.forms import CutiForm
+    form = CutiForm()
+    
     if request.method == 'GET':
-        return render_template('home/generate_cuti_form.html')
+        return render_template('home/generate_cuti_form.html', form=form)
+
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{getattr(form, field).label.text}: {error}", "error")
+                if 'csrf_token' in field:
+                    flash("CSRF token validation failed. Please refresh the page and try again.", "error")
+        return render_template('home/generate_cuti_form.html', form=form)
 
     def romawi_bulan(bulan):
         romawi = {
@@ -720,51 +928,42 @@ def generate_cuti():  # Keep the function name as generate_cuti for url_for to w
     try:
         # Ambil semua data dari form
         context = {
-            "nama": request.form.get("nama"),
-            "nip": request.form.get("nip"),
-            "jabatan": request.form.get("jabatan"),
-            "gol_ruang": request.form.get("gol_ruang"),
-            "unit_kerja": request.form.get("unit_kerja"),
-            "masa_kerja": request.form.get("masa_kerja"),
-            "c_tahun": "✓" if request.form.get("jenis_cuti") == "c_tahun" else "",
-            "c_besar": "✓" if request.form.get("jenis_cuti") == "c_besar" else "",
-            "c_sakit": "✓" if request.form.get("jenis_cuti") == "c_sakit" else "",
-            "c_lahir": "✓" if request.form.get("jenis_cuti") == "c_lahir" else "",
-            "c_penting": "✓" if request.form.get("jenis_cuti") == "c_penting" else "",
-            "c_luarnegara": "✓" if request.form.get("jenis_cuti") == "c_luarnegara" else "",
-            "alasan_cuti": request.form.get("alasan_cuti"),
-            "lama_cuti": request.form.get("lama_cuti"),
-            "tanggal_cuti": request.form.get("tanggal_cuti"),
-            "sampai_cuti": request.form.get("sampai_cuti"),
-            "telp": request.form.get("telp"),
-            "alamat": request.form.get("alamat"),
-            "no_suratmasuk": request.form.get("no_suratmasuk"),
+            "nama": form.nama.data,
+            "nip": form.nip.data,
+            "jabatan": form.jabatan.data,
+            "gol_ruang": form.gol_ruang.data,
+            "unit_kerja": form.unit_kerja.data,
+            "masa_kerja": form.masa_kerja.data,
+            "c_tahun": "✓" if form.jenis_cuti.data == "c_tahun" else "",
+            "c_besar": "✓" if form.jenis_cuti.data == "c_besar" else "",
+            "c_sakit": "✓" if form.jenis_cuti.data == "c_sakit" else "",
+            "c_lahir": "✓" if form.jenis_cuti.data == "c_lahir" else "",
+            "c_penting": "✓" if form.jenis_cuti.data == "c_penting" else "",
+            "c_luarnegara": "✓" if form.jenis_cuti.data == "c_luarnegara" else "",
+            "alasan_cuti": form.alasan_cuti.data,
+            "lama_cuti": form.lama_cuti.data,
+            "tanggal_cuti": form.tanggal_cuti.data.strftime("%Y-%m-%d"),
+            "sampai_cuti": form.sampai_cuti.data.strftime("%Y-%m-%d"),
+            "telp": form.telp.data,
+            "alamat": form.alamat.data,
+            "no_suratmasuk": form.no_suratmasuk.data,
         }
 
-        # Validate required fields
-        required_fields = ["nama", "nip", "jabatan", "gol_ruang", "unit_kerja", "masa_kerja", 
-                         "alasan_cuti", "lama_cuti", "tanggal_cuti", "sampai_cuti", "telp", 
-                         "alamat", "no_suratmasuk"]
-        missing_fields = [field for field in required_fields if not context[field]]
-        if missing_fields:
-            flash(f"Fields required: {', '.join(missing_fields)}", "error")
-            return render_template('home/generate_cuti_form.html')
-
         try:
-            tgl_obj = datetime.strptime(request.form.get("tgl_ajuan_cuti"), "%Y-%m-%d")
+            tgl_obj = form.tgl_ajuan_cuti.data
             context["tgl_ajuan_cuti"] = tgl_obj.strftime("%d")
             context["bulan_ajuan_cuti"] = romawi_bulan(tgl_obj.month)
             context["tahun_ajuan_cuti"] = str(tgl_obj.year)
             context["tgl_lengkap_ajuan_cuti"] = tgl_obj.strftime("%d %B %Y")
         except Exception:
             flash("Invalid date format for tgl_ajuan_cuti", "error")
-            return render_template('home/generate_cuti_form.html')
+            return render_template('home/generate_cuti_form.html', form=form)
 
         # Get absolute path to template
         template_path = os.path.join(current_app.root_path, 'static/assets/templates/form_permintaan_cuti.docx')
         if not os.path.exists(template_path):
             flash("Template file not found. Please contact administrator.", "error")
-            return render_template('home/generate_cuti_form.html')
+            return render_template('home/generate_cuti_form.html', form=form)
 
         document = MailMerge(template_path)
         document.merge(**context)
@@ -808,7 +1007,7 @@ def generate_cuti():  # Keep the function name as generate_cuti for url_for to w
             if os.path.exists(docx_path):
                 os.remove(docx_path)
             flash(f"Could not convert document to PDF. Please ensure LibreOffice is installed. Error: {conversion_error}", "error")
-            return render_template('home/generate_cuti_form.html')
+            return render_template('home/generate_cuti_form.html', form=form)
 
         if os.path.exists(docx_path):
             os.remove(docx_path)
@@ -818,13 +1017,13 @@ def generate_cuti():  # Keep the function name as generate_cuti for url_for to w
         
         if not os.path.exists(pdf_path):
             flash("PDF file was not generated. Please try again.", "error")
-            return render_template('home/generate_cuti_form.html')
+            return render_template('home/generate_cuti_form.html', form=form)
 
         return send_file(pdf_path, as_attachment=True, download_name=pdf_filename)
 
     except Exception as e:
         flash(f"An error occurred: {str(e)}", "error")
-        return render_template('home/generate_cuti_form.html')
+        return render_template('home/generate_cuti_form.html', form=form)
 
 @main_bp.route('/surat_masuk')
 @login_required
@@ -842,68 +1041,242 @@ def surat_masuk():
 def pegawai():
     if request.method == 'POST':
         try:
-            pegawai_baru = Pegawai(
-                nama=request.form['nama'],
-                tanggal_lahir=datetime.strptime(request.form['tanggal_lahir'], '%Y-%m-%d'),
-                nip=request.form['nip'],
-                golongan=request.form['golongan'],
-                jabatan=request.form['jabatan'],
-                agama=request.form['agama'],
-                jenis_kelamin=request.form['jenis_kelamin'],
-                riwayat_pendidikan=request.form['riwayat_pendidikan'],
-                riwayat_pekerjaan=request.form['riwayat_pekerjaan'],
-                nomor_telpon=request.form['nomor_telpon']
-            )
-            db.session.add(pegawai_baru)
-            db.session.commit()
-            flash('Pegawai berhasil ditambahkan!', 'success')
-            return redirect(url_for('main.pegawai_list'))
+            # Log request data for debugging
+            current_app.logger.info(f"=== ADD PEGAWAI REQUEST ===")
+            current_app.logger.info(f"User: {current_user.email}")
+            current_app.logger.info(f"Form data: {dict(request.form)}")
+            current_app.logger.info(f"Headers: {dict(request.headers)}")
+            current_app.logger.info(f"Method: {request.method}")
+            current_app.logger.info(f"URL: {request.url}")
+            
+            # Check if CSRF token exists in form
+            csrf_token_in_form = request.form.get('csrf_token')
+            current_app.logger.info(f"CSRF token in form: {'Yes' if csrf_token_in_form else 'No'}")
+            
+            # Check if CSRF token exists in headers
+            csrf_token_in_headers = request.headers.get('X-CSRFToken') or request.headers.get('X-CSRF-Token')
+            current_app.logger.info(f"CSRF token in headers: {'Yes' if csrf_token_in_headers else 'No'}")
+            
+            # Validate CSRF token
+            if not csrf_token_in_form:
+                current_app.logger.error("CSRF token missing in pegawai")
+                current_app.logger.error(f"Available form fields: {list(request.form.keys())}")
+                return jsonify({"success": False, "message": "Token keamanan tidak ditemukan. Silakan refresh halaman."}), 400
+            
+            # Validate required fields
+            required_fields = ['nama', 'tanggal_lahir', 'nip', 'golongan', 'jabatan', 'agama', 'jenis_kelamin', 'riwayat_pendidikan', 'riwayat_pekerjaan', 'nomor_telpon']
+            missing_fields = []
+            
+            for field in required_fields:
+                if not request.form.get(field):
+                    missing_fields.append(field)
+            
+            if missing_fields:
+                error_msg = f"Field yang diperlukan tidak ditemukan: {', '.join(missing_fields)}"
+                current_app.logger.error(error_msg)
+                return jsonify({"success": False, "message": error_msg}), 400
+            
+            # Check if NIP already exists
+            existing_pegawai = Pegawai.query.filter_by(nip=request.form['nip']).first()
+            if existing_pegawai:
+                return jsonify({"success": False, "message": f'NIP {request.form["nip"]} sudah terdaftar!'}), 400
+            
+            # Parse tanggal_lahir
+            try:
+                tanggal_lahir = datetime.strptime(request.form['tanggal_lahir'], '%Y-%m-%d')
+                current_app.logger.info(f"Tanggal lahir parsed successfully: {tanggal_lahir}")
+            except ValueError as e:
+                current_app.logger.error(f"Invalid date format: {request.form['tanggal_lahir']}")
+                return jsonify({"success": False, "message": "Format tanggal lahir tidak valid!"}), 400
+            
+            # Create new pegawai
+            try:
+                new_pegawai = Pegawai(
+                    nama=request.form['nama'].strip(),
+                    tanggal_lahir=tanggal_lahir,
+                    nip=request.form['nip'].strip(),
+                    golongan=request.form['golongan'].strip(),
+                    jabatan=request.form['jabatan'].strip(),
+                    agama=request.form['agama'].strip(),
+                    jenis_kelamin=request.form['jenis_kelamin'].strip(),
+                    nomor_telpon=request.form['nomor_telpon'].strip(),
+                    riwayat_pendidikan=request.form['riwayat_pendidikan'].strip(),
+                    riwayat_pekerjaan=request.form['riwayat_pekerjaan'].strip()
+                )
+                
+                current_app.logger.info(f"Pegawai object created: {new_pegawai.nama}")
+                
+                db.session.add(new_pegawai)
+                db.session.commit()
+                
+                current_app.logger.info(f"Pegawai berhasil ditambahkan: {new_pegawai.nama} (NIP: {new_pegawai.nip})")
+                return jsonify({"success": True, "message": f"Pegawai {new_pegawai.nama} berhasil ditambahkan!"})
+                
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Error creating pegawai object: {str(e)}")
+                return jsonify({"success": False, "message": f"Gagal membuat data pegawai: {str(e)}"}), 500
+            
         except Exception as e:
             db.session.rollback()
-            flash(f'Gagal menambahkan pegawai: {str(e)}', 'danger')
+            current_app.logger.error(f"Unexpected error adding pegawai: {str(e)}", exc_info=True)
+            return jsonify({"success": False, "message": f"Gagal menambahkan pegawai: {str(e)}"}), 500
 
-    daftar_pegawai = Pegawai.query.all()
-    return render_template('home/pegawai.html', pegawais=daftar_pegawai)
+    return render_template('home/pegawai.html')
 
 @main_bp.route('/pegawai/list', methods=['GET'])
 @login_required
 @role_required('admin', 'pimpinan')
 def pegawai_list():
-    pegawais = Pegawai.query.all()
-    return render_template('home/list_pegawai.html', daftar_pegawai=pegawais)
+    daftar_pegawai = Pegawai.query.all()
+    return render_template('home/list_pegawai.html', daftar_pegawai=daftar_pegawai)
 
 @main_bp.route('/pegawai/edit/<int:id>', methods=['POST'])
 @login_required
 @role_required('admin', 'pimpinan')
 def edit_pegawai(id):
-    pegawai = Pegawai.query.get_or_404(id)
     try:
-        pegawai.nama = request.form['nama']
-        pegawai.nip = request.form['nip']
-        pegawai.tanggal_lahir = datetime.strptime(request.form['tanggal_lahir'], '%Y-%m-%d')
-        pegawai.golongan = request.form['golongan']
-        pegawai.jabatan = request.form['jabatan']
-        pegawai.agama = request.form['agama']
-        pegawai.jenis_kelamin = request.form['jenis_kelamin']
-        pegawai.nomor_telpon = request.form['nomor_telpon']
-        pegawai.riwayat_pendidikan = request.form['riwayat_pendidikan']
-        pegawai.riwayat_pekerjaan = request.form['riwayat_pekerjaan']
-        db.session.commit()
+        # Log form data for debugging
+        current_app.logger.info(f"=== EDIT PEGAWAI REQUEST ===")
+        current_app.logger.info(f"User: {current_user.email}")
+        current_app.logger.info(f"Pegawai ID: {id}")
+        current_app.logger.info(f"Form data: {dict(request.form)}")
+        current_app.logger.info(f"Headers: {dict(request.headers)}")
+        current_app.logger.info(f"Method: {request.method}")
+        current_app.logger.info(f"URL: {request.url}")
+        
+        # Check if CSRF token exists in form
+        csrf_token_in_form = request.form.get('csrf_token')
+        current_app.logger.info(f"CSRF token in form: {'Yes' if csrf_token_in_form else 'No'}")
+        
+        # Check if CSRF token exists in headers
+        csrf_token_in_headers = request.headers.get('X-CSRFToken') or request.headers.get('X-CSRF-Token')
+        current_app.logger.info(f"CSRF token in headers: {'Yes' if csrf_token_in_headers else 'No'}")
+        
+        # Validate CSRF token
+        if not csrf_token_in_form:
+            current_app.logger.error("CSRF token missing in edit_pegawai")
+            current_app.logger.error(f"Available form fields: {list(request.form.keys())}")
+            return jsonify({"success": False, "message": "Token keamanan tidak ditemukan. Silakan refresh halaman."}), 400
+
+        # Validate required fields
+        required_fields = ['nama', 'tanggal_lahir', 'nip', 'golongan', 'jabatan', 'agama', 'jenis_kelamin', 'riwayat_pendidikan', 'riwayat_pekerjaan', 'nomor_telpon']
+        missing_fields = []
+        
+        for field in required_fields:
+            if not request.form.get(field):
+                missing_fields.append(field)
+        
+        if missing_fields:
+            error_msg = f"Field yang diperlukan tidak ditemukan: {', '.join(missing_fields)}"
+            current_app.logger.error(error_msg)
+            return jsonify({"success": False, "message": error_msg}), 400
+        
+        # Try to get pegawai
+        try:
+            pegawai = Pegawai.query.get_or_404(id)
+            current_app.logger.info(f"Pegawai found: {pegawai.nama} (NIP: {pegawai.nip})")
+        except Exception as e:
+            current_app.logger.error(f"Error getting pegawai {id}: {str(e)}")
+            return jsonify({"success": False, "message": f"Pegawai dengan ID {id} tidak ditemukan."}), 404
+        
+        # Check if NIP already exists (excluding current pegawai)
+        existing_pegawai = Pegawai.query.filter_by(nip=request.form['nip']).filter(Pegawai.id != id).first()
+        if existing_pegawai:
+            return jsonify({"success": False, "message": f'NIP {request.form["nip"]} sudah terdaftar!'}), 400
+        
+        # Parse tanggal_lahir
+        try:
+            tanggal_lahir = datetime.strptime(request.form['tanggal_lahir'], '%Y-%m-%d')
+            current_app.logger.info(f"Tanggal lahir parsed successfully: {tanggal_lahir}")
+        except ValueError as e:
+            current_app.logger.error(f"Invalid date format: {request.form['tanggal_lahir']}")
+            return jsonify({"success": False, "message": "Format tanggal lahir tidak valid!"}), 400
+        
+        # Try to update pegawai data
+        try:
+            pegawai.nama = request.form['nama'].strip()
+            pegawai.tanggal_lahir = tanggal_lahir
+            pegawai.nip = request.form['nip'].strip()
+            pegawai.golongan = request.form['golongan'].strip()
+            pegawai.jabatan = request.form['jabatan'].strip()
+            pegawai.agama = request.form['agama'].strip()
+            pegawai.jenis_kelamin = request.form['jenis_kelamin'].strip()
+            pegawai.nomor_telpon = request.form['nomor_telpon'].strip()
+            pegawai.riwayat_pendidikan = request.form['riwayat_pendidikan'].strip()
+            pegawai.riwayat_pekerjaan = request.form['riwayat_pekerjaan'].strip()
+            
+            current_app.logger.info(f"Pegawai data updated in memory")
+            
+            db.session.commit()
+            
+            current_app.logger.info(f"Pegawai berhasil diupdate: {pegawai.nama} (NIP: {pegawai.nip})")
+            return jsonify({"success": True, "message": f"Data pegawai {pegawai.nama} berhasil diupdate!"})
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error updating pegawai in database: {str(e)}")
+            return jsonify({"success": False, "message": f"Gagal mengupdate pegawai di database: {str(e)}"}), 500
+        
     except Exception as e:
         db.session.rollback()
-    return redirect(url_for('pegawai_list'))
+        current_app.logger.error(f"Unexpected error updating pegawai {id}: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": f"Gagal mengupdate pegawai: {str(e)}"}), 500
 
 @main_bp.route('/pegawai/hapus/<int:id>', methods=['POST'])
 @login_required
-@role_required('admin', 'pimpinan')
+@role_required('admin')
 def hapus_pegawai(id):
-    pegawai = Pegawai.query.get_or_404(id)
     try:
-        db.session.delete(pegawai)
-        db.session.commit()
+        # Log request data for debugging
+        current_app.logger.info(f"=== DELETE PEGAWAI REQUEST ===")
+        current_app.logger.info(f"User: {current_user.email}")
+        current_app.logger.info(f"Pegawai ID: {id}")
+        current_app.logger.info(f"Form data: {dict(request.form)}")
+        current_app.logger.info(f"Headers: {dict(request.headers)}")
+        current_app.logger.info(f"Method: {request.method}")
+        current_app.logger.info(f"URL: {request.url}")
+        
+        # Check if CSRF token exists in form
+        csrf_token_in_form = request.form.get('csrf_token')
+        current_app.logger.info(f"CSRF token in form: {'Yes' if csrf_token_in_form else 'No'}")
+        
+        # Check if CSRF token exists in headers
+        csrf_token_in_headers = request.headers.get('X-CSRFToken') or request.headers.get('X-CSRF-Token')
+        current_app.logger.info(f"CSRF token in headers: {'Yes' if csrf_token_in_headers else 'No'}")
+        
+        # Validate CSRF token
+        if not csrf_token_in_form:
+            current_app.logger.error("CSRF token missing in hapus_pegawai")
+            current_app.logger.error(f"Available form fields: {list(request.form.keys())}")
+            return jsonify({"success": False, "message": "Token keamanan tidak ditemukan. Silakan refresh halaman."}), 400
+        
+        # Try to get pegawai
+        try:
+            pegawai = Pegawai.query.get_or_404(id)
+            current_app.logger.info(f"Pegawai found: {pegawai.nama} (NIP: {pegawai.nip})")
+        except Exception as e:
+            current_app.logger.error(f"Error getting pegawai {id}: {str(e)}")
+            return jsonify({"success": False, "message": f"Pegawai dengan ID {id} tidak ditemukan."}), 404
+        
+        nama_pegawai = pegawai.nama
+        nip_pegawai = pegawai.nip
+        
+        # Try to delete pegawai
+        try:
+            db.session.delete(pegawai)
+            db.session.commit()
+            current_app.logger.info(f"Pegawai berhasil dihapus: {nama_pegawai} (NIP: {nip_pegawai})")
+            return jsonify({"success": True, "message": f"Pegawai {nama_pegawai} berhasil dihapus!"})
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error deleting pegawai from database: {str(e)}")
+            return jsonify({"success": False, "message": f"Gagal menghapus pegawai dari database: {str(e)}"}), 500
+        
     except Exception as e:
         db.session.rollback()
-    return redirect(url_for('pegawai_list'))
+        current_app.logger.error(f"Unexpected error deleting pegawai {id}: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": f"Gagal menghapus pegawai: {str(e)}"}), 500
 
 
 
@@ -953,9 +1326,11 @@ def approve_surat_keluar(surat_id):
         surat.status_suratKeluar = 'approved'
         
         db.session.commit()
+        current_app.logger.info(f"Surat keluar {surat_id} approved by {current_user.email}")
         return jsonify({"success": True, "message": "Surat keluar berhasil disetujui"})
     except Exception as e:
         db.session.rollback()
+        current_app.logger.error(f"Error approving surat keluar {surat_id}: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @main_bp.route('/surat-keluar/reject/<int:surat_id>', methods=['POST'])
@@ -967,9 +1342,11 @@ def reject_surat_keluar(surat_id):
         surat.status_suratKeluar = 'rejected'
         
         db.session.commit()
+        current_app.logger.info(f"Surat keluar {surat_id} rejected by {current_user.email}")
         return jsonify({"success": True, "message": "Surat keluar berhasil ditolak"})
     except Exception as e:
         db.session.rollback()
+        current_app.logger.error(f"Error rejecting surat keluar {surat_id}: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -978,9 +1355,15 @@ def reject_surat_keluar(surat_id):
 @login_required
 @role_required('pimpinan')
 def list_pending_surat_keluar():
-    # Ambil daftar surat keluar yang masih pending
-    pending_surat_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending').all()
-    return render_template('home/list_pending_surat_keluar.html', pending_surat_keluar=pending_surat_keluar)
+    try:
+        # Ambil daftar surat keluar yang masih pending
+        pending_surat_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending').order_by(SuratKeluar.created_at.desc()).all()
+        current_app.logger.info(f"Showing {len(pending_surat_keluar)} pending surat keluar for user {current_user.email}")
+        return render_template('home/list_pending_surat_keluar.html', pending_surat_keluar=pending_surat_keluar)
+    except Exception as e:
+        current_app.logger.error(f"Error in list_pending_surat_keluar: {str(e)}")
+        flash('Terjadi kesalahan saat memuat daftar surat keluar pending.', 'error')
+        return redirect(url_for('main.index'))
 
 
 
@@ -992,6 +1375,33 @@ def detail_surat_keluar(id):
     return render_template('home/detail_surat_keluar.html', surat=surat_keluar)
 
 
+
+@main_bp.route('/update-ocr-accuracy/<int:id>', methods=['POST'])
+@login_required
+@role_required('admin', 'pimpinan')
+def update_ocr_accuracy(id):
+    """
+    Update OCR accuracy for a specific document
+    """
+    try:
+        surat_type = request.form.get('type')  # 'masuk' or 'keluar'
+        
+        if surat_type == 'masuk':
+            surat = SuratMasuk.query.get_or_404(id)
+            from config.ocr_utils import calculate_overall_ocr_accuracy
+            surat.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(surat, 'suratMasuk')
+        elif surat_type == 'keluar':
+            surat = SuratKeluar.query.get_or_404(id)
+            from config.ocr_utils import calculate_overall_ocr_accuracy
+            surat.ocr_accuracy_suratKeluar = calculate_overall_ocr_accuracy(surat, 'suratKeluar')
+        else:
+            return jsonify({"success": False, "error": "Invalid surat type"})
+        
+        db.session.commit()
+        return jsonify({"success": True, "accuracy": getattr(surat, f'ocr_accuracy_{surat_type}', 0)})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)})
 
 @main_bp.route('/surat-keluar/download/<int:id>')
 @login_required
@@ -1012,6 +1422,25 @@ def download_surat_keluar(id):
     except Exception as e:
         flash('Gagal mengunduh dokumen.', 'error')
         return redirect(url_for('detail_surat_keluar', id=id))
+
+@main_bp.route('/surat-keluar/image/<int:id>')
+@login_required
+@role_required('pimpinan')
+def view_surat_keluar_image(id):
+    """Endpoint untuk menampilkan gambar surat keluar"""
+    try:
+        surat = SuratKeluar.query.get_or_404(id)
+        if surat.gambar_suratKeluar:
+            return send_file(
+                io.BytesIO(surat.gambar_suratKeluar),
+                mimetype='image/jpeg',
+                as_attachment=False
+            )
+        else:
+            return jsonify({'error': 'Gambar tidak ditemukan'}), 404
+    except Exception as e:
+        current_app.logger.error(f"Error viewing surat keluar image {id}: {str(e)}")
+        return jsonify({'error': 'Terjadi kesalahan saat memuat gambar'}), 500
 
 @main_bp.route('/ocr-test', methods=['GET', 'POST'])
 @login_required
@@ -1057,3 +1486,50 @@ def ocr_test():
             return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=True, has_success=False)
     
     return render_template('home/ocr_test.html', extracted_text=extracted_text, has_error=False, has_success=False)
+
+# OCR Cuti route removed - using blueprint instead
+
+@main_bp.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(current_app.root_path, 'static/assets/images'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
+
+@main_bp.route('/api/debug/surat/<int:surat_id>', methods=['GET'])
+@login_required
+@role_required('pimpinan')
+def debug_surat_detail(surat_id):
+    """Debug endpoint untuk memeriksa struktur data surat"""
+    try:
+        surat = SuratKeluar.query.get(surat_id)
+        if not surat:
+            return jsonify({
+                'success': False,
+                'message': f'Surat dengan ID {surat_id} tidak ditemukan'
+            }), 404
+        
+        # Return raw surat data for debugging
+        return jsonify({
+            'success': True,
+            'surat_id': surat_id,
+            'raw_data': {
+                'id_suratKeluar': surat.id_suratKeluar,
+                'nomor_suratKeluar': surat.nomor_suratKeluar,
+                'tanggal_suratKeluar': str(surat.tanggal_suratKeluar) if surat.tanggal_suratKeluar else None,
+                'pengirim_suratKeluar': surat.pengirim_suratKeluar,
+                'penerima_suratKeluar': surat.penerima_suratKeluar,
+                'perihal_suratKeluar': surat.perihal_suratKeluar,
+                'isi_suratKeluar': surat.isi_suratKeluar,
+                'status_suratKeluar': surat.status_suratKeluar,
+                'file_suratKeluar': str(surat.file_suratKeluar),
+                'created_at': str(surat.created_at) if surat.created_at else None
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'error_type': type(e).__name__
+        }), 500

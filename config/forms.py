@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField, TextAreaField, BooleanField
-from wtforms.validators import DataRequired, Email
+from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField, TextAreaField, BooleanField, RadioField
+from wtforms.validators import DataRequired, Email, Length
 from flask_wtf.file import FileField, FileAllowed
 
 class RegistrationForm(FlaskForm):
@@ -32,3 +32,52 @@ class OCRSuratMasukForm(FlaskForm):
     preprocess = BooleanField('Preprocessing')
     enhance_contrast = BooleanField('Enhance Contrast')
     submit = SubmitField('Process OCR')
+
+class CutiForm(FlaskForm):
+    nama = StringField('Nama', validators=[DataRequired()])
+    nip = StringField('NIP', validators=[DataRequired()])
+    jabatan = StringField('Jabatan', validators=[DataRequired()])
+    gol_ruang = StringField('Gol. Ruang', validators=[DataRequired()])
+    unit_kerja = StringField('Unit Kerja', validators=[DataRequired()])
+    masa_kerja = StringField('Masa Kerja', validators=[DataRequired()])
+    alamat = TextAreaField('Alamat', validators=[DataRequired()])
+    no_suratmasuk = StringField('Nomor Surat Masuk', validators=[DataRequired()])
+    tgl_ajuan_cuti = DateField('Tanggal Ajuan Cuti', validators=[DataRequired()])
+    tanggal_cuti = DateField('Tanggal Mulai Cuti', validators=[DataRequired()])
+    sampai_cuti = DateField('Tanggal Selesai Cuti', validators=[DataRequired()])
+    telp = StringField('Nomor Telepon', validators=[DataRequired()])
+    jenis_cuti = RadioField('Jenis Cuti', choices=[
+        ('c_tahun', 'Tahun'),
+        ('c_besar', 'Besar'),
+        ('c_sakit', 'Sakit'),
+        ('c_lahir', 'Lahir'),
+        ('c_penting', 'Penting'),
+        ('c_luarnegara', 'Luar Negara')
+    ], validators=[DataRequired()])
+    alasan_cuti = TextAreaField('Alasan Cuti', validators=[DataRequired()])
+    lama_cuti = StringField('Lama Cuti', validators=[DataRequired()])
+
+class InputCutiForm(FlaskForm):
+    nama = StringField('Nama', validators=[DataRequired()])
+    nip = StringField('NIP', validators=[DataRequired()])
+    jabatan = StringField('Jabatan', validators=[DataRequired()])
+    gol_ruang = StringField('Gol. Ruang', validators=[DataRequired()])
+    unit_kerja = StringField('Unit Kerja', validators=[DataRequired()])
+    masa_kerja = StringField('Masa Kerja', validators=[DataRequired()])
+    alamat = TextAreaField('Alamat', validators=[DataRequired()])
+    no_suratmasuk = StringField('Nomor Surat Masuk', validators=[DataRequired()])
+    tgl_ajuan_cuti = DateField('Tanggal Ajuan Cuti', validators=[DataRequired()])
+    tanggal_cuti = DateField('Tanggal Mulai Cuti', validators=[DataRequired()])
+    sampai_cuti = DateField('Tanggal Selesai Cuti', validators=[DataRequired()])
+    telp = StringField('Nomor Telepon', validators=[DataRequired()])
+    jenis_cuti = SelectField('Jenis Cuti', choices=[
+        ('c_tahun', 'Tahun'),
+        ('c_besar', 'Besar'),
+        ('c_sakit', 'Sakit'),
+        ('c_lahir', 'Lahir'),
+        ('c_penting', 'Penting'),
+        ('c_luarnegara', 'Luar Negara')
+    ], validators=[DataRequired()])
+    alasan_cuti = TextAreaField('Alasan Cuti', validators=[DataRequired()])
+    lama_cuti = StringField('Lama Cuti', validators=[DataRequired()])
+    submit = SubmitField('Simpan Cuti')

@@ -50,6 +50,7 @@ class SuratKeluar(db.Model):
     nomor_suratKeluar = db.Column(db.Text, nullable=False)
     isi_suratKeluar = db.Column(db.Text, nullable=False)
     gambar_suratKeluar = db.Column(db.LargeBinary, nullable=True) 
+    file_suratKeluar = db.Column(db.LargeBinary, nullable=True)  # Add missing field
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     ocr_accuracy_suratKeluar = db.Column(db.Float)
     initial_nomor_suratKeluar = db.Column(db.String(255))
@@ -66,6 +67,30 @@ class SuratKeluar(db.Model):
     # New status field
     status_suratKeluar = db.Column(db.String(20), default='pending', nullable=False)
 
+class Cuti(db.Model):
+    __tablename__ = 'cuti'
+    id_cuti = db.Column(db.Integer, primary_key=True)
+    nama = db.Column(db.String(100), nullable=False)
+    nip = db.Column(db.String(50), nullable=False)
+    jabatan = db.Column(db.String(100), nullable=False)
+    gol_ruang = db.Column(db.String(50), nullable=False)
+    unit_kerja = db.Column(db.String(100), nullable=False)
+    masa_kerja = db.Column(db.String(100), nullable=False)
+    alamat = db.Column(db.Text, nullable=False)
+    no_suratmasuk = db.Column(db.String(100), nullable=False)
+    tgl_ajuan_cuti = db.Column(db.Date, nullable=False)
+    tanggal_cuti = db.Column(db.Date, nullable=False)
+    sampai_cuti = db.Column(db.Date, nullable=False)
+    telp = db.Column(db.String(20), nullable=False)
+    jenis_cuti = db.Column(db.String(50), nullable=False)
+    alasan_cuti = db.Column(db.Text, nullable=False)
+    lama_cuti = db.Column(db.String(50), nullable=False)
+    status_cuti = db.Column(db.String(20), default='pending', nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    approved_by = db.Column(db.String(100), nullable=True)
+    approved_at = db.Column(db.DateTime, nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+
 class Pegawai(db.Model):
     __tablename__ = 'pegawai'
     id = db.Column(db.Integer, primary_key=True)
@@ -81,4 +106,4 @@ class Pegawai(db.Model):
     jabatan = db.Column(db.String(100), nullable=True)
 
 def load_user(user_id):
-    return User.query.with_entities(User.id, User.email, User.password).get(int(user_id))
+    return User.query.get(int(user_id))

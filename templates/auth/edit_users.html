@@ -4,16 +4,7 @@
 <div class="container mt-4">
   <h1 class="mb-5 text-center font-bold text-2xl">{% if single_user %}Edit User Profile{% else %}Manajemen User{% endif %}</h1>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+  <!-- Flash messages will be converted to toasts automatically -->
 
   {% if not single_user %}
   <div class="card mb-4">
@@ -48,12 +39,11 @@
               <td>
                 <div class="btn-group">
                   {% if not user.is_approved %}
-                  <form method="POST" action="/approve-user/{{ user.id }}">
-                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
-                  </form>
+                  <button type="button" class="btn btn-sm btn-success" onclick="approveUser({{ user.id }}, '{{ user.email }}')">Approve</button>
                   {% endif %}
                   <button class="btn btn-sm btn-primary ml-2" onclick="selectUser({{ user.id }}, '{{ user.email }}')">Edit</button>
-                  <form method="POST" action="/delete-user/{{ user.id }}" onsubmit="return confirm('Are you sure you want to delete this user?');" class="d-inline">
+                  <form method="POST" action="{{ url_for('main.delete_user', user_id=user.id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <button type="submit" class="btn btn-sm btn-danger ml-2">Delete</button>
                   </form>
                 </div>
@@ -73,10 +63,11 @@
     </div>
     <div class="card-body">
       {% if single_user %}
-        <form method="POST" action="{{ url_for('edit_user', user_id=users[0].id) }}">
+        <form method="POST" action="{{ url_for('main.edit_user', user_id=users[0].id) }}">
       {% else %}
         <form method="POST" action="{{ url_for('main.edit_user_view') }}">
       {% endif %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         
         {% if not single_user %}
         <!-- Select User -->
@@ -163,10 +154,37 @@
         document.getElementById("is_approved").checked = data.is_approved;
         document.getElementById("password").value = '';
       } else {
-        alert("User not found.");
+        window.toast.error("User not found.");
       }
     } catch (error) {
-      alert("Error fetching user data.");
+      window.toast.error("Error fetching user data.");
+      console.error(error);
+    }
+  }
+
+  async function approveUser(userId, userEmail) {
+    try {
+      const response = await fetch(`/approve-user/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.toast.success(data.message);
+        // Reload page after a short delay to show updated status
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      } else {
+        window.toast.error(data.message);
+      }
+    } catch (error) {
+      window.toast.error("Error approving user.");
       console.error(error);
     }
   }

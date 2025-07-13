@@ -3,23 +3,111 @@
 {% block title %}Show Surat Keluar - PA Banjarbaru{% endblock %}
 
 {% block content %}
+<style>
+.sticky-search-container {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: transparent;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    width: 100%;
+    min-width: max-content;
+}
+
+.search-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 300px;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.search-button {
+    padding: 0.5rem 1rem;
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-button:hover {
+    background-color: #4b5563;
+}
+
+.create-button {
+    padding: 0.5rem 1rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.create-button:hover {
+    background-color: #2563eb;
+}
+
+@media (max-width: 768px) {
+    .search-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-form {
+        min-width: auto;
+    }
+    
+    .search-input {
+        min-width: auto;
+    }
+}
+</style>
+
 <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Surat Keluar</h1>
-    <div class="flex justify-between mb-3">
-        <a href="{{ url_for('main.input_surat_keluar') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Create Surat
-            Keluar</a>
-        <div class="search-btn">
-            <form method="GET" action="{{ url_for('main.show_surat_keluar') }}" class="flex">
-                <input type="text" name="search" placeholder="Search..." class="form-control border rounded px-2 py-1"
-                    style="width: 300px; margin-right: 10px;">
-                <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded">
-                    <i class="feather icon-search"></i>
+    
+    <!-- Sticky Search Container -->
+    <div class="sticky-search-container">
+        <div class="search-controls">
+            <a href="{{ url_for('main.input_surat_keluar') }}" class="create-button">
+                <i class="fas fa-plus mr-2"></i>Create Surat Keluar
+            </a>
+            <form method="GET" action="{{ url_for('main.show_surat_keluar') }}" class="search-form">
+                <input type="text" name="search" placeholder="Search surat keluar..." 
+                       value="{{ request.args.get('search', '') }}" class="search-input">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
                 </button>
             </form>
         </div>
     </div>
 
-    <table class="min-w-full bg-white border border-gray-300">
+    <!-- Table Container with Horizontal Scroll -->
+    <div class="table-container" style="overflow-x: auto; margin-top: 1rem;">
+        <table class="min-w-full bg-white border border-gray-300" style="min-width: 800px;">
         <thead>
             <tr class="bg-gray-200">
                 <th class="py-2 px-4 border">
@@ -96,7 +184,7 @@
         <tbody>
             {% for entry in entries.items %}
             <tr class="{% if loop.index % 2 == 0 %}bg-gray-100{% endif %}">
-                <td class="py-2 px-4 border">{{ entry.tanggal_suratKeluar.strftime('%Y-%m-%d') }}</td>
+                <td class="py-2 px-4 border">{{ entry.tanggal_suratKeluar.strftime('%d/%m/%Y') }}</td>
                 <td class="py-2 px-4 border">{{ entry.pengirim_suratKeluar }}</td>
                 <td class="py-2 px-4 border">{{ entry.penerima_suratKeluar }}</td>
                 <td class="py-2 px-4 border">{{ entry.nomor_suratKeluar }}</td>
@@ -133,6 +221,7 @@
                     </a>
                     <form action="{{ url_for('main.delete_surat_keluar', id=entry.id_suratKeluar) }}" method="POST"
                         style="display:inline;" onsubmit="return confirmDelete();">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded">
                             <i class="feather icon-trash"></i>
                         </button>
@@ -142,56 +231,75 @@
             {% endfor %}
         </tbody>
     </table>
-
-<!-- Pagination Controls -->
-<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-    <!-- Mobile pagination (Previous / Next only) -->
-    <div class="flex flex-1 justify-between sm:hidden">
-        {% if entries.has_prev %}
-        <a href="{{ url_for('main.show_surat_keluar', page=entries.prev_num, search=request.args.get('search'), sort=sort, order=order) }}"
-           class="text-gray-700 hover:text-blue-600">← Previous</a>
-        {% endif %}
-        {% if entries.has_next %}
-        <a href="{{ url_for('main.show_surat_keluar', page=entries.next_num, search=request.args.get('search'), sort=sort, order=order) }}"
-           class="text-gray-700 hover:text-blue-600">Next →</a>
-        {% endif %}
     </div>
 
-    <!-- Desktop pagination with page numbers -->
-    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-            <p class="text-sm text-gray-700">
-                Showing
-                <span class="font-medium">{{ entries.page }}</span>
-                of
-                <span class="font-medium">{{ entries.pages }}</span>
-            </p>
-        </div>
-        <div>
-            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+    <!-- Pagination Controls -->
+    <div class="mt-6 flex items-center justify-between">
+        <div class="flex flex-1 items-center justify-between">
+            <div class="flex items-baseline">
+                <p class="text-sm text-gray-700">
+                    Showing page <span class="font-medium">{{ entries.page }}</span> of
+                    <span class="font-medium">{{ entries.pages }}</span>
+                </p>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <!-- First Page -->
                 {% if entries.page > 1 %}
                 <a href="{{ url_for('main.show_surat_keluar', page=1, search=request.args.get('search'), sort=sort, order=order) }}"
-                   class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">1</a>
+                   class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0">
+                    <span class="sr-only">First</span>
+                    <i class="fas fa-angle-double-left h-5 w-5"></i>
+                </a>
                 {% endif %}
 
-                {% if entries.page > 3 %}
-                <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>
+                <!-- Previous Page -->
+                {% if entries.has_prev %}
+                <a href="{{ url_for('main.show_surat_keluar', page=entries.prev_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                   class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0">
+                    <span class="sr-only">Previous</span>
+                    <i class="fas fa-angle-left h-5 w-5"></i>
+                </a>
                 {% endif %}
 
-                {% for page_num in range(max(1, entries.page - 1), min(entries.pages + 1, entries.page + 2)) %}
-                <a href="{{ url_for('main.show_surat_keluar', page=page_num, search=request.args.get('search'), sort=sort, order=order) }}"
-                   class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {% if page_num == entries.page %}bg-indigo-600 text-white{% else %}text-gray-900 hover:bg-gray-50{% endif %} ring-1 ring-inset ring-gray-300">{{ page_num }}</a>
-                {% endfor %}
+                <!-- Page Numbers -->
+                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    {% if entries.page > 3 %}
+                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>
+                    {% endif %}
 
-                {% if entries.page < entries.pages - 2 %}
-                <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>
+                    {% for page_num in range(max(1, entries.page - 1), min(entries.pages + 1, entries.page + 2)) %}
+                    <a href="{{ url_for('main.show_surat_keluar', page=page_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                       class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {% if page_num == entries.page %}bg-blue-600 text-white hover:bg-blue-700{% else %}text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50{% endif %}">
+                        {{ page_num }}
+                    </a>
+                    {% endfor %}
+
+                    {% if entries.page < entries.pages - 2 %}
+                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300">...</span>
+                    {% endif %}
+                </nav>
+
+                <!-- Next Page -->
+                {% if entries.has_next %}
+                <a href="{{ url_for('main.show_surat_keluar', page=entries.next_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                   class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0">
+                    <span class="sr-only">Next</span>
+                    <i class="fas fa-angle-right h-5 w-5"></i>
+                </a>
+                {% endif %}
+
+                <!-- Last Page -->
+                {% if entries.page < entries.pages %}
                 <a href="{{ url_for('main.show_surat_keluar', page=entries.pages, search=request.args.get('search'), sort=sort, order=order) }}"
-                   class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">{{ entries.pages }}</a>
+                   class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0">
+                    <span class="sr-only">Last</span>
+                    <i class="fas fa-angle-double-right h-5 w-5"></i>
+                </a>
                 {% endif %}
-            </nav>
+            </div>
         </div>
     </div>
-</div>
 
 </div>
 

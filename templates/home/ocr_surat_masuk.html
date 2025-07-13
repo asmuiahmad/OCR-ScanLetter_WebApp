@@ -129,7 +129,33 @@
         .copy-btn:hover {
             background-color: #27ae60;
             transform: translateY(-1px);
-    }
+        }
+
+        /* CSS untuk zoom dan pan */
+        #imagePreview {
+            transition: transform 0.1s ease-out;
+            transform-origin: center;
+            user-select: none;
+        }
+
+        #imagePreviewContainer {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .zoom-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
     
     @media (max-width: 768px) {
             .ocr-container {
@@ -158,6 +184,17 @@
 
 {% block content %}
 <div class="container mx-auto p-4">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 border border-red-400 text-red-700{% elif category == 'success' %}bg-green-100 border border-green-400 text-green-700{% else %}bg-blue-100 border border-blue-400 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
     <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Masuk</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6">
@@ -241,8 +278,15 @@
                                 <!-- Kolom Gambar -->
                                 <div class="col-span-1 bg-gray-100 rounded-lg p-4">
                                     <h4 class="text-md font-medium text-gray-700 mb-2">Gambar Dokumen</h4>
-                                    <div id="imagePreviewContainer" class="w-full h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                                        <img id="imagePreview" src="" alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain hidden">
+                                    <p class="text-xs text-gray-500 mb-2">Gunakan mouse wheel untuk zoom, drag untuk pan</p>
+                                    <div class="zoom-controls">
+                                        <button id="zoomInBtn" class="zoom-btn bg-blue-500 text-white hover:bg-blue-600">Zoom In</button>
+                                        <button id="zoomOutBtn" class="zoom-btn bg-blue-500 text-white hover:bg-blue-600">Zoom Out</button>
+                                        <button id="resetZoomBtn" class="zoom-btn bg-gray-500 text-white hover:bg-gray-600">Reset</button>
+                                        <span id="zoomLevel" class="text-xs text-gray-600 ml-2">100%</span>
+                                    </div>
+                                    <div id="imagePreviewContainer" class="w-full h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg overflow-hidden relative">
+                                        <img id="imagePreview" src="" alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain hidden cursor-move">
                                         <p id="noImageText" class="text-gray-500">Tidak ada gambar</p>
                                     </div>
                                 </div>
@@ -258,7 +302,7 @@
                                 </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Kode Surat</label>
-                                                <input type="text" name="kode_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
+                                                <input type="text" name="kode_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" value="{{ item.kodesurat2 if item and item.kodesurat2 else '' }}">
                                             </div>
                                 </div>
                                         
@@ -387,45 +431,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const extractedDataList = {{ extracted_data_list | tojson | safe }};
     const imagePaths = {{ image_paths | tojson | safe }};
     const extractedDataModal = document.getElementById('extractedDataModal');
+    console.log('Debug: extractedDataModal found:', extractedDataModal);
     let currentIndex = 0;
+
+    console.log('Debug: extractedDataList from backend:', extractedDataList);
+    console.log('Debug: extractedDataList length:', extractedDataList.length);
+    console.log('Debug: extractedDataList type:', typeof extractedDataList);
+    if (extractedDataList.length > 0) {
+        console.log('Debug: First item data:', extractedDataList[0]);
+        console.log('Debug: kodesurat2 in first item:', extractedDataList[0]['kodesurat2']);
+    } else {
+        console.log('Debug: extractedDataList is empty or null');
+    }
 
     // Fungsi untuk mengisi form dengan data
     function fillFormWithData(data) {
-        const form = document.getElementById('extractedDataForm');
-        const inputs = form.querySelectorAll('input, textarea');
+        console.log('Debug: Data received in fillFormWithData:', data);
         
-        inputs.forEach(input => {
-            const name = input.name;
-            
-            // Mapping khusus untuk field-field tambahan
-            const specialMappings = {
-                'full_letter_number': () => {
-                    const components = [
-                        data['nomor_suratMasuk'] || 'Not found',
-                        (data['kodesurat1'] || 'Not found') + '.W15-A12',
-                        data['kodesurat2'] || 'Not found',
-                        data['bulan'] || 'Not found',
-                        data['tahun'] || new Date().getFullYear().toString()
-                    ];
-                    return components.join('/');
-                },
-                'kode_suratMasuk': () => data['kodesurat1'] || '',
-                'pengirim_suratMasuk': () => data['pengirim_suratMasuk'] || '',
-                'penerima_suratMasuk': () => data['penerima_suratMasuk'] || '',
-                'isi_suratMasuk': () => data['isi_suratMasuk'] || '',
-                'jenis_surat': () => data['jenis_surat'] || '',
-                'tanggal_suratMasuk': () => {
-                    if (data['dates'] && data['dates'].length > 0) {
-                        return data['dates'][0];
-                    }
-                    return '';
-                }
-            };
-            
-            if (specialMappings[name]) {
-                input.value = specialMappings[name]();
+        const form = document.getElementById('extractedDataForm');
+        if (!form) {
+            console.error('Form not found');
+            return;
+        }
+        
+        // Isi field dengan data yang benar
+        const fieldMappings = {
+            'full_letter_number': data['nomor_surat'] || '',
+            'kode_suratMasuk': data['kodesurat2'] || '',
+            'pengirim_suratMasuk': data['pengirim'] || '',
+            'penerima_suratMasuk': data['penerima'] || '',
+            'isi_suratMasuk': data['isi'] || '',
+            'jenis_surat': data['jenis_surat'] || '',
+            'tanggal_suratMasuk': data['tanggal'] || ''
+        };
+        
+        // Isi setiap field
+        Object.keys(fieldMappings).forEach(fieldName => {
+            const input = form.querySelector(`[name="${fieldName}"]`);
+            if (input) {
+                input.value = fieldMappings[fieldName];
+                console.log(`Set ${fieldName} = ${fieldMappings[fieldName]}`);
             } else {
-                input.value = data[name] || (name === 'filename' ? data.filename : '');
+                console.warn(`Field ${fieldName} not found in form`);
             }
         });
         
@@ -437,16 +484,153 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.src = imagePath;
             imagePreview.classList.remove('hidden');
             noImageText.classList.add('hidden');
+            
+            // Reset zoom dan pan ketika gambar baru dimuat
+            resetImageZoom();
+            
+            // Setup zoom dan pan events setelah gambar dimuat
+            setTimeout(() => {
+                setupZoomPanEvents();
+            }, 200);
         } else {
             imagePreview.classList.add('hidden');
             noImageText.classList.remove('hidden');
         }
     }
 
+    // Fungsi untuk zoom dan pan
+    let currentZoom = 1;
+    let isDragging = false;
+    let startX, startY, translateX = 0, translateY = 0;
+
+    function resetImageZoom() {
+        const imagePreview = document.getElementById('imagePreview');
+        if (imagePreview) {
+            currentZoom = 1;
+            translateX = 0;
+            translateY = 0;
+            updateImageTransform();
+        }
+    }
+
+    function updateImageTransform() {
+        const imagePreview = document.getElementById('imagePreview');
+        const zoomLevel = document.getElementById('zoomLevel');
+        console.log('Debug: updateImageTransform called');
+        console.log('Debug: imagePreview found:', imagePreview);
+        console.log('Debug: zoomLevel found:', zoomLevel);
+        console.log('Debug: currentZoom:', currentZoom);
+        console.log('Debug: translateX:', translateX, 'translateY:', translateY);
+        
+        if (imagePreview) {
+            const transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+            imagePreview.style.transform = transform;
+            console.log('Debug: Applied transform:', transform);
+        }
+        if (zoomLevel) {
+            const zoomText = `${Math.round(currentZoom * 100)}%`;
+            zoomLevel.textContent = zoomText;
+            console.log('Debug: Updated zoom level text:', zoomText);
+        }
+    }
+
+    function zoomIn() {
+        console.log('Debug: zoomIn called, currentZoom before:', currentZoom);
+        currentZoom = Math.min(currentZoom * 1.2, 5);
+        console.log('Debug: zoomIn called, currentZoom after:', currentZoom);
+        updateImageTransform();
+    }
+
+    function zoomOut() {
+        console.log('Debug: zoomOut called, currentZoom before:', currentZoom);
+        currentZoom = Math.max(currentZoom / 1.2, 0.5);
+        console.log('Debug: zoomOut called, currentZoom after:', currentZoom);
+        updateImageTransform();
+    }
+
+    // Setup zoom dan pan event listeners
+    function setupZoomPanEvents() {
+        console.log('Debug: Setting up zoom and pan events');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+        const imagePreview = document.getElementById('imagePreview');
+
+        console.log('Debug: zoomInBtn found:', zoomInBtn);
+        console.log('Debug: zoomOutBtn found:', zoomOutBtn);
+        console.log('Debug: resetZoomBtn found:', resetZoomBtn);
+        console.log('Debug: imagePreview found:', imagePreview);
+
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', function() {
+                console.log('Debug: Zoom In clicked');
+                zoomIn();
+            });
+        }
+
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', function() {
+                console.log('Debug: Zoom Out clicked');
+                zoomOut();
+            });
+        }
+
+        if (resetZoomBtn) {
+            resetZoomBtn.addEventListener('click', function() {
+                console.log('Debug: Reset Zoom clicked');
+                resetImageZoom();
+            });
+        }
+
+        // Mouse events untuk pan
+        if (imagePreview) {
+            imagePreview.addEventListener('mousedown', function(e) {
+                console.log('Debug: Mouse down on image, currentZoom:', currentZoom);
+                if (currentZoom > 1) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                    imagePreview.style.cursor = 'grabbing';
+                    console.log('Debug: Started dragging');
+                }
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging && currentZoom > 1) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateImageTransform();
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    imagePreview.style.cursor = 'grab';
+                    console.log('Debug: Stopped dragging');
+                }
+            });
+
+            // Wheel event untuk zoom
+            imagePreview.addEventListener('wheel', function(e) {
+                console.log('Debug: Wheel event on image');
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    zoomIn();
+                } else {
+                    zoomOut();
+                }
+            });
+        }
+    }
+
     // Tampilkan tombol "View Extracted Data" jika ada data yang diekstrak
+    console.log('Debug: Checking if should create button, extractedDataList.length =', extractedDataList.length);
     if (extractedDataList.length > 0) {
+        console.log('Debug: Creating View Extracted Data button');
         // Buat tombol "View Extracted Data" jika belum ada
         let viewDataBtn = document.getElementById('viewExtractedDataBtn');
+        console.log('Debug: Existing viewDataBtn:', viewDataBtn);
         if (!viewDataBtn) {
             viewDataBtn = document.createElement('button');
             viewDataBtn.id = 'viewExtractedDataBtn';
@@ -461,12 +645,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Tambahkan tombol setelah form upload
             const uploadForm = document.querySelector('form[enctype="multipart/form-data"]');
+            console.log('Debug: Found uploadForm:', uploadForm);
             if (uploadForm) {
+                console.log('Debug: Creating button container');
                 // Tambahkan div container untuk tombol dengan margin
                 const buttonContainer = document.createElement('div');
                 buttonContainer.className = 'mt-6 text-center';
                 buttonContainer.appendChild(viewDataBtn);
                 uploadForm.parentNode.insertBefore(buttonContainer, uploadForm.nextSibling);
+                console.log('Debug: Button added to page');
+            } else {
+                console.log('Debug: uploadForm not found');
             }
         }
         
@@ -477,6 +666,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Tampilkan modal
             extractedDataModal.classList.remove('hidden');
+            
+            // Setup zoom dan pan events setelah modal ditampilkan
+            setTimeout(() => {
+                setupZoomPanEvents();
+            }, 100);
         });
     }
 
@@ -491,15 +685,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Modify close modal logic
     const closeModalBtn = document.getElementById('closeModalBtn');
-    closeModalBtn.addEventListener('click', function() {
-        extractedDataModal.classList.add('hidden');
-        allowBackgroundScroll();
-    });
-    
-    // Event handler untuk tombol close yang ada di modal
-    const closeModalBtn2 = document.getElementById('closeModalBtn');
-    if (closeModalBtn2) {
-        closeModalBtn2.addEventListener('click', function() {
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function() {
             extractedDataModal.classList.add('hidden');
             allowBackgroundScroll();
         });
@@ -541,7 +728,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Simpan data
     const saveExtractedDataBtn = document.getElementById('saveExtractedData');
-    saveExtractedDataBtn.addEventListener('click', function() {
+    if (saveExtractedDataBtn) {
+        saveExtractedDataBtn.addEventListener('click', function() {
         const form = document.getElementById('extractedDataForm');
         const formData = new FormData(form);
         const extractedData = [];
@@ -549,35 +737,50 @@ document.addEventListener('DOMContentLoaded', function() {
         // Ambil data dari extractedDataList untuk komponen yang tidak ditampilkan di form
         const currentData = extractedDataList[currentIndex];
         
-        // Konstruksi full_letter_number secara dinamis
-        const nomor_suratMasuk = formData.get('full_letter_number') || 'Not found';
-        const kodesurat1 = formData.get('kode_suratMasuk') || 'Not found';
-        const kodePA = 'W15-A12';  // Sesuaikan dengan kode PA yang diinginkan
+        // Ambil data dari form dengan nama field yang benar
+        const rowData = {
+            filename: currentData.filename || '',
+            full_letter_number: formData.get('full_letter_number') || '',
+            pengirim_suratMasuk: formData.get('pengirim_suratMasuk') || '',
+            penerima_suratMasuk: formData.get('penerima_suratMasuk') || '',
+            isi_suratMasuk: formData.get('isi_suratMasuk') || '',
+            kode_suratMasuk: formData.get('kode_suratMasuk') || '',
+            jenis_surat: formData.get('jenis_surat') || '',
+            tanggal: formData.get('tanggal_suratMasuk') || '', // Kirim sebagai 'tanggal' untuk backend
+            // Tambahkan field untuk kode surat dari backend
+            kodesurat2: currentData['kodesurat2'] || '',
+            // Tambahkan data initial dari hasil OCR asli untuk perhitungan akurasi
+            initial_full_letter_number: currentData['nomor_surat'] || '',
+            initial_pengirim_suratMasuk: currentData['pengirim'] || '',
+            initial_penerima_suratMasuk: currentData['penerima'] || '',
+            initial_isi_suratMasuk: currentData['isi'] || ''
+        };
+
+        // Validasi field wajib
+        const requiredFields = {
+            "Nomor Surat": rowData.full_letter_number,
+            "Pengirim": rowData.pengirim_suratMasuk,
+            "Penerima": rowData.penerima_suratMasuk,
+            "Isi": rowData.isi_suratMasuk,
+            "Tanggal": rowData.tanggal
+        };
         
-        // Ambil data dari backend untuk komponen yang tidak ditampilkan di form
-        const kodesurat2 = currentData['kodesurat2'] || 'Not found';
-        const bulan = currentData['bulan'] || 'Not found';
-        const tahun = currentData['tahun'] || new Date().getFullYear().toString();
-
-        // Konstruksi full_letter_number
-        const full_letter_number = [
-            nomor_suratMasuk,
-            kodesurat1 + '.' + kodePA,
-            kodesurat2,
-            bulan,
-            tahun
-        ].join('/');
-
-        // Ambil data dari form
-        const rowData = {};
-        formData.forEach((value, key) => {
-            rowData[key] = value;
-        });
-
-        // Tambahkan full_letter_number yang baru dikonstruksi
-        rowData['full_letter_number'] = full_letter_number;
+        const missingFields = [];
+        for (const [fieldName, value] of Object.entries(requiredFields)) {
+            if (!value) {
+                missingFields.push(fieldName);
+            }
+        }
+        
+        if (missingFields.length > 0) {
+            alert(`Harap isi semua field wajib:\n- ${missingFields.join('\n- ')}`);
+            return;
+        }
 
         extractedData.push(rowData);
+
+        // Debug: Log data yang akan dikirim
+        console.log('Data yang akan dikirim ke server:', extractedData);
 
         // Ambil CSRF token dari input tersembunyi
         const csrfToken = document.querySelector('input[name="csrf_token"]').value;
@@ -587,14 +790,13 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken  // Gunakan token dari input tersembunyi
+                'X-CSRFToken': csrfToken
             },
             body: JSON.stringify(extractedData),
-            credentials: 'same-origin'  // Penting untuk mengirim cookies
+            credentials: 'same-origin'
         })
         .then(response => {
             if (!response.ok) {
-                // Log error response
                 console.error('Response status:', response.status);
                 return response.text().then(text => {
                     console.error('Response text:', text);
@@ -605,18 +807,21 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.success) {
-                alert('Data berhasil disimpan');
+                const message = data.message || 'Data berhasil disimpan';
+                alert(message);
                 extractedDataModal.classList.add('hidden');
-                window.location.reload();
+                // Redirect ke halaman OCR yang bersih
+                window.location.href = "{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}";
             } else {
-                alert('Gagal menyimpan data: ' + data.error);
+                alert('Gagal menyimpan data: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('Terjadi kesalahan saat menyimpan data');
         });
-    });
+        });
+    }
 });
 </script>
 {% endblock %}
@@ -634,22 +839,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const copyTextBtn = document.getElementById('copy-text');
 
         // Drag and drop functionality
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dragDropContainer.addEventListener(eventName, preventDefaults, false);
-        });
+        if (dragDropContainer) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dragDropContainer.addEventListener(eventName, preventDefaults, false);
+            });
+        }
 
         function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
         }
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dragDropContainer.addEventListener(eventName, highlight, false);
-        });
+        if (dragDropContainer) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dragDropContainer.addEventListener(eventName, highlight, false);
+            });
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dragDropContainer.addEventListener(eventName, unhighlight, false);
-        });
+            ['dragleave', 'drop'].forEach(eventName => {
+                dragDropContainer.addEventListener(eventName, unhighlight, false);
+            });
+        }
 
         function highlight() {
             dragDropContainer.classList.add('dragover');
@@ -659,7 +868,9 @@ document.addEventListener('DOMContentLoaded', function() {
             dragDropContainer.classList.remove('dragover');
         }
 
-        dragDropContainer.addEventListener('drop', handleDrop, false);
+        if (dragDropContainer) {
+            dragDropContainer.addEventListener('drop', handleDrop, false);
+        }
 
         function handleDrop(e) {
             const dt = e.dataTransfer;
@@ -667,9 +878,11 @@ document.addEventListener('DOMContentLoaded', function() {
             handleFiles(files);
         }
 
-        fileInput.addEventListener('change', function(e) {
-            handleFiles(this.files);
-        });
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                handleFiles(this.files);
+            });
+        }
 
         function handleFiles(files) {
             if (files.length > 0) {
@@ -696,24 +909,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Remove file
-        removeFileBtn.addEventListener('click', function() {
-            fileInput.value = '';
-            filePreview.style.display = 'none';
-            previewImage.src = '';
-        });
+        if (removeFileBtn) {
+            removeFileBtn.addEventListener('click', function() {
+                if (fileInput) fileInput.value = '';
+                if (filePreview) filePreview.style.display = 'none';
+                if (previewImage) previewImage.src = '';
+            });
+        }
 
         // Copy text functionality
-        copyTextBtn.addEventListener('click', function() {
-            const extractedText = document.getElementById('extracted-text');
-            extractedText.select();
-            document.execCommand('copy');
-            
-            // Temporary visual feedback
-            copyTextBtn.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
-            setTimeout(() => {
-                copyTextBtn.innerHTML = '<i class="fas fa-copy"></i> Salin Teks';
-            }, 2000);
-        });
+        if (copyTextBtn) {
+            copyTextBtn.addEventListener('click', function() {
+                const extractedText = document.getElementById('extracted-text');
+                if (extractedText) {
+                    extractedText.select();
+                    document.execCommand('copy');
+                    
+                    // Temporary visual feedback
+                    copyTextBtn.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
+                    setTimeout(() => {
+                        copyTextBtn.innerHTML = '<i class="fas fa-copy"></i> Salin Teks';
+                    }, 2000);
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

@@ -1,6 +1,11 @@
 {
-    "surat_masuk": {},
-    "surat_keluar": {
-        "001__Khataman-Al-Quran-dan-Dzikrul-Ghofilin-24-09-2023_page-0001.jpg": "7bb0ba82f4e3d8e22b0a25091f256cc7"
-    }
+    "surat_masuk": {
+        "1.jpg": {
+            "id": 14,
+            "nomor_surat": "1931/KPA.W15-A12/HM2.1.4/IX/2024",
+            "kode_surat": "HM2.1.4",
+            "saved_at": "2025-07-13T22:04:47.513829"
+        }
+    },
+    "surat_keluar": {}
 }

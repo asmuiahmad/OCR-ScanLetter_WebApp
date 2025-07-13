@@ -105,18 +105,21 @@
             top: 0;
             left: 0;
             height: 100vh;
-            width: 260px;
+            width: 250px;
             background: #11101d;
             padding: 20px 0;
-            transition: width 0.2s;
             z-index: 100;
             overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        .modern-sidebar.sidebar-collapsed {
+            width: 80px;
         }
         .modern-sidebar .logo-details {
             height: 60px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            padding: 0 15px;
         }
         .modern-sidebar .logo-details i {
             font-size: 30px;
@@ -128,10 +131,20 @@
             color: #fff;
             font-size: 22px;
             font-weight: 600;
+            opacity: 1;
+            transition: 0.3s;
+        }
+        .modern-sidebar.sidebar-collapsed .logo_name {
+            opacity: 0;
+            pointer-events: none;
         }
         .modern-sidebar ul.nav-links {
             margin-top: 20px;
             padding-left: 0;
+        }
+        .modern-sidebar.sidebar-collapsed .links_name {
+            opacity: 0;
+            pointer-events: none;
         }
         .modern-sidebar ul.nav-links li {
             position: relative;

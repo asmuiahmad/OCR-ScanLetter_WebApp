@@ -21,20 +21,30 @@
         {{ form.hidden_tag() }}
         
         <div class="form-group mb-3">
-            <input type="email" name="email" placeholder="Email" required="required" class="form-control" />
+            {{ form.email(class="form-control", placeholder="Email", required="required") }}
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <small class="text-danger">{{ error }}</small>
+                {% endfor %}
+            {% endif %}
         </div>
         
         <div class="form-group mb-3">
-            <input type="password" name="password" placeholder="Password" required="required" class="form-control" />
+            {{ form.password(class="form-control", placeholder="Password", required="required") }}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <small class="text-danger">{{ error }}</small>
+                {% endfor %}
+            {% endif %}
         </div>
         
         <div class="form-group mb-3">
-            <select name="role" class="form-control" required>
-                <option value="" disabled selected>Pilih Role</option>
-                <option value="karyawan">Karyawan</option>
-                <option value="pimpinan">Pimpinan</option>
-                <option value="admin">Admin</option>
-            </select>
+            {{ form.role(class="form-control", required="required") }}
+            {% if form.role.errors %}
+                {% for error in form.role.errors %}
+                    <small class="text-danger">{{ error }}</small>
+                {% endfor %}
+            {% endif %}
         </div>
         
         <div class="form-text mb-3 text-muted">
@@ -43,8 +53,7 @@
 
         <p class="mt-2">Sudah punya akun? <a href="{{ url_for('auth.login') }}">Login di sini</a></p>
 
-        <button type="submit" class="btn btn-primary btn-block btn-large">Register</button>
+        {{ form.submit(class="btn btn-primary btn-block btn-large") }}
     </form>
 </div>
 {% endblock %}
-`

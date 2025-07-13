@@ -1,6 +1,7 @@
 {% extends "layouts/base.html" %}
 {% block head %}
     {{ super() }}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
     <style>
         /* Modern OCR Page Design */
@@ -32,18 +33,13 @@
         }
 
         .drag-drop-area {
-            border: 2px dashed #3498db;
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
-            background-color: #ffffff;
             transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
+            border: 2px dashed #d1d5db;
         }
 
         .drag-drop-area.dragover {
-            background-color: #f1f8ff;
-            border-color: #2980b9;
+            border-color: #3b82f6;
+            background-color: #eff6ff;
         }
 
         .drag-drop-area input[type="file"] {
@@ -53,8 +49,8 @@
         .drag-drop-label {
             cursor: pointer;
             color: #3498db;
-        font-weight: 600;
-    }
+            font-weight: 600;
+        }
     
         .file-preview {
             display: flex;
@@ -79,12 +75,12 @@
         }
 
         .file-actions {
-        display: flex;
+            display: flex;
             gap: 0.5rem;
         }
 
         .btn-ocr-primary {
-        background-color: #3498db;
+            background-color: #3498db;
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
@@ -133,35 +129,72 @@
         .copy-btn:hover {
             background-color: #27ae60;
             transform: translateY(-1px);
-    }
+        }
+
+        /* CSS untuk zoom dan pan */
+        #imagePreview {
+            transition: transform 0.1s ease-out;
+            transform-origin: center;
+            user-select: none;
+        }
+
+        #imagePreviewContainer {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .zoom-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
     
-    @media (max-width: 768px) {
+        @media (max-width: 768px) {
             .ocr-container {
                 padding: 1rem;
-        }
+            }
         
             .drag-drop-area {
                 padding: 2rem;
-        }
+            }
         
             .file-preview {
                 flex-direction: column;
                 text-align: center;
-        }
+            }
         
             .file-actions {
                 margin-top: 1rem;
-            flex-direction: column;
+                flex-direction: column;
                 width: 100%;
+            }
         }
-    }
-</style>
+    </style>
 {% endblock %}
 
 {% block title %}OCR Surat Keluar - PA Banjarbaru{% endblock %}
 
 {% block content %}
 <div class="container mx-auto p-4">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 border border-red-400 text-red-700{% elif category == 'success' %}bg-green-100 border border-green-400 text-green-700{% else %}bg-blue-100 border border-blue-400 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
     <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Keluar</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6">
@@ -189,14 +222,13 @@
                                 class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition inline-block cursor-pointer"
                             >
                                 Pilih Dokumen
-                        </label>
-                    </div>
+                            </label>
+                        </div>
                         <div id="filePreview" class="mt-4 hidden">
                             <p id="selectedFiles" class="text-sm text-gray-700"></p>
-                    </div>
+                        </div>
                     </div>
                 </div>
-
                 <!-- Informasi Tambahan -->
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Petunjuk Unggah</h3>
@@ -208,86 +240,100 @@
                 </div>
             </div>
 
-            <!-- Proses OCR Button -->
-            <div class="text-center mt-6">
-                <button type="submit" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    Proses OCR
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
+                    Proses Dokumen
                 </button>
             </div>
         </form>
-                    </div>
+    </div>
                     
     <!-- Modal untuk Detail Ekstraksi -->
     {% if extracted_data_list %}
     <div id="extractedDataModal" class="fixed inset-0 z-[9999] hidden overflow-y-auto overflow-x-hidden overscroll-contain" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" aria-hidden="true"></div>
-        
         <div class="flex items-center justify-center min-h-screen w-full px-4 pt-4 pb-20 text-center absolute top-0 left-0 right-0 bottom-0">
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl w-[95%] md:w-[90%] max-h-[90vh] relative z-[10000]">
+                <!-- Close Button -->
+                <button type="button" id="closeModalBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-50" aria-label="Close Modal">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 overflow-y-auto max-h-[75vh]">
                     <div class="sm:flex sm:items-start">
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                             <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4" id="modal-title">
                                 Detail Ekstraksi Dokumen Surat Keluar
                             </h3>
-                            
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <!-- Kolom Gambar -->
                                 <div class="col-span-1 bg-gray-100 rounded-lg p-4">
                                     <h4 class="text-md font-medium text-gray-700 mb-2">Gambar Dokumen</h4>
-                                    <div id="imagePreviewContainer" class="w-full h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                                        <img id="imagePreview" src="" alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain hidden">
+                                    <p class="text-xs text-gray-500 mb-2">Gunakan mouse wheel untuk zoom, drag untuk pan</p>
+                                    <div class="zoom-controls">
+                                        <button id="zoomInBtn" class="zoom-btn bg-blue-500 text-white hover:bg-blue-600">Zoom In</button>
+                                        <button id="zoomOutBtn" class="zoom-btn bg-blue-500 text-white hover:bg-blue-600">Zoom Out</button>
+                                        <button id="resetZoomBtn" class="zoom-btn bg-gray-500 text-white hover:bg-gray-600">Reset</button>
+                                        <span id="zoomLevel" class="text-xs text-gray-600 ml-2">100%</span>
+                                    </div>
+                                    <div id="imagePreviewContainer" class="w-full h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg overflow-hidden relative">
+                                        <img id="imagePreview" src="" alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain hidden cursor-move">
                                         <p id="noImageText" class="text-gray-500">Tidak ada gambar</p>
                                     </div>
                                 </div>
-                                
                                 <!-- Kolom Input -->
                                 <div class="col-span-2">
                                     <form id="extractedDataForm" class="space-y-4">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Nomor Surat</label>
                                                 <input type="text" name="full_letter_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                </div>
+                                            </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700">Kode Surat</label>
-                                                <input type="text" name="kode_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                </div>
-                            </div>
-                            
+                                                <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                                                <input type="date" name="tanggal" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
+                                            </div>
+                                        </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Pengirim</label>
                                                 <input type="text" name="pengirim_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                    </div>
+                                            </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Penerima</label>
                                                 <input type="text" name="penerima_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                </div>
-                            </div>
-                            
+                                            </div>
+                                        </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Isi Surat</label>
                                             <textarea name="isi_suratKeluar" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"></textarea>
                                         </div>
-
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700">Jenis Surat</label>
-                                                <input type="text" name="jenis_surat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
+                                                <label class="block text-sm font-medium text-gray-700">Acara (Opsional)</label>
+                                                <input type="text" name="acara_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Acara jika ada">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                                                <input type="date" name="tanggal_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
+                                                <label class="block text-sm font-medium text-gray-700">Tempat (Opsional)</label>
+                                                <input type="text" name="tempat_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Tempat jika ada">
                                             </div>
                                         </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Tanggal Acara (Opsional)</label>
+                                                <input type="date" name="tanggal_acara_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Pilih tanggal acara">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Jam Acara (Opsional)</label>
+                                                <input type="time" name="jam_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Pilih jam acara">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Tombol Navigasi & Simpan di Modal -->
@@ -311,53 +357,128 @@
     {% endif %}
 </div>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const extractedDataList = {{ extracted_data_list | tojson | safe }};
     const imagePaths = {{ image_paths | tojson | safe }};
     const extractedDataModal = document.getElementById('extractedDataModal');
     let currentIndex = 0;
-
+    
     // Fungsi untuk mengisi form dengan data
     function fillFormWithData(data) {
         const form = document.getElementById('extractedDataForm');
         const inputs = form.querySelectorAll('input, textarea');
         
-        inputs.forEach(input => {
-            const name = input.name;
-            let value = '';
-            
-            // Explicit mapping for different field names
-            switch(name) {
-                case 'full_letter_number':
-                    value = data['nomor_surat'] || '';
-                    break;
-                case 'pengirim_suratKeluar':
-                    value = data['pengirim'] || '';
-                    break;
-                case 'penerima_suratKeluar':
-                    value = data['penerima'] || '';
-                    break;
-                case 'isi_suratKeluar':
-                    value = data['isi'] || '';
-                    break;
-                case 'kode_suratKeluar':
-                    value = data['kodesurat2'] || '';
-                    break;
-                case 'jenis_surat':
-                    value = data['jenis_surat'] || '';
-                    break;
-                case 'tanggal_suratKeluar':
-                    if (data['dates'] && data['dates'].length > 0) {
-                        value = data['dates'][0];
-                    }
-                    break;
-                default:
-                    value = data[name] || '';
+        // Mapping khusus untuk field surat keluar
+        const fieldMappings = {
+            'full_letter_number': data['nomor_surat'] || '',
+            'pengirim_suratKeluar': data['pengirim'] || '',
+            'penerima_suratKeluar': data['penerima'] || '',
+            'isi_suratKeluar': data['isi'] || '',
+            'acara_suratKeluar': data['acara'] || '',
+            'tempat_suratKeluar': data['tempat'] || '',
+            'tanggal': data['tanggal'] || '' // Format YYYY-MM-DD
+        };
+
+        // Isi semua field sesuai mapping
+        Object.entries(fieldMappings).forEach(([name, value]) => {
+            const input = form.querySelector(`[name="${name}"]`);
+            if (input) {
+                input.value = value;
             }
-            
-            input.value = value;
         });
+        
+        // Handle tanggal acara khusus
+        const tanggalAcaraInput = form.querySelector('[name="tanggal_acara_suratKeluar"]');
+        if (tanggalAcaraInput) {
+            if (data['tanggal_acara']) {
+                // Coba parse tanggal acara dari berbagai format
+                const tanggalAcara = parseTanggalAcara(data['tanggal_acara']);
+                if (tanggalAcara) {
+                    tanggalAcaraInput.value = tanggalAcara;
+                } else {
+                    tanggalAcaraInput.value = ''; // Kosongkan jika tidak bisa parse
+                }
+            } else {
+                tanggalAcaraInput.value = '';
+            }
+        }
+        
+        // Handle jam acara khusus
+        const jamAcaraInput = form.querySelector('[name="jam_suratKeluar"]');
+        if (jamAcaraInput) {
+            if (data['jam']) {
+                // Coba parse jam dari berbagai format
+                const jamAcara = parseJamAcara(data['jam']);
+                if (jamAcara) {
+                    jamAcaraInput.value = jamAcara;
+                } else {
+                    jamAcaraInput.value = ''; // Kosongkan jika tidak bisa parse
+                }
+            } else {
+                jamAcaraInput.value = '';
+            }
+        }
+        
+        // Fungsi helper untuk parse tanggal acara
+        function parseTanggalAcara(tanggalStr) {
+            if (!tanggalStr) return null;
+            
+            // Coba berbagai format tanggal
+            const formats = [
+                /(\d{1,2})\/(\d{1,2})\/(\d{4})/, // DD/MM/YYYY
+                /(\d{1,2})-(\d{1,2})-(\d{4})/, // DD-MM-YYYY
+                /(\d{4})-(\d{1,2})-(\d{1,2})/, // YYYY-MM-DD
+                /(\d{1,2})\/(\d{1,2})\/(\d{2})/, // DD/MM/YY
+                /(\d{1,2})-(\d{1,2})-(\d{2})/  // DD-MM-YY
+            ];
+            
+            for (let format of formats) {
+                const match = tanggalStr.match(format);
+                if (match) {
+                    let day, month, year;
+                    if (match[1].length === 4) {
+                        // Format YYYY-MM-DD
+                        year = match[1];
+                        month = match[2].padStart(2, '0');
+                        day = match[3].padStart(2, '0');
+                    } else {
+                        // Format DD/MM/YYYY atau DD-MM-YYYY
+                        day = match[1].padStart(2, '0');
+                        month = match[2].padStart(2, '0');
+                        year = match[3].length === 2 ? '20' + match[3] : match[3];
+                    }
+                    return `${year}-${month}-${day}`;
+                }
+            }
+            return null;
+        }
+        
+        // Fungsi helper untuk parse jam acara
+        function parseJamAcara(jamStr) {
+            if (!jamStr) return null;
+            
+            // Coba berbagai format jam
+            const formats = [
+                /(\d{1,2}):(\d{2})/, // HH:MM
+                /(\d{1,2})\.(\d{2})/, // HH.MM
+                /(\d{1,2})\.(\d{2})\s*(WIB|WITA|WIT)?/, // HH.MM WIB
+                /(\d{1,2}):(\d{2})\s*(WIB|WITA|WIT)?/, // HH:MM WIB
+                /(\d{1,2})\s*(\d{2})/, // HH MM
+                /(\d{1,2})\.(\d{2})/, // HH.MM
+            ];
+            
+            for (let format of formats) {
+                const match = jamStr.match(format);
+                if (match) {
+                    const hour = match[1].padStart(2, '0');
+                    const minute = match[2].padStart(2, '0');
+                    return `${hour}:${minute}`;
+                }
+            }
+            return null;
+        }
         
         // Update gambar preview
         const imagePreview = document.getElementById('imagePreview');
@@ -371,43 +492,77 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.classList.add('hidden');
             noImageText.classList.remove('hidden');
         }
+
+        // Update raw OCR textarea
+        const rawOcrTextarea = document.getElementById('rawOcrTextarea');
+        if (rawOcrTextarea && data.raw_ocr) {
+            rawOcrTextarea.value = data.raw_ocr;
+        } else if (rawOcrTextarea) {
+            rawOcrTextarea.value = '';
+        }
     }
 
-    // Tampilkan tombol "View Extracted Data" jika ada data yang diekstrak
-    if (extractedDataList.length > 0) {
-        // Buat tombol "View Extracted Data" jika belum ada
-        let viewDataBtn = document.getElementById('viewExtractedDataBtn');
-        if (!viewDataBtn) {
-            viewDataBtn = document.createElement('button');
-            viewDataBtn.id = 'viewExtractedDataBtn';
-            viewDataBtn.className = 'bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg';
-            viewDataBtn.innerHTML = `
-                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-                View Extracted Data (${extractedDataList.length} items)
-            `;
-            
-            // Tambahkan tombol setelah form upload
-            const uploadForm = document.querySelector('form[enctype="multipart/form-data"]');
-            if (uploadForm) {
-                // Tambahkan div container untuk tombol dengan margin
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'mt-6 text-center';
-                buttonContainer.appendChild(viewDataBtn);
-                uploadForm.parentNode.insertBefore(buttonContainer, uploadForm.nextSibling);
-            }
-        }
+    // Tampilkan tombol "View Extracted Data" jika ada hasil
+    if (extractedDataList && extractedDataList.length > 0) {
+        let viewDataBtn = document.createElement('button');
+        viewDataBtn.id = 'viewExtractedDataBtn';
+        viewDataBtn.className = 'mt-4 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg w-full';
+        viewDataBtn.innerHTML = `
+            <svg class="w-5 h-5 inline mr-2 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            Lihat Hasil Ekstraksi (${extractedDataList.length} dokumen)
+        `;
         
-        // Event handler untuk tombol "View Extracted Data"
         viewDataBtn.addEventListener('click', function() {
-            // Isi form dengan data pertama
-            fillFormWithData(extractedDataList[0]);
-            
-            // Tampilkan modal
-            extractedDataModal.classList.remove('hidden');
+            const modal = document.getElementById('extractedDataModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                fillFormWithData(extractedDataList[0]);
+            }
         });
+        
+        const uploadForm = document.getElementById('uploadForm');
+        if (uploadForm) {
+            uploadForm.parentNode.insertBefore(viewDataBtn, uploadForm.nextSibling);
+        }
+    }
+    
+    // Tambahkan tombol manual test untuk debugging
+    let testBtn = document.createElement('button');
+    testBtn.id = 'testManualBtn';
+    testBtn.className = 'mt-2 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-300 font-medium text-sm shadow-lg w-full';
+    testBtn.innerHTML = `
+        <svg class="w-4 h-4 inline mr-2 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Test Manual Form Acara
+    `;
+    
+    testBtn.addEventListener('click', function() {
+        const modal = document.getElementById('extractedDataModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Test data dengan field acara
+            const testData = {
+                'nomor_surat': '001/Test/2024',
+                'pengirim': 'Test Pengirim',
+                'penerima': 'Test Penerima',
+                'isi': 'Test isi surat',
+                'acara': 'Rapat Koordinasi',
+                'tempat': 'Ruang Meeting',
+                'tanggal_acara': '15/12/2024',
+                'jam': '09:30',
+                'tanggal': '2024-12-10'
+            };
+            fillFormWithData(testData);
+        }
+    });
+    
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+        uploadForm.parentNode.insertBefore(testBtn, uploadForm.nextSibling);
     }
 
     // Navigation buttons
@@ -426,111 +581,97 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Call updateNavButtons when modal is shown or index changes
+    // Call updateNavButtons when modal is shown
     if (extractedDataModal) {
-        // If you have code that shows the modal, call updateNavButtons() there too
         updateNavButtons();
     }
 
-    // Example: update on navigation
+    // Navigation event listeners
     if (prevBtn && nextBtn) {
         prevBtn.addEventListener('click', function() {
             if (currentIndex > 0) {
                 currentIndex--;
-                // ... update modal content ...
+                fillFormWithData(extractedDataList[currentIndex]);
                 updateNavButtons();
             }
         });
         nextBtn.addEventListener('click', function() {
             if (currentIndex < extractedDataList.length - 1) {
                 currentIndex++;
-                // ... update modal content ...
+                fillFormWithData(extractedDataList[currentIndex]);
                 updateNavButtons();
             }
         });
     }
 
-    // Prevent scrolling of background when modal is open
-    function preventBackgroundScroll() {
-        document.body.style.overflow = 'hidden';
-    }
-
-    function allowBackgroundScroll() {
-        document.body.style.overflow = 'auto';
-    }
-
-    // Modify close modal logic
+    // Close modal functionality
     const closeModalBtn = document.getElementById('closeModalBtn');
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', function() {
             extractedDataModal.classList.add('hidden');
-            allowBackgroundScroll();
         });
     }
 
     // Close modal if clicking outside
-    extractedDataModal.addEventListener('click', function(event) {
-        if (event.target === extractedDataModal) {
-            extractedDataModal.classList.add('hidden');
-            allowBackgroundScroll();
-        }
-    });
-
-    // Simpan data
-    const saveExtractedDataBtn = document.getElementById('saveExtractedData');
-    saveExtractedDataBtn.addEventListener('click', function() {
-        const formData = new FormData(document.getElementById('extractedDataForm'));
-        const extractedData = [];
-        // Get CSRF token from meta tag
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Ambil data dari form
-        const rowData = {};
-        formData.forEach((value, key) => {
-            rowData[key] = value;
-        });
-        extractedData.push(rowData);
-
-        // Kirim data ke server
-        fetch("{{ url_for('ocr_surat_keluar.save_extracted_data') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify(extractedData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Data berhasil disimpan');
+    if (extractedDataModal) {
+        extractedDataModal.addEventListener('click', function(event) {
+            if (event.target === extractedDataModal) {
                 extractedDataModal.classList.add('hidden');
-                window.location.reload();
-            } else {
-                alert('Gagal menyimpan data: ' + data.error);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data');
         });
-    });
+    }
+
+    // Save data functionality
+    const saveExtractedDataBtn = document.getElementById('saveExtractedData');
+    if (saveExtractedDataBtn) {
+        saveExtractedDataBtn.addEventListener('click', function() {
+            const form = document.getElementById('extractedDataForm');
+            const formData = new FormData(form);
+            const extractedData = [];
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Ambil data dari form
+            const rowData = {};
+            formData.forEach((value, key) => {
+                rowData[key] = value;
+            });
+            extractedData.push(rowData);
+
+            // Kirim data ke server
+            fetch("{{ url_for('ocr_surat_keluar.save_extracted_data') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(extractedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Data berhasil disimpan');
+                    extractedDataModal.classList.add('hidden');
+                    window.location.reload();
+                } else {
+                    alert('Gagal menyimpan data: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            });
+        });
+    }
 });
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('fileInput');
-    const manualUploadBtn = document.getElementById('manualUploadBtn');
-    const selectedFilesText = document.getElementById('selectedFilesText');
+    const selectedFilesText = document.getElementById('selectedFiles');
 
     // Trigger file input when manual upload button is clicked
-    manualUploadBtn.addEventListener('click', function() {
-        fileInput.click();
-    });
-
-    // Update file selection notification
     fileInput.addEventListener('change', function() {
         if (this.files.length > 0) {
             const fileNames = Array.from(this.files)
@@ -577,102 +718,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-</script>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const dragDropContainer = document.getElementById('drag-drop-container');
-        const fileInput = document.getElementById('file-input');
-        const filePreview = document.getElementById('file-preview');
-        const previewImage = document.getElementById('preview-image');
-        const fileName = document.getElementById('file-name');
-        const fileSize = document.getElementById('file-size');
-        const removeFileBtn = document.getElementById('remove-file');
-        const copyTextBtn = document.getElementById('copy-text');
-
-        // Drag and drop functionality
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dragDropContainer.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dragDropContainer.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dragDropContainer.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight() {
-            dragDropContainer.classList.add('dragover');
-        }
-
-        function unhighlight() {
-            dragDropContainer.classList.remove('dragover');
-        }
-
-        dragDropContainer.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
-
-        fileInput.addEventListener('change', function(e) {
-            handleFiles(this.files);
-        });
-
-        function handleFiles(files) {
-            if (files.length > 0) {
-                const file = files[0];
-                
-                // Validate file type
-                const validTypes = ['image/jpeg', 'image/png', 'image/tiff'];
-                if (!validTypes.includes(file.type)) {
-                    alert('Format file tidak didukung. Harap unggah JPG, PNG, atau TIFF.');
-                    fileInput.value = ''; // Clear the input
-            return;
-        }
-
-                // File preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    fileName.textContent = file.name;
-                    fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-                    filePreview.style.display = 'flex';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Remove file
-        removeFileBtn.addEventListener('click', function() {
-            fileInput.value = '';
-            filePreview.style.display = 'none';
-            previewImage.src = '';
-        });
-
-        // Copy text functionality
-        copyTextBtn.addEventListener('click', function() {
-            const extractedText = document.getElementById('extracted-text');
-            extractedText.select();
-            document.execCommand('copy');
-            
-            // Temporary visual feedback
-            copyTextBtn.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
-            setTimeout(() => {
-                copyTextBtn.innerHTML = '<i class="fas fa-copy"></i> Salin Teks';
-            }, 2000);
-        });
-    });
 </script>
 {% endblock %}

@@ -3,13 +3,12 @@
 {% include 'includes/head.html' %}
 
 <body class="bg-gray-50">
+  <!-- CSRF Token for AJAX requests -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <div class="modern-sidebar sidebar-collapsed">
-    <div class="logo-details">
+    <div class="logo-details" id="sidebarToggle" style="cursor: pointer;">
       <i class="fas fa-envelope-open-text"></i>
       <span class="logo_name">Surat App</span>
-    </div>
-    <div class="sidebar-toggle" title="Toggle Sidebar">
-      <i class="fas fa-bars"></i>
     </div>
     <ul class="nav-links">
       <li>
@@ -60,6 +59,7 @@
         <div class="dropdown" id="ocrMenu">
           <a href="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}">OCR Surat Masuk</a>
           <a href="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}">OCR Surat Keluar</a>
+          <a href="{{ url_for('ocr_cuti.ocr_cuti') }}">OCR Cuti & Formulir Cuti</a>
           <a href="{{ url_for('main.ocr_test') }}">OCR Test</a>
         </div>
       </li>
@@ -81,6 +81,17 @@
         </div>
       </li>
       {% endif %}
+      {% if current_user.role == 'pimpinan' %}
+      <li>
+        <a href="{{ url_for('main.list_pending_surat_keluar') }}">
+          <i class="fas fa-check-circle"></i>
+          <span class="links_name">Persetujuan Surat</span>
+          {% if g.pending_surat_keluar_count > 0 %}
+          <span class="badge bg-danger">{{ g.pending_surat_keluar_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+      {% endif %}
       {% if current_user.is_admin %}
       <li>
         <a href="{{ url_for('main.edit_user_view') }}">
@@ -89,12 +100,6 @@
         </a>
       </li>
       {% endif %}
-      <li>
-        <a href="{{ url_for('auth.logout') }}">
-          <i class="fas fa-sign-out-alt"></i>
-          <span class="links_name">Logout</span>
-        </a>
-      </li>
       {% if current_user.is_authenticated %}
       <li>
         <a href="{{ url_for('main.edit_user', user_id=current_user.id) }}" class="user-profile-link">
@@ -102,26 +107,6 @@
           <span class="links_name">{{ current_user.email }}</span>
           <span class="user-role-badge" data-role="{{ current_user.role }}">{{ current_user.role.upper() }}</span>
         </a>
-      </li>
-      {% endif %}
-      {% if current_user.role == 'pimpinan' %}
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle">
-          <i class="fas fa-check-circle"></i>
-          <span class="links_name">Persetujuan Surat</span>
-          <i class="fas fa-caret-down"></i>
-        </a>
-        <ul class="dropdown-menu">
-          <li>
-            <a href="{{ url_for('main.list_pending_surat_keluar') }}">
-              <i class="fas fa-paper-plane"></i>
-              <span class="links_name">Surat Keluar Pending</span>
-              {% if g.pending_surat_keluar_count > 0 %}
-              <span class="badge bg-danger">{{ g.pending_surat_keluar_count }}</span>
-              {% endif %}
-            </a>
-          </li>
-        </ul>
       </li>
       {% endif %}
     </ul>
@@ -138,6 +123,7 @@
             </a>
           </div>
           <div class="flex items-center">
+            {% if current_user.role in ['pimpinan', 'admin'] %}
             <div class="relative mr-4">
               <button class="notification-bell-btn relative">
                 <i class="fas fa-bell text-gray-600 hover:text-blue-600 transition-colors duration-200"></i>
@@ -149,20 +135,26 @@
               </button>
               
               <!-- Dropdown Notifikasi -->
-              <div class="notification-dropdown hidden absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+              <div class="notification-dropdown hidden absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 transform transition-all duration-200 ease-in-out">
                 <div class="p-4">
                   <h3 class="text-sm font-semibold text-gray-700 mb-2">Notifikasi</h3>
                   {% if g.pending_surat_keluar_count > 0 %}
-                  <a href="{{ url_for('main.list_pending_surat_keluar') }}" class="block py-2 hover:bg-gray-100">
+                  <a href="{{ url_for('main.list_pending_surat_keluar') }}" class="block py-2 px-3 rounded hover:bg-gray-100 transition-colors duration-200">
                     <div class="flex items-center">
                       <i class="fas fa-paper-plane mr-2 text-green-500"></i>
                       <span class="text-sm">Surat Keluar Pending: {{ g.pending_surat_keluar_count }}</span>
                     </div>
                   </a>
+                  {% else %}
+                  <div class="py-2 px-3 text-sm text-gray-500">
+                    <i class="fas fa-check-circle mr-2 text-green-500"></i>
+                    Tidak ada surat pending
+                  </div>
                   {% endif %}
                 </div>
               </div>
             </div>
+            {% endif %}
             <div class="hidden sm:flex sm:items-center sm:ml-6">
               <div class="relative">
                 <a href="{{ url_for('auth.logout') }}" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200">
@@ -218,6 +210,9 @@
     <div class="content p-4 sm:p-6 overflow-y-auto">
       {% block content %}{% endblock %}
     </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
   </div>
   <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -243,20 +238,27 @@
     // Sidebar toggle functionality
     document.addEventListener('DOMContentLoaded', function() {
       const sidebar = document.querySelector('.modern-sidebar');
-      const sidebarToggle = document.querySelector('.sidebar-toggle');
       const mainContent = document.querySelector('.main-content');
-
-      sidebarToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('sidebar-collapsed');
-        mainContent.style.marginLeft = sidebar.classList.contains('sidebar-collapsed') ? '80px' : '250px';
-      });
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      
+      if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+          sidebar.classList.toggle('sidebar-collapsed');
+          mainContent.style.marginLeft = sidebar.classList.contains('sidebar-collapsed') ? '80px' : '250px';
+        });
+      }
 
       // Notification bell toggle
       const notificationBell = document.querySelector('.notification-bell-btn');
       const notificationDropdown = document.querySelector('.notification-dropdown');
 
       if (notificationBell && notificationDropdown) {
-        notificationBell.addEventListener('click', function() {
+        console.log('Notification bell found and initialized');
+        
+        notificationBell.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Notification bell clicked');
           notificationDropdown.classList.toggle('hidden');
         });
 
@@ -266,56 +268,339 @@
             notificationDropdown.classList.add('hidden');
           }
         });
+      } else {
+        console.log('Notification bell or dropdown not found');
       }
-    });
 
-    // Mobile menu toggle
-    document.addEventListener('DOMContentLoaded', function() {
+
+
+      // Mobile menu toggle
       const mobileMenuButton = document.querySelector('.mobile-menu-button');
       const mobileMenu = document.querySelector('.mobile-menu');
-      if (mobileMenuButton) {
+      if (mobileMenuButton && mobileMenu) {
         mobileMenuButton.addEventListener('click', function() {
           mobileMenu.classList.toggle('hidden');
         });
       }
-    });
 
-    // Close mobile sidebar when clicking outside
-    document.addEventListener('click', function(e) {
-      if (!sidebar.contains(e.target) && !mobileMenuButton.contains(e.target)) {
-        sidebar.classList.remove('mobile-open');
-        mobileMenu.classList.add('hidden');
-      }
-    });
-  </script>
-  {% block extra_js %}
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-      const notificationBellBtn = document.querySelector('.notification-bell-btn');
-      const notificationDropdown = document.querySelector('.notification-dropdown');
-
-      // Toggle dropdown visibility
-      notificationBellBtn.addEventListener('click', function(e) {
-          e.stopPropagation(); // Prevent document click from immediately closing
-          notificationDropdown.classList.toggle('hidden');
-      });
-
-      // Close dropdown when clicking outside
+      // Close mobile sidebar when clicking outside
       document.addEventListener('click', function(e) {
-          if (!notificationDropdown.contains(e.target) && !notificationBellBtn.contains(e.target)) {
-              notificationDropdown.classList.add('hidden');
+        const sidebar = document.querySelector('.modern-sidebar');
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        if (!sidebar.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+          sidebar.classList.remove('mobile-open');
+          if (mobileMenu) {
+            mobileMenu.classList.add('hidden');
           }
+        }
       });
-  });
+    });
   </script>
-  {% endblock %}
+  {% block extra_js %}{% endblock %}
 
-  <!-- Include global JavaScript files -->
-  <script src="{{ url_for('static', filename='assets/js/pcoded.js') }}"></script>
-  <script src="{{ url_for('static', filename='assets/js/plugins/bootstrap.min.js') }}"></script>
-  
-  <!-- Page-specific scripts -->
-  {% block scripts %}{% endblock %}
-</body>
+      <!-- Include global JavaScript files -->
+    <script src="{{ url_for('static', filename='assets/js/pcoded.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/plugins/bootstrap.min.js') }}"></script>
+    
+    <!-- Toast Notification System -->
+    <style>
+      /* Notification Bell Styles */
+      .notification-bell-btn {
+        position: relative;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+      }
+      
+      .notification-bell-btn:hover {
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+      
+      .notification-bell-btn:active {
+        transform: scale(0.95);
+      }
+      
+      .notification-dropdown {
+        transform-origin: top right;
+        animation: dropdownSlide 0.2s ease-out;
+      }
+      
+      .notification-dropdown.hidden {
+        display: none !important;
+      }
+      
+      @keyframes dropdownSlide {
+        from {
+          opacity: 0;
+          transform: scale(0.95) translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      
+      /* Toast Styles */
+      .toast {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-bottom: 8px;
+        max-width: 400px;
+        min-width: 300px;
+        animation: slideIn 0.3s ease-out;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .toast::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+      }
+      
+      .toast-success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+      }
+      
+      .toast-success::before {
+        background: #22c55e;
+      }
+      
+      .toast-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+      }
+      
+      .toast-error::before {
+        background: #ef4444;
+      }
+      
+      .toast-warning {
+        background: #fffbeb;
+        border: 1px solid #fed7aa;
+        color: #92400e;
+      }
+      
+      .toast-warning::before {
+        background: #f59e0b;
+      }
+      
+      .toast-info {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+      }
+      
+      .toast-info::before {
+        background: #3b82f6;
+      }
+      
+      .toast-content {
+        flex: 1;
+        margin-right: 12px;
+      }
+      
+      .toast-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+      
+      .toast-message {
+        font-size: 13px;
+        opacity: 0.9;
+      }
+      
+      .toast-close {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+      }
+      
+      .toast-close:hover {
+        opacity: 1;
+      }
+      
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+      
+      .toast.fade-out {
+        animation: slideOut 0.3s ease-in forwards;
+      }
+    </style>
+    
+    <!-- Toast JavaScript -->
+    <script>
+      class ToastNotification {
+        constructor() {
+          this.container = document.getElementById('toast-container');
+        }
+        
+        show(message, type = 'success', title = null, duration = 5000) {
+          const toast = document.createElement('div');
+          toast.className = `toast toast-${type}`;
+          
+          const icon = this.getIcon(type);
+          const closeIcon = '×';
+          
+          toast.innerHTML = `
+            <div class="toast-content">
+              ${title ? `<div class="toast-title">${title}</div>` : ''}
+              <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">${closeIcon}</button>
+          `;
+          
+          this.container.appendChild(toast);
+          
+          // Auto remove after duration
+          if (duration > 0) {
+            setTimeout(() => {
+              if (toast.parentElement) {
+                toast.classList.add('fade-out');
+                setTimeout(() => {
+                  if (toast.parentElement) {
+                    toast.remove();
+                  }
+                }, 300);
+              }
+            }, duration);
+          }
+          
+          return toast;
+        }
+        
+        getIcon(type) {
+          const icons = {
+            success: '✓',
+            error: '✕',
+            warning: '⚠',
+            info: 'ℹ'
+          };
+          return icons[type] || icons.info;
+        }
+        
+        success(message, title = null) {
+          return this.show(message, 'success', title);
+        }
+        
+        error(message, title = null) {
+          return this.show(message, 'error', title);
+        }
+        
+        warning(message, title = null) {
+          return this.show(message, 'warning', title);
+        }
+        
+        info(message, title = null) {
+          return this.show(message, 'info', title);
+        }
+      }
+      
+      // Global toast instance
+      window.toast = new ToastNotification();
+      
+      // Convert flash messages to toasts
+      document.addEventListener('DOMContentLoaded', function() {
+        const flashMessages = document.querySelectorAll('.alert');
+        flashMessages.forEach(alert => {
+          const message = alert.textContent.trim();
+          const category = alert.className.includes('alert-success') ? 'success' :
+                          alert.className.includes('alert-danger') ? 'error' :
+                          alert.className.includes('alert-warning') ? 'warning' : 'info';
+          
+          // Show toast
+          window.toast.show(message, category);
+          
+          // Remove original alert
+          alert.remove();
+        });
+
+        // Initialize notification system
+        initializeNotifications();
+      });
+
+      // Function to update notification count
+      function updateNotificationCount() {
+        const notificationBell = document.querySelector('.notification-bell-btn');
+        if (!notificationBell) return;
+
+        fetch('/api/notifications/count')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const badge = notificationBell.querySelector('.absolute');
+              if (data.pending_count > 0) {
+                if (badge) {
+                  badge.textContent = data.pending_count;
+                } else {
+                  const newBadge = document.createElement('span');
+                  newBadge.className = 'absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center';
+                  newBadge.textContent = data.pending_count;
+                  notificationBell.appendChild(newBadge);
+                }
+              } else {
+                if (badge) {
+                  badge.remove();
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching notification count:', error);
+          });
+      }
+
+      // Initialize notification system
+      function initializeNotifications() {
+        const notificationBell = document.querySelector('.notification-bell-btn');
+        if (notificationBell) {
+          // Update count on page load
+          updateNotificationCount();
+          
+          // Auto-refresh every 30 seconds
+          setInterval(updateNotificationCount, 30000);
+        }
+      }
+    </script>
+    
+    <!-- Page-specific scripts -->
+    {% block scripts %}{% endblock %}
+  </body>
 
 </html>

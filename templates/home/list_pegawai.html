@@ -23,92 +23,110 @@
                 <td>{{ pegawai.golongan }}</td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
-                        <button class="btn btn-sm btn-info mx-1" data-toggle="modal" data-target="#editModal{{ pegawai.id }}" title="Edit">
+                        <button type="button" class="btn btn-sm btn-info mx-1" data-bs-toggle="modal" data-bs-target="#editModal{{ pegawai.id }}" title="Edit">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <form method="POST" action="{{ url_for('hapus_pegawai', id=pegawai.id) }}"
-                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus pegawai ini?');" class="d-inline">
+                        {% if current_user.role == 'admin' %}
+                        <form method="POST" action="{{ url_for('main.hapus_pegawai', id=pegawai.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <button type="submit" class="btn btn-sm btn-danger mx-1" title="Hapus">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </td>
             </tr>
 
-            <!-- Modal Edit -->
+            <!-- Modal Detail/Edit Pegawai -->
             <div class="modal fade" id="editModal{{ pegawai.id }}" tabindex="-1" role="dialog"
                 aria-labelledby="editModalLabel{{ pegawai.id }}" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <form method="POST" action="{{ url_for('edit_pegawai', id=pegawai.id) }}">
+                <div class="modal-dialog modal-md" role="document">
+                    <form method="POST" action="{{ url_for('main.edit_pegawai', id=pegawai.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editModalLabel{{ pegawai.id }}">Edit Pegawai</h5>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <div class="modal-header py-3">
+                                <h5 class="modal-title text-lg font-semibold" id="editModalLabel{{ pegawai.id }}">Detail Pegawai</h5>
+                                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
                             </div>
-                            <div class="modal-body">
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label>Nama</label>
-                                        <input type="text" name="nama" class="form-control" value="{{ pegawai.nama }}"
-                                            required>
+                            <div class="modal-body px-4 py-3">
+                                <div class="space-y-4">
+                                    <!-- Informasi Pribadi -->
+                                    <div>
+                                        <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Informasi Pribadi</h6>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                                <input type="text" name="nama" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.nama }}"
+                                                    {% if current_user.role != 'admin' %}disabled{% endif %} required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
+                                                <input type="text" name="nip" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.nip }}"
+                                                    {% if current_user.role != 'admin' %}disabled{% endif %} required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+                                                <input type="date" name="tanggal_lahir" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.tanggal_lahir.strftime('%Y-%m-%d') if pegawai.tanggal_lahir else '' }}" {% if current_user.role != 'admin' %}disabled{% endif %} required>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
+                                                <input type="text" name="jenis_kelamin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.jenis_kelamin }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Agama</label>
+                                                <input type="text" name="agama" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.agama }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>NIP</label>
-                                        <input type="text" name="nip" class="form-control" value="{{ pegawai.nip }}"
-                                            required>
+                                    
+                                    <!-- Informasi Jabatan -->
+                                    <div>
+                                        <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Informasi Jabatan</h6>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
+                                                <input type="text" name="jabatan" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.jabatan }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Golongan/Pangkat</label>
+                                                <input type="text" name="golongan" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.golongan }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Jabatan</label>
-                                        <input type="text" name="jabatan" class="form-control"
-                                            value="{{ pegawai.jabatan }}">
+                                    
+                                    <!-- Informasi Kontak -->
+                                    <div>
+                                        <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Informasi Kontak</h6>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+                                                <input type="text" name="nomor_telpon" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="{{ pegawai.nomor_telpon }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Golongan</label>
-                                        <input type="text" name="golongan" class="form-control"
-                                            value="{{ pegawai.golongan }}">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Tanggal Lahir</label>
-                                        <input type="date" name="tanggal_lahir" class="form-control"
-                                            value="{{ pegawai.tanggal_lahir.strftime('%Y-%m-%d') }}" required>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Agama</label>
-                                        <input type="text" name="agama" class="form-control"
-                                            value="{{ pegawai.agama }}">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Jenis Kelamin</label>
-                                        <select name="jenis_kelamin" class="form-control">
-                                            <option value="Laki-laki"
-                                                {% if pegawai.jenis_kelamin == 'Laki-laki' %}selected{% endif %}>
-                                                Laki-laki</option>
-                                            <option value="Perempuan"
-                                                {% if pegawai.jenis_kelamin == 'Perempuan' %}selected{% endif %}>
-                                                Perempuan</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Nomor Telepon</label>
-                                        <input type="text" name="nomor_telpon" class="form-control"
-                                            value="{{ pegawai.nomor_telpon }}">
-                                    </div>
-                                    <div class="form-group col-md-12">
-                                        <label>Riwayat Pendidikan</label>
-                                        <textarea name="riwayat_pendidikan" class="form-control"
-                                            rows="2">{{ pegawai.riwayat_pendidikan }}</textarea>
-                                    </div>
-                                    <div class="form-group col-md-12">
-                                        <label>Riwayat Pekerjaan</label>
-                                        <textarea name="riwayat_pekerjaan" class="form-control"
-                                            rows="2">{{ pegawai.riwayat_pekerjaan }}</textarea>
+                                    
+                                    <!-- Riwayat -->
+                                    <div>
+                                        <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Riwayat</h6>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Riwayat Pendidikan</label>
+                                                <textarea name="riwayat_pendidikan" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" rows="3" {% if current_user.role != 'admin' %}disabled{% endif %}>{{ pegawai.riwayat_pendidikan }}</textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Riwayat Pekerjaan</label>
+                                                <textarea name="riwayat_pekerjaan" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" rows="3" {% if current_user.role != 'admin' %}disabled{% endif %}>{{ pegawai.riwayat_pekerjaan }}</textarea>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer">
+                                {% if current_user.role == 'admin' %}
                                 <button type="submit" class="btn btn-success">Simpan</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                {% endif %}
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                             </div>
                         </div>
                     </form>
@@ -122,6 +140,172 @@
 
 {% block scripts %}
 <script>
+    // Handle form submissions with AJAX and toast notifications
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle edit form submissions
+        const editForms = document.querySelectorAll('form[action*="/pegawai/edit/"]');
+        editForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                console.log('=== EDIT FORM SUBMISSION ===');
+                console.log('Form action:', this.action);
+                console.log('Form method:', this.method);
+                
+                const formData = new FormData(this);
+                
+                // Log form data before adding CSRF token
+                console.log('Form data before CSRF:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+                
+                // Ensure CSRF token is included
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                console.log('CSRF token from meta:', csrfToken);
+                formData.append('csrf_token', csrfToken);
+                
+                // Log form data after adding CSRF token
+                console.log('Form data after CSRF:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+                
+                console.log('Sending request to:', this.action);
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    
+                    if (data.success) {
+                        // Show success toast
+                        if (window.toast) {
+                            window.toast.success(data.message);
+                        }
+                        // Close modal
+                        const modal = this.closest('.modal');
+                        if (modal) {
+                            const modalInstance = bootstrap.Modal.getInstance(modal);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                        }
+                        // Reload page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        // Show error toast
+                        if (window.toast) {
+                            window.toast.error(data.message);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (window.toast) {
+                        window.toast.error('Terjadi kesalahan saat menyimpan data');
+                    }
+                });
+            });
+        });
+        
+        // Handle delete form submissions
+        const deleteForms = document.querySelectorAll('form[action*="/pegawai/hapus/"]');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                console.log('=== DELETE FORM SUBMISSION ===');
+                console.log('Form action:', this.action);
+                console.log('Form method:', this.method);
+                
+                if (!confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) {
+                    console.log('User cancelled deletion');
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                
+                // Log form data before adding CSRF token
+                console.log('Form data before CSRF:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+                
+                // Ensure CSRF token is included
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                console.log('CSRF token from meta:', csrfToken);
+                formData.append('csrf_token', csrfToken);
+                
+                // Log form data after adding CSRF token
+                console.log('Form data after CSRF:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+                
+                console.log('Sending request to:', this.action);
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    
+                    if (data.success) {
+                        // Show success toast
+                        if (window.toast) {
+                            window.toast.success(data.message);
+                        }
+                        // Reload page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        // Show error toast
+                        if (window.toast) {
+                            window.toast.error(data.message);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (window.toast) {
+                        window.toast.error('Terjadi kesalahan saat menghapus data');
+                    }
+                });
+            });
+        });
+    });
+    
     function confirmDelete(pegawaiId) {
         if (confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) {
             window.location.href = `/pegawai/delete/${pegawaiId}`;

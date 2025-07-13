@@ -1,0 +1,87 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Input Cuti - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-5 text-center font-bold text-2xl">Input Cuti</h1>
+    
+    <form method="POST" class="form-horizontal">
+        {{ form.csrf_token }}
+        <div class="row">
+            <!-- Kolom Kiri -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.nama.label(style="margin-bottom: 3px;") }}
+                    {{ form.nama(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.nip.label(style="margin-bottom: 3px;") }}
+                    {{ form.nip(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.jabatan.label(style="margin-bottom: 3px;") }}
+                    {{ form.jabatan(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.gol_ruang.label(style="margin-bottom: 3px;") }}
+                    {{ form.gol_ruang(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.unit_kerja.label(style="margin-bottom: 3px;") }}
+                    {{ form.unit_kerja(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.masa_kerja.label(style="margin-bottom: 3px;") }}
+                    {{ form.masa_kerja(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.alamat.label(style="margin-bottom: 3px;") }}
+                    {{ form.alamat(class="form-control", style="height: 60px;", required=true) }}
+                </div>
+            </div>
+
+            <!-- Kolom Kanan -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.no_suratmasuk.label(style="margin-bottom: 3px;") }}
+                    {{ form.no_suratmasuk(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.tgl_ajuan_cuti.label(style="margin-bottom: 3px;") }}
+                    {{ form.tgl_ajuan_cuti(class="form-control", type="date", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.tanggal_cuti.label(style="margin-bottom: 3px;") }}
+                    {{ form.tanggal_cuti(class="form-control", type="date", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.sampai_cuti.label(style="margin-bottom: 3px;") }}
+                    {{ form.sampai_cuti(class="form-control", type="date", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.telp.label(style="margin-bottom: 3px;") }}
+                    {{ form.telp(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.jenis_cuti.label(style="margin-bottom: 3px;") }}
+                    {{ form.jenis_cuti(class="form-control", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.alasan_cuti.label(style="margin-bottom: 3px;") }}
+                    {{ form.alasan_cuti(class="form-control", style="height: 60px;", required=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.lama_cuti.label(style="margin-bottom: 3px;") }}
+                    {{ form.lama_cuti(class="form-control", required=true) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tombol Submit -->
+        <div class="form-group" style="margin-top: 8px;">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+{% endblock %} 

@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <p class="text-gray-600 font-semibold">Tanggal Surat</p>
-                    <p class="text-lg">{{ surat.tanggal_suratKeluar.strftime('%d %B %Y') }}</p>
+                    <p class="text-lg">{{ surat.tanggal_suratKeluar.strftime('%d/%m/%Y') }}</p>
                 </div>
                 <div>
                     <p class="text-gray-600 font-semibold">Pengirim</p>
@@ -24,9 +24,22 @@
                     <p class="text-lg">{{ surat.penerima_suratKeluar }}</p>
                 </div>
                 <div class="col-span-1 md:col-span-2">
-                    <p class="text-gray-600 font-semibold">Perihal</p>
-                    <p class="text-lg">{{ surat.perihal_suratKeluar }}</p>
+                    <p class="text-gray-600 font-semibold">Isi Surat</p>
+                    <p class="text-lg">{{ surat.isi_suratKeluar }}</p>
                 </div>
+                {% if surat.gambar_suratKeluar %}
+                <div class="col-span-1 md:col-span-2">
+                    <p class="text-gray-600 font-semibold">Gambar Surat</p>
+                    <div class="mt-2">
+                        <img src="{{ url_for('view_surat_keluar_image', id=surat.id_suratKeluar) }}" 
+                             alt="Gambar Surat Keluar" 
+                             class="max-w-full h-auto rounded-lg border border-gray-300 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                             style="max-height: 400px; object-fit: contain;"
+                             onclick="openImageModal(this.src, 'Gambar Surat Keluar')">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Klik gambar untuk melihat ukuran penuh</p>
+                </div>
+                {% endif %}
                 <div class="col-span-1 md:col-span-2">
                     <p class="text-gray-600 font-semibold">Status</p>
                     {% if surat.status_suratKeluar == 'pending' %}
@@ -133,5 +146,60 @@ function rejectSurat(suratId) {
         });
     }
 }
+
+// Image modal functionality
+function openImageModal(imageSrc, title) {
+    // Create modal if it doesn't exist
+    let imageModal = document.getElementById('imageModal');
+    if (!imageModal) {
+        imageModal = document.createElement('div');
+        imageModal.id = 'imageModal';
+        imageModal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden';
+        imageModal.innerHTML = `
+            <div class="relative max-w-4xl max-h-full p-4">
+                <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+                    <div class="flex justify-between items-center p-4 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
+                        <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <img id="modalImage" src="" alt="${title}" class="max-w-full max-h-96 object-contain">
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(imageModal);
+        
+        // Close modal when clicking outside
+        imageModal.addEventListener('click', function(e) {
+            if (e.target === imageModal) {
+                closeImageModal();
+            }
+        });
+    }
+    
+    // Set image source and show modal
+    const modalImage = document.getElementById('modalImage');
+    if (modalImage) {
+        modalImage.src = imageSrc;
+        imageModal.classList.remove('hidden');
+    }
+}
+
+function closeImageModal() {
+    const imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+        imageModal.classList.add('hidden');
+    }
+}
+
+// Close image modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeImageModal();
+    }
+});
 </script>
 {% endblock %} 

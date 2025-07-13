@@ -1,0 +1,211 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Daftar Cuti - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Daftar Cuti</h1>
+        <a href="{{ url_for('main.input_cuti') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Input Cuti
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Cari nama, NIP, atau jenis cuti..." value="{{ request.args.get('search', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-control">
+                        <option value="">Semua Status</option>
+                        <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="approved" {% if request.args.get('status') == 'approved' %}selected{% endif %}>Disetujui</option>
+                        <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="jenis_cuti" class="form-control">
+                        <option value="">Semua Jenis Cuti</option>
+                        <option value="c_tahun" {% if request.args.get('jenis_cuti') == 'c_tahun' %}selected{% endif %}>Tahun</option>
+                        <option value="c_besar" {% if request.args.get('jenis_cuti') == 'c_besar' %}selected{% endif %}>Besar</option>
+                        <option value="c_sakit" {% if request.args.get('jenis_cuti') == 'c_sakit' %}selected{% endif %}>Sakit</option>
+                        <option value="c_lahir" {% if request.args.get('jenis_cuti') == 'c_lahir' %}selected{% endif %}>Lahir</option>
+                        <option value="c_penting" {% if request.args.get('jenis_cuti') == 'c_penting' %}selected{% endif %}>Penting</option>
+                        <option value="c_luarnegara" {% if request.args.get('jenis_cuti') == 'c_luarnegara' %}selected{% endif %}>Luar Negara</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>NIP</th>
+                            <th>Jenis Cuti</th>
+                            <th>Tanggal Cuti</th>
+                            <th>Lama Cuti</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cuti in entries.items %}
+                        <tr>
+                            <td>{{ loop.index + (entries.page - 1) * entries.per_page }}</td>
+                            <td>{{ cuti.nama }}</td>
+                            <td>{{ cuti.nip }}</td>
+                            <td>
+                                {% if cuti.jenis_cuti == 'c_tahun' %}Tahun
+                                {% elif cuti.jenis_cuti == 'c_besar' %}Besar
+                                {% elif cuti.jenis_cuti == 'c_sakit' %}Sakit
+                                {% elif cuti.jenis_cuti == 'c_lahir' %}Lahir
+                                {% elif cuti.jenis_cuti == 'c_penting' %}Penting
+                                {% elif cuti.jenis_cuti == 'c_luarnegara' %}Luar Negara
+                                {% else %}{{ cuti.jenis_cuti }}{% endif %}
+                            </td>
+                            <td>{{ cuti.tanggal_cuti.strftime('%d/%m/%Y') }} - {{ cuti.sampai_cuti.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ cuti.lama_cuti }}</td>
+                            <td>
+                                {% if cuti.status_cuti == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% elif cuti.status_cuti == 'approved' %}
+                                    <span class="badge bg-success">Disetujui</span>
+                                {% elif cuti.status_cuti == 'rejected' %}
+                                    <span class="badge bg-danger">Ditolak</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ cuti.status_cuti }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('main.detail_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if current_user.role in ['admin', 'pimpinan'] %}
+                                    <a href="{{ url_for('main.edit_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if cuti.status_cuti == 'pending' and current_user.role in ['admin', 'pimpinan'] %}
+                                    <button type="button" class="btn btn-sm btn-success" onclick="approveCuti({{ cuti.id_cuti }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="rejectCuti({{ cuti.id_cuti }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">Tidak ada data cuti</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if entries.pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if entries.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.show_cuti', page=entries.prev_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in entries.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != entries.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.show_cuti', page=page_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if entries.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('main.show_cuti', page=entries.next_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function approveCuti(id) {
+    if (confirm('Apakah Anda yakin ingin menyetujui cuti ini?')) {
+        fetch(`/cuti/approve/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Gagal menyetujui cuti: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menyetujui cuti');
+        });
+    }
+}
+
+function rejectCuti(id) {
+    if (confirm('Apakah Anda yakin ingin menolak cuti ini?')) {
+        fetch(`/cuti/reject/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Gagal menolak cuti: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menolak cuti');
+        });
+    }
+}
+</script>
+{% endblock %} 

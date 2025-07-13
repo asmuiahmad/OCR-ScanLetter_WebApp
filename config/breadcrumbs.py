@@ -23,6 +23,11 @@ route_breadcrumbs = {
     'edit_user_view': 'Manajemen User',
     'edit_user': 'Edit User',
     'ocr_test': 'OCR Test',
+    'login': 'Login',
+    'logout': 'Logout',
+    'register': 'Register',
+    'ocr_cuti': 'OCR Cuti',
+    'favicon': 'Favicon',
 }
 
 def get_breadcrumb_title(endpoint):
@@ -31,29 +36,22 @@ def get_breadcrumb_title(endpoint):
         endpoint = endpoint.split('.')[-1]
     return route_breadcrumbs.get(endpoint, endpoint.replace('_', ' ').title())
 
-def generate_breadcrumbs(endpoint, **kwargs):
-    """Generate breadcrumbs based on endpoint"""
+def generate_breadcrumbs(endpoint, **view_args):
     breadcrumbs = []
-    
-    # Always add home as first item unless it's the home page
     if endpoint != 'main.index':
         breadcrumbs.append(('Home', url_for('main.index')))
-    
-    # Get the endpoint without blueprint prefix
-    clean_endpoint = endpoint.split('.')[-1]
-    
-    # Add the current page breadcrumb
+    if not endpoint:
+        return breadcrumbs
+    clean_endpoint = endpoint.split('.')[-1] if '.' in endpoint else endpoint
+    # Add current page breadcrumb
     if clean_endpoint in route_breadcrumbs:
-        # Special handling for edit pages to show the parent page first
+        # Special handling for edit pages
         if clean_endpoint.startswith('edit_'):
             parent_endpoint = clean_endpoint.replace('edit_', 'show_')
             if parent_endpoint in route_breadcrumbs:
                 breadcrumbs.append((route_breadcrumbs[parent_endpoint], url_for(f'main.{parent_endpoint}')))
-        
-        # Add the current page
-        current_url = url_for(endpoint, **kwargs) if endpoint != 'main.index' else None
+        current_url = url_for(endpoint, **view_args) if endpoint != 'main.index' else None
         breadcrumbs.append((route_breadcrumbs[clean_endpoint], current_url))
-    
     return breadcrumbs
 
 def register_breadcrumbs(app):
