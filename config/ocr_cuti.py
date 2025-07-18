@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
 from config.extensions import db
-from config.models import SuratMasuk, Cuti
+from config.models import SuratKeluar, Cuti
 from datetime import datetime
 import random
 import string
@@ -295,10 +295,215 @@ def list_cuti():
     try:
         # Ambil data cuti dari database
         cuti_list = Cuti.query.order_by(Cuti.created_at.desc()).all()
-        return render_template('home/ocr_cuti.html', cuti_list=cuti_list)
+        return render_template('home/list_cuti.html', cuti_list=cuti_list)
     except Exception as e:
         flash(f'Error saat mengambil data cuti: {str(e)}', 'error')
-        return render_template('home/ocr_cuti.html')
+        return render_template('home/list_cuti.html', cuti_list=[])
+
+@ocr_cuti_bp.route('/detail/<int:cuti_id>', methods=['GET'])
+@login_required
+def detail_cuti(cuti_id):
+    """API endpoint untuk mendapatkan detail cuti"""
+    try:
+        cuti = Cuti.query.get_or_404(cuti_id)
+        
+        cuti_data = {
+            'id_cuti': cuti.id_cuti,
+            'nama': cuti.nama,
+            'nip': cuti.nip,
+            'jabatan': cuti.jabatan,
+            'gol_ruang': cuti.gol_ruang,
+            'unit_kerja': cuti.unit_kerja,
+            'masa_kerja': cuti.masa_kerja,
+            'alamat': cuti.alamat,
+            'telp': cuti.telp,
+            'jenis_cuti': cuti.jenis_cuti,
+            'alasan_cuti': cuti.alasan_cuti,
+            'lama_cuti': cuti.lama_cuti,
+            'tanggal_cuti': cuti.tanggal_cuti.strftime('%d/%m/%Y'),
+            'sampai_cuti': cuti.sampai_cuti.strftime('%d/%m/%Y'),
+            'tgl_ajuan_cuti': cuti.tgl_ajuan_cuti.strftime('%d/%m/%Y'),
+            'status_cuti': cuti.status_cuti,
+            'approved_by': cuti.approved_by,
+            'approved_at': cuti.approved_at.strftime('%d/%m/%Y %H:%M:%S') if cuti.approved_at else None,
+            'notes': cuti.notes,
+            'qr_code': cuti.qr_code,
+            'pdf_path': cuti.pdf_path
+        }
+        
+        return jsonify({
+            'success': True,
+            'cuti': cuti_data
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        }), 500
+
+@ocr_cuti_bp.route('/approve/<int:cuti_id>', methods=['POST'])
+@login_required
+def approve_cuti(cuti_id):
+    """Approve cuti dan generate digital signature dengan QR code"""
+    try:
+        # Cek apakah user adalah pimpinan atau admin
+        if current_user.role not in ['pimpinan', 'admin']:
+            return jsonify({
+                'success': False,
+                'message': 'Anda tidak memiliki wewenang untuk menyetujui cuti'
+            }), 403
+        
+        # Ambil data cuti
+        cuti = Cuti.query.get_or_404(cuti_id)
+        
+        if cuti.status_cuti == 'approved':
+            return jsonify({
+                'success': False,
+                'message': 'Cuti sudah disetujui sebelumnya'
+            }), 400
+        
+        # Update status cuti
+        cuti.status_cuti = 'approved'
+        cuti.approved_by = current_user.email
+        cuti.approved_at = datetime.now()
+        
+        # Generate digital signature dengan QR code
+        from config.digital_signature import DigitalSignature
+        digital_sig = DigitalSignature()
+        
+        # Info approver
+        approver_info = {
+            'name': current_user.email,
+            'role': current_user.role,
+            'nip': getattr(current_user, 'nip', '-')
+        }
+        
+        # Create QR code
+        qr_info = digital_sig.create_qr_code(cuti, approver_info)
+        if not qr_info:
+            return jsonify({
+                'success': False,
+                'message': 'Gagal membuat QR code digital signature'
+            }), 500
+        
+        # Generate PDF
+        pdf_path = digital_sig.generate_pdf_surat_cuti(cuti, qr_info, approver_info)
+        if not pdf_path:
+            return jsonify({
+                'success': False,
+                'message': 'Gagal membuat PDF surat persetujuan'
+            }), 500
+        
+        # Update cuti dengan QR code dan path PDF
+        cuti.qr_code = qr_info['signature_hash']
+        cuti.pdf_path = pdf_path
+        cuti.notes = request.json.get('notes', '')
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cuti berhasil disetujui dengan tanda tangan digital',
+            'qr_code': qr_info['qr_base64'],
+            'signature_hash': qr_info['signature_hash'],
+            'pdf_url': f'/cuti/download_pdf/{cuti_id}'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        }), 500
+
+@ocr_cuti_bp.route('/reject/<int:cuti_id>', methods=['POST'])
+@login_required
+def reject_cuti(cuti_id):
+    """Reject cuti"""
+    try:
+        # Cek apakah user adalah pimpinan atau admin
+        if current_user.role not in ['pimpinan', 'admin']:
+            return jsonify({
+                'success': False,
+                'message': 'Anda tidak memiliki wewenang untuk menolak cuti'
+            }), 403
+        
+        # Ambil data cuti
+        cuti = Cuti.query.get_or_404(cuti_id)
+        
+        if cuti.status_cuti != 'pending':
+            return jsonify({
+                'success': False,
+                'message': 'Cuti sudah diproses sebelumnya'
+            }), 400
+        
+        # Update status cuti
+        cuti.status_cuti = 'rejected'
+        cuti.approved_by = current_user.email
+        cuti.approved_at = datetime.now()
+        cuti.notes = request.json.get('notes', 'Ditolak oleh pimpinan')
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cuti berhasil ditolak'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        }), 500
+
+@ocr_cuti_bp.route('/download_pdf/<int:cuti_id>')
+@login_required
+def download_pdf(cuti_id):
+    """Download PDF surat persetujuan cuti"""
+    try:
+        cuti = Cuti.query.get_or_404(cuti_id)
+        
+        if not cuti.pdf_path or not os.path.exists(cuti.pdf_path):
+            flash('File PDF tidak ditemukan', 'error')
+            return redirect(url_for('ocr_cuti.list_cuti'))
+        
+        from flask import send_file
+        return send_file(
+            cuti.pdf_path,
+            as_attachment=True,
+            download_name=f'surat_cuti_{cuti.nama}_{cuti.id_cuti}.pdf'
+        )
+        
+    except Exception as e:
+        flash(f'Error downloading PDF: {str(e)}', 'error')
+        return redirect(url_for('ocr_cuti.list_cuti'))
+
+@ocr_cuti_bp.route('/verify/<signature_hash>')
+def verify_signature(signature_hash):
+    """Verifikasi digital signature"""
+    try:
+        from config.digital_signature import DigitalSignature
+        digital_sig = DigitalSignature()
+        
+        result = digital_sig.verify_signature(signature_hash)
+        
+        if result['valid']:
+            cuti = result['cuti_data']
+            return render_template('home/verify_signature.html', 
+                                 cuti=cuti, 
+                                 signature_hash=signature_hash,
+                                 valid=True)
+        else:
+            return render_template('home/verify_signature.html', 
+                                 message=result['message'],
+                                 valid=False)
+            
+    except Exception as e:
+        return render_template('home/verify_signature.html', 
+                             message=f'Error: {str(e)}',
+                             valid=False)
 
 @ocr_cuti_bp.route('/save_extracted_data', methods=['POST'])
 @login_required
@@ -321,8 +526,8 @@ def save_extracted_data():
                     save_cuti_data(item)
                     saved_count += 1
                 else:
-                    print("Saving to SuratMasuk table")
-                    save_surat_masuk(item)
+                    print("Saving to SuratKeluar table")
+                    save_surat_keluar(item)
                     saved_count += 1
             except Exception as e:
                 print(f"Error saving item: {str(e)}")
@@ -385,7 +590,7 @@ def save_cuti_data(item):
         db.session.rollback()
         raise e
 
-def save_surat_masuk(item):
+def save_surat_keluar(item):
     # Parse tanggal
     tanggal_obj = datetime.utcnow().date()
     if item.get('tanggal_cuti'):
@@ -397,23 +602,23 @@ def save_surat_masuk(item):
         except:
             tanggal_obj = datetime.utcnow().date()
 
-    # Buat objek SuratMasuk
-    surat_masuk = SuratMasuk(
+    # Buat objek SuratKeluar
+    surat_keluar = SuratKeluar(
         full_letter_number=item.get('nomor_surat', 'Not found'),
-        nomor_suratMasuk=item.get('nomor_surat', 'Not found'),
-        tanggal_suratMasuk=tanggal_obj,
-        pengirim_suratMasuk=item.get('pengirim', 'Not found'),
-        penerima_suratMasuk=item.get('penerima', 'Ketua Pengadilan Agama'),
-        kode_suratMasuk="CUTI-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6)),
-        jenis_suratMasuk='Cuti' if item.get('jenis_surat') == 'Cuti' else 'Umum',
-        isi_suratMasuk=item.get('isi', 'Not found'),
+        nomor_suratKeluar=item.get('nomor_surat', 'Not found'),
+        tanggal_suratKeluar=tanggal_obj,
+        pengirim_suratKeluar=item.get('pengirim', 'Not found'),
+        penerima_suratKeluar=item.get('penerima', 'Ketua Pengadilan Agama'),
+        kode_suratKeluar="CUTI-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6)),
+        jenis_suratKeluar='Cuti' if item.get('jenis_surat') == 'Cuti' else 'Umum',
+        isi_suratKeluar=item.get('isi', 'Not found'),
         initial_full_letter_number=item.get('nomor_surat', 'Not found'),
-        initial_pengirim_suratMasuk=item.get('pengirim', 'Not found'),
-        initial_penerima_suratMasuk=item.get('penerima', 'Ketua Pengadilan Agama'),
-        initial_isi_suratMasuk=item.get('isi', 'Not found'),
-        initial_nomor_suratMasuk=item.get('nomor_surat', 'Not found'),
-        status_suratMasuk='pending'
+        initial_pengirim_suratKeluar=item.get('pengirim', 'Not found'),
+        initial_penerima_suratKeluar=item.get('penerima', 'Ketua Pengadilan Agama'),
+        initial_isi_suratKeluar=item.get('isi', 'Not found'),
+        initial_nomor_suratKeluar=item.get('nomor_surat', 'Not found'),
+        status_suratKeluar='pending'
     )
     
-    db.session.add(surat_masuk)
+    db.session.add(surat_keluar)
     db.session.commit() 

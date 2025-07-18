@@ -7,48 +7,48 @@
 <h1>Edit Surat Keluar</h1>
 <form method="POST">
     <div class="form-group">
-        <label for="tanggal_suratKeluar">Tanggal Surat Keluar:</label>
-        <input type="date" class="form-control" name="tanggal_suratKeluar" value="{{ entry.tanggal_suratKeluar.strftime('%Y-%m-%d') }}" {% if not current_user.is_admin %}disabled{% endif %} required>
+        <label for="tanggal_suratMasuk">Tanggal Surat Keluar:</label>
+        <input type="date" class="form-control" name="tanggal_suratMasuk" value="{{ entry.tanggal_suratMasuk.strftime('%Y-%m-%d') }}" {% if not current_user.is_admin %}disabled{% endif %} required>
     </div>
     <div class="form-group">
-        <label for="pengirim_suratKeluar">Pengirim:</label>
-        <input type="text" class="form-control" name="pengirim_suratKeluar" value="{{ entry.pengirim_suratKeluar }}" {% if not current_user.is_admin %}disabled{% endif %} required>
+        <label for="pengirim_suratMasuk">Pengirim:</label>
+        <input type="text" class="form-control" name="pengirim_suratMasuk" value="{{ entry.pengirim_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
     </div>
     <div class="form-group">
-        <label for="penerima_suratKeluar">Penerima:</label>
-        <input type="text" class="form-control" name="penerima_suratKeluar" value="{{ entry.penerima_suratKeluar }}" {% if not current_user.is_admin %}disabled{% endif %} required>
+        <label for="penerima_suratMasuk">Penerima:</label>
+        <input type="text" class="form-control" name="penerima_suratMasuk" value="{{ entry.penerima_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
     </div>
     <div class="form-group">
-        <label for="nomor_suratKeluar">Nomor Surat:</label>
-        <input type="text" class="form-control" name="nomor_suratKeluar" value="{{ entry.nomor_suratKeluar }}" {% if not current_user.is_admin %}disabled{% endif %} required>
+        <label for="nomor_suratMasuk">Nomor Surat:</label>
+        <input type="text" class="form-control" name="nomor_suratMasuk" value="{{ entry.nomor_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
     </div>
     <div class="form-group">
-        <label for="kode_suratKeluar">Kode Surat:</label>
-        <input type="text" class="form-control" name="kode_suratKeluar" value="{{ entry.kode_suratKeluar }}" {% if not current_user.is_admin %}disabled{% endif %} required>
+        <label for="kode_suratMasuk">Kode Surat:</label>
+        <input type="text" class="form-control" name="kode_suratMasuk" value="{{ entry.kode_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
     </div>
     <div class="form-group">
-        <label for="jenis_suratKeluar">Jenis Surat:</label>
-        <input type="text" class="form-control" name="jenis_suratKeluar" value="{{ entry.jenis_suratKeluar }}" {% if not current_user.is_admin %}disabled{% endif %} required>
+        <label for="jenis_suratMasuk">Jenis Surat:</label>
+        <input type="text" class="form-control" name="jenis_suratMasuk" value="{{ entry.jenis_suratMasuk }}" {% if not current_user.is_admin %}disabled{% endif %} required>
     </div>
     <div class="form-group">
-        <label for="isi_suratKeluar">Isi Surat:</label>
-        <textarea class="form-control" name="isi_suratKeluar" {% if not current_user.is_admin %}disabled{% endif %} required>{{ entry.isi_suratKeluar }}</textarea>
+        <label for="isi_suratMasuk">Isi Surat:</label>
+        <textarea class="form-control" name="isi_suratMasuk" {% if not current_user.is_admin %}disabled{% endif %} required>{{ entry.isi_suratMasuk }}</textarea>
     </div>
     <div class="form-group">
-        <label for="acara_suratKeluar">Acara (Opsional):</label>
-        <input type="text" class="form-control" name="acara_suratKeluar" value="{{ entry.acara_suratKeluar or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+        <label for="acara_suratMasuk">Acara (Opsional):</label>
+        <input type="text" class="form-control" name="acara_suratMasuk" value="{{ entry.acara_suratMasuk or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
     </div>
     <div class="form-group">
-        <label for="tempat_suratKeluar">Tempat (Opsional):</label>
-        <input type="text" class="form-control" name="tempat_suratKeluar" value="{{ entry.tempat_suratKeluar or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+        <label for="tempat_suratMasuk">Tempat (Opsional):</label>
+        <input type="text" class="form-control" name="tempat_suratMasuk" value="{{ entry.tempat_suratMasuk or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
     </div>
     <div class="form-group">
-        <label for="tanggal_acara_suratKeluar">Tanggal Acara (Opsional):</label>
-        <input type="date" class="form-control" name="tanggal_acara_suratKeluar" value="{{ entry.tanggal_acara_suratKeluar.strftime('%Y-%m-%d') if entry.tanggal_acara_suratKeluar else '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+        <label for="tanggal_acara_suratMasuk">Tanggal Acara (Opsional):</label>
+        <input type="date" class="form-control" name="tanggal_acara_suratMasuk" value="{{ entry.tanggal_acara_suratMasuk.strftime('%Y-%m-%d') if entry.tanggal_acara_suratMasuk else '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
     </div>
     <div class="form-group">
-        <label for="jam_suratKeluar">Jam Acara (Opsional):</label>
-        <input type="time" class="form-control" name="jam_suratKeluar" value="{{ entry.jam_suratKeluar or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
+        <label for="jam_suratMasuk">Jam Acara (Opsional):</label>
+        <input type="time" class="form-control" name="jam_suratMasuk" value="{{ entry.jam_suratMasuk or '' }}" {% if not current_user.is_admin %}disabled{% endif %}>
     </div>
     <button type="submit" class="btn btn-primary" {% if not current_user.is_admin %}disabled{% endif %}>Update</button>
 </form>

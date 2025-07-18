@@ -49,13 +49,13 @@
         .drag-drop-label {
             cursor: pointer;
             color: #3498db;
-        font-weight: 600;
-    }
+            font-weight: 600;
+        }
     
         .file-preview {
-        display: flex;
+            display: flex;
             align-items: center;
-        justify-content: space-between;
+            justify-content: space-between;
             background-color: #f1f8ff;
             padding: 1rem;
             border-radius: 8px;
@@ -157,30 +157,30 @@
             transition: all 0.2s;
         }
     
-    @media (max-width: 768px) {
+        @media (max-width: 768px) {
             .ocr-container {
                 padding: 1rem;
-        }
+            }
         
             .drag-drop-area {
                 padding: 2rem;
-        }
+            }
         
             .file-preview {
                 flex-direction: column;
                 text-align: center;
-        }
+            }
         
             .file-actions {
                 margin-top: 1rem;
-            flex-direction: column;
+                flex-direction: column;
                 width: 100%;
             }
-    }
-</style>
+        }
+    </style>
 {% endblock %}
 
-{% block title %}OCR Surat Masuk - PA Banjarbaru{% endblock %}
+{% block title %}OCR Surat Keluar - PA Banjarbaru{% endblock %}
 
 {% block content %}
 <div class="container mx-auto p-4">
@@ -195,7 +195,7 @@
         {% endif %}
     {% endwith %}
     
-    <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Masuk</h1>
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Keluar</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6">
         <form action="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="uploadForm">
@@ -222,11 +222,11 @@
                                 class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition inline-block cursor-pointer"
                             >
                                 Pilih Dokumen
-                        </label>
-                    </div>
+                            </label>
+                        </div>
                         <div id="filePreview" class="mt-4 hidden">
                             <p id="selectedFiles" class="text-sm text-gray-700"></p>
-                    </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Informasi Tambahan -->
@@ -237,8 +237,8 @@
                         <li>Ukuran maksimal dokumen: 10 MB</li>
                         <li>Format yang didukung: JPG, PNG, WEBP</li>
                     </ul>
-        </div>
-</div>
+                </div>
+            </div>
 
             <div class="flex justify-end">
                 <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
@@ -246,34 +246,26 @@
                 </button>
             </div>
         </form>
-                    </div>
+    </div>
                     
     <!-- Modal untuk Detail Ekstraksi -->
     {% if extracted_data_list %}
     <div id="extractedDataModal" class="fixed inset-0 z-[9999] hidden overflow-y-auto overflow-x-hidden overscroll-contain" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" aria-hidden="true"></div>
-        
         <div class="flex items-center justify-center min-h-screen w-full px-4 pt-4 pb-20 text-center absolute top-0 left-0 right-0 bottom-0">
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl w-[95%] md:w-[90%] max-h-[90vh] relative z-[10000]">
                 <!-- Close Button -->
-                <button 
-                    type="button" 
-                    id="closeModalBtn" 
-                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-50"
-                    aria-label="Close Modal"
-                >
+                <button type="button" id="closeModalBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-50" aria-label="Close Modal">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 overflow-y-auto max-h-[75vh]">
                     <div class="sm:flex sm:items-start">
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                             <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4" id="modal-title">
-                                Detail Ekstraksi Dokumen Surat Masuk
+                                Detail Ekstraksi Dokumen Surat Keluar
                             </h3>
-                            
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <!-- Kolom Gambar -->
                                 <div class="col-span-1 bg-gray-100 rounded-lg p-4">
@@ -290,7 +282,6 @@
                                         <p id="noImageText" class="text-gray-500">Tidak ada gambar</p>
                                     </div>
                                 </div>
-                                
                                 <!-- Kolom Input -->
                                 <div class="col-span-2">
                                     <form id="extractedDataForm" class="space-y-4">
@@ -299,13 +290,12 @@
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Nomor Surat</label>
                                                 <input type="text" name="full_letter_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Kode Surat</label>
-                                                <input type="text" name="kode_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" value="{{ item.kodesurat2 if item and item.kodesurat2 else '' }}">
                                             </div>
-                                </div>
-                                        
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                                                <input type="date" name="tanggal" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
+                                            </div>
+                                        </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Pengirim</label>
@@ -316,29 +306,36 @@
                                                 <input type="text" name="penerima_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
                                             </div>
                                         </div>
-                                        
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Isi Surat</label>
                                             <textarea name="isi_suratMasuk" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"></textarea>
                                         </div>
-
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700">Jenis Surat</label>
-                                                <input type="text" name="jenis_surat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
+                                                <label class="block text-sm font-medium text-gray-700">Acara (Opsional)</label>
+                                                <input type="text" name="acara_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Acara jika ada">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                                                <input type="date" name="tanggal_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
+                                                <label class="block text-sm font-medium text-gray-700">Tempat (Opsional)</label>
+                                                <input type="text" name="tempat_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Tempat jika ada">
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Tanggal Acara (Opsional)</label>
+                                                <input type="date" name="tanggal_acara_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Pilih tanggal acara">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Jam Acara (Opsional)</label>
+                                                <input type="time" name="jam_suratMasuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" placeholder="Pilih jam acara">
                                             </div>
                                         </div>
                                     </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-                    </div>
-                </div>
-
                 <!-- Tombol Navigasi & Simpan di Modal -->
                 <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 sticky bottom-0">
                     <button type="button" id="saveExtractedData" class="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition">
@@ -360,121 +357,128 @@
     {% endif %}
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const filePreview = document.getElementById('file-preview');
-    
-    // Open file dialog on click
-    dropZone.addEventListener('click', () => fileInput.click());
-    
-    // Handle file selection
-    fileInput.addEventListener('change', function() {
-        filePreview.innerHTML = '';
-        Array.from(this.files).forEach(file => {
-            const preview = document.createElement('div');
-            preview.className = 'flex items-center p-3 bg-white rounded-lg border';
-            preview.innerHTML = `
-                <div class="flex-shrink-0">
-                    <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
-                    <p class="text-sm text-gray-500">${(file.size / 1024).toFixed(2)} KB</p>
-                </div>
-            `;
-            filePreview.appendChild(preview);
-        });
-    });
-    
-    // Drag and drop functionality
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-    });
-    
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => {
-            dropZone.classList.add('border-blue-500', 'bg-blue-50');
-        }, false);
-    });
-    
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => {
-            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-        }, false);
-    });
-    
-    dropZone.addEventListener('drop', handleDrop, false);
-    
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        fileInput.files = files;
-        
-        // Trigger change event
-        const event = new Event('change');
-        fileInput.dispatchEvent(event);
-    }
-});
-</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const extractedDataList = {{ extracted_data_list | tojson | safe }};
     const imagePaths = {{ image_paths | tojson | safe }};
     const extractedDataModal = document.getElementById('extractedDataModal');
-    console.log('Debug: extractedDataModal found:', extractedDataModal);
     let currentIndex = 0;
-
-    console.log('Debug: extractedDataList from backend:', extractedDataList);
-    console.log('Debug: extractedDataList length:', extractedDataList.length);
-    console.log('Debug: extractedDataList type:', typeof extractedDataList);
-    if (extractedDataList.length > 0) {
-        console.log('Debug: First item data:', extractedDataList[0]);
-        console.log('Debug: kodesurat2 in first item:', extractedDataList[0]['kodesurat2']);
-    } else {
-        console.log('Debug: extractedDataList is empty or null');
-    }
-
+    
     // Fungsi untuk mengisi form dengan data
     function fillFormWithData(data) {
-        console.log('Debug: Data received in fillFormWithData:', data);
-        
         const form = document.getElementById('extractedDataForm');
-        if (!form) {
-            console.error('Form not found');
-            return;
-        }
+        const inputs = form.querySelectorAll('input, textarea');
         
-        // Isi field dengan data yang benar
+        // Mapping khusus untuk field surat keluar
         const fieldMappings = {
             'full_letter_number': data['nomor_surat'] || '',
-            'kode_suratMasuk': data['kodesurat2'] || '',
             'pengirim_suratMasuk': data['pengirim'] || '',
             'penerima_suratMasuk': data['penerima'] || '',
             'isi_suratMasuk': data['isi'] || '',
-            'jenis_surat': data['jenis_surat'] || '',
-            'tanggal_suratMasuk': data['tanggal'] || ''
+            'acara_suratMasuk': data['acara'] || '',
+            'tempat_suratMasuk': data['tempat'] || '',
+            'tanggal': data['tanggal'] || '' // Format YYYY-MM-DD
         };
-        
-        // Isi setiap field
-        Object.keys(fieldMappings).forEach(fieldName => {
-            const input = form.querySelector(`[name="${fieldName}"]`);
+
+        // Isi semua field sesuai mapping
+        Object.entries(fieldMappings).forEach(([name, value]) => {
+            const input = form.querySelector(`[name="${name}"]`);
             if (input) {
-                input.value = fieldMappings[fieldName];
-                console.log(`Set ${fieldName} = ${fieldMappings[fieldName]}`);
-            } else {
-                console.warn(`Field ${fieldName} not found in form`);
+                input.value = value;
             }
         });
+        
+        // Handle tanggal acara khusus
+        const tanggalAcaraInput = form.querySelector('[name="tanggal_acara_suratMasuk"]');
+        if (tanggalAcaraInput) {
+            if (data['tanggal_acara']) {
+                // Coba parse tanggal acara dari berbagai format
+                const tanggalAcara = parseTanggalAcara(data['tanggal_acara']);
+                if (tanggalAcara) {
+                    tanggalAcaraInput.value = tanggalAcara;
+                } else {
+                    tanggalAcaraInput.value = ''; // Kosongkan jika tidak bisa parse
+                }
+            } else {
+                tanggalAcaraInput.value = '';
+            }
+        }
+        
+        // Handle jam acara khusus
+        const jamAcaraInput = form.querySelector('[name="jam_suratMasuk"]');
+        if (jamAcaraInput) {
+            if (data['jam']) {
+                // Coba parse jam dari berbagai format
+                const jamAcara = parseJamAcara(data['jam']);
+                if (jamAcara) {
+                    jamAcaraInput.value = jamAcara;
+                } else {
+                    jamAcaraInput.value = ''; // Kosongkan jika tidak bisa parse
+                }
+            } else {
+                jamAcaraInput.value = '';
+            }
+        }
+        
+        // Fungsi helper untuk parse tanggal acara
+        function parseTanggalAcara(tanggalStr) {
+            if (!tanggalStr) return null;
+            
+            // Coba berbagai format tanggal
+            const formats = [
+                /(\d{1,2})\/(\d{1,2})\/(\d{4})/, // DD/MM/YYYY
+                /(\d{1,2})-(\d{1,2})-(\d{4})/, // DD-MM-YYYY
+                /(\d{4})-(\d{1,2})-(\d{1,2})/, // YYYY-MM-DD
+                /(\d{1,2})\/(\d{1,2})\/(\d{2})/, // DD/MM/YY
+                /(\d{1,2})-(\d{1,2})-(\d{2})/  // DD-MM-YY
+            ];
+            
+            for (let format of formats) {
+                const match = tanggalStr.match(format);
+                if (match) {
+                    let day, month, year;
+                    if (match[1].length === 4) {
+                        // Format YYYY-MM-DD
+                        year = match[1];
+                        month = match[2].padStart(2, '0');
+                        day = match[3].padStart(2, '0');
+                    } else {
+                        // Format DD/MM/YYYY atau DD-MM-YYYY
+                        day = match[1].padStart(2, '0');
+                        month = match[2].padStart(2, '0');
+                        year = match[3].length === 2 ? '20' + match[3] : match[3];
+                    }
+                    return `${year}-${month}-${day}`;
+                }
+            }
+            return null;
+        }
+        
+        // Fungsi helper untuk parse jam acara
+        function parseJamAcara(jamStr) {
+            if (!jamStr) return null;
+            
+            // Coba berbagai format jam
+            const formats = [
+                /(\d{1,2}):(\d{2})/, // HH:MM
+                /(\d{1,2})\.(\d{2})/, // HH.MM
+                /(\d{1,2})\.(\d{2})\s*(WIB|WITA|WIT)?/, // HH.MM WIB
+                /(\d{1,2}):(\d{2})\s*(WIB|WITA|WIT)?/, // HH:MM WIB
+                /(\d{1,2})\s*(\d{2})/, // HH MM
+                /(\d{1,2})\.(\d{2})/, // HH.MM
+            ];
+            
+            for (let format of formats) {
+                const match = jamStr.match(format);
+                if (match) {
+                    const hour = match[1].padStart(2, '0');
+                    const minute = match[2].padStart(2, '0');
+                    return `${hour}:${minute}`;
+                }
+            }
+            return null;
+        }
         
         // Update gambar preview
         const imagePreview = document.getElementById('imagePreview');
@@ -484,455 +488,235 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.src = imagePath;
             imagePreview.classList.remove('hidden');
             noImageText.classList.add('hidden');
-            
-            // Reset zoom dan pan ketika gambar baru dimuat
-            resetImageZoom();
-            
-            // Setup zoom dan pan events setelah gambar dimuat
-            setTimeout(() => {
-                setupZoomPanEvents();
-            }, 200);
         } else {
             imagePreview.classList.add('hidden');
             noImageText.classList.remove('hidden');
         }
-    }
 
-    // Fungsi untuk zoom dan pan
-    let currentZoom = 1;
-    let isDragging = false;
-    let startX, startY, translateX = 0, translateY = 0;
-
-    function resetImageZoom() {
-        const imagePreview = document.getElementById('imagePreview');
-        if (imagePreview) {
-            currentZoom = 1;
-            translateX = 0;
-            translateY = 0;
-            updateImageTransform();
+        // Update raw OCR textarea
+        const rawOcrTextarea = document.getElementById('rawOcrTextarea');
+        if (rawOcrTextarea && data.raw_ocr) {
+            rawOcrTextarea.value = data.raw_ocr;
+        } else if (rawOcrTextarea) {
+            rawOcrTextarea.value = '';
         }
     }
 
-    function updateImageTransform() {
-        const imagePreview = document.getElementById('imagePreview');
-        const zoomLevel = document.getElementById('zoomLevel');
-        console.log('Debug: updateImageTransform called');
-        console.log('Debug: imagePreview found:', imagePreview);
-        console.log('Debug: zoomLevel found:', zoomLevel);
-        console.log('Debug: currentZoom:', currentZoom);
-        console.log('Debug: translateX:', translateX, 'translateY:', translateY);
+    // Tampilkan tombol "View Extracted Data" jika ada hasil
+    if (extractedDataList && extractedDataList.length > 0) {
+        let viewDataBtn = document.createElement('button');
+        viewDataBtn.id = 'viewExtractedDataBtn';
+        viewDataBtn.className = 'mt-4 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg w-full';
+        viewDataBtn.innerHTML = `
+            <svg class="w-5 h-5 inline mr-2 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            Lihat Hasil Ekstraksi (${extractedDataList.length} dokumen)
+        `;
         
-        if (imagePreview) {
-            const transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
-            imagePreview.style.transform = transform;
-            console.log('Debug: Applied transform:', transform);
-        }
-        if (zoomLevel) {
-            const zoomText = `${Math.round(currentZoom * 100)}%`;
-            zoomLevel.textContent = zoomText;
-            console.log('Debug: Updated zoom level text:', zoomText);
-        }
-    }
-
-    function zoomIn() {
-        console.log('Debug: zoomIn called, currentZoom before:', currentZoom);
-        currentZoom = Math.min(currentZoom * 1.2, 5);
-        console.log('Debug: zoomIn called, currentZoom after:', currentZoom);
-        updateImageTransform();
-    }
-
-    function zoomOut() {
-        console.log('Debug: zoomOut called, currentZoom before:', currentZoom);
-        currentZoom = Math.max(currentZoom / 1.2, 0.5);
-        console.log('Debug: zoomOut called, currentZoom after:', currentZoom);
-        updateImageTransform();
-    }
-
-    // Setup zoom dan pan event listeners
-    function setupZoomPanEvents() {
-        console.log('Debug: Setting up zoom and pan events');
-        const zoomInBtn = document.getElementById('zoomInBtn');
-        const zoomOutBtn = document.getElementById('zoomOutBtn');
-        const resetZoomBtn = document.getElementById('resetZoomBtn');
-        const imagePreview = document.getElementById('imagePreview');
-
-        console.log('Debug: zoomInBtn found:', zoomInBtn);
-        console.log('Debug: zoomOutBtn found:', zoomOutBtn);
-        console.log('Debug: resetZoomBtn found:', resetZoomBtn);
-        console.log('Debug: imagePreview found:', imagePreview);
-
-        if (zoomInBtn) {
-            zoomInBtn.addEventListener('click', function() {
-                console.log('Debug: Zoom In clicked');
-                zoomIn();
-            });
-        }
-
-        if (zoomOutBtn) {
-            zoomOutBtn.addEventListener('click', function() {
-                console.log('Debug: Zoom Out clicked');
-                zoomOut();
-            });
-        }
-
-        if (resetZoomBtn) {
-            resetZoomBtn.addEventListener('click', function() {
-                console.log('Debug: Reset Zoom clicked');
-                resetImageZoom();
-            });
-        }
-
-        // Mouse events untuk pan
-        if (imagePreview) {
-            imagePreview.addEventListener('mousedown', function(e) {
-                console.log('Debug: Mouse down on image, currentZoom:', currentZoom);
-                if (currentZoom > 1) {
-                    isDragging = true;
-                    startX = e.clientX - translateX;
-                    startY = e.clientY - translateY;
-                    imagePreview.style.cursor = 'grabbing';
-                    console.log('Debug: Started dragging');
-                }
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (isDragging && currentZoom > 1) {
-                    translateX = e.clientX - startX;
-                    translateY = e.clientY - startY;
-                    updateImageTransform();
-                }
-            });
-
-            document.addEventListener('mouseup', function() {
-                if (isDragging) {
-                    isDragging = false;
-                    imagePreview.style.cursor = 'grab';
-                    console.log('Debug: Stopped dragging');
-                }
-            });
-
-            // Wheel event untuk zoom
-            imagePreview.addEventListener('wheel', function(e) {
-                console.log('Debug: Wheel event on image');
-                e.preventDefault();
-                if (e.deltaY < 0) {
-                    zoomIn();
-                } else {
-                    zoomOut();
-                }
-            });
-        }
-    }
-
-    // Tampilkan tombol "View Extracted Data" jika ada data yang diekstrak
-    console.log('Debug: Checking if should create button, extractedDataList.length =', extractedDataList.length);
-    if (extractedDataList.length > 0) {
-        console.log('Debug: Creating View Extracted Data button');
-        // Buat tombol "View Extracted Data" jika belum ada
-        let viewDataBtn = document.getElementById('viewExtractedDataBtn');
-        console.log('Debug: Existing viewDataBtn:', viewDataBtn);
-        if (!viewDataBtn) {
-            viewDataBtn = document.createElement('button');
-            viewDataBtn.id = 'viewExtractedDataBtn';
-            viewDataBtn.className = 'bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg';
-            viewDataBtn.innerHTML = `
-                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-                View Extracted Data (${extractedDataList.length} items)
-            `;
-            
-            // Tambahkan tombol setelah form upload
-            const uploadForm = document.querySelector('form[enctype="multipart/form-data"]');
-            console.log('Debug: Found uploadForm:', uploadForm);
-            if (uploadForm) {
-                console.log('Debug: Creating button container');
-                // Tambahkan div container untuk tombol dengan margin
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'mt-6 text-center';
-                buttonContainer.appendChild(viewDataBtn);
-                uploadForm.parentNode.insertBefore(buttonContainer, uploadForm.nextSibling);
-                console.log('Debug: Button added to page');
-            } else {
-                console.log('Debug: uploadForm not found');
-            }
-        }
-        
-        // Event handler untuk tombol "View Extracted Data"
         viewDataBtn.addEventListener('click', function() {
-            // Isi form dengan data pertama
-            fillFormWithData(extractedDataList[0]);
-            
-            // Tampilkan modal
-            extractedDataModal.classList.remove('hidden');
-            
-            // Setup zoom dan pan events setelah modal ditampilkan
-            setTimeout(() => {
-                setupZoomPanEvents();
-            }, 100);
+            const modal = document.getElementById('extractedDataModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                fillFormWithData(extractedDataList[0]);
+            }
+        });
+        
+        const uploadForm = document.getElementById('uploadForm');
+        if (uploadForm) {
+            uploadForm.parentNode.insertBefore(viewDataBtn, uploadForm.nextSibling);
+        }
+    }
+    
+    // Tambahkan tombol manual test untuk debugging
+    let testBtn = document.createElement('button');
+    testBtn.id = 'testManualBtn';
+    testBtn.className = 'mt-2 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-300 font-medium text-sm shadow-lg w-full';
+    testBtn.innerHTML = `
+        <svg class="w-4 h-4 inline mr-2 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Test Manual Form Acara
+    `;
+    
+    testBtn.addEventListener('click', function() {
+        const modal = document.getElementById('extractedDataModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Test data dengan field acara
+            const testData = {
+                'nomor_surat': '001/Test/2024',
+                'pengirim': 'Test Pengirim',
+                'penerima': 'Test Penerima',
+                'isi': 'Test isi surat',
+                'acara': 'Rapat Koordinasi',
+                'tempat': 'Ruang Meeting',
+                'tanggal_acara': '15/12/2024',
+                'jam': '09:30',
+                'tanggal': '2024-12-10'
+            };
+            fillFormWithData(testData);
+        }
+    });
+    
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+        uploadForm.parentNode.insertBefore(testBtn, uploadForm.nextSibling);
+    }
+
+    // Navigation buttons
+    const prevBtn = document.getElementById('prevModalBtn');
+    const nextBtn = document.getElementById('nextModalBtn');
+
+    function updateNavButtons() {
+        if (!extractedDataList || extractedDataList.length <= 1) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-block';
+            prevBtn.disabled = (currentIndex === 0);
+            nextBtn.disabled = (currentIndex === extractedDataList.length - 1);
+        }
+    }
+
+    // Call updateNavButtons when modal is shown
+    if (extractedDataModal) {
+        updateNavButtons();
+    }
+
+    // Navigation event listeners
+    if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', function() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                fillFormWithData(extractedDataList[currentIndex]);
+                updateNavButtons();
+            }
+        });
+        nextBtn.addEventListener('click', function() {
+            if (currentIndex < extractedDataList.length - 1) {
+                currentIndex++;
+                fillFormWithData(extractedDataList[currentIndex]);
+                updateNavButtons();
+            }
         });
     }
 
-    // Prevent scrolling of background when modal is open
-    function preventBackgroundScroll() {
-        document.body.style.overflow = 'hidden';
-    }
-
-    function allowBackgroundScroll() {
-        document.body.style.overflow = 'auto';
-    }
-
-    // Modify close modal logic
+    // Close modal functionality
     const closeModalBtn = document.getElementById('closeModalBtn');
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', function() {
             extractedDataModal.classList.add('hidden');
-            allowBackgroundScroll();
         });
     }
 
     // Close modal if clicking outside
-    extractedDataModal.addEventListener('click', function(event) {
-        if (event.target === extractedDataModal) {
-            extractedDataModal.classList.add('hidden');
-            allowBackgroundScroll();
-        }
-    });
+    if (extractedDataModal) {
+        extractedDataModal.addEventListener('click', function(event) {
+            if (event.target === extractedDataModal) {
+                extractedDataModal.classList.add('hidden');
+            }
+        });
+    }
 
-    // Event handler untuk tombol navigasi
-    const prevModalBtn = document.getElementById('prevModalBtn');
-    const nextModalBtn = document.getElementById('nextModalBtn');
-    
-    if (prevModalBtn) {
-        prevModalBtn.addEventListener('click', function() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                fillFormWithData(extractedDataList[currentIndex]);
-            } else {
-                alert('Sudah di entri pertama.');
-            }
-        });
-    }
-    
-    if (nextModalBtn) {
-        nextModalBtn.addEventListener('click', function() {
-            if (currentIndex < extractedDataList.length - 1) {
-                currentIndex++;
-                fillFormWithData(extractedDataList[currentIndex]);
-            } else {
-                alert('Tidak ada entri lagi untuk diproses.');
-            }
-        });
-    }
-    
-    // Simpan data
+    // Save data functionality
     const saveExtractedDataBtn = document.getElementById('saveExtractedData');
     if (saveExtractedDataBtn) {
         saveExtractedDataBtn.addEventListener('click', function() {
-        const form = document.getElementById('extractedDataForm');
-        const formData = new FormData(form);
-        const extractedData = [];
+            const form = document.getElementById('extractedDataForm');
+            const formData = new FormData(form);
+            const extractedData = [];
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Ambil data dari extractedDataList untuk komponen yang tidak ditampilkan di form
-        const currentData = extractedDataList[currentIndex];
-        
-        // Ambil data dari form dengan nama field yang benar
-        const rowData = {
-            filename: currentData.filename || '',
-            full_letter_number: formData.get('full_letter_number') || '',
-            pengirim_suratMasuk: formData.get('pengirim_suratMasuk') || '',
-            penerima_suratMasuk: formData.get('penerima_suratMasuk') || '',
-            isi_suratMasuk: formData.get('isi_suratMasuk') || '',
-            kode_suratMasuk: formData.get('kode_suratMasuk') || '',
-            jenis_surat: formData.get('jenis_surat') || '',
-            tanggal: formData.get('tanggal_suratMasuk') || '', // Kirim sebagai 'tanggal' untuk backend
-            // Tambahkan field untuk kode surat dari backend
-            kodesurat2: currentData['kodesurat2'] || '',
-            // Tambahkan data initial dari hasil OCR asli untuk perhitungan akurasi
-            initial_full_letter_number: currentData['nomor_surat'] || '',
-            initial_pengirim_suratMasuk: currentData['pengirim'] || '',
-            initial_penerima_suratMasuk: currentData['penerima'] || '',
-            initial_isi_suratMasuk: currentData['isi'] || ''
-        };
+            // Ambil data dari form
+            const rowData = {};
+            formData.forEach((value, key) => {
+                rowData[key] = value;
+            });
+            extractedData.push(rowData);
 
-        // Validasi field wajib
-        const requiredFields = {
-            "Nomor Surat": rowData.full_letter_number,
-            "Pengirim": rowData.pengirim_suratMasuk,
-            "Penerima": rowData.penerima_suratMasuk,
-            "Isi": rowData.isi_suratMasuk,
-            "Tanggal": rowData.tanggal
-        };
-        
-        const missingFields = [];
-        for (const [fieldName, value] of Object.entries(requiredFields)) {
-            if (!value) {
-                missingFields.push(fieldName);
-            }
-        }
-        
-        if (missingFields.length > 0) {
-            alert(`Harap isi semua field wajib:\n- ${missingFields.join('\n- ')}`);
-            return;
-        }
-
-        extractedData.push(rowData);
-
-        // Debug: Log data yang akan dikirim
-        console.log('Data yang akan dikirim ke server:', extractedData);
-
-        // Ambil CSRF token dari input tersembunyi
-        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
-
-        // Kirim data ke server
-        fetch("{{ url_for('ocr_surat_masuk.save_extracted_data') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify(extractedData),
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                console.error('Response status:', response.status);
-                return response.text().then(text => {
-                    console.error('Response text:', text);
-                    throw new Error('Network response was not ok');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                const message = data.message || 'Data berhasil disimpan';
-                alert(message);
-                extractedDataModal.classList.add('hidden');
-                // Redirect ke halaman OCR yang bersih
-                window.location.href = "{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}";
-            } else {
-                alert('Gagal menyimpan data: ' + (data.error || 'Unknown error'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data');
-        });
+            // Kirim data ke server
+            fetch("{{ url_for('ocr_surat_masuk.save_extracted_data') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(extractedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Data berhasil disimpan');
+                    extractedDataModal.classList.add('hidden');
+                    window.location.reload();
+                } else {
+                    alert('Gagal menyimpan data: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            });
         });
     }
 });
 </script>
-{% endblock %}
 
-{% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const dragDropContainer = document.getElementById('drag-drop-container');
-        const fileInput = document.getElementById('file-input');
-        const filePreview = document.getElementById('file-preview');
-        const previewImage = document.getElementById('preview-image');
-        const fileName = document.getElementById('file-name');
-        const fileSize = document.getElementById('file-size');
-        const removeFileBtn = document.getElementById('remove-file');
-        const copyTextBtn = document.getElementById('copy-text');
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('fileInput');
+    const selectedFilesText = document.getElementById('selectedFiles');
 
-        // Drag and drop functionality
-        if (dragDropContainer) {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dragDropContainer.addEventListener(eventName, preventDefaults, false);
-            });
-        }
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        if (dragDropContainer) {
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dragDropContainer.addEventListener(eventName, highlight, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dragDropContainer.addEventListener(eventName, unhighlight, false);
-            });
-        }
-
-        function highlight() {
-            dragDropContainer.classList.add('dragover');
-        }
-
-        function unhighlight() {
-            dragDropContainer.classList.remove('dragover');
-        }
-
-        if (dragDropContainer) {
-            dragDropContainer.addEventListener('drop', handleDrop, false);
-        }
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
-
-        if (fileInput) {
-            fileInput.addEventListener('change', function(e) {
-                handleFiles(this.files);
-            });
-        }
-
-        function handleFiles(files) {
-            if (files.length > 0) {
-                const file = files[0];
-                
-                // Validate file type
-                const validTypes = ['image/jpeg', 'image/png', 'image/tiff'];
-                if (!validTypes.includes(file.type)) {
-                    alert('Format file tidak didukung. Harap unggah JPG, PNG, atau TIFF.');
-                    fileInput.value = ''; // Clear the input
-            return;
-        }
-
-                // File preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    fileName.textContent = file.name;
-                    fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-                    filePreview.style.display = 'flex';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Remove file
-        if (removeFileBtn) {
-            removeFileBtn.addEventListener('click', function() {
-                if (fileInput) fileInput.value = '';
-                if (filePreview) filePreview.style.display = 'none';
-                if (previewImage) previewImage.src = '';
-            });
-        }
-
-        // Copy text functionality
-        if (copyTextBtn) {
-            copyTextBtn.addEventListener('click', function() {
-                const extractedText = document.getElementById('extracted-text');
-                if (extractedText) {
-                    extractedText.select();
-                    document.execCommand('copy');
-                    
-                    // Temporary visual feedback
-                    copyTextBtn.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
-                    setTimeout(() => {
-                        copyTextBtn.innerHTML = '<i class="fas fa-copy"></i> Salin Teks';
-                    }, 2000);
-                }
-            });
+    // Trigger file input when manual upload button is clicked
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const fileNames = Array.from(this.files)
+                .map(file => file.name)
+                .join(', ');
+            
+            selectedFilesText.textContent = `Dipilih: ${fileNames}`;
+            selectedFilesText.classList.remove('text-gray-600');
+            selectedFilesText.classList.add('text-green-600');
+        } else {
+            selectedFilesText.textContent = 'Belum ada file dipilih';
+            selectedFilesText.classList.remove('text-green-600');
+            selectedFilesText.classList.add('text-gray-600');
         }
     });
+
+    // Drag and drop functionality
+    const dropZone = document.querySelector('label');
+
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+        this.classList.remove('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('border-blue-500', 'bg-blue-50');
+        
+        const droppedFiles = e.dataTransfer.files;
+        fileInput.files = droppedFiles;
+        
+        if (droppedFiles.length > 0) {
+            const fileNames = Array.from(droppedFiles)
+                .map(file => file.name)
+                .join(', ');
+            
+            selectedFilesText.textContent = `Dipilih: ${fileNames}`;
+            selectedFilesText.classList.remove('text-gray-600');
+            selectedFilesText.classList.add('text-green-600');
+        }
+    });
+});
 </script>
 {% endblock %}

@@ -40,6 +40,11 @@ setuptools==80.9.0
 typing_extensions==4.12.2
 blinker==1.9.0
 
+# QR Code and PDF Generation
+qrcode==8.0
+reportlab==4.2.5
+pdf2image==1.17.0
+
 # Additional Dependencies for Development
 # Note: These are optional but recommended for development
 # python-dotenv==1.0.1  # For environment variables (already included above)

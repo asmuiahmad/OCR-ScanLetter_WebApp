@@ -1,5 +1,5 @@
 // Get base URLs from data attributes
-const suratMasukImageBaseUrl = document.querySelector('#ocr-form').dataset.suratMasukImageUrl;
+const suratKeluarImageBaseUrl = document.querySelector('#ocr-form').dataset.suratKeluarImageUrl;
 const staticImageBaseUrl = document.querySelector('#ocr-form').dataset.staticImageUrl;
 const ocrEndpoint = document.querySelector('#ocr-form').dataset.ocrEndpoint;
     let currentIndex = 0;
@@ -17,25 +17,25 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute
         const data = extractedDataList[index];
         
         // Atur sumber gambar
-        const imageSrc = data.id_suratMasuk !== null ? 
-            suratMasukImageBaseUrl.replace('0', data.id_suratMasuk) : 
+        const imageSrc = data.id_suratKeluar !== null ? 
+            suratKeluarImageBaseUrl.replace('0', data.id_suratKeluar) : 
             staticImageBaseUrl + data.filename;
         document.getElementById('modal-image').src = imageSrc;
 
         // Isi nilai awal (hidden)
         document.getElementById('initial_full_letter_number').value = data.full_letter_number || '';
-        document.getElementById('initial_pengirim_suratMasuk').value = data.pengirim_suratMasuk || '';
-        document.getElementById('initial_penerima_suratMasuk').value = data.penerima_suratMasuk || '';
-        document.getElementById('initial_isi_suratMasuk').value = data.isi_suratMasuk || '';
+        document.getElementById('initial_pengirim_suratKeluar').value = data.pengirim_suratKeluar || '';
+        document.getElementById('initial_penerima_suratKeluar').value = data.penerima_suratKeluar || '';
+        document.getElementById('initial_isi_suratKeluar').value = data.isi_suratKeluar || '';
 
         // Isi form
         document.getElementById('filename').value = data.filename;
         document.getElementById('full_letter_number').value = data.full_letter_number || '';
-        document.getElementById('pengirim_suratMasuk').value = data.pengirim_suratMasuk || '';
-        document.getElementById('penerima_suratMasuk').value = data.penerima_suratMasuk || '';
+        document.getElementById('pengirim_suratKeluar').value = data.pengirim_suratKeluar || '';
+        document.getElementById('penerima_suratKeluar').value = data.penerima_suratKeluar || '';
         document.getElementById('kodesurat2').value = data.kodesurat2 || '';
         document.getElementById('jenis_surat').value = data.jenis_surat || '';
-        document.getElementById('isi_suratMasuk').value = data.isi_suratMasuk || '';
+        document.getElementById('isi_suratKeluar').value = data.isi_suratKeluar || '';
 
         // Isi opsi tanggal
         const dateSelect = document.getElementById('selected_date');
@@ -79,24 +79,24 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute
         const formData = {
             filename: document.getElementById('filename').value,
             initial_full_letter_number: document.getElementById('initial_full_letter_number').value,
-            initial_pengirim_suratMasuk: document.getElementById('initial_pengirim_suratMasuk').value,
-            initial_penerima_suratMasuk: document.getElementById('initial_penerima_suratMasuk').value,
-            initial_isi_suratMasuk: document.getElementById('initial_isi_suratMasuk').value,
+            initial_pengirim_suratKeluar: document.getElementById('initial_pengirim_suratKeluar').value,
+            initial_penerima_suratKeluar: document.getElementById('initial_penerima_suratKeluar').value,
+            initial_isi_suratKeluar: document.getElementById('initial_isi_suratKeluar').value,
             full_letter_number: document.getElementById('full_letter_number').value.trim(),
-            pengirim_suratMasuk: document.getElementById('pengirim_suratMasuk').value.trim(),
-            penerima_suratMasuk: document.getElementById('penerima_suratMasuk').value.trim(),
+            pengirim_suratKeluar: document.getElementById('pengirim_suratKeluar').value.trim(),
+            penerima_suratKeluar: document.getElementById('penerima_suratKeluar').value.trim(),
             selected_date: document.getElementById('selected_date').value.trim(),
             kodesurat2: document.getElementById('kodesurat2').value.trim(),
             jenis_surat: document.getElementById('jenis_surat').value.trim(),
-            isi_suratMasuk: document.getElementById('isi_suratMasuk').value.trim()
+            isi_suratKeluar: document.getElementById('isi_suratKeluar').value.trim()
         };
 
         // Validasi field wajib
         const requiredFields = {
             "Nomor Surat Lengkap": formData.full_letter_number,
-            "Pengirim": formData.pengirim_suratMasuk,
-            "Penerima": formData.penerima_suratMasuk,
-            "Isi": formData.isi_suratMasuk,
+            "Pengirim": formData.pengirim_suratKeluar,
+            "Penerima": formData.penerima_suratKeluar,
+            "Isi": formData.isi_suratKeluar,
             "Tanggal Surat": formData.selected_date
         };
         
@@ -663,7 +663,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Retrieve Base URLs and Endpoints Safely
-    const suratMasukImageBaseUrl = getDataAttribute('#ocr-form', 'suratMasukImageUrl', '');
+    const suratKeluarImageBaseUrl = getDataAttribute('#ocr-form', 'suratKeluarImageUrl', '');
     const staticImageBaseUrl = getDataAttribute('#ocr-form', 'staticImageUrl', '');
     const ocrEndpoint = getDataAttribute('#ocr-form', 'ocrEndpoint', '');
 

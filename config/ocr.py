@@ -10,13 +10,13 @@ from .ocr_utils import (
     clean_text,
     extract_dates,
     extract_tanggal,
-    extract_penerima_surat_masuk,
     extract_penerima_surat_keluar,
+    extract_penerima_surat_masuk,
     extract_pengirim,
     calculate_file_hash
 )
-from config.ocr_surat_masuk import extract_ocr_data as extract_ocr_data_surat_masuk
-from config.ocr_surat_keluar import extract_ocr_data_surat_keluar
+from config.ocr_surat_keluar import extract_ocr_data as extract_ocr_data_surat_keluar
+from config.ocr_surat_masuk import extract_ocr_data_surat_masuk
 
 ocr_bp = Blueprint('ocr', __name__)
 
@@ -54,16 +54,16 @@ def ocr():
                 extracted_text = f"Error during OCR processing: {e}"
     return render_template('home/ocr.html', extracted_text=extracted_text)
 
-def process_ocr_surat_masuk(file_path):
+def process_ocr_surat_keluar(file_path):
     """
     Process OCR for incoming letter (surat masuk)
     Returns structured data from OCR
     """
-    return extract_ocr_data_surat_masuk(file_path)
+    return extract_ocr_data_surat_keluar(file_path)
 
-def process_ocr_surat_keluar(file_path):
+def process_ocr_surat_masuk(file_path):
     """
     Process OCR for outgoing letter (surat keluar)
     Returns structured data from OCR
     """
-    return extract_ocr_data_surat_keluar(file_path)
+    return extract_ocr_data_surat_masuk(file_path)

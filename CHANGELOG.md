@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fitur persetujuan surat masuk
 - Route approve/reject surat masuk
 - Menu pending surat masuk dari sidebar
-- Template yang tidak diperlukan (list_pending_surat_masuk.html, detail_surat_masuk.html)
+- Template yang tidak diperlukan (list_pending_surat_keluar.html, detail_surat_keluar.html)
 - Perhitungan pending count untuk surat masuk
 
 ## [Unreleased]

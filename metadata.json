@@ -1,5 +1,5 @@
 {
-    "surat_masuk": {
+    "surat_keluar": {
         "1.jpg": {
             "id": 14,
             "nomor_surat": "1931/KPA.W15-A12/HM2.1.4/IX/2024",
@@ -7,5 +7,5 @@
             "saved_at": "2025-07-13T22:04:47.513829"
         }
     },
-    "surat_keluar": {}
+    "surat_masuk": {}
 }

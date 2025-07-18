@@ -3,7 +3,6 @@
 {% include 'includes/head.html' %}
 
 <body class="bg-gray-50">
-  <!-- CSRF Token for AJAX requests -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <div class="modern-sidebar sidebar-collapsed">
     <div class="logo-details" id="sidebarToggle" style="cursor: pointer;">
@@ -12,13 +11,13 @@
     </div>
     <ul class="nav-links">
       <li>
-        <a href="{{ url_for('main.index') }}">
+        <a href="{{ url_for('main.index') }}" data-tooltip="Dashboard">
           <i class="fas fa-home"></i>
           <span class="links_name">Dashboard</span>
         </a>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'showSuratMenu')">
+        <a href="#" onclick="toggleMenu(event, 'showSuratMenu')" data-tooltip="Show Surat">
           <i class="fas fa-envelope-open-text"></i>
           <span class="links_name">Show Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
@@ -29,7 +28,7 @@
         </div>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'templatesMenu')">
+        <a href="#" onclick="toggleMenu(event, 'templatesMenu')" data-tooltip="Templates Surat">
           <i class="fas fa-folder"></i>
           <span class="links_name">Templates Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
@@ -40,18 +39,18 @@
       </li>
       {% if current_user.role != 'karyawan' %}
       <li>
-        <a href="#" onclick="toggleMenu(event, 'inputSuratMenu')">
+        <a href="#" onclick="toggleMenu(event, 'inputSuratMenu')" data-tooltip="Input Surat">
           <i class="fas fa-edit"></i>
           <span class="links_name">Input Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="inputSuratMenu">
-          <a href="{{ url_for('main.input_surat_masuk') }}">Surat Masuk</a>
-          <a href="{{ url_for('main.input_surat_keluar') }}">Surat Keluar</a>
+          <a href="{{ url_for('main.input_surat_keluar') }}">Surat Masuk</a>
+          <a href="{{ url_for('main.input_surat_masuk') }}">Surat Keluar</a>
         </div>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'ocrMenu')">
+        <a href="#" onclick="toggleMenu(event, 'ocrMenu')" data-tooltip="OCR">
           <i class="fas fa-eye"></i>
           <span class="links_name">OCR</span>
           <i class="fas fa-chevron-down ml-auto"></i>
@@ -64,13 +63,27 @@
         </div>
       </li>
       <li>
-        <a href="{{ url_for('main.laporan_statistik') }}">
+        <a href="#" onclick="toggleMenu(event, 'cutiMenu')" data-tooltip="Manajemen Cuti">
+          <i class="fas fa-calendar-alt"></i>
+          <span class="links_name">Manajemen Cuti</span>
+          <i class="fas fa-chevron-down ml-auto"></i>
+        </a>
+        <div class="dropdown" id="cutiMenu">
+          <a href="{{ url_for('ocr_cuti.ocr_cuti') }}">Input Cuti Baru</a>
+          <a href="{{ url_for('ocr_cuti.list_cuti') }}">Daftar Permohonan Cuti</a>
+          {% if current_user.role in ['pimpinan', 'admin'] %}
+          <a href="{{ url_for('ocr_cuti.list_cuti') }}?status=pending">Cuti Menunggu Persetujuan</a>
+          {% endif %}
+        </div>
+      </li>
+      <li>
+        <a href="{{ url_for('main.laporan_statistik') }}" data-tooltip="Laporan Statistik">
           <i class="fas fa-chart-bar"></i>
           <span class="links_name">Laporan Statistik</span>
         </a>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')">
+        <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')" data-tooltip="Pegawai">
           <i class="fas fa-users"></i>
           <span class="links_name">Pegawai</span>
           <i class="fas fa-chevron-down ml-auto"></i>
@@ -83,36 +96,66 @@
       {% endif %}
       {% if current_user.role == 'pimpinan' %}
       <li>
-        <a href="{{ url_for('main.list_pending_surat_keluar') }}">
+        <a href="{{ url_for('main.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat">
           <i class="fas fa-check-circle"></i>
           <span class="links_name">Persetujuan Surat</span>
-          {% if g.pending_surat_keluar_count > 0 %}
-          <span class="badge bg-danger">{{ g.pending_surat_keluar_count }}</span>
+          {% if g.pending_surat_masuk_count > 0 %}
+          <span class="badge">{{ g.pending_surat_masuk_count }}</span>
           {% endif %}
         </a>
       </li>
       {% endif %}
       {% if current_user.is_admin %}
       <li>
-        <a href="{{ url_for('main.edit_user_view') }}">
+        <a href="{{ url_for('main.edit_user_view') }}" data-tooltip="Manajemen User">
           <i class="fas fa-user-cog"></i>
           <span class="links_name">Manajemen User</span>
         </a>
       </li>
       {% endif %}
-      {% if current_user.is_authenticated %}
-      <li>
-        <a href="{{ url_for('main.edit_user', user_id=current_user.id) }}" class="user-profile-link">
-          <i class="fas fa-user"></i>
-          <span class="links_name">{{ current_user.email }}</span>
-          <span class="user-role-badge" data-role="{{ current_user.role }}">{{ current_user.role.upper() }}</span>
-        </a>
-      </li>
-      {% endif %}
     </ul>
+    
+
+    {% if current_user.is_authenticated %}
+    <div class="sidebar-user-profile">
+      <div class="user-profile-container">
+        <div class="user-avatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ current_user.email.split('@')[0] }}</div>
+          <div class="user-email">{{ current_user.email }}</div>
+          <div class="user-role-badge" data-role="{{ current_user.role }}">
+            {{ current_user.role.upper() }}
+          </div>
+        </div>
+        <div class="user-actions">
+          <div class="dropdown" id="userProfileMenu">
+            <button class="user-menu-btn" onclick="toggleUserMenu(event)" data-tooltip="User Menu">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div class="dropdown-menu" id="userDropdown">
+              <a href="{{ url_for('main.edit_user', user_id=current_user.id) }}">
+                <i class="fas fa-user-edit"></i>
+                <span>Edit Profile</span>
+              </a>
+              <a href="#" onclick="showUserInfo()">
+                <i class="fas fa-info-circle"></i>
+                <span>User Info</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="{{ url_for('auth.logout') }}" class="logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
   <div class="main-content" style="margin-left:80px;">
-    <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-20">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -127,22 +170,22 @@
             <div class="relative mr-4">
               <button class="notification-bell-btn relative">
                 <i class="fas fa-bell text-gray-600 hover:text-blue-600 transition-colors duration-200"></i>
-                {% if g.pending_surat_keluar_count > 0 %}
+                {% if g.pending_surat_masuk_count > 0 %}
                 <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {{ g.pending_surat_keluar_count }}
+                  {{ g.pending_surat_masuk_count }}
                 </span>
                 {% endif %}
               </button>
               
-              <!-- Dropdown Notifikasi -->
+
               <div class="notification-dropdown hidden absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 transform transition-all duration-200 ease-in-out">
                 <div class="p-4">
                   <h3 class="text-sm font-semibold text-gray-700 mb-2">Notifikasi</h3>
-                  {% if g.pending_surat_keluar_count > 0 %}
-                  <a href="{{ url_for('main.list_pending_surat_keluar') }}" class="block py-2 px-3 rounded hover:bg-gray-100 transition-colors duration-200">
+                  {% if g.pending_surat_masuk_count > 0 %}
+                  <a href="{{ url_for('main.list_pending_surat_masuk') }}" class="block py-2 px-3 rounded hover:bg-gray-100 transition-colors duration-200">
                     <div class="flex items-center">
                       <i class="fas fa-paper-plane mr-2 text-green-500"></i>
-                      <span class="text-sm">Surat Keluar Pending: {{ g.pending_surat_keluar_count }}</span>
+                      <span class="text-sm">Surat Keluar Pending: {{ g.pending_surat_masuk_count }}</span>
                     </div>
                   </a>
                   {% else %}
@@ -172,7 +215,6 @@
           </div>
         </div>
       </div>
-      <!-- Mobile menu, show/hide based on menu state -->
       <div class="sm:hidden hidden mobile-menu">
         <div class="pt-2 pb-3 space-y-1">
           <a href="{{ url_for('auth.logout') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100">
@@ -183,7 +225,6 @@
       </div>
     </nav>
     
-    <!-- Breadcrumb -->
     <nav class="bg-white px-4 py-3 border-b border-gray-200">
       <ol class="flex flex-wrap items-center text-sm">
         {% for text, url in breadcrumbs %}
@@ -206,21 +247,17 @@
       </ol>
     </nav>
     
-    <!-- Page Content -->
     <div class="content p-4 sm:p-6 overflow-y-auto">
       {% block content %}{% endblock %}
     </div>
     
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
   </div>
-  <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.3/viewer.min.js"></script>
   <script>
-    // Dropdown menu toggle for modern sidebar
     function toggleMenu(e, id) {
       e.preventDefault();
       const dropdown = document.getElementById(id);
@@ -235,46 +272,109 @@
       }
     }
 
-    // Sidebar toggle functionality
+    function toggleUserMenu(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropdown = document.getElementById('userDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    function showUserInfo() {
+      const userInfo = `
+        <div class="user-info-modal">
+          <h4>Informasi User</h4>
+          <p><strong>Email:</strong> {{ current_user.email }}</p>
+          <p><strong>Role:</strong> {{ current_user.role.title() }}</p>
+          <p><strong>Status:</strong> {{ 'Active' if current_user.is_approved else 'Pending' }}</p>
+          <p><strong>Last Login:</strong> {{ current_user.last_login.strftime('%d/%m/%Y %H:%M') if current_user.last_login else 'Never' }}</p>
+          <p><strong>Login Count:</strong> {{ current_user.login_count or 0 }}</p>
+        </div>
+      `;
+      
+      window.toast.info(userInfo, 'User Information', 8000);
+      
+      document.getElementById('userDropdown').classList.remove('show');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       const sidebar = document.querySelector('.modern-sidebar');
       const mainContent = document.querySelector('.main-content');
       const sidebarToggle = document.getElementById('sidebarToggle');
       
+      let isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+      
+      function toggleSidebar() {
+        isCollapsed = !isCollapsed;
+        
+        if (isCollapsed) {
+          sidebar.classList.add('sidebar-collapsed');
+          mainContent.style.marginLeft = '80px';
+          document.querySelectorAll('.dropdown.show').forEach(dropdown => {
+            dropdown.classList.remove('show');
+          });
+          document.querySelectorAll('.fa-chevron-down').forEach(chevron => {
+            chevron.style.transform = 'rotate(0deg)';
+          });
+        } else {
+          sidebar.classList.remove('sidebar-collapsed');
+          mainContent.style.marginLeft = '250px';
+        }
+        
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
+      }
+      
+      const savedState = localStorage.getItem('sidebarCollapsed');
+      if (savedState !== null) {
+        const shouldCollapse = savedState === 'true';
+        if (shouldCollapse !== isCollapsed) {
+          toggleSidebar();
+        }
+      }
+      
       if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-          sidebar.classList.toggle('sidebar-collapsed');
-          mainContent.style.marginLeft = sidebar.classList.contains('sidebar-collapsed') ? '80px' : '250px';
+        sidebarToggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleSidebar();
+        });
+        
+        sidebarToggle.addEventListener('mouseenter', function() {
+          this.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        });
+        
+        sidebarToggle.addEventListener('mouseleave', function() {
+          this.style.backgroundColor = 'transparent';
         });
       }
+      
+      function handleResize() {
+        if (window.innerWidth <= 768) {
+          if (!isCollapsed) {
+            toggleSidebar();
+          }
+        }
+      }
+      
+      window.addEventListener('resize', handleResize);
+      handleResize();
 
-      // Notification bell toggle
       const notificationBell = document.querySelector('.notification-bell-btn');
       const notificationDropdown = document.querySelector('.notification-dropdown');
 
       if (notificationBell && notificationDropdown) {
-        console.log('Notification bell found and initialized');
-        
         notificationBell.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
-          console.log('Notification bell clicked');
           notificationDropdown.classList.toggle('hidden');
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
           if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
             notificationDropdown.classList.add('hidden');
           }
         });
-      } else {
-        console.log('Notification bell or dropdown not found');
       }
 
-
-
-      // Mobile menu toggle
       const mobileMenuButton = document.querySelector('.mobile-menu-button');
       const mobileMenu = document.querySelector('.mobile-menu');
       if (mobileMenuButton && mobileMenu) {
@@ -283,29 +383,36 @@
         });
       }
 
-      // Close mobile sidebar when clicking outside
       document.addEventListener('click', function(e) {
         const sidebar = document.querySelector('.modern-sidebar');
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
         const mobileMenu = document.querySelector('.mobile-menu');
+        const userDropdown = document.getElementById('userDropdown');
+        const userMenuBtn = document.querySelector('.user-menu-btn');
+        
         if (!sidebar.contains(e.target) && !mobileMenuButton.contains(e.target)) {
           sidebar.classList.remove('mobile-open');
           if (mobileMenu) {
             mobileMenu.classList.add('hidden');
           }
         }
+        
+        if (userDropdown && !userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+          userDropdown.classList.remove('show');
+        }
       });
+      
+      const userAvatar = document.querySelector('.user-avatar');
+      if (userAvatar) {
+        userAvatar.setAttribute('data-tooltip', '{{ current_user.email.split("@")[0] }} ({{ current_user.role.title() }})');
+      }
     });
   </script>
   {% block extra_js %}{% endblock %}
 
-      <!-- Include global JavaScript files -->
     <script src="{{ url_for('static', filename='assets/js/pcoded.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/js/plugins/bootstrap.min.js') }}"></script>
-    
-    <!-- Toast Notification System -->
     <style>
-      /* Notification Bell Styles */
       .notification-bell-btn {
         position: relative;
         cursor: pointer;
@@ -342,7 +449,6 @@
         }
       }
       
-      /* Toast Styles */
       .toast {
         display: flex;
         align-items: center;
@@ -464,7 +570,7 @@
       }
     </style>
     
-    <!-- Toast JavaScript -->
+
     <script>
       class ToastNotification {
         constructor() {
@@ -488,7 +594,6 @@
           
           this.container.appendChild(toast);
           
-          // Auto remove after duration
           if (duration > 0) {
             setTimeout(() => {
               if (toast.parentElement) {
@@ -532,10 +637,8 @@
         }
       }
       
-      // Global toast instance
       window.toast = new ToastNotification();
       
-      // Convert flash messages to toasts
       document.addEventListener('DOMContentLoaded', function() {
         const flashMessages = document.querySelectorAll('.alert');
         flashMessages.forEach(alert => {
@@ -544,18 +647,14 @@
                           alert.className.includes('alert-danger') ? 'error' :
                           alert.className.includes('alert-warning') ? 'warning' : 'info';
           
-          // Show toast
           window.toast.show(message, category);
           
-          // Remove original alert
           alert.remove();
         });
 
-        // Initialize notification system
         initializeNotifications();
       });
 
-      // Function to update notification count
       function updateNotificationCount() {
         const notificationBell = document.querySelector('.notification-bell-btn');
         if (!notificationBell) return;
@@ -586,20 +685,16 @@
           });
       }
 
-      // Initialize notification system
       function initializeNotifications() {
         const notificationBell = document.querySelector('.notification-bell-btn');
         if (notificationBell) {
-          // Update count on page load
           updateNotificationCount();
           
-          // Auto-refresh every 30 seconds
           setInterval(updateNotificationCount, 30000);
         }
       }
     </script>
     
-    <!-- Page-specific scripts -->
     {% block scripts %}{% endblock %}
   </body>
 

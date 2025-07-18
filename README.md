@@ -97,19 +97,6 @@ The application will run at `http://localhost:5001`
 - `created_at`: Creation timestamp
 
 ### IncomingLetter Table
-- `id_suratMasuk`: Primary key
-- `tanggal_suratMasuk`: Letter date
-- `pengirim_suratMasuk`: Letter sender
-- `penerima_suratMasuk`: Letter recipient
-- `nomor_suratMasuk`: Letter number
-- `kode_suratMasuk`: Letter code
-- `jenis_suratMasuk`: Letter type
-- `isi_suratMasuk`: Letter content
-- `gambar_suratMasuk`: Letter image file
-- `status_suratMasuk`: Letter status (approved)
-- `created_at`: Creation timestamp
-
-### OutgoingLetter Table
 - `id_suratKeluar`: Primary key
 - `tanggal_suratKeluar`: Letter date
 - `pengirim_suratKeluar`: Letter sender
@@ -118,8 +105,21 @@ The application will run at `http://localhost:5001`
 - `kode_suratKeluar`: Letter code
 - `jenis_suratKeluar`: Letter type
 - `isi_suratKeluar`: Letter content
-- `file_suratKeluar`: Letter file
-- `status_suratKeluar`: Letter status (pending/approved/rejected)
+- `gambar_suratKeluar`: Letter image file
+- `status_suratKeluar`: Letter status (approved)
+- `created_at`: Creation timestamp
+
+### OutgoingLetter Table
+- `id_suratMasuk`: Primary key
+- `tanggal_suratMasuk`: Letter date
+- `pengirim_suratMasuk`: Letter sender
+- `penerima_suratMasuk`: Letter recipient
+- `nomor_suratMasuk`: Letter number
+- `kode_suratMasuk`: Letter code
+- `jenis_suratMasuk`: Letter type
+- `isi_suratMasuk`: Letter content
+- `file_suratMasuk`: Letter file
+- `status_suratMasuk`: Letter status (pending/approved/rejected)
 - `created_at`: Creation timestamp
 
 ## Usage

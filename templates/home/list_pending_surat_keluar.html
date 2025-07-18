@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="container mx-auto px-4 py-6">
     <h1 class="text-2xl font-bold mb-4">Surat Keluar Pending</h1>
     
-    {% if pending_surat_keluar %}
+    {% if pending_surat_masuk %}
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <table class="w-full table-auto">
             <thead class="bg-gray-100">
@@ -29,22 +29,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tr>
             </thead>
             <tbody>
-                {% for surat in pending_surat_keluar %}
-                <tr class="border-b hover:bg-gray-50" data-surat-id="{{ surat.id_suratKeluar }}">
-                    <td class="px-4 py-2">{{ surat.nomor_suratKeluar }}</td>
-                    <td class="px-4 py-2">{{ surat.penerima_suratKeluar }}</td>
-                    <td class="px-4 py-2">{{ surat.tanggal_suratKeluar.strftime('%d/%m/%Y') }}</td>
+                {% for surat in pending_surat_masuk %}
+                <tr class="border-b hover:bg-gray-50" data-surat-id="{{ surat.id_suratMasuk }}">
+                    <td class="px-4 py-2">{{ surat.nomor_suratMasuk }}</td>
+                    <td class="px-4 py-2">{{ surat.penerima_suratMasuk }}</td>
+                    <td class="px-4 py-2">{{ surat.tanggal_suratMasuk.strftime('%d/%m/%Y') }}</td>
                     <td class="px-4 py-2">
                         <div class="flex space-x-2">
-                            <button onclick="showDetailModal({{ surat.id_suratKeluar }})"
+                            <button onclick="showDetailModal({{ surat.id_suratMasuk }})"
                                 class="btn btn-sm btn-info">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button onclick="approveSurat({{ surat.id_suratKeluar }})"
+                            <button onclick="approveSurat({{ surat.id_suratMasuk }})"
                                 class="btn btn-sm btn-success">
                                 <i class="fas fa-check"></i>
                             </button>
-                            <button onclick="rejectSurat({{ surat.id_suratKeluar }})"
+                            <button onclick="rejectSurat({{ surat.id_suratMasuk }})"
                                 class="btn btn-sm btn-danger">
                                 <i class="fas fa-times"></i>
                             </button>
@@ -134,29 +134,29 @@ function showDetailModal(suratId) {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <p class="text-gray-600 font-semibold text-sm">Nomor Surat</p>
-                            <p class="text-lg font-medium">${surat.nomor_suratKeluar || '-'}</p>
+                            <p class="text-lg font-medium">${surat.nomor_suratMasuk || '-'}</p>
                         </div>
                         <div>
                             <p class="text-gray-600 font-semibold text-sm">Tanggal Surat</p>
-                            <p class="text-lg font-medium">${surat.tanggal_suratKeluar || '-'}</p>
+                            <p class="text-lg font-medium">${surat.tanggal_suratMasuk || '-'}</p>
                         </div>
                         <div>
                             <p class="text-gray-600 font-semibold text-sm">Pengirim</p>
-                            <p class="text-lg font-medium">${surat.pengirim_suratKeluar || '-'}</p>
+                            <p class="text-lg font-medium">${surat.pengirim_suratMasuk || '-'}</p>
                         </div>
                         <div>
                             <p class="text-gray-600 font-semibold text-sm">Penerima</p>
-                            <p class="text-lg font-medium">${surat.penerima_suratKeluar || '-'}</p>
+                            <p class="text-lg font-medium">${surat.penerima_suratMasuk || '-'}</p>
                         </div>
                         <div class="col-span-1 md:col-span-2">
                             <p class="text-gray-600 font-semibold text-sm">Isi Surat</p>
-                            <p class="text-base">${surat.isi_suratKeluar || '-'}</p>
+                            <p class="text-base">${surat.isi_suratMasuk || '-'}</p>
                         </div>
                         ${surat.has_gambar ? `
                         <div class="col-span-1 md:col-span-2">
                             <p class="text-gray-600 font-semibold text-sm">Gambar Surat</p>
                             <div class="mt-2">
-                                <img src="/surat-keluar/image/${surat.id_suratKeluar}" 
+                                <img src="/surat-keluar/image/${surat.id_suratMasuk}" 
                                      alt="Gambar Surat Keluar" 
                                      class="max-w-full h-auto rounded-lg border border-gray-300 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
                                      style="max-height: 400px; object-fit: contain;"
@@ -168,18 +168,18 @@ function showDetailModal(suratId) {
                         <div class="col-span-1 md:col-span-2">
                             <p class="text-gray-600 font-semibold text-sm">Status</p>
                             <span class="px-3 py-1 rounded-full text-sm font-medium ${
-                                surat.status_suratKeluar === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                surat.status_suratKeluar === 'approved' ? 'bg-green-100 text-green-800' :
+                                surat.status_suratMasuk === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                surat.status_suratMasuk === 'approved' ? 'bg-green-100 text-green-800' :
                                 'bg-red-100 text-red-800'
                             }">
-                                ${surat.status_suratKeluar === 'pending' ? 'Pending' :
-                                  surat.status_suratKeluar === 'approved' ? 'Disetujui' : 'Ditolak'}
+                                ${surat.status_suratMasuk === 'pending' ? 'Pending' :
+                                  surat.status_suratMasuk === 'approved' ? 'Disetujui' : 'Ditolak'}
                             </span>
                         </div>
-                        ${surat.file_suratKeluar ? `
+                        ${surat.file_suratMasuk ? `
                         <div class="col-span-1 md:col-span-2">
                             <p class="text-gray-600 font-semibold text-sm">Dokumen</p>
-                            <a href="/surat-keluar/download/${surat.id_suratKeluar}" 
+                            <a href="/surat-keluar/download/${surat.id_suratMasuk}" 
                                class="inline-flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
                                 <i class="fas fa-download mr-2"></i>Download Dokumen
                             </a>
@@ -192,12 +192,12 @@ function showDetailModal(suratId) {
                 const approveBtn = document.getElementById('approveBtn');
                 const rejectBtn = document.getElementById('rejectBtn');
                 
-                if (surat.status_suratKeluar === 'pending') {
+                if (surat.status_suratMasuk === 'pending') {
                     approveBtn.classList.remove('hidden');
                     rejectBtn.classList.remove('hidden');
                     // Store surat ID for action buttons
-                    approveBtn.setAttribute('data-surat-id', surat.id_suratKeluar);
-                    rejectBtn.setAttribute('data-surat-id', surat.id_suratKeluar);
+                    approveBtn.setAttribute('data-surat-id', surat.id_suratMasuk);
+                    rejectBtn.setAttribute('data-surat-id', surat.id_suratMasuk);
                 } else {
                     approveBtn.classList.add('hidden');
                     rejectBtn.classList.add('hidden');

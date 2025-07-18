@@ -38,8 +38,6 @@ class SuratMasuk(db.Model):
     initial_penerima_suratMasuk = db.Column(db.String(255))
     initial_isi_suratMasuk = db.Column(db.Text)
     initial_nomor_suratMasuk = db.Column(db.String(255))
-    
-    # New status field
     status_suratMasuk = db.Column(db.String(20), default='pending', nullable=False)
 
 class SuratKeluar(db.Model):
@@ -49,22 +47,18 @@ class SuratKeluar(db.Model):
     penerima_suratKeluar = db.Column(db.Text, nullable=False)
     nomor_suratKeluar = db.Column(db.Text, nullable=False)
     isi_suratKeluar = db.Column(db.Text, nullable=False)
-    gambar_suratKeluar = db.Column(db.LargeBinary, nullable=True) 
-    file_suratKeluar = db.Column(db.LargeBinary, nullable=True)  # Add missing field
+    gambar_suratKeluar = db.Column(db.LargeBinary, nullable=True)
+    file_suratKeluar = db.Column(db.LargeBinary, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     ocr_accuracy_suratKeluar = db.Column(db.Float)
     initial_nomor_suratKeluar = db.Column(db.String(255))
     initial_pengirim_suratKeluar = db.Column(db.String(255))
     initial_penerima_suratKeluar = db.Column(db.String(255))
     initial_isi_suratKeluar = db.Column(db.Text)
-    
-    # Tambahan field untuk Surat Keluar
     acara_suratKeluar = db.Column(db.Text, nullable=True)
     tempat_suratKeluar = db.Column(db.Text, nullable=True)
     tanggal_acara_suratKeluar = db.Column(db.Date, nullable=True)
     jam_suratKeluar = db.Column(db.String(10), nullable=True)
-    
-    # New status field
     status_suratKeluar = db.Column(db.String(20), default='pending', nullable=False)
 
 class Cuti(db.Model):
@@ -90,6 +84,10 @@ class Cuti(db.Model):
     approved_by = db.Column(db.String(100), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
     notes = db.Column(db.Text, nullable=True)
+    # Tambahan untuk digital signature dan file
+    qr_code = db.Column(db.Text, nullable=True)  # base64 string QR code
+    pdf_path = db.Column(db.Text, nullable=True) # path file PDF
+    docx_path = db.Column(db.Text, nullable=True) # path file DOCX
 
 class Pegawai(db.Model):
     __tablename__ = 'pegawai'

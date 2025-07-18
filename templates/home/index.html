@@ -16,7 +16,7 @@
                 </div>
                 <div class="ml-4">
                     <h5 class="text-xl font-semibold text-white">Total Surat Masuk</h5>
-                    <p class="text-4xl font-bold text-white">{{ suratMasuk_count }}</p>
+                    <p class="text-4xl font-bold text-white">{{ suratKeluar_count }}</p>
                 </div>
             </div>
         </div>
@@ -29,7 +29,7 @@
                 </div>
                 <div class="ml-4">
                     <h5 class="text-xl font-semibold text-white">Total Surat Keluar</h5>
-                    <p class="text-4xl font-bold text-white">{{ suratKeluar_count }}</p>
+                    <p class="text-4xl font-bold text-white">{{ suratMasuk_count }}</p>
                 </div>
             </div>
         </div>
@@ -46,7 +46,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_year }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_year }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
                         <i class="fas fa-inbox text-indigo-600"></i>
@@ -55,7 +55,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_year }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_year }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
                         <i class="fas fa-paper-plane text-indigo-600"></i>
@@ -73,7 +73,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_month }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_month }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
                         <i class="fas fa-inbox text-amber-600"></i>
@@ -82,7 +82,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_month }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_month }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
                         <i class="fas fa-paper-plane text-amber-600"></i>
@@ -100,7 +100,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_week }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_week }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
                         <i class="fas fa-inbox text-emerald-600"></i>
@@ -109,7 +109,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_week }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_week }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
                         <i class="fas fa-paper-plane text-emerald-600"></i>
@@ -128,7 +128,7 @@
             </div>
             <div class="p-6">
                 <div class="space-y-4">
-                    {% for surat in recent_surat_masuk %}
+                    {% for surat in recent_surat_keluar %}
                     <div class="flex items-start">
                         <div class="flex-shrink-0 mt-1">
                             <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
@@ -137,16 +137,16 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm font-medium text-gray-900">
-                                {{ surat.pengirim_suratMasuk }}
+                                {{ surat.pengirim_suratKeluar }}
                             </p>
                             <p class="text-xs text-gray-500">
-                                {{ surat.tanggal_suratMasuk.strftime('%d %b %Y') }} - {{ surat.nomor_suratMasuk }}
+                                {{ surat.tanggal_suratKeluar.strftime('%d %b %Y') }} - {{ surat.nomor_suratKeluar }}
                             </p>
                         </div>
                     </div>
                     {% endfor %}
                     
-                    {% for surat in recent_surat_keluar %}
+                    {% for surat in recent_surat_masuk %}
                     <div class="flex items-start">
                         <div class="flex-shrink-0 mt-1">
                             <div class="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
@@ -155,10 +155,10 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm font-medium text-gray-900">
-                                {{ surat.pengirim_suratKeluar }}
+                                {{ surat.pengirim_suratMasuk }}
                             </p>
                             <p class="text-xs text-gray-500">
-                                {{ surat.tanggal_suratKeluar.strftime('%d %b %Y') }} - {{ surat.nomor_suratKeluar }}
+                                {{ surat.tanggal_suratMasuk.strftime('%d %b %Y') }} - {{ surat.nomor_suratMasuk }}
                             </p>
                         </div>
                     </div>

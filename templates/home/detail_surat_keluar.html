@@ -9,29 +9,29 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-600 font-semibold">Nomor Surat</p>
-                    <p class="text-lg">{{ surat.nomor_suratKeluar }}</p>
+                    <p class="text-lg">{{ surat.nomor_suratMasuk }}</p>
                 </div>
                 <div>
                     <p class="text-gray-600 font-semibold">Tanggal Surat</p>
-                    <p class="text-lg">{{ surat.tanggal_suratKeluar.strftime('%d/%m/%Y') }}</p>
+                    <p class="text-lg">{{ surat.tanggal_suratMasuk.strftime('%d/%m/%Y') }}</p>
                 </div>
                 <div>
                     <p class="text-gray-600 font-semibold">Pengirim</p>
-                    <p class="text-lg">{{ surat.pengirim_suratKeluar }}</p>
+                    <p class="text-lg">{{ surat.pengirim_suratMasuk }}</p>
                 </div>
                 <div>
                     <p class="text-gray-600 font-semibold">Penerima</p>
-                    <p class="text-lg">{{ surat.penerima_suratKeluar }}</p>
+                    <p class="text-lg">{{ surat.penerima_suratMasuk }}</p>
                 </div>
                 <div class="col-span-1 md:col-span-2">
                     <p class="text-gray-600 font-semibold">Isi Surat</p>
-                    <p class="text-lg">{{ surat.isi_suratKeluar }}</p>
+                    <p class="text-lg">{{ surat.isi_suratMasuk }}</p>
                 </div>
-                {% if surat.gambar_suratKeluar %}
+                {% if surat.gambar_suratMasuk %}
                 <div class="col-span-1 md:col-span-2">
                     <p class="text-gray-600 font-semibold">Gambar Surat</p>
                     <div class="mt-2">
-                        <img src="{{ url_for('view_surat_keluar_image', id=surat.id_suratKeluar) }}" 
+                        <img src="{{ url_for('view_surat_masuk_image', id=surat.id_suratMasuk) }}" 
                              alt="Gambar Surat Keluar" 
                              class="max-w-full h-auto rounded-lg border border-gray-300 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
                              style="max-height: 400px; object-fit: contain;"
@@ -42,9 +42,9 @@
                 {% endif %}
                 <div class="col-span-1 md:col-span-2">
                     <p class="text-gray-600 font-semibold">Status</p>
-                    {% if surat.status_suratKeluar == 'pending' %}
+                    {% if surat.status_suratMasuk == 'pending' %}
                     <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">Pending</span>
-                    {% elif surat.status_suratKeluar == 'approved' %}
+                    {% elif surat.status_suratMasuk == 'approved' %}
                     <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full">Disetujui</span>
                     {% else %}
                     <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full">Ditolak</span>
@@ -52,10 +52,10 @@
                 </div>
             </div>
 
-            {% if surat.file_suratKeluar %}
+            {% if surat.file_suratMasuk %}
             <div class="mt-6">
                 <h2 class="text-xl font-semibold mb-2">Dokumen</h2>
-                <a href="{{ url_for('download_surat_keluar', id=surat.id_suratKeluar) }}"
+                <a href="{{ url_for('download_surat_masuk', id=surat.id_suratMasuk) }}"
                     class="bg-blue-500 text-white px-4 py-2 rounded inline-block mb-2">
                     <i class="fas fa-download mr-2"></i>Download
                 </a>
@@ -63,19 +63,19 @@
             {% endif %}
 
             <div class="mt-6 flex space-x-4">
-                {% if surat.status_suratKeluar == 'pending' %}
+                {% if surat.status_suratMasuk == 'pending' %}
                 <div class="flex space-x-2">
-                    <button onclick="approveSurat({{ surat.id_suratKeluar }})"
+                    <button onclick="approveSurat({{ surat.id_suratMasuk }})"
                         class="bg-green-500 text-white px-4 py-2 rounded inline-block">
                         <i class="fas fa-check mr-2"></i>Setujui
                     </button>
-                    <button onclick="rejectSurat({{ surat.id_suratKeluar }})"
+                    <button onclick="rejectSurat({{ surat.id_suratMasuk }})"
                         class="bg-red-500 text-white px-4 py-2 rounded inline-block">
                         <i class="fas fa-times mr-2"></i>Tolak
                     </button>
                 </div>
                 {% endif %}
-                <a href="{{ url_for('list_pending_surat_keluar') }}" 
+                <a href="{{ url_for('list_pending_surat_masuk') }}" 
                    class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300">
                     <i class="fas fa-arrow-left mr-2"></i> Kembali
                 </a>

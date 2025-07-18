@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Show Surat Masuk - PA Banjarbaru{% endblock %}
+{% block title %}Surat Masuk - PA Banjarbaru{% endblock %}
 
 {% block content %}
 <style>
@@ -93,10 +93,10 @@
     <div class="sticky-search-container">
         <div class="search-controls">
             <a href="{{ url_for('main.input_surat_masuk') }}" class="create-button">
-                <i class="fas fa-plus mr-2"></i>Create Surat Masuk
+                <i class="fas fa-plus mr-2"></i>Tambah Surat Masuk
             </a>
             <form method="GET" action="{{ url_for('main.show_surat_masuk') }}" class="search-form">
-                <input type="text" name="search" placeholder="Search surat masuk..." 
+                <input type="text" name="search" placeholder="Cari surat masuk..." 
                        value="{{ request.args.get('search', '') }}" class="search-input">
                 <button type="submit" class="search-button">
                     <i class="fas fa-search"></i>
@@ -215,11 +215,11 @@
                 </td>
 
                 <td class="py-2 px-4 border">
-                    <a href="{{ url_for('main.edit_surat_masuk', id_suratMasuk=entry.id_suratMasuk) }}"
+                    <a href="{{ url_for('main.edit_surat_masuk', id=entry.id_suratMasuk) }}"
                         class="bg-yellow-500 text-white px-2 py-1 rounded">
                         <i class="feather icon-edit"></i>
                     </a>
-                    <form action="{{ url_for('main.delete_surat_masuk', id_suratMasuk=entry.id_suratMasuk) }}" method="POST"
+                    <form action="{{ url_for('main.delete_surat_masuk', id=entry.id_suratMasuk) }}" method="POST"
                         style="display:inline;" onsubmit="return confirmDelete();">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded">

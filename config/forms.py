@@ -14,18 +14,18 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
-class SuratMasukForm(FlaskForm):
-    tanggal_suratMasuk = DateField('Tanggal Surat', validators=[DataRequired()], format='%Y-%m-%d')
-    pengirim_suratMasuk = StringField('Pengirim', validators=[DataRequired()])
-    penerima_suratMasuk = StringField('Penerima', validators=[DataRequired()])
-    nomor_suratMasuk = StringField('Nomor Surat', validators=[DataRequired()])
-    kode_suratMasuk = StringField('Kode Surat', validators=[DataRequired()])
-    jenis_suratMasuk = StringField('Jenis Surat', validators=[DataRequired()])
-    isi_suratMasuk = TextAreaField('Isi Surat', validators=[DataRequired()])
+class SuratKeluarForm(FlaskForm):
+    tanggal_suratKeluar = DateField('Tanggal Surat', validators=[DataRequired()], format='%Y-%m-%d')
+    pengirim_suratKeluar = StringField('Pengirim', validators=[DataRequired()])
+    penerima_suratKeluar = StringField('Penerima', validators=[DataRequired()])
+    nomor_suratKeluar = StringField('Nomor Surat', validators=[DataRequired()])
+    kode_suratKeluar = StringField('Kode Surat', validators=[DataRequired()])
+    jenis_suratKeluar = StringField('Jenis Surat', validators=[DataRequired()])
+    isi_suratKeluar = TextAreaField('Isi Surat', validators=[DataRequired()])
     image = FileField('Gambar Surat', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Image only!')])
     submit = SubmitField('Simpan Surat Masuk')
 
-class OCRSuratMasukForm(FlaskForm):
+class OCRSuratKeluarForm(FlaskForm):
     image = FileField('Upload Image', validators=[
         FileAllowed(['jpg', 'png', 'jpeg', 'webp'], 'Images only!')
     ])

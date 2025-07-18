@@ -244,7 +244,7 @@ def normalize_recipient_text(text):
     # Use the new normalize_case function
     return normalize_case(text)
 
-def extract_penerima_surat_masuk(text):
+def extract_penerima_surat_keluar(text):
     """
     Extract recipient (penerima) from OCR text for incoming letters
     Only take up to the first newline or known stopwords after 'Yth.' or 'Kepada Yth.'
@@ -270,12 +270,12 @@ def extract_penerima_surat_masuk(text):
             return recipient
     return "Not found"
 
-def extract_penerima_surat_keluar(text):
+def extract_penerima_surat_masuk(text):
     """
     Extract recipient (penerima) from OCR text for outgoing letters
     """
-    # Same logic as extract_penerima_surat_masuk
-    return extract_penerima_surat_masuk(text)
+    # Same logic as extract_penerima_surat_keluar
+    return extract_penerima_surat_keluar(text)
 
 def extract_pengirim(text):
     """
@@ -964,7 +964,7 @@ def extract_ocr_data(file_path):
         nomor_surat = extract_nomor_surat(normalized_text)
         tanggal = extract_tanggal(normalized_text)
         pengirim = extract_pengirim(normalized_text)
-        penerima = extract_penerima_surat_masuk(normalized_text)
+        penerima = extract_penerima_surat_keluar(normalized_text)
         isi_surat = extract_isi_suratmasuk(normalized_text)
         
         # Ekstraksi komponen nomor surat untuk kodesurat2

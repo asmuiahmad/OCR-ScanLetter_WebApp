@@ -34,8 +34,8 @@ def create_directories():
     directories = [
         'instance',
         'static/ocr/uploads',
-        'static/ocr/surat_masuk',
         'static/ocr/surat_keluar',
+        'static/ocr/surat_masuk',
         'generated'
     ]
     
