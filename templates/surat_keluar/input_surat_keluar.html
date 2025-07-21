@@ -1,0 +1,113 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Input Surat Keluar - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<style>
+  .form-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  .form-card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  .input-field {
+    transition: all 0.2s ease;
+  }
+  .input-field:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  .btn-submit {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+  }
+  .btn-submit:hover {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  .floating-label {
+    position: absolute;
+    top: -0.7rem;
+    left: 0.9rem;
+    padding: 0 0.25rem;
+    background: white;
+    font-size: 0.75rem;
+    color: #111827;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+</style>
+<div class="container mx-auto py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
+      <div class="bg-gradient-to-r from-primary to-secondary p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-black">
+            <i class="fas fa-file-import mr-3 text-yellow-400"></i>Input Surat Keluar
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
+      <form method="POST" enctype="multipart/form-data" class="p-6">
+        {{ form.csrf_token()|safe }}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {% for field in form if field.type != 'CSRFToken' and field.type != 'SubmitField' and field.type != 'FileField' and field.type != 'TextAreaField' %}
+            {% if field.label.text != 'CSRF Token' %}
+              <div class="relative">
+                <div class="floating-label">{{ field.label.text }}</div>
+                {{ field(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", required=field.flags.required) }}
+                {% if field.errors %}
+                  <div class="text-red-500 text-xs mt-1">{{ field.errors[0] }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {# Isi Surat (TextAreaField) dan Gambar Surat (FileField) dalam 2 kolom #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          {% set textarea = form|selectattr('type', 'equalto', 'TextAreaField')|list %}
+          {% set filefield = form|selectattr('type', 'equalto', 'FileField')|list %}
+          <!-- Kolom Isi Surat -->
+          <div class="relative">
+            <div class="floating-label">{{ textarea[0].label.text }}</div>
+            {{ textarea[0](class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[120px]", required=textarea[0].flags.required) }}
+            {% if textarea[0].errors %}
+              <div class="text-red-500 text-xs mt-1">{{ textarea[0].errors[0] }}</div>
+            {% endif %}
+          </div>
+          <!-- Kolom Gambar Surat - Diperbaiki -->
+          <div class="relative">
+            <div class="floating-label">{{ filefield[0].label.text }}</div>
+            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary transition">
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                <p class="text-sm text-gray-500">Klik untuk mengunggah file</p>
+                <p class="text-xs text-gray-500">PDF, JPG, PNG (Maks. 10MB)</p>
+              </div>
+              {{ filefield[0](class="hidden") }}
+            </label>
+            {% if filefield[0].errors %}
+              <div class="text-red-500 text-xs mt-1">{{ filefield[0].errors[0] }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="mt-8 flex justify-end">
+          {{ form.submit(class="btn-submit px-8 py-3 rounded-lg text-white font-semibold flex items-center") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+      if (!input.value) input.value = today;
+    });
+  });
+</script>
+{% endblock %}

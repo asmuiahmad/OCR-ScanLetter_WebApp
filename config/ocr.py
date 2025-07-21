@@ -39,10 +39,10 @@ def ocr():
     extracted_text = ""
     if request.method == 'POST':
         if 'image' not in request.files:
-            return render_template('home/ocr.html', extracted_text='No file part')
+            return render_template('ocr/ocr.html', extracted_text='No file part')
         file = request.files['image']
         if file.filename == '':
-            return render_template('home/ocr.html', extracted_text='No selected file')
+            return render_template('ocr/ocr.html', extracted_text='No selected file')
         if file:
             filename = secure_filename(file.filename)
             file_path = os.path.join('static/ocr/uploads', filename)
@@ -52,7 +52,7 @@ def ocr():
                 extracted_text = clean_text(extracted_text)  # Clean OCR output
             except Exception as e:
                 extracted_text = f"Error during OCR processing: {e}"
-    return render_template('home/ocr.html', extracted_text=extracted_text)
+    return render_template('ocr/ocr.html', extracted_text=extracted_text)
 
 def process_ocr_surat_keluar(file_path):
     """

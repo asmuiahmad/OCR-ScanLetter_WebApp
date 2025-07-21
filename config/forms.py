@@ -81,3 +81,16 @@ class InputCutiForm(FlaskForm):
     alasan_cuti = TextAreaField('Alasan Cuti', validators=[DataRequired()])
     lama_cuti = StringField('Lama Cuti', validators=[DataRequired()])
     submit = SubmitField('Simpan Cuti')
+
+class SuratMasukForm(FlaskForm):
+    tanggal_suratMasuk = DateField('Tanggal Surat', validators=[DataRequired()], format='%Y-%m-%d')
+    pengirim_suratMasuk = StringField('Pengirim', validators=[DataRequired()])
+    penerima_suratMasuk = StringField('Penerima', validators=[DataRequired()])
+    nomor_suratMasuk = StringField('Nomor Surat', validators=[DataRequired()])
+    isi_suratMasuk = TextAreaField('Isi Surat', validators=[DataRequired()])
+    acara_suratMasuk = StringField('Acara', validators=[])
+    tempat_suratMasuk = StringField('Tempat', validators=[])
+    tanggal_acara_suratMasuk = DateField('Tanggal Acara', format='%Y-%m-%d', validators=[], default=None)
+    jam_suratMasuk = StringField('Jam', validators=[])
+    lampiran_suratMasuk = FileField('Lampiran Surat', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif', 'pdf'], 'Image/PDF only!')])
+    submit = SubmitField('Simpan Surat Masuk')

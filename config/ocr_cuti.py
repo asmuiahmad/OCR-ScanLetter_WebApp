@@ -221,17 +221,17 @@ def extract_cuti_fields(text):
 @login_required
 def ocr_cuti():
     if request.method == 'GET':
-        return render_template('home/ocr_cuti.html')
+        return render_template('cuti/ocr_cuti.html')
     
     # Handle POST request for OCR processing
     if 'image' not in request.files:
         flash('Tidak ada file yang diunggah.', 'error')
-        return render_template('home/ocr_cuti.html')
+        return render_template('cuti/ocr_cuti.html')
 
     files = request.files.getlist('image')
     if not files or files[0].filename == '':
         flash('Tidak ada file yang dipilih.', 'error')
-        return render_template('home/ocr_cuti.html')
+        return render_template('cuti/ocr_cuti.html')
 
     extracted_data_list = []
     
@@ -286,7 +286,7 @@ def ocr_cuti():
     if extracted_data_list:
         flash(f'{len(extracted_data_list)} dokumen berhasil diproses.', 'success')
     
-    return render_template('home/ocr_cuti.html', extracted_data_list=extracted_data_list) 
+    return render_template('cuti/ocr_cuti.html', extracted_data_list=extracted_data_list) 
 
 @ocr_cuti_bp.route('/list', methods=['GET'])
 @login_required
@@ -295,10 +295,10 @@ def list_cuti():
     try:
         # Ambil data cuti dari database
         cuti_list = Cuti.query.order_by(Cuti.created_at.desc()).all()
-        return render_template('home/list_cuti.html', cuti_list=cuti_list)
+        return render_template('cuti/list_cuti.html', cuti_list=cuti_list)
     except Exception as e:
         flash(f'Error saat mengambil data cuti: {str(e)}', 'error')
-        return render_template('home/list_cuti.html', cuti_list=[])
+        return render_template('cuti/list_cuti.html', cuti_list=[])
 
 @ocr_cuti_bp.route('/detail/<int:cuti_id>', methods=['GET'])
 @login_required
@@ -491,17 +491,17 @@ def verify_signature(signature_hash):
         
         if result['valid']:
             cuti = result['cuti_data']
-            return render_template('home/verify_signature.html', 
+            return render_template('other/verify_signature.html', 
                                  cuti=cuti, 
                                  signature_hash=signature_hash,
                                  valid=True)
         else:
-            return render_template('home/verify_signature.html', 
+            return render_template('other/verify_signature.html', 
                                  message=result['message'],
                                  valid=False)
             
     except Exception as e:
-        return render_template('home/verify_signature.html', 
+        return render_template('other/verify_signature.html', 
                              message=f'Error: {str(e)}',
                              valid=False)
 

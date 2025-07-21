@@ -183,7 +183,17 @@
 {% block title %}OCR Surat Keluar - PA Banjarbaru{% endblock %}
 
 {% block content %}
-<div class="container mx-auto p-4">
+<div class="container mx-auto py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
+      <div class="bg-gradient-to-r from-primary to-secondary p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-black">
+            <i class="fas fa-arrow-down mr-3 text-green-600"></i>OCR Surat Masuk
+          </h2>
+        </div>
+      </div>
+    </div>
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -529,42 +539,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Tambahkan tombol manual test untuk debugging
-    let testBtn = document.createElement('button');
-    testBtn.id = 'testManualBtn';
-    testBtn.className = 'mt-2 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-300 font-medium text-sm shadow-lg w-full';
-    testBtn.innerHTML = `
-        <svg class="w-4 h-4 inline mr-2 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        Test Manual Form Acara
-    `;
-    
-    testBtn.addEventListener('click', function() {
-        const modal = document.getElementById('extractedDataModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            // Test data dengan field acara
-            const testData = {
-                'nomor_surat': '001/Test/2024',
-                'pengirim': 'Test Pengirim',
-                'penerima': 'Test Penerima',
-                'isi': 'Test isi surat',
-                'acara': 'Rapat Koordinasi',
-                'tempat': 'Ruang Meeting',
-                'tanggal_acara': '15/12/2024',
-                'jam': '09:30',
-                'tanggal': '2024-12-10'
-            };
-            fillFormWithData(testData);
-        }
-    });
-    
-    const uploadForm = document.getElementById('uploadForm');
-    if (uploadForm) {
-        uploadForm.parentNode.insertBefore(testBtn, uploadForm.nextSibling);
-    }
-
     // Navigation buttons
     const prevBtn = document.getElementById('prevModalBtn');
     const nextBtn = document.getElementById('nextModalBtn');

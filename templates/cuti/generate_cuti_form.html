@@ -1,0 +1,134 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<style>
+  .form-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  .form-card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  .input-field {
+    transition: all 0.2s ease;
+  }
+  .input-field:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  .btn-submit {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+  }
+  .btn-submit:hover {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  .floating-label {
+    position: absolute;
+    top: -0.7rem;
+    left: 0.9rem;
+    padding: 0 0.25rem;
+    background: white;
+    font-size: 0.75rem;
+    color: #111827;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+</style>
+<div class="container mx-auto py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
+      <div class="bg-gradient-to-r from-primary to-secondary p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-black">
+            <i class="fas fa-calendar-check text-red-600 mr-3"></i>Formulir Permintaan Cuti
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
+      <form method="POST" action="{{ url_for('main.generate_cuti') }}" class="p-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-5">
+            <div class="relative">
+              <div class="floating-label">Nama</div>
+              {{ form.nama(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Nama Lengkap") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">NIP</div>
+              {{ form.nip(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="NIP") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Jabatan</div>
+              {{ form.jabatan(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Jabatan") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Gol. Ruang</div>
+              {{ form.gol_ruang(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Golongan Ruang") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Unit Kerja</div>
+              {{ form.unit_kerja(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Unit Kerja") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Masa Kerja</div>
+              {{ form.masa_kerja(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Contoh: 2 Tahun 4 Bulan") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Alamat</div>
+              {{ form.alamat(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px]", rows="3", placeholder="Alamat selama cuti") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Nomor Surat Masuk</div>
+              {{ form.no_suratmasuk(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Misal: 123") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Tanggal Ajuan Cuti</div>
+              {{ form.tgl_ajuan_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none") }}
+            </div>
+          </div>
+          <div class="space-y-5">
+            <div class="relative">
+              <div class="floating-label">Tanggal Mulai Cuti</div>
+              {{ form.tanggal_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Tanggal Selesai Cuti</div>
+              {{ form.sampai_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Nomor Telepon</div>
+              {{ form.telp(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Contoh: 081234567890") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Jenis Cuti</div>
+              <div class="border rounded p-3 bg-gray-50">
+                {% for subfield in form.jenis_cuti %}
+                <div class="flex items-center mb-2">
+                  {{ subfield(class="form-radio accent-blue-600 mr-2") }}
+                  {{ subfield.label(class="text-gray-700") }}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="relative">
+              <div class="floating-label">Alasan Cuti</div>
+              {{ form.alasan_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px]", rows="3", placeholder="Alasan Cuti") }}
+            </div>
+            <div class="relative">
+              <div class="floating-label">Lama Cuti</div>
+              {{ form.lama_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Contoh: 3 Hari") }}
+            </div>
+            <div class="flex justify-end mt-6">
+              <button type="submit" class="btn-submit px-8 py-3 rounded-lg text-white font-semibold flex items-center">Generate Surat Cuti</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

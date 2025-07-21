@@ -1,0 +1,190 @@
+/* ===== SIDEBAR FUNCTIONALITY ===== */
+
+// Dropdown menu toggle for modern sidebar
+function toggleMenu(e, id) {
+  e.preventDefault();
+  const dropdown = document.getElementById(id);
+  const chevron = e.currentTarget.querySelector('.fa-chevron-down');
+  
+  if (dropdown.classList.contains('show')) {
+    dropdown.classList.remove('show');
+    chevron.style.transform = 'rotate(0deg)';
+  } else {
+    dropdown.classList.add('show');
+    chevron.style.transform = 'rotate(180deg)';
+  }
+}
+
+// User Profile Menu Toggle
+function toggleUserMenu(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  const dropdown = document.getElementById('userDropdown');
+  dropdown.classList.toggle('show');
+}
+
+// Show User Info Modal
+function showUserInfo() {
+  const userInfo = `
+    <div class="user-info-modal">
+      <h4>Informasi User</h4>
+      <p><strong>Email:</strong> ${window.currentUser?.email || 'N/A'}</p>
+      <p><strong>Role:</strong> ${window.currentUser?.role || 'N/A'}</p>
+      <p><strong>Status:</strong> ${window.currentUser?.isApproved ? 'Active' : 'Pending'}</p>
+      <p><strong>Last Login:</strong> ${window.currentUser?.lastLogin || 'Never'}</p>
+      <p><strong>Login Count:</strong> ${window.currentUser?.loginCount || 0}</p>
+    </div>
+  `;
+  
+  // Show toast with user info
+  if (window.toast) {
+    window.toast.info(userInfo, 'User Information', 8000);
+  }
+  
+  // Close dropdown
+  const dropdown = document.getElementById('userDropdown');
+  if (dropdown) {
+    dropdown.classList.remove('show');
+  }
+}
+
+// Enhanced Sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebar = document.querySelector('.modern-sidebar');
+  const mainContent = document.querySelector('.main-content');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  
+  // Initialize sidebar state
+  let isCollapsed = sidebar?.classList.contains('sidebar-collapsed') || false;
+  
+  // Function to toggle sidebar
+  function toggleSidebar() {
+    if (!sidebar || !mainContent) return;
+    
+    isCollapsed = !isCollapsed;
+    
+    if (isCollapsed) {
+      sidebar.classList.add('sidebar-collapsed');
+      mainContent.style.marginLeft = '80px';
+      // Close all dropdowns when collapsing
+      document.querySelectorAll('.dropdown.show').forEach(dropdown => {
+        dropdown.classList.remove('show');
+      });
+      // Reset chevron rotations
+      document.querySelectorAll('.fa-chevron-down').forEach(chevron => {
+        chevron.style.transform = 'rotate(0deg)';
+      });
+    } else {
+      sidebar.classList.remove('sidebar-collapsed');
+      mainContent.style.marginLeft = '250px';
+    }
+    
+    // Save state to localStorage
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
+  }
+  
+  // Load saved state from localStorage
+  const savedState = localStorage.getItem('sidebarCollapsed');
+  if (savedState !== null) {
+    const shouldCollapse = savedState === 'true';
+    if (shouldCollapse !== isCollapsed) {
+      toggleSidebar();
+    }
+  }
+  
+  // Add click event to toggle button
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSidebar();
+    });
+    
+    // Add hover effect
+    sidebarToggle.addEventListener('mouseenter', function() {
+      this.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+    });
+    
+    sidebarToggle.addEventListener('mouseleave', function() {
+      this.style.backgroundColor = 'transparent';
+    });
+  }
+  
+  // Auto-collapse on mobile
+  function handleResize() {
+    if (window.innerWidth <= 768) {
+      if (!isCollapsed) {
+        toggleSidebar();
+      }
+    }
+  }
+  
+  window.addEventListener('resize', handleResize);
+  handleResize(); // Check on initial load
+
+  // Notification bell toggle
+  const notificationBell = document.querySelector('.notification-bell-btn');
+  const notificationDropdown = document.querySelector('.notification-dropdown');
+
+  if (notificationBell && notificationDropdown) {
+    notificationBell.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      notificationDropdown.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
+        notificationDropdown.classList.add('hidden');
+      }
+    });
+  }
+
+  // Mobile menu toggle
+  const mobileMenuButton = document.querySelector('.mobile-menu-button');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener('click', function() {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(e) {
+    const sidebar = document.querySelector('.modern-sidebar');
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const userDropdown = document.getElementById('userDropdown');
+    const userMenuBtn = document.querySelector('.user-menu-btn');
+    
+    // Close mobile sidebar
+    if (sidebar && mobileMenuButton && !sidebar.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+      sidebar.classList.remove('mobile-open');
+      if (mobileMenu) {
+        mobileMenu.classList.add('hidden');
+      }
+    }
+    
+    // Close user dropdown
+    if (userDropdown && userMenuBtn && !userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+      userDropdown.classList.remove('show');
+    }
+  });
+  
+  // Add tooltip data to user avatar for collapsed state
+  const userAvatar = document.querySelector('.user-avatar');
+  if (userAvatar && window.currentUser) {
+    const username = window.currentUser.email ? window.currentUser.email.split('@')[0] : 'User';
+    const role = window.currentUser.role ? window.currentUser.role.charAt(0).toUpperCase() + window.currentUser.role.slice(1) : 'User';
+    userAvatar.setAttribute('data-tooltip', `${username} (${role})`);
+  }
+
+  // Remove sidebar expand on hover (desktop only)
+  // (No code for mouseenter/mouseleave on sidebar)
+});
+
+// Export functions for global use
+window.toggleMenu = toggleMenu;
+window.toggleUserMenu = toggleUserMenu;
+window.showUserInfo = showUserInfo;

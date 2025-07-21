@@ -383,7 +383,7 @@ def ocr_surat_keluar():
         if not files or all(file.filename == '' for file in files):
             logger.warning("No files selected for upload")
             flash('Silakan pilih dokumen terlebih dahulu', 'warning')
-            return render_template('home/ocr_surat_keluar.html',
+            return render_template('ocr/ocr_surat_keluar.html',
                                    extracted_data_list=[],
                                    image_paths=[],
                                    extracted_text='',
@@ -423,14 +423,14 @@ def ocr_surat_keluar():
             logger.info(f"Item {i}: {data}")
         
         # Render template with extracted data
-        return render_template('home/ocr_surat_keluar.html',
+        return render_template('ocr/ocr_surat_keluar.html',
                                extracted_data_list=extracted_data_list,
                                image_paths=image_paths,
                                extracted_text=extracted_text,
                                currentIndex=0)
 
     # GET request handling
-    return render_template('home/ocr_surat_keluar.html',
+    return render_template('ocr/ocr_surat_keluar.html',
                            extracted_data_list=[],
                            image_paths=[],
                            extracted_text='',

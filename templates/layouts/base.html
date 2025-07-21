@@ -5,21 +5,22 @@
 <body class="bg-gray-50">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <div class="modern-sidebar sidebar-collapsed">
-    <div class="logo-details" id="sidebarToggle" style="cursor: pointer;">
+    <div class="logo-details" id="sidebarToggle" style="cursor: pointer; margin-bottom: -0.5rem;">
       <i class="fas fa-envelope-open-text"></i>
       <span class="logo_name">Surat App</span>
     </div>
-    <ul class="nav-links">
+    <ul class="nav-links" style="margin-top: 0.25rem; height:500px;">
       <li>
-        <a href="{{ url_for('main.index') }}" data-tooltip="Dashboard">
+        <a href="{{ url_for('main.index') }}" data-tooltip="Dashboard" class="flex items-center px-4 py-2">
           <i class="fas fa-home"></i>
-          <span class="links_name">Dashboard</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Dashboard">Dashboard</span>
+          <span class="invisible w-4"></span>
         </a>
       </li>
       <li>
         <a href="#" onclick="toggleMenu(event, 'showSuratMenu')" data-tooltip="Show Surat">
           <i class="fas fa-envelope-open-text"></i>
-          <span class="links_name">Show Surat</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Show Surat">Show Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="showSuratMenu">
@@ -30,7 +31,7 @@
       <li>
         <a href="#" onclick="toggleMenu(event, 'templatesMenu')" data-tooltip="Templates Surat">
           <i class="fas fa-folder"></i>
-          <span class="links_name">Templates Surat</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Templates Surat">Templates Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="templatesMenu">
@@ -41,18 +42,18 @@
       <li>
         <a href="#" onclick="toggleMenu(event, 'inputSuratMenu')" data-tooltip="Input Surat">
           <i class="fas fa-edit"></i>
-          <span class="links_name">Input Surat</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Input Surat">Input Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="inputSuratMenu">
-          <a href="{{ url_for('main.input_surat_keluar') }}">Surat Masuk</a>
-          <a href="{{ url_for('main.input_surat_masuk') }}">Surat Keluar</a>
+          <a href="{{ url_for('main.input_surat_masuk') }}">Surat Masuk</a>
+          <a href="{{ url_for('main.input_surat_keluar') }}">Surat Keluar</a>
         </div>
       </li>
       <li>
         <a href="#" onclick="toggleMenu(event, 'ocrMenu')" data-tooltip="OCR">
           <i class="fas fa-eye"></i>
-          <span class="links_name">OCR</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="OCR">OCR</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="ocrMenu">
@@ -65,7 +66,7 @@
       <li>
         <a href="#" onclick="toggleMenu(event, 'cutiMenu')" data-tooltip="Manajemen Cuti">
           <i class="fas fa-calendar-alt"></i>
-          <span class="links_name">Manajemen Cuti</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Manajemen Cuti">Manajemen Cuti</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="cutiMenu">
@@ -77,15 +78,16 @@
         </div>
       </li>
       <li>
-        <a href="{{ url_for('main.laporan_statistik') }}" data-tooltip="Laporan Statistik">
+        <a href="{{ url_for('main.laporan_statistik') }}" data-tooltip="Laporan Statistik" class="flex items-center px-4 py-2">
           <i class="fas fa-chart-bar"></i>
-          <span class="links_name">Laporan Statistik</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Laporan Statistik">Laporan Statistik</span>
+          <span class="invisible w-4"></span>
         </a>
       </li>
       <li>
         <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')" data-tooltip="Pegawai">
           <i class="fas fa-users"></i>
-          <span class="links_name">Pegawai</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Pegawai">Pegawai</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="pegawaiMenu">
@@ -96,20 +98,23 @@
       {% endif %}
       {% if current_user.role == 'pimpinan' %}
       <li>
-        <a href="{{ url_for('main.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat">
+        <a href="{{ url_for('main.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat" class="flex items-center px-4 py-2 relative hover:bg-blue-50 rounded-lg transition group">
           <i class="fas fa-check-circle"></i>
-          <span class="links_name">Persetujuan Surat</span>
+          <span class="links_name flex-grow truncate block max-w-[140px] ml-4 pr-12" title="Persetujuan Surat">Persetujuan Surat</span>
           {% if g.pending_surat_masuk_count > 0 %}
-          <span class="badge">{{ g.pending_surat_masuk_count }}</span>
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold rounded-full shadow px-2 py-1 flex items-center justify-center min-w-[24px] h-6 ml-2 border-2 border-white z-10">
+            {{ g.pending_surat_masuk_count }}
+          </span>
           {% endif %}
         </a>
       </li>
       {% endif %}
       {% if current_user.is_admin %}
       <li>
-        <a href="{{ url_for('main.edit_user_view') }}" data-tooltip="Manajemen User">
+        <a href="{{ url_for('main.edit_user_view') }}" data-tooltip="Manajemen User" class="flex items-center px-4 py-2">
           <i class="fas fa-user-cog"></i>
-          <span class="links_name">Manajemen User</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Manajemen User">Manajemen User</span>
+          <span class="invisible w-4"></span>
         </a>
       </li>
       {% endif %}
@@ -119,37 +124,13 @@
     {% if current_user.is_authenticated %}
     <div class="sidebar-user-profile">
       <div class="user-profile-container">
-        <div class="user-avatar">
-          <i class="fas fa-user-circle"></i>
-        </div>
+        <a class="user-avatar flex items-center justify-center rounded-full bg-gray-200 hover:bg-blue-200 transition" id="sidebarUserAvatar" href="{{ url_for('main.edit_user', user_id=current_user.id) }}" style="width:54px; height:54px; cursor:pointer; position:relative; display:inline-flex;" data-tooltip="{{ current_user.email.split('@')[0] }} ({{ current_user.role.title() }})">
+          <i class="fas fa-user-circle text-4xl text-blue-700" style="font-size:40px;"></i>
+        </a>
         <div class="user-info">
           <div class="user-name">{{ current_user.email.split('@')[0] }}</div>
           <div class="user-email">{{ current_user.email }}</div>
-          <div class="user-role-badge" data-role="{{ current_user.role }}">
-            {{ current_user.role.upper() }}
-          </div>
-        </div>
-        <div class="user-actions">
-          <div class="dropdown" id="userProfileMenu">
-            <button class="user-menu-btn" onclick="toggleUserMenu(event)" data-tooltip="User Menu">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-            <div class="dropdown-menu" id="userDropdown">
-              <a href="{{ url_for('main.edit_user', user_id=current_user.id) }}">
-                <i class="fas fa-user-edit"></i>
-                <span>Edit Profile</span>
-              </a>
-              <a href="#" onclick="showUserInfo()">
-                <i class="fas fa-info-circle"></i>
-                <span>User Info</span>
-              </a>
-              <div class="dropdown-divider"></div>
-              <a href="{{ url_for('auth.logout') }}" class="logout-link">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-              </a>
-            </div>
-          </div>
+          <div class="user-role-badge" data-role="{{ current_user.role }}" style="margin-top:-12px;">{{ current_user.role.upper() }}</div>
         </div>
       </div>
     </div>
@@ -166,8 +147,10 @@
             </a>
           </div>
           <div class="flex items-center">
+            <div class="flex items-center">
+              <div class="hidden sm:flex sm:items-center">
             {% if current_user.role in ['pimpinan', 'admin'] %}
-            <div class="relative mr-4">
+                <div class="relative flex items-center gap-2">
               <button class="notification-bell-btn relative">
                 <i class="fas fa-bell text-gray-600 hover:text-blue-600 transition-colors duration-200"></i>
                 {% if g.pending_surat_masuk_count > 0 %}
@@ -176,31 +159,53 @@
                 </span>
                 {% endif %}
               </button>
-              
-
-              <div class="notification-dropdown hidden absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 transform transition-all duration-200 ease-in-out">
-                <div class="p-4">
-                  <h3 class="text-sm font-semibold text-gray-700 mb-2">Notifikasi</h3>
-                  {% if g.pending_surat_masuk_count > 0 %}
-                  <a href="{{ url_for('main.list_pending_surat_masuk') }}" class="block py-2 px-3 rounded hover:bg-gray-100 transition-colors duration-200">
-                    <div class="flex items-center">
-                      <i class="fas fa-paper-plane mr-2 text-green-500"></i>
-                      <span class="text-sm">Surat Keluar Pending: {{ g.pending_surat_masuk_count }}</span>
+                  <div class="notification-dropdown hidden absolute right-0 top-full mt-2 w-96 max-h-80 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 transform transition-all duration-200 ease-in-out overflow-y-auto p-0">
+                    <div class="p-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white rounded-t-xl">
+                      <h3 class="text-base font-bold text-blue-700 mb-1 flex items-center gap-2">
+                        <i class="fas fa-envelope-open-text"></i> Semua Surat Masuk
+                      </h3>
                     </div>
-                  </a>
+                    {% if surat_masuk_list and surat_masuk_list|length > 0 %}
+                      <ul class="divide-y divide-gray-100">
+                        {% for surat in surat_masuk_list %}
+                        <li>
+                          <div class="flex flex-col gap-1 py-4 px-5 hover:bg-blue-50 transition rounded-xl group border-b last:border-b-0 border-gray-100">
+                            <div class="flex flex-row sm:items-center sm:justify-between gap-1">
+                              <span class="font-semibold text-gray-800 group-hover:text-blue-700">{{ surat.pengirim_suratMasuk }}</span>
+                              <div class="flex flex-col items-center gap-1 ml-2">
+                                <span class="inline-block text-xs text-white bg-blue-500 px-3 py-0.5 rounded-full group-hover:bg-blue-700 text-center">Pending</span>
+                                <div class="flex gap-2 mt-1">
+                                  <button onclick="approveSurat({{ surat.id_suratMasuk }}, this)" class="approve-btn flex items-center justify-center w-7 h-7 rounded-full bg-green-100 hover:bg-green-200 text-green-700 border border-green-200 transition" title="Setujui">
+                                    <i class="fas fa-check"></i>
+                                  </button>
+                                  <button onclick="rejectSurat({{ surat.id_suratMasuk }}, this)" class="reject-btn flex items-center justify-center w-7 h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-700 border border-red-200 transition" title="Tolak">
+                                    <i class="fas fa-times"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="flex items-center text-xs text-gray-500 gap-2 mt-1">
+                              <i class="far fa-calendar-alt mr-1"></i>
+                              {{ surat.tanggal_suratMasuk.strftime('%d %b %Y') if surat.tanggal_suratMasuk else '' }}
+                            </div>
+                            <div class="text-xs text-gray-600 truncate mt-1">
+                              <i class="fas fa-hashtag mr-1"></i>{{ surat.nomor_suratMasuk }}
+                            </div>
+                          </div>
+                        </li>
+                        {% endfor %}
+                      </ul>
                   {% else %}
-                  <div class="py-2 px-3 text-sm text-gray-500">
-                    <i class="fas fa-check-circle mr-2 text-green-500"></i>
-                    Tidak ada surat pending
+                      <div class="py-6 px-5 text-center text-gray-400 text-sm">
+                        <i class="fas fa-check-circle mr-2 text-green-400"></i>
+                        Tidak ada surat masuk
                   </div>
                   {% endif %}
-                </div>
               </div>
             </div>
             {% endif %}
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
-              <div class="relative">
-                <a href="{{ url_for('auth.logout') }}" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200">
+                <div class="relative ml-2">
+                <a href="{{ url_for('auth.logout') }}" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors duration-200">
                   <i class="fas fa-sign-out-alt mr-1"></i>
                   Logout
                 </a>
@@ -272,13 +277,6 @@
       }
     }
 
-    function toggleUserMenu(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      const dropdown = document.getElementById('userDropdown');
-      dropdown.classList.toggle('show');
-    }
-
     function showUserInfo() {
       const userInfo = `
         <div class="user-info-modal">
@@ -293,14 +291,13 @@
       
       window.toast.info(userInfo, 'User Information', 8000);
       
-      document.getElementById('userDropdown').classList.remove('show');
     }
 
     document.addEventListener('DOMContentLoaded', function() {
       const sidebar = document.querySelector('.modern-sidebar');
       const mainContent = document.querySelector('.main-content');
       const sidebarToggle = document.getElementById('sidebarToggle');
-      
+      const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
       let isCollapsed = sidebar.classList.contains('sidebar-collapsed');
       
       function toggleSidebar() {
@@ -346,6 +343,14 @@
           this.style.backgroundColor = 'transparent';
         });
       }
+
+      if (sidebarUserAvatar) {
+        sidebarUserAvatar.addEventListener('click', function() {
+          // The user profile menu logic was removed, so this event listener is no longer needed.
+          // Keeping it here as a placeholder if the user profile menu is re-added later.
+          // For now, it will do nothing.
+        });
+      }
       
       function handleResize() {
         if (window.innerWidth <= 768) {
@@ -387,18 +392,11 @@
         const sidebar = document.querySelector('.modern-sidebar');
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
         const mobileMenu = document.querySelector('.mobile-menu');
-        const userDropdown = document.getElementById('userDropdown');
-        const userMenuBtn = document.querySelector('.user-menu-btn');
-        
         if (!sidebar.contains(e.target) && !mobileMenuButton.contains(e.target)) {
           sidebar.classList.remove('mobile-open');
           if (mobileMenu) {
             mobileMenu.classList.add('hidden');
           }
-        }
-        
-        if (userDropdown && !userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-          userDropdown.classList.remove('show');
         }
       });
       
@@ -692,6 +690,81 @@
           
           setInterval(updateNotificationCount, 30000);
         }
+      }
+    </script>
+    
+    <style>
+    /* Animasi untuk menghilangkan notifikasi */
+    @keyframes fadeOutSlideUp {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-10px);
+            height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+    }
+    .fade-out-item {
+        animation: fadeOutSlideUp 0.5s ease forwards;
+    }
+    </style>
+    
+    <script>
+function approveSurat(suratId, buttonElement) {
+    event.stopPropagation();
+    fetch(`/surat-keluar/approve/${suratId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.toast.success('Surat telah disetujui!');
+            const listItem = buttonElement.closest('li');
+            listItem.classList.add('fade-out-item');
+            setTimeout(() => {
+                listItem.remove();
+                updateNotificationCount();
+            }, 500);
+        } else {
+            window.toast.error(data.message || 'Gagal menyetujui surat!');
+        }
+    })
+    .catch(() => window.toast.error('Gagal menyetujui surat!'));
+}
+
+function rejectSurat(suratId, buttonElement) {
+    event.stopPropagation();
+    fetch(`/surat-keluar/reject/${suratId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.toast.success('Surat telah ditolak!');
+            const listItem = buttonElement.closest('li');
+            listItem.classList.add('fade-out-item');
+            setTimeout(() => {
+                listItem.remove();
+                updateNotificationCount();
+            }, 500);
+        } else {
+            window.toast.error(data.message || 'Gagal menolak surat!');
+        }
+    })
+    .catch(() => window.toast.error('Gagal menolak surat!'));
       }
     </script>
     

@@ -1,50 +1,108 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-  <h1 class="mb-5 text-center font-bold text-2xl">{% if single_user %}Edit User Profile{% else %}Manajemen User{% endif %}</h1>
-
-  <!-- Flash messages will be converted to toasts automatically -->
-
-  {% if not single_user %}
-  <div class="card mb-4">
-    <div class="card-header">
-      <h4>Daftar Pengguna</h4>
+<style>
+  .form-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  .form-card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  .input-field {
+    transition: all 0.2s ease;
+    padding-right: 2.5rem !important;
+  }
+  .input-field:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  .btn-submit {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+  }
+  .btn-submit:hover {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  .floating-label {
+    position: absolute;
+    top: -0.7rem;
+    left: 0.9rem;
+    padding: 0 0.25rem;
+    background: white;
+    font-size: 0.75rem;
+    color: #111827;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+  .password-container {
+    position: relative;
+  }
+  .toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6b7280;
+    z-index: 20;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+</style>
+<div class="container mx-auto py-8 px-4">
+  <div class="max-w-3xl mx-auto">
+    <!-- Header Judul Terpisah -->
+    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
+      <div class="bg-gradient-to-r from-primary to-secondary p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-black">
+            <i class="fas fa-user-edit mr-3 text-black"></i>{% if single_user %}Edit User Profile{% else %}Manajemen User{% endif %}
+          </h2>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Last Login</th>
-              <th>Actions</th>
+    <!-- Table dan Form dalam container terpisah -->
+    <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
+      {% if not single_user %}
+      <div class="p-6">
+        <div class="overflow-x-auto mb-8">
+          <table class="min-w-full text-sm text-left border border-gray-200 rounded-lg">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-2">Email</th>
+                <th class="px-4 py-2">Role</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Last Login</th>
+                <th class="px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for user in users %}
-            <tr>
-              <td>{{ user.email }}</td>
-              <td>{{ user.role }}</td>
-              <td>
+              <tr class="border-b">
+                <td class="px-4 py-2">{{ user.email }}</td>
+                <td class="px-4 py-2">{{ user.role }}</td>
+                <td class="px-4 py-2">
                 {% if user.is_approved %}
-                  <span class="badge bg-success">Approved</span>
+                    <span class="inline-block px-2 py-1 text-xs rounded bg-green-100 text-green-700">Approved</span>
                 {% else %}
-                  <span class="badge bg-warning">Pending</span>
+                    <span class="inline-block px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">Pending</span>
                 {% endif %}
               </td>
-              <td>{{ user.last_login|default('Never', true) }}</td>
-              <td>
-                <div class="btn-group">
+                <td class="px-4 py-2">{{ user.last_login|default('Never', true) }}</td>
+                <td class="px-4 py-2">
+                  <div class="flex gap-2">
                   {% if not user.is_approved %}
-                  <button type="button" class="btn btn-sm btn-success" onclick="approveUser({{ user.id }}, '{{ user.email }}')">Approve</button>
+                    <button type="button" class="px-2 py-1 rounded bg-green-500 text-white text-xs" onclick="approveUser({{ user.id }}, '{{ user.email }}')">Approve</button>
                   {% endif %}
-                  <button class="btn btn-sm btn-primary ml-2" onclick="selectUser({{ user.id }}, '{{ user.email }}')">Edit</button>
-                  <form method="POST" action="{{ url_for('main.delete_user', user_id=user.id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');" style="display: inline;">
+                    <button class="px-2 py-1 rounded bg-blue-500 text-white text-xs" onclick="selectUser({{ user.id }}, '{{ user.email }}')">Edit</button>
+                    <form method="POST" action="{{ url_for('main.delete_user', user_id=user.id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');" class="inline">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="btn btn-sm btn-danger ml-2">Delete</button>
+                      <button type="submit" class="px-2 py-1 rounded bg-red-500 text-white text-xs">Delete</button>
                   </form>
                 </div>
               </td>
@@ -52,28 +110,22 @@
             {% endfor %}
           </tbody>
         </table>
-      </div>
     </div>
   </div>
   {% endif %}
-
-  <div class="card">
-    <div class="card-header">
-      <h4>{% if single_user %}Edit Profile{% else %}Edit User{% endif %}</h4>
-    </div>
-    <div class="card-body">
+      <div class="p-6">
       {% if single_user %}
         <form method="POST" action="{{ url_for('main.edit_user', user_id=users[0].id) }}">
       {% else %}
         <form method="POST" action="{{ url_for('main.edit_user_view') }}">
       {% endif %}
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-6">
         {% if not single_user %}
-        <!-- Select User -->
-        <div class="form-group mb-3">
-          <label for="userSelect">Select User:</label>
-          <select class="form-control" id="userSelect" name="user_id" required>
+              <div class="relative">
+                <div class="floating-label">Select User</div>
+                <select class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" id="userSelect" name="user_id" required>
             <option value="">-- Choose User --</option>
             {% for u in users %}
               <option value="{{ u.id }}">{{ u.email }}</option>
@@ -81,49 +133,54 @@
           </select>
         </div>
         {% endif %}
-
-        <!-- Email Field -->
-        <div class="form-group mb-3">
-          <label for="email">Email:</label>
-          <input type="text" class="form-control" name="email" id="email" 
-                 value="{% if single_user %}{{ users[0].email }}{% endif %}" required />
-        </div>
-
-        {% if not single_user %}
-        <!-- Role Field -->
-        <div class="form-group mb-3">
-          <label for="role">Role:</label>
-          <select class="form-control" name="role" id="role" required>
+              <div class="relative">
+                <div class="floating-label">Role</div>
+                <select class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" name="role" id="role" required>
             <option value="karyawan" {% if single_user and users[0].role == 'karyawan' %}selected{% endif %}>Karyawan</option>
             <option value="pimpinan" {% if single_user and users[0].role == 'pimpinan' %}selected{% endif %}>Pimpinan</option>
             <option value="admin" {% if single_user and users[0].role == 'admin' %}selected{% endif %}>Admin</option>
           </select>
         </div>
-
-        <!-- Status Field -->
-        <div class="form-group mb-3">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="is_approved" id="is_approved" value="1"
-                   {% if single_user and users[0].is_approved %}checked{% endif %}>
-            <label class="form-check-label" for="is_approved">
-              Approved
-            </label>
+              <div class="relative">
+                <div class="floating-label">Email</div>
+                <input type="text" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" name="email" id="email" value="{% if single_user %}{{ users[0].email }}{% endif %}" required />
+              </div>
+            </div>
+            <div class="space-y-6">
+              <div class="relative password-container">
+                <div class="floating-label">Password Lama</div>
+                <input type="password" class="input-field w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none" name="current_password" id="current_password" />
+                <span class="toggle-password" onclick="togglePasswordVisibility('current_password', 'eyeIconCurrent')">
+                  <i id="eyeIconCurrent" class="fas fa-eye"></i>
+                </span>
+              </div>
+              <div class="relative password-container">
+                <div class="floating-label">Password Baru</div>
+                <input type="password" class="input-field w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none" name="new_password" id="new_password" />
+                <span class="toggle-password" onclick="togglePasswordVisibility('new_password', 'eyeIconNew')">
+                  <i id="eyeIconNew" class="fas fa-eye"></i>
+                </span>
+              </div>
+              <div class="relative password-container">
+                <div class="floating-label">Verifikasi Password Baru</div>
+                <input type="password" class="input-field w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none" name="confirm_new_password" id="confirm_new_password" />
+                <span class="toggle-password" onclick="togglePasswordVisibility('confirm_new_password', 'eyeIconConfirm')">
+                  <i id="eyeIconConfirm" class="fas fa-eye"></i>
+                </span>
+              </div>
+              <div class="flex items-center pt-2">
+                <input class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" type="checkbox" name="is_approved" id="is_approved" value="1" {% if single_user and users[0].is_approved %}checked{% endif %}>
+                <label for="is_approved" class="ms-2 text-sm font-medium text-gray-900">Approved</label>
+              </div>
+            </div>
           </div>
+          <div class="mt-8 flex justify-end space-x-4">
+            <button type="submit" class="btn-submit px-6 py-2.5 rounded-lg text-white font-semibold flex items-center">
+              <i class="fas fa-save mr-2"></i> Update User
+            </button>
         </div>
-        {% endif %}
-
-        <!-- Password Field -->
-        <div class="form-group mb-3">
-          <label for="password">New Password:</label>
-          <input type="password" class="form-control" name="password" id="password" />
-          <small class="form-text text-muted">Leave empty to keep current password</small>
+        </form>
         </div>
-
-        <button type="submit" class="btn btn-primary">Update User</button>
-        {% if single_user %}
-        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Back to Dashboard</a>
-        {% endif %}
-      </form>
     </div>
   </div>
 </div>
@@ -138,7 +195,9 @@
   async function fetchUserData(userId) {
     if (!userId) {
       document.getElementById("email").value = '';
-      document.getElementById("password").value = '';
+      document.getElementById("current_password").value = '';
+      document.getElementById("new_password").value = '';
+      document.getElementById("confirm_new_password").value = '';
       document.getElementById("role").value = 'karyawan';
       document.getElementById("is_approved").checked = false;
       return;
@@ -152,7 +211,9 @@
         document.getElementById("email").value = data.email;
         document.getElementById("role").value = data.role || 'karyawan';
         document.getElementById("is_approved").checked = data.is_approved;
-        document.getElementById("password").value = '';
+        document.getElementById("current_password").value = '';
+        document.getElementById("new_password").value = '';
+        document.getElementById("confirm_new_password").value = '';
       } else {
         window.toast.error("User not found.");
       }
@@ -199,5 +260,19 @@
     }
   });
   {% endif %}
+
+  function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const eyeIcon = document.getElementById(iconId);
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      eyeIcon.classList.remove('fa-eye');
+      eyeIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      eyeIcon.classList.remove('fa-eye-slash');
+      eyeIcon.classList.add('fa-eye');
+    }
+  }
 </script>
 {% endblock %}

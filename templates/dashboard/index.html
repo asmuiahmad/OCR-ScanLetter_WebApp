@@ -4,7 +4,16 @@
 
 {% block content %}
 <div class="container mx-auto py-6 px-4">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800 border-b pb-2">Dashboard</h1>
+  <div class="max-w-5xl mx-auto">
+    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
+      <div class="bg-gradient-to-r from-primary to-secondary p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-black">
+            Dashboard
+          </h2>
+        </div>
+      </div>
+    </div>
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -12,7 +21,7 @@
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg overflow-hidden">
             <div class="px-6 py-5 flex items-center">
                 <div class="flex items-center justify-center p-3 rounded-full bg-blue-100 bg-opacity-30">
-                    <i class="fas fa-envelope-open-text text-white text-2xl"></i>
+                    <i class="fas fa-arrow-down text-green-600 text-2xl"></i>
                 </div>
                 <div class="ml-4">
                     <h5 class="text-xl font-semibold text-white">Total Surat Masuk</h5>
@@ -25,7 +34,7 @@
         <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg overflow-hidden">
             <div class="px-6 py-5 flex items-center">
                 <div class="flex items-center justify-center p-3 rounded-full bg-green-100 bg-opacity-30">
-                    <i class="fas fa-paper-plane text-white text-2xl"></i>
+                    <i class="fas fa-arrow-up text-yellow-400 text-2xl"></i>
                 </div>
                 <div class="ml-4">
                     <h5 class="text-xl font-semibold text-white">Total Surat Keluar</h5>
@@ -49,7 +58,7 @@
                         <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_year }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
-                        <i class="fas fa-inbox text-indigo-600"></i>
+                        <i class="fas fa-arrow-down text-green-600"></i>
                     </div>
                 </div>
                 <div class="flex justify-between items-center">
@@ -58,7 +67,7 @@
                         <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_year }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
-                        <i class="fas fa-paper-plane text-indigo-600"></i>
+                        <i class="fas fa-arrow-up text-yellow-400"></i>
                     </div>
                 </div>
             </div>
@@ -66,8 +75,8 @@
         
         <!-- Monthly Stats -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-amber-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-amber-700">Statistik Bulanan</h3>
+            <div class="bg-pink-50 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-pink-700">Statistik Bulanan</h3>
             </div>
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
@@ -75,8 +84,8 @@
                         <p class="text-sm text-gray-500">Surat Masuk</p>
                         <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_month }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
-                        <i class="fas fa-inbox text-amber-600"></i>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100">
+                        <i class="fas fa-arrow-down text-green-600"></i>
                     </div>
                 </div>
                 <div class="flex justify-between items-center">
@@ -84,13 +93,12 @@
                         <p class="text-sm text-gray-500">Surat Keluar</p>
                         <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_month }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
-                        <i class="fas fa-paper-plane text-amber-600"></i>
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100">
+                        <i class="fas fa-arrow-up text-yellow-400"></i>
                     </div>
                 </div>
             </div>
         </div>
-        
         <!-- Weekly Stats -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
             <div class="bg-emerald-50 px-6 py-4 border-b border-gray-200">
@@ -103,7 +111,7 @@
                         <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_week }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
-                        <i class="fas fa-inbox text-emerald-600"></i>
+                        <i class="fas fa-arrow-down text-green-600"></i>
                     </div>
                 </div>
                 <div class="flex justify-between items-center">
@@ -112,7 +120,7 @@
                         <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_week }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
-                        <i class="fas fa-paper-plane text-emerald-600"></i>
+                        <i class="fas fa-arrow-up text-yellow-400"></i>
                     </div>
                 </div>
             </div>
@@ -132,7 +140,7 @@
                     <div class="flex items-start">
                         <div class="flex-shrink-0 mt-1">
                             <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
-                                <i class="fas fa-inbox text-blue-600 text-sm"></i>
+                                <i class="fas fa-arrow-down text-green-600 text-sm"></i>
                             </div>
                         </div>
                         <div class="ml-3">
@@ -150,7 +158,7 @@
                     <div class="flex items-start">
                         <div class="flex-shrink-0 mt-1">
                             <div class="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
-                                <i class="fas fa-paper-plane text-green-600 text-sm"></i>
+                                <i class="fas fa-arrow-up text-yellow-400 text-sm"></i>
                             </div>
                         </div>
                         <div class="ml-3">
@@ -166,34 +174,29 @@
                 </div>
             </div>
         </div>
-        
-        <!-- User Login Activity -->
+        <!-- Recent User Logins -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-700">Aktivitas Login Pengguna</h3>
+                <h3 class="text-lg font-semibold text-gray-700">User Login Terakhir</h3>
             </div>
             <div class="p-6">
-                <div class="space-y-4">
+                <ul class="divide-y divide-gray-200">
                     {% for user in users %}
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="flex items-center justify-center h-8 w-8 rounded-full bg-purple-100">
-                                <i class="fas fa-user text-purple-600 text-sm"></i>
+                    <li class="py-3 flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100">
+                                <i class="fas fa-user text-indigo-600 text-lg"></i>
                             </div>
                         </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900">
-                                {{ user.email }}
-                            </p>
-                            <p class="text-xs text-gray-500">
-                                Login terakhir: {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Belum pernah' }}
-                            </p>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">{{ user.email }}</p>
+                            <p class="text-xs text-gray-500">Last login: {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}</p>
                         </div>
-                    </div>
+                    </li>
                     {% endfor %}
-                </div>
+                </ul>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock %} 

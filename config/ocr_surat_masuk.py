@@ -350,7 +350,7 @@ def ocr_surat_masuk():
             
             if not files or all(file.filename == '' for file in files):
                 flash('Tidak ada file yang dipilih untuk diunggah.', 'error')
-                return render_template('home/ocr_surat_masuk.html',
+                return render_template('ocr/ocr_surat_masuk.html',
                                        extracted_data_list=[],
                                        image_paths=[],
                                        currentIndex=0)
@@ -391,13 +391,13 @@ def ocr_surat_masuk():
                 if saved_count > 0:
                     flash(f"Berhasil memproses {saved_count} dokumen", 'success')
             
-            return render_template('home/ocr_surat_masuk.html', 
+            return render_template('ocr/ocr_surat_masuk.html', 
                                    extracted_data_list=extracted_data_list, 
                                    image_paths=image_paths,
                                    currentIndex=0)
         
         # Untuk GET request, tampilkan halaman kosong
-        return render_template('home/ocr_surat_masuk.html', 
+        return render_template('ocr/ocr_surat_masuk.html', 
                                extracted_data_list=[], 
                                image_paths=[],
                                currentIndex=0)
@@ -405,7 +405,7 @@ def ocr_surat_masuk():
     except Exception as e:
         logger.error(f"Error in ocr_surat_masuk: {str(e)}")
         flash("Terjadi kesalahan sistem", 'error')
-        return render_template('home/ocr_surat_masuk.html', 
+        return render_template('ocr/ocr_surat_masuk.html', 
                                extracted_data_list=[], 
                                image_paths=[],
                                currentIndex=0)
