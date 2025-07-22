@@ -5,12 +5,12 @@ Database check and fix script
 import os
 import sqlite3
 from config.extensions import db
-from config.models import User, SuratKeluar, SuratMasuk, Pegawai, Cuti
+from config.models import User, SuratKeluar, SuratMasuk, Pegawai, Cuti, UserLoginLog
 
 def check_database():
     """Check database and add missing columns if needed"""
     basedir = os.path.abspath(os.path.dirname(__file__))
-    instance_path = os.path.join(basedir, 'instance')
+    instance_path = os.path.join(os.path.dirname(basedir), 'instance')
     db_path = os.path.join(instance_path, 'app.db')
     
     print(f"Checking database at: {db_path}")
@@ -57,6 +57,15 @@ def check_database():
         else:
             print("status_suratKeluar column already exists.")
         
+        # Check UserLoginLog table
+        cursor.execute("PRAGMA table_info(user_login_logs)")
+        user_login_logs_columns = [column[1] for column in cursor.fetchall()]
+        
+        if not user_login_logs_columns:
+            print("UserLoginLog table doesn't exist. It will be created when the app starts.")
+        else:
+            print("UserLoginLog table exists with columns:", user_login_logs_columns)
+        
         print("Database check completed successfully!")
         return True
         
@@ -71,8 +80,11 @@ def create_tables():
     from flask import Flask
     from config.extensions import db
     
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    instance_path = os.path.join(os.path.dirname(basedir), 'instance')
+    
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/app.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, 'app.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     db.init_app(app)
@@ -89,4 +101,4 @@ if __name__ == "__main__":
         print("Creating new database with all tables...")
         create_tables()
     
-    print("Database setup completed!") 
+    print("Database setup completed!")

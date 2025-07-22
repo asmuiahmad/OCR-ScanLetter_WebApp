@@ -3,88 +3,7 @@
 {% block title %}Surat Masuk - PA Banjarbaru{% endblock %}
 
 {% block content %}
-<style>
-.sticky-search-container {
-    position: sticky;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    background: transparent;
-    padding: 1rem 0;
-    margin-bottom: 1rem;
-    width: 100%;
-    min-width: max-content;
-}
-
-.search-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.search-form {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 300px;
-}
-
-.search-input {
-    flex: 1;
-    min-width: 200px;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-}
-
-.search-button {
-    padding: 0.5rem 1rem;
-    background-color: #6b7280;
-    color: white;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.search-button:hover {
-    background-color: #4b5563;
-}
-
-.create-button {
-    padding: 0.5rem 1rem;
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 0.375rem;
-    text-decoration: none;
-    transition: background-color 0.2s;
-    white-space: nowrap;
-}
-
-.create-button:hover {
-    background-color: #2563eb;
-}
-
-@media (max-width: 768px) {
-    .search-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .search-form {
-        min-width: auto;
-    }
-    
-    .search-input {
-        min-width: auto;
-    }
-}
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/table-search.css') }}"
 
 <div class="container mx-auto">
   <div class="max-w-5xl mx-auto">
@@ -101,10 +20,10 @@
     <!-- Sticky Search Container -->
     <div class="sticky-search-container">
         <div class="search-controls">
-            <a href="{{ url_for('main.input_surat_masuk') }}" class="create-button">
+            <a href="{{ url_for('surat_masuk.input_surat_masuk') }}" class="create-button">
                 <i class="fas fa-plus mr-2"></i>Tambah Surat Masuk
             </a>
-            <form method="GET" action="{{ url_for('main.show_surat_masuk') }}" class="search-form">
+            <form method="GET" action="{{ url_for('surat_masuk.show_surat_masuk') }}" class="search-form">
                 <input type="text" name="search" placeholder="Cari surat masuk..." 
                        value="{{ request.args.get('search', '') }}" class="search-input">
                 <button type="submit" class="search-button">
@@ -160,11 +79,11 @@
                 </td>
                 <td class="py-2 px-4 text-center">
                   <div class="flex justify-center gap-2">
-                    <a href="{{ url_for('main.edit_surat_masuk', id=entry.id_suratMasuk) }}"
+                    <a href="{{ url_for('surat_masuk.edit_surat_masuk', id=entry.id_suratMasuk) }}"
                         class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition">
                         <i class="feather icon-edit"></i>
                     </a>
-                    <form action="{{ url_for('main.delete_surat_masuk', id=entry.id_suratMasuk) }}" method="POST"
+                    <form action="{{ url_for('surat_masuk.delete_surat_masuk', id=entry.id_suratMasuk) }}" method="POST"
                         style="display:inline;" onsubmit="return confirmDelete();">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition">
@@ -190,32 +109,32 @@
             </div>
             <div class="flex items-center gap-1">
                 {% if entries.page > 1 %}
-                <a href="{{ url_for('main.show_surat_masuk', page=1, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('surat_masuk.show_surat_masuk', page=1, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="rounded-l-lg px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition">
                     <i class="fas fa-angle-double-left"></i>
                 </a>
                 {% endif %}
                 {% if entries.has_prev %}
-                <a href="{{ url_for('main.show_surat_masuk', page=entries.prev_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('surat_masuk.show_surat_masuk', page=entries.prev_num, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition">
                     <i class="fas fa-angle-left"></i>
                 </a>
                 {% endif %}
                 {% for page_num in range(max(1, entries.page - 1), min(entries.pages + 1, entries.page + 2)) %}
-                <a href="{{ url_for('main.show_surat_masuk', page=page_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('surat_masuk.show_surat_masuk', page=page_num, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="px-3 py-2 rounded-lg font-semibold transition
                    {% if page_num == entries.page %}bg-blue-600 text-white hover:bg-blue-700{% else %}bg-gray-100 text-gray-700 hover:bg-blue-100{% endif %}">
                     {{ page_num }}
                 </a>
                 {% endfor %}
                 {% if entries.has_next %}
-                <a href="{{ url_for('main.show_surat_masuk', page=entries.next_num, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('surat_masuk.show_surat_masuk', page=entries.next_num, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition">
                     <i class="fas fa-angle-right"></i>
                 </a>
                 {% endif %}
                 {% if entries.page < entries.pages %}
-                <a href="{{ url_for('main.show_surat_masuk', page=entries.pages, search=request.args.get('search'), sort=sort, order=order) }}"
+                <a href="{{ url_for('surat_masuk.show_surat_masuk', page=entries.pages, search=request.args.get('search'), sort=sort, order=order) }}"
                    class="rounded-r-lg px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition">
                     <i class="fas fa-angle-double-right"></i>
                 </a>
@@ -226,9 +145,5 @@
 
 </div>
 
-<script>
-    function confirmDelete() {
-        return confirm('Are you sure you want to delete this entry?');
-    }
-</script>
+<script src="{{ url_for('static', filename='assets/js/utils/confirm-delete.js') }}"></script>
 {% endblock %}

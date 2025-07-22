@@ -3,15 +3,17 @@
 {% block title %}Error{% endblock %}
 
 {% block content %}
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-    <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <div class="text-center">
-            <h1 class="text-3xl font-bold text-red-600 mb-4">Error</h1>
-            <p class="text-xl text-gray-700 mb-6">{{ error_message }}</p>
-            <a href="{{ url_for('main.index') }}" class="inline-block bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded transition duration-200 shadow-md">
-                Return to Dashboard
-            </a>
-        </div>
-    </div>
+<div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-red-100 to-blue-100 p-4">
+  <div class="bg-white rounded-lg shadow-lg p-10 max-w-md w-full flex flex-col items-center">
+    <svg width="80" height="80" fill="none" viewBox="0 0 80 80" class="mb-6">
+      <circle cx="40" cy="40" r="38" stroke="#ef4444" stroke-width="4" fill="#fee2e2"/>
+      <path d="M28 28l24 24M52 28L28 52" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <h1 class="text-3xl font-bold text-red-600 mb-4">Oops! Error</h1>
+    <p class="text-lg text-gray-700 mb-6">{{ error_message }}</p>
+    <a href="{{ url_for('dashboard.dashboard') }}" class="inline-block bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-900 text-white font-bold py-3 px-8 rounded-xl transition duration-200 shadow-lg text-lg">
+      Kembali ke Dashboard
+    </a>
+  </div>
 </div>
 {% endblock %} 

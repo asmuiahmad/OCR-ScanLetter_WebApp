@@ -1,14 +1,5 @@
-{% extends 'layouts/base.html' %}
-
-{% block content %}
-<style>
-  .form-card {
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  .form-card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
+{% extends 'layouts/base.html' %} {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
   .table-modern {
     width: 100%;
     border-collapse: separate;
@@ -16,9 +7,10 @@
     border-radius: 1rem;
     overflow: hidden;
     background: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
-  .table-modern th, .table-modern td {
+  .table-modern th,
+  .table-modern td {
     padding: 0.75rem 1rem;
     text-align: left;
     font-size: 15px;
@@ -42,22 +34,193 @@
   .table-modern td.text-center {
     text-align: center;
   }
+  /* New button styles consistent with edit-user */
   .btn-action {
-    @apply px-1.5 py-1 rounded text-xs font-semibold transition;
     display: inline-flex;
     align-items: center;
-    gap: 0.15rem;
-    font-size: 0.85rem;
-    min-width: 28px;
-    min-height: 28px;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-edit {
+    background: #3b82f6;
+    color: white;
+  }
+  .btn-edit:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .btn-delete {
+    background: #ef4444;
+    color: white;
+  }
+  .btn-delete:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Modal styles consistent with edit-user */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
     justify-content: center;
   }
-  .btn-edit { background: #2563eb; color: white; }
-  .btn-edit:hover { background: #1d4ed8; }
-  .btn-delete { background: #ef4444; color: white; }
-  .btn-delete:hover { background: #b91c1c; }
+
+  .modal-content {
+    background: white;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 48rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    margin: 2rem;
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 1rem 1rem 0 0;
+  }
+
+  .modal-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .close-modal {
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0 1rem;
+    line-height: 1;
+  }
+
+  .close-modal:hover {
+    opacity: 0.8;
+  }
+
+  .floating-label {
+    position: absolute;
+    top: -0.7rem;
+    left: 0.9rem;
+    padding: 0 0.25rem;
+    background: white;
+    font-size: 0.75rem;
+    color: #111827;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .input-field {
+    transition: all 0.2s ease;
+  }
+
+  .input-field:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+  }
+
+  /* Toast styles */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    animation: fadeIn 0.3s, fadeOut 0.3s 4.7s;
+  }
+
+  .toast-success {
+    background-color: #10b981;
+  }
+
+  .toast-error {
+    background-color: #ef4444;
+  }
+
+  .toast-info {
+    background-color: #3b82f6;
+  }
+
+  .toast-icon {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 20px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, 20px);
+    }
+  }
+
+  .btn-submit {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    font-weight: 600;
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-submit:hover {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
 </style>
-<div id="toast-container" class="fixed bottom-6 left-1/2 z-50 flex flex-col items-center space-y-2" style="transform:translateX(-50%);"></div>
+<!-- Toast Container -->
+<div id="toast-container" class="toast hidden"></div>
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-5xl mx-auto">
     <div class="form-card bg-white rounded-2xl overflow-hidden mb-8">
@@ -71,14 +234,14 @@
     </div>
     <div class="bg-white rounded-2xl shadow form-card p-4">
       <div class="overflow-x-auto">
-        <table class="table-modern">
+        <table class="modern-table">
           <thead>
             <tr>
               <th>Nama</th>
               <th>NIP</th>
               <th>Jabatan</th>
               <th>Golongan</th>
-              <th class="text-center">Aksi</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -88,111 +251,33 @@
               <td>{{ pegawai.nip }}</td>
               <td>{{ pegawai.jabatan }}</td>
               <td>{{ pegawai.golongan }}</td>
-              <td class="text-center">
-                <div class="flex justify-center gap-2">
-                  <button type="button" class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editModal{{ pegawai.id }}" title="Edit">
-                    <i class="fas fa-eye"></i>
+              <td>
+                <div class="flex gap-2 items-center">
+                  <button
+                    type="button"
+                    class="btn-primary btn-action"
+                    onclick="openModal('editModal{{ pegawai.id }}')"
+                    title="Edit"
+                  >
+                    <i class="fas fa-edit text-sm"></i>
                   </button>
                   {% if current_user.role == 'admin' %}
-                  <form method="POST" action="{{ url_for('main.hapus_pegawai', id=pegawai.id) }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <button type="submit" class="btn-action btn-delete" title="Hapus">
-                      <i class="fas fa-trash"></i>
+                  <form
+                    method="POST"
+                    action="{{ url_for('pegawai.hapus_pegawai', pegawai_id=pegawai.id) }}"
+                    style="display: inline"
+                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus pegawai ini?')"
+                  >
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button
+                      type="submit"
+                      class="btn-danger btn-action"
+                      title="Hapus"
+                    >
+                      <i class="fas fa-trash text-sm"></i>
                     </button>
                   </form>
                   {% endif %}
-                </div>
-                <!-- Modal Detail/Edit Pegawai -->
-                <div class="modal fade" id="editModal{{ pegawai.id }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ pegawai.id }}" aria-hidden="true">
-                  <div class="modal-dialog modal-md" role="document">
-                    <form method="POST" action="{{ url_for('main.edit_pegawai', id=pegawai.id) }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                      <div class="modal-content">
-                        <div class="modal-header py-3">
-                          <h5 class="modal-title text-lg font-semibold" id="editModalLabel{{ pegawai.id }}">Detail Pegawai</h5>
-                          <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
-                        </div>
-                        <div class="modal-body px-4 py-3">
-                          <style>
-                            .floating-label { position: absolute; top: -0.7rem; left: 0.9rem; padding: 0 0.25rem; background: white; font-size: 0.75rem; color: #111827; font-weight: 500; transition: all 0.2s ease; z-index: 10; }
-                            .input-field { transition: all 0.2s ease; padding-right: 0.5rem; }
-                            .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-                          </style>
-                          <div class="space-y-4">
-                            <!-- Informasi Pribadi -->
-                            <div>
-                              <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Informasi Pribadi</h6>
-                              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="relative">
-                                  <div class="floating-label">Nama Lengkap</div>
-                                  <input type="text" name="nama" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.nama }}" {% if current_user.role != 'admin' %}disabled{% endif %} required>
-                                </div>
-                                <div class="relative">
-                                  <div class="floating-label">NIP</div>
-                                  <input type="text" name="nip" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.nip }}" {% if current_user.role != 'admin' %}disabled{% endif %} required>
-                                </div>
-                                <div class="relative">
-                                  <div class="floating-label">Tanggal Lahir</div>
-                                  <input type="date" name="tanggal_lahir" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.tanggal_lahir.strftime('%Y-%m-%d') if pegawai.tanggal_lahir else '' }}" {% if current_user.role != 'admin' %}disabled{% endif %} required>
-                                </div>
-                                <div class="relative">
-                                  <div class="floating-label">Jenis Kelamin</div>
-                                  <input type="text" name="jenis_kelamin" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.jenis_kelamin }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
-                                </div>
-                                <div class="relative">
-                                  <div class="floating-label">Agama</div>
-                                  <input type="text" name="agama" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.agama }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
-                                </div>
-                              </div>
-                            </div>
-                            <!-- Informasi Jabatan -->
-                            <div>
-                              <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Informasi Jabatan</h6>
-                              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="relative">
-                                  <div class="floating-label">Jabatan</div>
-                                  <input type="text" name="jabatan" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.jabatan }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
-                                </div>
-                                <div class="relative">
-                                  <div class="floating-label">Golongan/Pangkat</div>
-                                  <input type="text" name="golongan" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.golongan }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
-                                </div>
-                              </div>
-                            </div>
-                            <!-- Informasi Kontak -->
-                            <div>
-                              <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Informasi Kontak</h6>
-                              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="relative">
-                                  <div class="floating-label">Nomor Telepon</div>
-                                  <input type="text" name="nomor_telpon" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" value="{{ pegawai.nomor_telpon }}" {% if current_user.role != 'admin' %}disabled{% endif %}>
-                                </div>
-                              </div>
-                            </div>
-                            <!-- Riwayat -->
-                            <div>
-                              <h6 class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-2">Riwayat</h6>
-                              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="relative">
-                                  <div class="floating-label">Riwayat Pendidikan</div>
-                                  <textarea name="riwayat_pendidikan" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px] resize-none" rows="3" {% if current_user.role != 'admin' %}disabled{% endif %}>{{ pegawai.riwayat_pendidikan }}</textarea>
-                                </div>
-                                <div class="relative">
-                                  <div class="floating-label">Riwayat Pekerjaan</div>
-                                  <textarea name="riwayat_pekerjaan" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px] resize-none" rows="3" {% if current_user.role != 'admin' %}disabled{% endif %}>{{ pegawai.riwayat_pekerjaan }}</textarea>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          {% if current_user.role == 'admin' %}
-                          <button type="submit" class="btn btn-success">Simpan</button>
-                          {% endif %}
-                        </div>
-                      </div>
-                    </form>
-                  </div>
                 </div>
               </td>
             </tr>
@@ -203,104 +288,415 @@
     </div>
   </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<!-- Modals for each employee -->
+{% for pegawai in daftar_pegawai %}
+<div id="editModal{{ pegawai.id }}" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-user-edit mr-2"></i>Detail Pegawai
+      </h3>
+      <button
+        class="close-modal"
+        onclick="closeModal('editModal{{ pegawai.id }}')"
+      >
+        &times;
+      </button>
+    </div>
+    <div class="p-6">
+      <form
+        method="POST"
+        action="{{ url_for('pegawai.edit_pegawai', id=pegawai.id) }}"
+        id="editForm{{ pegawai.id }}"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div class="space-y-6">
+          <!-- Informasi Pribadi -->
+          <div>
+            <h6
+              class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-3"
+            >
+              Informasi Pribadi
+            </h6>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="relative">
+                <div class="floating-label">Nama Lengkap</div>
+                <input
+                  type="text"
+                  name="nama"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.nama }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                  required
+                />
+              </div>
+              <div class="relative">
+                <div class="floating-label">NIP</div>
+                <input
+                  type="text"
+                  name="nip"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.nip }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                  required
+                />
+              </div>
+              <div class="relative">
+                <div class="floating-label">Tanggal Lahir</div>
+                <input
+                  type="date"
+                  name="tanggal_lahir"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.tanggal_lahir.strftime('%Y-%m-%d') if pegawai.tanggal_lahir else '' }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                  required
+                />
+              </div>
+              <div class="relative">
+                <div class="floating-label">Jenis Kelamin</div>
+                <input
+                  type="text"
+                  name="jenis_kelamin"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.jenis_kelamin }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                />
+              </div>
+              <div class="relative">
+                <div class="floating-label">Agama</div>
+                <input
+                  type="text"
+                  name="agama"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.agama }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Informasi Jabatan -->
+          <div>
+            <h6
+              class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-3"
+            >
+              Informasi Jabatan
+            </h6>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="relative">
+                <div class="floating-label">Jabatan</div>
+                <input
+                  type="text"
+                  name="jabatan"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.jabatan }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                />
+              </div>
+              <div class="relative">
+                <div class="floating-label">Golongan/Pangkat</div>
+                <input
+                  type="text"
+                  name="golongan"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.golongan }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Informasi Kontak -->
+          <div>
+            <h6
+              class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-3"
+            >
+              Informasi Kontak
+            </h6>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="relative">
+                <div class="floating-label">Nomor Telepon</div>
+                <input
+                  type="text"
+                  name="nomor_telpon"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none"
+                  value="{{ pegawai.nomor_telpon }}"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Riwayat -->
+          <div>
+            <h6
+              class="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-3"
+            >
+              Riwayat
+            </h6>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="relative">
+                <div class="floating-label">Riwayat Pendidikan</div>
+                <textarea
+                  name="riwayat_pendidikan"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[100px] resize-none"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                >
+{{ pegawai.riwayat_pendidikan }}</textarea
+                >
+              </div>
+              <div class="relative">
+                <div class="floating-label">Riwayat Pekerjaan</div>
+                <textarea
+                  name="riwayat_pekerjaan"
+                  class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[100px] resize-none"
+                  {%
+                  if
+                  current_user.role
+                  !="admin"
+                  %}disabled{%
+                  endif
+                  %}
+                >
+{{ pegawai.riwayat_pekerjaan }}</textarea
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end">
+          {% if current_user.role == 'admin' %}
+          <button type="submit" class="btn-primary btn-submit flex items-center gap-2">
+            <i class="fas fa-save"></i> Simpan Perubahan
+          </button>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %} {% endblock %} {% block scripts %}
 <script>
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `px-6 py-3 rounded-lg shadow-lg text-white font-semibold flex items-center gap-2 animate-fade-in-up ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-      toast.innerHTML = type === 'success'
-        ? `<i class='fas fa-check-circle'></i> ${message}`
-        : `<i class='fas fa-exclamation-triangle'></i> ${message}`;
-      const container = document.getElementById('toast-container');
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('opacity-0');
-        setTimeout(() => toast.remove(), 400);
-      }, 5000);
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle edit form submissions
-        const editForms = document.querySelectorAll('form[action*="/pegawai/edit/"]');
-        editForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                formData.append('csrf_token', csrfToken);
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('HTTP error!');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message, 'success');
-                        // Close modal
-                        const modal = this.closest('.modal');
-                        if (modal) {
-                            const modalInstance = bootstrap.Modal.getInstance(modal);
-                            if (modalInstance) modalInstance.hide();
-                        }
-                        setTimeout(() => { window.location.reload(); }, 1000);
-                    } else {
-                        showToast(data.message || 'Gagal menyimpan data', 'danger');
-                    }
-                })
-                .catch(error => {
-                    showToast('Terjadi kesalahan saat menyimpan data', 'danger');
-                });
-            });
-        });
-        // Handle delete form submissions
-        const deleteForms = document.querySelectorAll('form[action*="/pegawai/hapus/"]');
-        deleteForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (!confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) return;
-                const formData = new FormData(this);
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                formData.append('csrf_token', csrfToken);
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('HTTP error!');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        showToast(data.message, 'danger');
-                        setTimeout(() => { window.location.reload(); }, 1000);
-                    } else {
-                        showToast(data.message || 'Gagal menghapus data', 'danger');
-                    }
-                })
-                .catch(error => {
-                    showToast('Terjadi kesalahan saat menghapus data', 'danger');
-                });
-            });
-        });
+  // Modal functions
+  function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+  }
+
+  // Close modal when clicking outside of content
+  window.addEventListener('click', function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
     });
-    
-    function confirmDelete(pegawaiId) {
-        if (confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) {
-            window.location.href = `/pegawai/delete/${pegawaiId}`;
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (modal.style.display === 'flex') {
+          modal.style.display = 'none';
         }
+      });
     }
+  });
+
+  // Function to show toast
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    container.className = `toast toast-${type}`;
+
+    // Set icon based on type
+    let icon = '';
+    if (type === 'success') {
+      icon = '<i class="fas fa-check-circle toast-icon"></i>';
+    } else if (type === 'error') {
+      icon = '<i class="fas fa-exclamation-circle toast-icon"></i>';
+    } else {
+      icon = '<i class="fas fa-info-circle toast-icon"></i>';
+    }
+
+    container.innerHTML = icon + message;
+    container.classList.remove('hidden');
+
+    // Remove toast after 5 seconds
+    setTimeout(() => {
+      container.classList.add('hidden');
+    }, 5000);
+  }
+
+  // Form submission handling
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle flash messages
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          {% if category == 'success' %}
+            setTimeout(() => {
+              showToast("{{ message }}", 'success');
+            }, 100);
+          {% elif category == 'error' %}
+            setTimeout(() => {
+              showToast("{{ message }}", 'error');
+            }, 100);
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    // Handle edit form submissions
+    const editForms = document.querySelectorAll('form[action*="/pegawai/edit/"]');
+    editForms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Show loading toast
+        showToast('Menyimpan perubahan...', 'info');
+
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('HTTP error!');
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            showToast(data.message || 'Data pegawai berhasil diperbarui!', 'success');
+            // Close modal
+            const modalId = this.closest('.modal').id;
+            closeModal(modalId);
+            setTimeout(() => { window.location.reload(); }, 1000);
+          } else {
+            showToast(data.message || 'Gagal menyimpan data', 'error');
+          }
+        })
+        .catch(error => {
+          showToast('Terjadi kesalahan saat menyimpan data', 'error');
+          console.error('Error:', error);
+        });
+      });
+    });
+
+    // Handle delete form submissions
+    const deleteForms = document.querySelectorAll('form[action*="/pegawai/hapus/"]');
+    deleteForms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!confirm('Apakah Anda yakin ingin menghapus pegawai ini?')) return;
+
+        showToast('Menghapus pegawai...', 'info');
+
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('HTTP error!');
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            showToast(data.message || 'Pegawai berhasil dihapus!', 'error');
+            setTimeout(() => { window.location.reload(); }, 1000);
+          } else {
+            showToast(data.message || 'Gagal menghapus data', 'error');
+          }
+        })
+        .catch(error => {
+          showToast('Terjadi kesalahan saat menghapus data', 'error');
+          console.error('Error:', error);
+        });
+      });
+    });
+  });
 </script>
 <style>
-@keyframes fade-in-up {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up { animation: fade-in-up 0.4s; transition: opacity 0.4s; }
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.4s;
+    transition: opacity 0.4s;
+  }
 </style>
 {% endblock %}

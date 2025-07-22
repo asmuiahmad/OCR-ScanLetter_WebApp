@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="mb-0">Daftar Cuti</h1>
-        <a href="{{ url_for('main.input_cuti') }}" class="btn btn-primary">
+        <a href="{{ url_for('cuti.input_cuti') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Input Cuti
         </a>
     </div>
@@ -91,11 +91,11 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ url_for('main.detail_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-info">
+                                    <a href="{{ url_for('cuti.detail_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-info">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     {% if current_user.role in ['admin', 'pimpinan'] %}
-                                    <a href="{{ url_for('main.edit_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ url_for('cuti.edit_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     {% endif %}
@@ -125,7 +125,7 @@
                 <ul class="pagination justify-content-center">
                     {% if entries.has_prev %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main.show_cuti', page=entries.prev_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Previous</a>
+                        <a class="page-link" href="{{ url_for('cuti.show_cuti', page=entries.prev_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Previous</a>
                     </li>
                     {% endif %}
                     
@@ -133,7 +133,7 @@
                         {% if page_num %}
                             {% if page_num != entries.page %}
                             <li class="page-item">
-                                <a class="page-link" href="{{ url_for('main.show_cuti', page=page_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">{{ page_num }}</a>
+                                <a class="page-link" href="{{ url_for('cuti.show_cuti', page=page_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">{{ page_num }}</a>
                             </li>
                             {% else %}
                             <li class="page-item active">
@@ -149,7 +149,7 @@
                     
                     {% if entries.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main.show_cuti', page=entries.next_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Next</a>
+                        <a class="page-link" href="{{ url_for('cuti.show_cuti', page=entries.next_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Next</a>
                     </li>
                     {% endif %}
                 </ul>

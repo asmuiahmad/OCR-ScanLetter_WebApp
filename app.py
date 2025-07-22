@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session
 from config.extensions import db, login_manager, csrf
 from flask_migrate import Migrate
 from datetime import timedelta
-from config.models import User
+from config.models import User, UserLoginLog
 import os
 from flask_wtf.csrf import generate_csrf
 from werkzeug.exceptions import HTTPException
@@ -41,14 +41,18 @@ def create_app():
     from config.ocr_surat_keluar import ocr_surat_keluar_bp
     from config.ocr_surat_masuk import ocr_surat_masuk_bp
     from config.ocr_cuti import ocr_cuti_bp
-    from config.routes import auth_bp, main_bp
+    from config.routes_user_login_logs import user_login_logs_bp
+    from config.routes_main import register_blueprints
     
+    # Register OCR blueprints
     app.register_blueprint(ocr_bp, url_prefix='/ocr')
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp)
     app.register_blueprint(ocr_cuti_bp, url_prefix='/cuti')
     app.register_blueprint(ocr_surat_masuk_bp, url_prefix='/surat-masuk')
     app.register_blueprint(ocr_surat_keluar_bp, url_prefix='/surat-keluar')
+    app.register_blueprint(user_login_logs_bp)
+    
+    # Register all other blueprints
+    register_blueprints(app)
 
     @login_manager.user_loader
     def load_user(user_id):

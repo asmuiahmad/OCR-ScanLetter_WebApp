@@ -1,6 +1,6 @@
 /* ===== TAILWIND CSS CONFIGURATION ===== */
 
-// Tailwind CSS configuration
+// Tailwind CSS configuration for browser
 tailwind.config = {
   theme: {
     extend: {
@@ -20,6 +20,8 @@ tailwind.config = {
           800: "#1e40af",
           900: "#1e3a8a",
         },
+        primary: "#4F46E5",
+        secondary: "#10B981",
       },
     },
   },

@@ -3,9 +3,7 @@
     {{ super() }}
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
-    <style>
-        /* Modern OCR Page Design */
-        .ocr-container {
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/ocr-pages.css') }}">
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;

@@ -1,14 +1,7 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-<style>
-  .form-card {
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  .form-card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
   .input-field {
     transition: all 0.2s ease;
     padding-right: 2.5rem !important;
@@ -53,9 +46,246 @@
     display: flex;
     align-items: center;
   }
+  
+  /* Custom toast styles for bottom-center positioning */
+  .toast-container {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+  }
+  
+  /* Toast styles */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    animation: fadeIn 0.3s, fadeOut 0.3s 4.7s;
+  }
+  
+  .toast-success {
+    background-color: #10B981;
+  }
+  
+  .toast-error {
+    background-color: #EF4444;
+  }
+  
+  .toast-info {
+    background-color: #3B82F6;
+  }
+  
+  .toast-icon {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, 20px); }
+  }
+  
+  /* Activity Log Section Improvements */
+  .activity-log-table {
+    font-size: 0.875rem;
+  }
+  
+  .activity-log-table th {
+    font-weight: 600;
+    color: #374151;
+    background-color: #f9fafb;
+    padding: 0.75rem 1rem;
+  }
+  
+  .activity-log-table td {
+    vertical-align: top;
+    padding: 0.75rem 1rem;
+  }
+  
+  .activity-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+  }
+  
+  .pagination-btn {
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background-color: white;
+    color: #4b5563;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .pagination-btn:hover:not(:disabled) {
+    background-color: #f3f4f6;
+    transform: translateY(-1px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .pagination-info {
+    padding: 0.5rem 1rem;
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+  }
+  
+  /* Improved Refresh Button */
+  .refresh-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .refresh-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 42rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    margin: 2rem;
+  }
+  
+  .modal-header {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 1rem 1rem 0 0;
+  }
+  
+  .modal-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .close-modal {
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0 1rem;
+    line-height: 1;
+  }
+  
+  .close-modal:hover {
+    opacity: 0.8;
+  }
+  /* STATIC, MINI FLOATING LABEL */
+  .floating-label-container {
+    position: relative;
+    padding-top: 1.25rem;
+  }
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    padding: 0 0.2rem;
+    background: white;
+    font-size: 0.65rem;
+    color: #6b7280;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    padding: 0 0.2rem;
+    background: white;
+    font-size: 0.7rem;
+    color: #2563eb;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    line-height: 1;
+    pointer-events: none;
+    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
+  }
 </style>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+</head>
+<!-- Toast Container -->
+<div id="toast-container" class="toast hidden"></div>
+
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-3xl mx-auto">
+    {# --- Ubah label Edit User Profile menjadi floating-label di atas kiri input --- #}
+    {# Cari bagian form single_user, tambahkan floating-label pada input judul #}
+    {# Tambahkan di atas form: #}
+    {% if single_user %}
+      <!-- label floating Edit User Profile dihapus sesuai permintaan -->
+    {% endif %}
     <!-- Header Judul Terpisah -->
     <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
       <div class="bg-gradient-to-r from-primary to-secondary p-6">
@@ -71,38 +301,44 @@
       {% if not single_user %}
       <div class="p-6">
         <div class="overflow-x-auto mb-8">
-          <table class="min-w-full text-sm text-left border border-gray-200 rounded-lg">
-            <thead class="bg-gray-100">
+          <table class="modern-table">
+            <thead>
               <tr>
-                <th class="px-4 py-2">Email</th>
-                <th class="px-4 py-2">Role</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2">Last Login</th>
-                <th class="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
           <tbody>
             {% for user in users %}
-              <tr class="border-b">
-                <td class="px-4 py-2">{{ user.email }}</td>
-                <td class="px-4 py-2">{{ user.role }}</td>
-                <td class="px-4 py-2">
+              <tr>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role }}</td>
+                <td>
                 {% if user.is_approved %}
                     <span class="inline-block px-2 py-1 text-xs rounded bg-green-100 text-green-700">Approved</span>
                 {% else %}
                     <span class="inline-block px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">Pending</span>
                 {% endif %}
               </td>
-                <td class="px-4 py-2">{{ user.last_login|default('Never', true) }}</td>
-                <td class="px-4 py-2">
-                  <div class="flex gap-2">
+                <td>{{ user.last_login|default('Never', true) }}</td>
+                <td>
+                  <div class="flex gap-2 items-center">
                   {% if not user.is_approved %}
-                    <button type="button" class="px-2 py-1 rounded bg-green-500 text-white text-xs" onclick="approveUser({{ user.id }}, '{{ user.email }}')">Approve</button>
+                      <button onclick="approveUser({{ user.id }})" class="table-action-btn table-action-btn-edit">
+                        <i class="fas fa-check text-sm"></i> Approve
+                      </button>
                   {% endif %}
-                    <button class="px-2 py-1 rounded bg-blue-500 text-white text-xs" onclick="selectUser({{ user.id }}, '{{ user.email }}')">Edit</button>
-                    <form method="POST" action="{{ url_for('main.delete_user', user_id=user.id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');" class="inline">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                      <button type="submit" class="px-2 py-1 rounded bg-red-500 text-white text-xs">Delete</button>
+                      <button onclick="editUser({{ user.id }}, '{{ user.email }}', '{{ user.role }}', {{ user.is_approved|lower }})" class="table-action-btn table-action-btn-view">
+                        <i class="fas fa-edit text-sm"></i>
+                      </button>
+                      <form method="POST" action="{{ url_for('user.delete_user', user_id=user.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="table-action-btn table-action-btn-delete">
+                        <i class="fas fa-trash text-sm"></i>
+                      </button>
                   </form>
                 </div>
               </td>
@@ -113,154 +349,310 @@
     </div>
   </div>
   {% endif %}
+  
+  <!-- Edit User Modal -->
+  <div id="editUserModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-user-edit mr-2"></i>Edit User
+        </h3>
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+      </div>
       <div class="p-6">
-      {% if single_user %}
-        <form method="POST" action="{{ url_for('main.edit_user', user_id=users[0].id) }}">
-      {% else %}
-        <form method="POST" action="{{ url_for('main.edit_user_view') }}">
-      {% endif %}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <form method="POST" id="editUserForm" action="{{ url_for('user.edit_user_view') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <input type="hidden" name="user_id" id="modal_user_id"/>
+          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-6">
-        {% if not single_user %}
-              <div class="relative">
-                <div class="floating-label">Select User</div>
-                <select class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" id="userSelect" name="user_id" required>
-            <option value="">-- Choose User --</option>
-            {% for u in users %}
-              <option value="{{ u.id }}">{{ u.email }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        {% endif %}
-              <div class="relative">
-                <div class="floating-label">Role</div>
-                <select class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" name="role" id="role" required>
-            <option value="karyawan" {% if single_user and users[0].role == 'karyawan' %}selected{% endif %}>Karyawan</option>
-            <option value="pimpinan" {% if single_user and users[0].role == 'pimpinan' %}selected{% endif %}>Pimpinan</option>
-            <option value="admin" {% if single_user and users[0].role == 'admin' %}selected{% endif %}>Admin</option>
-          </select>
-        </div>
-              <div class="relative">
-                <div class="floating-label">Email</div>
-                <input type="text" class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" name="email" id="email" value="{% if single_user %}{{ users[0].email }}{% endif %}" required />
+              <div class="floating-label-container">
+                <select class="floating-label-input" name="role" id="modal_role" required>
+                  <option value="">Select Role</option>
+                  <option value="karyawan">Karyawan</option>
+                  <option value="pimpinan">Pimpinan</option>
+                  <option value="admin">Admin</option>
+                </select>
+                <label class="floating-label">Role</label>
+              </div>
+              <div class="floating-label-container">
+                <input type="email" class="floating-label-input" name="email" id="modal_email" placeholder=" " required />
+                <label class="floating-label">Email</label>
+              </div>
+              <div class="flex items-center pt-2">
+                <input class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" type="checkbox" name="is_approved" id="modal_is_approved" value="1">
+                <label for="modal_is_approved" class="ms-2 text-sm font-medium text-gray-900">Approved</label>
               </div>
             </div>
             <div class="space-y-6">
-              <div class="relative password-container">
-                <div class="floating-label">Password Lama</div>
-                <input type="password" class="input-field w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none" name="current_password" id="current_password" />
+              <div class="floating-label-container password-input-container">
+                <input type="password" class="floating-label-input" name="current_password" id="modal_current_password" placeholder=" " />
+                <label class="floating-label">Password Lama</label>
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('modal_current_password', 'modal_eyeIconCurrent')">
+                  <i id="modal_eyeIconCurrent" class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="floating-label-container password-input-container">
+                <input type="password" class="floating-label-input" name="new_password" id="modal_new_password" placeholder=" " />
+                <label class="floating-label">Password Baru</label>
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('modal_new_password', 'modal_eyeIconNew')">
+                  <i id="modal_eyeIconNew" class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="floating-label-container password-input-container">
+                <input type="password" class="floating-label-input" name="confirm_new_password" id="modal_confirm_new_password" placeholder=" " />
+                <label class="floating-label">Verifikasi Password Baru</label>
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('modal_confirm_new_password', 'modal_eyeIconConfirm')">
+                  <i id="modal_eyeIconConfirm" class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-end">
+            <button type="submit" class="btn-primary submit-btn">
+              <i class="fas fa-save mr-2"></i> Update User
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  {% if single_user %}
+  <!-- Single User Edit Form (for profile editing) -->
+  <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
+    <div class="p-6">
+      <form method="POST" action="{{ url_for('user.edit_user', user_id=users[0].id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="columns is-multiline">
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" name="email" id="email" required placeholder=" " value="{{ users[0].email }}" />
+                <label class="label is-floating-label" for="email">Email</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input type="password" class="input" name="current_password" id="current_password" placeholder=" " />
+                <label class="label is-floating-label" for="current_password">Password Lama</label>
                 <span class="toggle-password" onclick="togglePasswordVisibility('current_password', 'eyeIconCurrent')">
                   <i id="eyeIconCurrent" class="fas fa-eye"></i>
                 </span>
               </div>
-              <div class="relative password-container">
-                <div class="floating-label">Password Baru</div>
-                <input type="password" class="input-field w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none" name="new_password" id="new_password" />
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input type="password" class="input" name="new_password" id="new_password" placeholder=" " />
+                <label class="label is-floating-label" for="new_password">Password Baru</label>
                 <span class="toggle-password" onclick="togglePasswordVisibility('new_password', 'eyeIconNew')">
                   <i id="eyeIconNew" class="fas fa-eye"></i>
                 </span>
               </div>
-              <div class="relative password-container">
-                <div class="floating-label">Verifikasi Password Baru</div>
-                <input type="password" class="input-field w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none" name="confirm_new_password" id="confirm_new_password" />
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input type="password" class="input" name="confirm_new_password" id="confirm_new_password" placeholder=" " />
+                <label class="label is-floating-label" for="confirm_new_password">Verifikasi Password Baru</label>
                 <span class="toggle-password" onclick="togglePasswordVisibility('confirm_new_password', 'eyeIconConfirm')">
                   <i id="eyeIconConfirm" class="fas fa-eye"></i>
                 </span>
               </div>
-              <div class="flex items-center pt-2">
-                <input class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" type="checkbox" name="is_approved" id="is_approved" value="1" {% if single_user and users[0].is_approved %}checked{% endif %}>
-                <label for="is_approved" class="ms-2 text-sm font-medium text-gray-900">Approved</label>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" type="checkbox" name="is_approved" id="is_approved" value="1" {% if users[0].is_approved %}checked{% endif %}>
+                <label class="label is-floating-label" for="is_approved">Approved</label>
               </div>
             </div>
           </div>
-          <div class="mt-8 flex justify-end space-x-4">
-            <button type="submit" class="btn-submit px-6 py-2.5 rounded-lg text-white font-semibold flex items-center">
-              <i class="fas fa-save mr-2"></i> Update User
+        </div>
+        <div class="field mt-5 has-text-right">
+          <button type="submit" class="button is-primary is-medium">
+            <span class="icon"><i class="fas fa-save"></i></span>
+            <span>Update User</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+    </div>
+    
+    <!-- User Activity Log Section -->
+    <div class="form-card bg-white rounded-2xl overflow-hidden shadow mt-8">
+      <div class="bg-gradient-to-r from-gray-600 to-gray-700 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white">
+              <i class="fas fa-history mr-3"></i>Log Aktivitas User
+            </h2>
+            <p class="text-white text-opacity-80 text-sm mt-1" id="log-status">
+              Memuat status sistem...
+            </p>
+          </div>
+          <button onclick="refreshActivityLog()" class="refresh-btn">
+            <i class="fas fa-sync-alt mr-2"></i>Refresh
+          </button>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="overflow-x-auto">
+          <table class="activity-log-table min-w-full text-left border border-gray-200 rounded-lg">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 w-1/5">Tanggal & Waktu</th>
+                <th class="px-4 py-3 w-1/6">User</th>
+                <th class="px-4 py-3 w-1/6">Aktivitas</th>
+                <th class="px-4 py-3 w-2/5">Detail Perubahan</th>
+                <th class="px-4 py-3 w-1/6">Diubah Oleh</th>
+              </tr>
+            </thead>
+            <tbody id="activity-log-body">
+              <!-- Activity log will be loaded here -->
+              <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                  <i class="fas fa-spinner fa-spin mr-2"></i>Memuat log aktivitas...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+          <div class="text-sm text-gray-600">
+            Menampilkan <span id="log-showing">0</span> dari <span id="log-total">0</span> aktivitas
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="loadActivityLog(currentLogPage - 1)" id="prev-log-btn" class="pagination-btn" disabled>
+              <i class="fas fa-chevron-left mr-1"></i>Sebelumnya
             </button>
+            <span class="pagination-info" id="log-page-info">
+              Halaman 1
+            </span>
+            <button onclick="loadActivityLog(currentLogPage + 1)" id="next-log-btn" class="pagination-btn" disabled>
+              Selanjutnya<i class="fas fa-chevron-right ml-1"></i>
+            </button>
+          </div>
         </div>
-        </form>
-        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  {% if not single_user %}
-  function selectUser(userId, email) {
-    document.getElementById("userSelect").value = userId;
+  // Modal functions
+  function openEditModal(userId, userEmail) {
+    console.log('Opening modal for user:', userId, userEmail);
     fetchUserData(userId);
+    document.getElementById('editUserModal').style.display = 'flex';
   }
 
-  async function fetchUserData(userId) {
-    if (!userId) {
-      document.getElementById("email").value = '';
-      document.getElementById("current_password").value = '';
-      document.getElementById("new_password").value = '';
-      document.getElementById("confirm_new_password").value = '';
-      document.getElementById("role").value = 'karyawan';
-      document.getElementById("is_approved").checked = false;
-      return;
-    }
+  function closeModal() {
+    document.getElementById('editUserModal').style.display = 'none';
+    // Clear form data when closing
+    clearModalForm();
+  }
 
+  function clearModalForm() {
+    document.getElementById("modal_user_id").value = '';
+    document.getElementById("modal_email").value = '';
+    document.getElementById("modal_role").value = 'karyawan';
+    document.getElementById("modal_is_approved").checked = false;
+    document.getElementById("modal_current_password").value = '';
+    document.getElementById("modal_new_password").value = '';
+    document.getElementById("modal_confirm_new_password").value = '';
+  }
+
+  // Close modal when clicking outside of content
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('editUserModal');
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  });
+
+  // Function to show toast
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    container.className = `toast toast-${type}`;
+    
+    // Set icon based on type
+    let icon = '';
+    if (type === 'success') {
+      icon = '<i class="fas fa-check-circle toast-icon"></i>';
+    } else if (type === 'error') {
+      icon = '<i class="fas fa-exclamation-circle toast-icon"></i>';
+    } else {
+      icon = '<i class="fas fa-info-circle toast-icon"></i>';
+    }
+    
+    container.innerHTML = icon + message;
+    container.classList.remove('hidden');
+    
+    // Remove toast after 5 seconds
+    setTimeout(() => {
+      container.classList.add('hidden');
+    }, 5000);
+  }
+
+  // Fetch user data for editing
+  async function fetchUserData(userId) {
+    console.log('Fetching user data for:', userId);
+    
     try {
       const response = await fetch(`/get-user-data/${userId}`);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (data.success) {
-        document.getElementById("email").value = data.email;
-        document.getElementById("role").value = data.role || 'karyawan';
-        document.getElementById("is_approved").checked = data.is_approved;
-        document.getElementById("current_password").value = '';
-        document.getElementById("new_password").value = '';
-        document.getElementById("confirm_new_password").value = '';
+        // Populate modal form
+        document.getElementById("modal_user_id").value = userId;
+        document.getElementById("modal_email").value = data.email;
+        document.getElementById("modal_role").value = data.role || 'karyawan';
+        document.getElementById("modal_is_approved").checked = data.is_approved;
+        
+        // Clear password fields
+        document.getElementById("modal_current_password").value = '';
+        document.getElementById("modal_new_password").value = '';
+        document.getElementById("modal_confirm_new_password").value = '';
+        
+        showToast("Data user berhasil dimuat untuk diedit", 'success');
+        
+        // Store original data for change tracking
+        window.originalUserData = {
+          email: data.email,
+          role: data.role,
+          is_approved: data.is_approved
+        };
       } else {
-        window.toast.error("User not found.");
+        showToast("User tidak ditemukan.", 'error');
+        closeModal();
       }
     } catch (error) {
-      window.toast.error("Error fetching user data.");
-      console.error(error);
+      console.error('Error fetching user data:', error);
+      showToast("Error mengambil data user.", 'error');
+      closeModal();
     }
   }
 
-  async function approveUser(userId, userEmail) {
-    try {
-      const response = await fetch(`/approve-user/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        window.toast.success(data.message);
-        // Reload page after a short delay to show updated status
-        setTimeout(() => {
-          location.reload();
-        }, 1000);
-      } else {
-        window.toast.error(data.message);
-      }
-    } catch (error) {
-      window.toast.error("Error approving user.");
-      console.error(error);
-    }
-  }
-
-  // Add event listener for user selection
-  document.addEventListener('DOMContentLoaded', function() {
-    const userSelect = document.getElementById('userSelect');
-    if (userSelect) {
-      userSelect.addEventListener('change', function() {
-        fetchUserData(this.value);
-      });
-    }
-  });
-  {% endif %}
-
+  // Password toggle function
   function togglePasswordVisibility(inputId, iconId) {
     const passwordInput = document.getElementById(inputId);
     const eyeIcon = document.getElementById(iconId);
@@ -274,5 +666,553 @@
       eyeIcon.classList.add('fa-eye');
     }
   }
+
+  // Approve user function
+  async function approveUser(userId, userEmail) {
+    try {
+      const response = await fetch(`/approve-user/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast(data.message, 'success');
+        
+        // Log the approval activity
+        logUserActivity('user_approved', userId, null, userEmail);
+        
+        // Reload page after a short delay
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      } else {
+        showToast(data.message, 'error');
+      }
+    } catch (error) {
+      showToast("Error menyetujui user.", 'error');
+      console.error(error);
+    }
+  }
+
+  // Activity Log Variables
+  let currentLogPage = 1;
+  const logPerPage = 10;
+
+  // Load activity log
+  async function loadActivityLog(page = 1) {
+    // Show loading indicator
+    document.getElementById('activity-log-body').innerHTML = `
+      <tr>
+        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+          <i class="fas fa-spinner fa-spin mr-2"></i>Memuat log aktivitas...
+        </td>
+      </tr>
+    `;
+    
+    currentLogPage = page;
+    
+    try {
+      const response = await fetch(`/user-activity-log?page=${page}&per_page=${logPerPage}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        displayActivityLog(data.logs);
+        updateLogPagination(data.pagination);
+        updateLogStatus('Backend tersedia - Data real-time');
+      } else {
+        throw new Error(data.message || 'Failed to load logs');
+      }
+    } catch (fetchError) {
+      console.log('Backend not available, using mock data:', fetchError.message);
+      // Use mock data when backend is not available
+      loadMockActivityLog(page);
+      updateLogStatus('Backend tidak tersedia - Menampilkan data contoh');
+    }
+  }
+
+  // Mock activity log data for demonstration
+  function loadMockActivityLog(page = 1) {
+    const mockLogs = [
+      {
+        id: 1,
+        activity_type: 'user_created',
+        target_user_email: 'john.doe@example.com',
+        performed_by_email: 'admin@example.com',
+        changes: null,
+        created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString() // 30 minutes ago
+      },
+      {
+        id: 2,
+        activity_type: 'role_changed',
+        target_user_email: 'jane.smith@example.com',
+        performed_by_email: 'admin@example.com',
+        changes: JSON.stringify({
+          role: { old: 'karyawan', new: 'pimpinan' }
+        }),
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() // 2 hours ago
+      },
+      {
+        id: 3,
+        activity_type: 'password_changed',
+        target_user_email: 'user@example.com',
+        performed_by_email: 'user@example.com',
+        changes: JSON.stringify({
+          password: { old: '••••••••', new: '••••••••' }
+        }),
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() // 1 day ago
+      },
+      {
+        id: 4,
+        activity_type: 'user_approved',
+        target_user_email: 'newuser@example.com',
+        performed_by_email: 'admin@example.com',
+        changes: null,
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString() // 2 days ago
+      },
+      {
+        id: 5,
+        activity_type: 'email_changed',
+        target_user_email: 'updated@example.com',
+        performed_by_email: 'admin@example.com',
+        changes: JSON.stringify({
+          email: { old: 'old@example.com', new: 'updated@example.com' }
+        }),
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString() // 3 days ago
+      },
+      {
+        id: 6,
+        activity_type: 'user_deleted',
+        target_user_email: 'deleted@example.com',
+        performed_by_email: 'admin@example.com',
+        changes: null,
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString() // 1 week ago
+      }
+    ];
+
+    // Simulate pagination
+    const startIndex = (page - 1) * logPerPage;
+    const endIndex = startIndex + logPerPage;
+    const paginatedLogs = mockLogs.slice(startIndex, endIndex);
+    
+    const mockPagination = {
+      current_page: page,
+      total_pages: Math.ceil(mockLogs.length / logPerPage),
+      total: mockLogs.length,
+      showing: paginatedLogs.length,
+      has_prev: page > 1,
+      has_next: page < Math.ceil(mockLogs.length / logPerPage)
+    };
+
+    // Add a small delay to simulate network request
+    setTimeout(() => {
+      displayActivityLog(paginatedLogs);
+      updateLogPagination(mockPagination);
+      
+      // Show info message about mock data
+      if (page === 1) {
+        showToast('Menampilkan data contoh - Backend belum tersedia', 'info');
+      }
+    }, 500);
+  }
+
+  // Display activity log in table
+  function displayActivityLog(logs) {
+    const tbody = document.getElementById('activity-log-body');
+    
+    if (!tbody) {
+      console.error('Activity log table body not found');
+      return;
+    }
+    
+    if (!logs || logs.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+            <i class="fas fa-info-circle mr-2"></i>Belum ada aktivitas yang tercatat
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    tbody.innerHTML = logs.map(log => {
+      const activityIcon = getActivityIcon(log.activity_type);
+      const activityColor = getActivityColor(log.activity_type);
+      
+      return `
+        <tr class="border-b hover:bg-gray-50">
+          <td class="px-4 py-3">
+            <div class="text-sm font-medium text-gray-900">${formatDateTime(log.created_at)}</div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="text-sm font-medium text-gray-900">${log.target_user_email || 'N/A'}</div>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activityColor}">
+              <i class="${activityIcon} mr-1"></i>
+              ${getActivityLabel(log.activity_type)}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="text-sm text-gray-900">${formatChanges(log.changes)}</div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="text-sm text-gray-900">${log.performed_by_email || 'System'}</div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Update pagination controls
+  function updateLogPagination(pagination) {
+    document.getElementById('log-showing').textContent = pagination.showing;
+    document.getElementById('log-total').textContent = pagination.total;
+    document.getElementById('log-page-info').textContent = `Halaman ${pagination.current_page} dari ${pagination.total_pages}`;
+    
+    const prevBtn = document.getElementById('prev-log-btn');
+    const nextBtn = document.getElementById('next-log-btn');
+    
+    prevBtn.disabled = !pagination.has_prev;
+    nextBtn.disabled = !pagination.has_next;
+    
+    // Style disabled buttons
+    if (prevBtn.disabled) {
+      prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+    
+    if (nextBtn.disabled) {
+      nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  }
+
+  // Get activity icon
+  function getActivityIcon(activityType) {
+    const icons = {
+      'user_created': 'fas fa-user-plus',
+      'user_deleted': 'fas fa-user-minus',
+      'user_updated': 'fas fa-user-edit',
+      'password_changed': 'fas fa-key',
+      'role_changed': 'fas fa-user-tag',
+      'email_changed': 'fas fa-envelope',
+      'user_approved': 'fas fa-check-circle'
+    };
+    return icons[activityType] || 'fas fa-info-circle';
+  }
+
+  // Get activity color
+  function getActivityColor(activityType) {
+    const colors = {
+      'user_created': 'bg-green-100 text-green-800',
+      'user_deleted': 'bg-red-100 text-red-800',
+      'user_updated': 'bg-blue-100 text-blue-800',
+      'password_changed': 'bg-yellow-100 text-yellow-800',
+      'role_changed': 'bg-purple-100 text-purple-800',
+      'email_changed': 'bg-indigo-100 text-indigo-800',
+      'user_approved': 'bg-green-100 text-green-800'
+    };
+    return colors[activityType] || 'bg-gray-100 text-gray-800';
+  }
+
+  // Get activity label
+  function getActivityLabel(activityType) {
+    const labels = {
+      'user_created': 'User Dibuat',
+      'user_deleted': 'User Dihapus',
+      'user_updated': 'User Diperbarui',
+      'password_changed': 'Password Diubah',
+      'role_changed': 'Role Diubah',
+      'email_changed': 'Email Diubah',
+      'user_approved': 'User Disetujui'
+    };
+    return labels[activityType] || 'Aktivitas';
+  }
+
+  // Format date and time
+  function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    const options = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
+    return date.toLocaleString('id-ID', options);
+  }
+
+  // Format changes
+  function formatChanges(changes) {
+    if (!changes) return '-';
+    
+    try {
+      const changesObj = typeof changes === 'string' ? JSON.parse(changes) : changes;
+      const changesList = [];
+      
+      for (const [field, change] of Object.entries(changesObj)) {
+        if (field === 'password') {
+          changesList.push(`Password: ••••••••`);
+        } else {
+          changesList.push(`${field}: "${change.old}" → "${change.new}"`);
+        }
+      }
+      
+      return changesList.join('<br>');
+    } catch (error) {
+      return changes;
+    }
+  }
+
+  // Update log status message
+  function updateLogStatus(message) {
+    const statusElement = document.getElementById('log-status');
+    if (statusElement) {
+      statusElement.textContent = message;
+    }
+  }
+
+  // Refresh activity log
+  function refreshActivityLog() {
+    loadActivityLog(1);
+    showToast('Log aktivitas diperbarui', 'success');
+  }
+
+  // Log user activity
+  async function logUserActivity(activityType, targetUserId, changes = null, targetUserEmail = null) {
+    try {
+      const response = await fetch('/log-user-activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+          activity_type: activityType,
+          target_user_id: targetUserId,
+          target_user_email: targetUserEmail,
+          changes: changes
+        })
+      });
+      
+      if (response.ok) {
+        // Refresh the activity log to show the new entry
+        setTimeout(() => {
+          loadActivityLog(1);
+        }, 500);
+      } else {
+        console.log('Activity logging endpoint not available');
+      }
+    } catch (error) {
+      console.log('Activity logging not available:', error.message);
+      // Don't show error to user, just log it
+    }
+  }
+
+  // Initialize floating labels
+  function initFloatingLabels() {
+    // For input fields
+    document.querySelectorAll('.floating-label-input').forEach(input => {
+      const container = input.parentNode;
+      if (input.value) {
+        container.classList.add('has-value');
+      } else {
+        container.classList.remove('has-value');
+      }
+      input.addEventListener('input', function() {
+        if (this.value) {
+          container.classList.add('has-value');
+        } else {
+          container.classList.remove('has-value');
+        }
+      });
+    });
+    // For select fields
+    document.querySelectorAll('.floating-label-select').forEach(select => {
+      const container = select.parentNode;
+      if (select.value) {
+        container.classList.add('has-value');
+      } else {
+        container.classList.remove('has-value');
+      }
+      select.addEventListener('change', function() {
+        if (this.value) {
+          container.classList.add('has-value');
+        } else {
+          container.classList.remove('has-value');
+        }
+      });
+    });
+  }
+
+  // Form submission handling
+  document.addEventListener('DOMContentLoaded', function() {
+    initFloatingLabels(); // Initialize floating labels on page load
+    // Load activity log on page load with error handling
+    try {
+      loadActivityLog(1);
+    } catch (error) {
+      console.error('Error initializing activity log:', error);
+      updateLogStatus('Error saat inisialisasi log');
+    }
+    // Handle flash messages with debugging
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        console.log('Flash messages found:', {{ messages|tojson }});
+        {% for category, message in messages %}
+          console.log('Processing flash message:', '{{ category }}', '{{ message }}');
+          {% if category == 'success' %}
+            setTimeout(() => {
+              showToast("{{ message }}", 'success');
+            }, 100);
+          {% elif category == 'error' %}
+            setTimeout(() => {
+              showToast("{{ message }}", 'error');
+            }, 100);
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        console.log('No flash messages found');
+      {% endif %}
+    {% endwith %}
+
+    // Check for localStorage success message (for cases where flash messages don't work)
+    const userEditSuccess = localStorage.getItem('userEditSuccess');
+    if (userEditSuccess) {
+      console.log('Found localStorage success message:', userEditSuccess);
+      setTimeout(() => {
+        showToast(userEditSuccess, 'success');
+      }, 200);
+      
+      // Log the user update activity
+      const changes = localStorage.getItem('userChanges');
+      const targetUserId = localStorage.getItem('targetUserId');
+      const targetUserEmail = localStorage.getItem('targetUserEmail');
+      
+      if (changes && targetUserId) {
+        const changesObj = JSON.parse(changes);
+        if (Object.keys(changesObj).length > 0) {
+          // Determine the primary activity type
+          let activityType = 'user_updated';
+          if (changesObj.password) {
+            activityType = 'password_changed';
+          } else if (changesObj.role) {
+            activityType = 'role_changed';
+          } else if (changesObj.email) {
+            activityType = 'email_changed';
+          }
+          
+          logUserActivity(activityType, targetUserId, changesObj, targetUserEmail);
+        }
+      }
+      
+      // Clear the stored data
+      localStorage.removeItem('userEditSuccess');
+      localStorage.removeItem('userChanges');
+      localStorage.removeItem('targetUserId');
+      localStorage.removeItem('targetUserEmail');
+    }
+
+    // Handle delete forms
+    const deleteForms = document.querySelectorAll('form[action*="delete_user"]');
+    deleteForms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const confirmed = confirm('Are you sure you want to delete this user?');
+        if (confirmed) {
+          showToast("Menghapus user...", 'info');
+          
+          // Get user email from the row for logging
+          const userRow = this.closest('tr');
+          const userEmail = userRow.querySelector('td:first-child').textContent.trim();
+          const userId = this.action.split('/').pop();
+          
+          // Log the deletion activity
+          logUserActivity('user_deleted', userId, null, userEmail);
+        }
+        return confirmed;
+      });
+    });
+
+    // Handle modal form submission
+    const modalForm = document.getElementById('editUserForm');
+    if (modalForm) {
+      modalForm.addEventListener('submit', function(e) {
+        // Debug: Log form data before submission
+        const formData = new FormData(modalForm);
+        console.log('Form data being submitted:');
+        for (let [key, value] of formData.entries()) {
+          console.log(key, value);
+        }
+        
+        // Validate required fields
+        const userId = document.getElementById("modal_user_id").value;
+        const email = document.getElementById("modal_email").value;
+        
+        if (!userId || !email) {
+          e.preventDefault();
+          showToast("User ID dan Email harus diisi", 'error');
+          return;
+        }
+        
+        // Show loading toast
+        showToast("Menyimpan perubahan...", 'info');
+        
+        // Track changes for logging
+        const currentData = {
+          email: document.getElementById("modal_email").value,
+          role: document.getElementById("modal_role").value,
+          is_approved: document.getElementById("modal_is_approved").checked,
+          password_changed: document.getElementById("modal_new_password").value.length > 0
+        };
+        
+        const changes = {};
+        if (window.originalUserData) {
+          if (currentData.email !== window.originalUserData.email) {
+            changes.email = { old: window.originalUserData.email, new: currentData.email };
+          }
+          if (currentData.role !== window.originalUserData.role) {
+            changes.role = { old: window.originalUserData.role, new: currentData.role };
+          }
+          if (currentData.is_approved !== window.originalUserData.is_approved) {
+            changes.is_approved = { old: window.originalUserData.is_approved, new: currentData.is_approved };
+          }
+          if (currentData.password_changed) {
+            changes.password = { old: "••••••••", new: "••••••••" };
+          }
+        }
+        
+        // Store changes and user info for logging after form submission
+        localStorage.setItem('userEditSuccess', 'Data user berhasil diperbarui!');
+        localStorage.setItem('userChanges', JSON.stringify(changes));
+        localStorage.setItem('targetUserId', userId);
+        localStorage.setItem('targetUserEmail', currentData.email);
+        
+        // Don't prevent default - let the form submit normally
+      });
+    }
+
+    // Handle single user form submission
+    const singleUserForm = document.querySelector('form[action*="edit_user"]:not(#editUserForm)');
+    if (singleUserForm) {
+      singleUserForm.addEventListener('submit', function(e) {
+        showToast("Menyimpan perubahan...", 'info');
+      });
+    }
+  });
 </script>
 {% endblock %}

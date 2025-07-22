@@ -1,13 +1,6 @@
 {% extends "layouts/base.html" %}
 {% block content %}
-<style>
-  .form-card {
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  .form-card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
   .input-field {
     transition: all 0.2s ease;
   }
@@ -26,17 +19,25 @@
   }
   .floating-label {
     position: absolute;
-    top: -0.7rem;
-    left: 0.9rem;
-    padding: 0 0.25rem;
+    top: 0;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    padding: 0 0.2rem;
     background: white;
-    font-size: 0.75rem;
-    color: #111827;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    z-index: 10;
+    font-size: 0.7rem;
+    color: #2563eb;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    line-height: 1;
+    pointer-events: none;
+    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
   }
 </style>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+</head>
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-4xl mx-auto">
     <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
@@ -49,83 +50,144 @@
       </div>
     </div>
     <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
-      <form method="POST" action="{{ url_for('main.generate_cuti') }}" class="p-6">
+      <form method="POST" action="{{ url_for('cuti.generate_cuti') }}" class="p-6">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-5">
-            <div class="relative">
-              <div class="floating-label">Nama</div>
-              {{ form.nama(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Nama Lengkap") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">NIP</div>
-              {{ form.nip(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="NIP") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Jabatan</div>
-              {{ form.jabatan(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Jabatan") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Gol. Ruang</div>
-              {{ form.gol_ruang(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Golongan Ruang") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Unit Kerja</div>
-              {{ form.unit_kerja(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Unit Kerja") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Masa Kerja</div>
-              {{ form.masa_kerja(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Contoh: 2 Tahun 4 Bulan") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Alamat</div>
-              {{ form.alamat(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px]", rows="3", placeholder="Alamat selama cuti") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Nomor Surat Masuk</div>
-              {{ form.no_suratmasuk(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Misal: 123") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Tanggal Ajuan Cuti</div>
-              {{ form.tgl_ajuan_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none") }}
-            </div>
-          </div>
-          <div class="space-y-5">
-            <div class="relative">
-              <div class="floating-label">Tanggal Mulai Cuti</div>
-              {{ form.tanggal_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Tanggal Selesai Cuti</div>
-              {{ form.sampai_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Nomor Telepon</div>
-              {{ form.telp(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Contoh: 081234567890") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Jenis Cuti</div>
-              <div class="border rounded p-3 bg-gray-50">
-                {% for subfield in form.jenis_cuti %}
-                <div class="flex items-center mb-2">
-                  {{ subfield(class="form-radio accent-blue-600 mr-2") }}
-                  {{ subfield.label(class="text-gray-700") }}
-                </div>
-                {% endfor %}
+        <div class="columns is-multiline">
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.nama(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="nama">Nama</label>
               </div>
             </div>
-            <div class="relative">
-              <div class="floating-label">Alasan Cuti</div>
-              {{ form.alasan_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px]", rows="3", placeholder="Alasan Cuti") }}
-            </div>
-            <div class="relative">
-              <div class="floating-label">Lama Cuti</div>
-              {{ form.lama_cuti(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", placeholder="Contoh: 3 Hari") }}
-            </div>
-            <div class="flex justify-end mt-6">
-              <button type="submit" class="btn-submit px-8 py-3 rounded-lg text-white font-semibold flex items-center">Generate Surat Cuti</button>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.nip(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="nip">NIP</label>
+              </div>
             </div>
           </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.jabatan(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="jabatan">Jabatan</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.gol_ruang(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="gol_ruang">Gol. Ruang</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.unit_kerja(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="unit_kerja">Unit Kerja</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.masa_kerja(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="masa_kerja">Masa Kerja</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.alamat(class="input", placeholder=" ", rows="3") }}
+                <label class="label is-floating-label" for="alamat">Alamat</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.no_suratmasuk(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="no_suratmasuk">Nomor Surat Masuk</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.tgl_ajuan_cuti(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="tgl_ajuan_cuti">Tanggal Ajuan Cuti</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-multiline">
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.tanggal_cuti(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="tanggal_cuti">Tanggal Mulai Cuti</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.sampai_cuti(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="sampai_cuti">Tanggal Selesai Cuti</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.telp(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="telp">Nomor Telepon</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                <div class="border rounded p-3 bg-gray-50">
+                  {% for subfield in form.jenis_cuti %}
+                  <div class="field is-checkradio">
+                    <input type="radio" name="jenis_cuti" value="{{ subfield.data.value }}" class="is-checkradio">
+                    <label class="label">{{ subfield.label }}</label>
+                  </div>
+                  {% endfor %}
+                </div>
+                <label class="label is-floating-label" for="jenis_cuti">Jenis Cuti</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.alasan_cuti(class="input", placeholder=" ", rows="3") }}
+                <label class="label is-floating-label" for="alasan_cuti">Alasan Cuti</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.lama_cuti(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="lama_cuti">Lama Cuti</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field mt-5 has-text-right">
+          <button type="submit" class="button is-primary is-medium">
+            <span class="icon"><i class="fas fa-file-signature"></i></span>
+            <span>Generate Surat Cuti</span>
+          </button>
         </div>
       </form>
     </div>

@@ -11,7 +11,7 @@
     </div>
     <ul class="nav-links" style="margin-top: 0.25rem; height:500px;">
       <li>
-        <a href="{{ url_for('main.index') }}" data-tooltip="Dashboard" class="flex items-center px-4 py-2">
+        <a href="{{ url_for('dashboard.dashboard') }}" data-tooltip="Dashboard" class="flex items-center px-4 py-2">
           <i class="fas fa-home"></i>
           <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Dashboard">Dashboard</span>
           <span class="invisible w-4"></span>
@@ -24,8 +24,8 @@
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="showSuratMenu">
-          <a href="{{ url_for('main.show_surat_masuk') }}">Surat Masuk</a>
-          <a href="{{ url_for('main.show_surat_keluar') }}">Surat Keluar</a>
+          <a href="{{ url_for('surat_masuk.show_surat_masuk') }}">Surat Masuk</a>
+          <a href="{{ url_for('surat_keluar.show_surat_keluar') }}">Surat Keluar</a>
         </div>
       </li>
       <li>
@@ -35,7 +35,7 @@
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="templatesMenu">
-          <a href="{{ url_for('main.generate_cuti') }}">Generate Cuti</a>
+          <a href="{{ url_for('cuti.generate_cuti') }}">Generate Cuti</a>
         </div>
       </li>
       {% if current_user.role != 'karyawan' %}
@@ -46,8 +46,8 @@
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="inputSuratMenu">
-          <a href="{{ url_for('main.input_surat_masuk') }}">Surat Masuk</a>
-          <a href="{{ url_for('main.input_surat_keluar') }}">Surat Keluar</a>
+          <a href="{{ url_for('surat_masuk.input_surat_masuk') }}">Surat Masuk</a>
+          <a href="{{ url_for('surat_keluar.input_surat_keluar') }}">Surat Keluar</a>
         </div>
       </li>
       <li>
@@ -60,7 +60,7 @@
           <a href="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}">OCR Surat Masuk</a>
           <a href="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}">OCR Surat Keluar</a>
           <a href="{{ url_for('ocr_cuti.ocr_cuti') }}">OCR Cuti & Formulir Cuti</a>
-          <a href="{{ url_for('main.ocr_test') }}">OCR Test</a>
+          <a href="{{ url_for('ocr_routes.ocr_test') }}">OCR Test</a>
         </div>
       </li>
       <li>
@@ -78,27 +78,27 @@
         </div>
       </li>
       <li>
-        <a href="{{ url_for('main.laporan_statistik') }}" data-tooltip="Laporan Statistik" class="flex items-center px-4 py-2">
+        <a href="{{ url_for('laporan.laporan_statistik') }}" data-tooltip="Laporan Statistik" class="flex items-center px-4 py-2">
           <i class="fas fa-chart-bar"></i>
           <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Laporan Statistik">Laporan Statistik</span>
           <span class="invisible w-4"></span>
         </a>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')" data-tooltip="Pegawai">
+        <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')" data-tooltip="Input Pegawai">
           <i class="fas fa-users"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Pegawai">Pegawai</span>
+          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Input Pegawai">Input Pegawai</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="pegawaiMenu">
-          <a href="{{ url_for('main.pegawai_list') }}">List Pegawai</a>
-          <a href="{{ url_for('main.pegawai') }}">Pegawai</a>
+          <a href="{{ url_for('pegawai.pegawai_list') }}">List Pegawai</a>
+          <a href="{{ url_for('pegawai.pegawai') }}">Pegawai</a>
         </div>
       </li>
       {% endif %}
       {% if current_user.role == 'pimpinan' %}
       <li>
-        <a href="{{ url_for('main.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat" class="flex items-center px-4 py-2 relative hover:bg-blue-50 rounded-lg transition group">
+        <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat" class="flex items-center px-4 py-2 relative hover:bg-blue-50 rounded-lg transition group">
           <i class="fas fa-check-circle"></i>
           <span class="links_name flex-grow truncate block max-w-[140px] ml-4 pr-12" title="Persetujuan Surat">Persetujuan Surat</span>
           {% if g.pending_surat_masuk_count > 0 %}
@@ -111,7 +111,7 @@
       {% endif %}
       {% if current_user.is_admin %}
       <li>
-        <a href="{{ url_for('main.edit_user_view') }}" data-tooltip="Manajemen User" class="flex items-center px-4 py-2">
+        <a href="{{ url_for('user.edit_user_view') }}" data-tooltip="Manajemen User" class="flex items-center px-4 py-2">
           <i class="fas fa-user-cog"></i>
           <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Manajemen User">Manajemen User</span>
           <span class="invisible w-4"></span>
@@ -124,7 +124,7 @@
     {% if current_user.is_authenticated %}
     <div class="sidebar-user-profile">
       <div class="user-profile-container">
-        <a class="user-avatar flex items-center justify-center rounded-full bg-gray-200 hover:bg-blue-200 transition" id="sidebarUserAvatar" href="{{ url_for('main.edit_user', user_id=current_user.id) }}" style="width:54px; height:54px; cursor:pointer; position:relative; display:inline-flex;" data-tooltip="{{ current_user.email.split('@')[0] }} ({{ current_user.role.title() }})">
+        <a class="user-avatar flex items-center justify-center rounded-full bg-gray-200 hover:bg-blue-200 transition" id="sidebarUserAvatar" href="{{ url_for('user.edit_user', user_id=current_user.id) }}" style="width:54px; height:54px; cursor:pointer; position:relative; display:inline-flex;" data-tooltip="{{ current_user.email.split('@')[0] }} ({{ current_user.role.title() }})">
           <i class="fas fa-user-circle text-4xl text-blue-700" style="font-size:40px;"></i>
         </a>
         <div class="user-info">
@@ -136,12 +136,12 @@
     </div>
     {% endif %}
   </div>
-  <div class="main-content" style="margin-left:80px;">
+  <div class="main-content">
     <nav class="bg-white shadow-sm sticky top-0 z-20">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <a class="flex items-center text-lg font-semibold text-gray-800" href="{{ url_for('main.index') }}">
+            <a class="flex items-center text-lg font-semibold text-gray-800" href="{{ url_for('dashboard.dashboard') }}">
               <i class="fas fa-envelope-open-text text-blue-600 mr-2"></i>
               Surat Masuk dan Surat Keluar
             </a>
@@ -258,515 +258,26 @@
     
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
   </div>
+  <!-- External Libraries -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.3/viewer.min.js"></script>
-  <script>
-    function toggleMenu(e, id) {
-      e.preventDefault();
-      const dropdown = document.getElementById(id);
-      const chevron = e.currentTarget.querySelector('.fa-chevron-down');
-      
-      if (dropdown.classList.contains('show')) {
-        dropdown.classList.remove('show');
-        chevron.style.transform = 'rotate(0deg)';
-      } else {
-        dropdown.classList.add('show');
-        chevron.style.transform = 'rotate(180deg)';
-      }
-    }
-
-    function showUserInfo() {
-      const userInfo = `
-        <div class="user-info-modal">
-          <h4>Informasi User</h4>
-          <p><strong>Email:</strong> {{ current_user.email }}</p>
-          <p><strong>Role:</strong> {{ current_user.role.title() }}</p>
-          <p><strong>Status:</strong> {{ 'Active' if current_user.is_approved else 'Pending' }}</p>
-          <p><strong>Last Login:</strong> {{ current_user.last_login.strftime('%d/%m/%Y %H:%M') if current_user.last_login else 'Never' }}</p>
-          <p><strong>Login Count:</strong> {{ current_user.login_count or 0 }}</p>
-        </div>
-      `;
-      
-      window.toast.info(userInfo, 'User Information', 8000);
-      
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const sidebar = document.querySelector('.modern-sidebar');
-      const mainContent = document.querySelector('.main-content');
-      const sidebarToggle = document.getElementById('sidebarToggle');
-      const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
-      let isCollapsed = sidebar.classList.contains('sidebar-collapsed');
-      
-      function toggleSidebar() {
-        isCollapsed = !isCollapsed;
-        
-        if (isCollapsed) {
-          sidebar.classList.add('sidebar-collapsed');
-          mainContent.style.marginLeft = '80px';
-          document.querySelectorAll('.dropdown.show').forEach(dropdown => {
-            dropdown.classList.remove('show');
-          });
-          document.querySelectorAll('.fa-chevron-down').forEach(chevron => {
-            chevron.style.transform = 'rotate(0deg)';
-          });
-        } else {
-          sidebar.classList.remove('sidebar-collapsed');
-          mainContent.style.marginLeft = '250px';
-        }
-        
-        localStorage.setItem('sidebarCollapsed', isCollapsed);
-      }
-      
-      const savedState = localStorage.getItem('sidebarCollapsed');
-      if (savedState !== null) {
-        const shouldCollapse = savedState === 'true';
-        if (shouldCollapse !== isCollapsed) {
-          toggleSidebar();
-        }
-      }
-      
-      if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleSidebar();
-        });
-        
-        sidebarToggle.addEventListener('mouseenter', function() {
-          this.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-        });
-        
-        sidebarToggle.addEventListener('mouseleave', function() {
-          this.style.backgroundColor = 'transparent';
-        });
-      }
-
-      if (sidebarUserAvatar) {
-        sidebarUserAvatar.addEventListener('click', function() {
-          // The user profile menu logic was removed, so this event listener is no longer needed.
-          // Keeping it here as a placeholder if the user profile menu is re-added later.
-          // For now, it will do nothing.
-        });
-      }
-      
-      function handleResize() {
-        if (window.innerWidth <= 768) {
-          if (!isCollapsed) {
-            toggleSidebar();
-          }
-        }
-      }
-      
-      window.addEventListener('resize', handleResize);
-      handleResize();
-
-      const notificationBell = document.querySelector('.notification-bell-btn');
-      const notificationDropdown = document.querySelector('.notification-dropdown');
-
-      if (notificationBell && notificationDropdown) {
-        notificationBell.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          notificationDropdown.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', function(event) {
-          if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
-            notificationDropdown.classList.add('hidden');
-          }
-        });
-      }
-
-      const mobileMenuButton = document.querySelector('.mobile-menu-button');
-      const mobileMenu = document.querySelector('.mobile-menu');
-      if (mobileMenuButton && mobileMenu) {
-        mobileMenuButton.addEventListener('click', function() {
-          mobileMenu.classList.toggle('hidden');
-        });
-      }
-
-      document.addEventListener('click', function(e) {
-        const sidebar = document.querySelector('.modern-sidebar');
-        const mobileMenuButton = document.querySelector('.mobile-menu-button');
-        const mobileMenu = document.querySelector('.mobile-menu');
-        if (!sidebar.contains(e.target) && !mobileMenuButton.contains(e.target)) {
-          sidebar.classList.remove('mobile-open');
-          if (mobileMenu) {
-            mobileMenu.classList.add('hidden');
-          }
-        }
-      });
-      
-      const userAvatar = document.querySelector('.user-avatar');
-      if (userAvatar) {
-        userAvatar.setAttribute('data-tooltip', '{{ current_user.email.split("@")[0] }} ({{ current_user.role.title() }})');
-      }
-    });
-  </script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-fix.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/floating-labels.css') }}">
+  
+  <!-- Custom JavaScript -->
+  <script src="{{ url_for('static', filename='assets/js/components/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/components/toast-notification.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/components/notifications.js') }}"></script>
+  
   {% block extra_js %}{% endblock %}
 
-    <script src="{{ url_for('static', filename='assets/js/pcoded.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/js/plugins/bootstrap.min.js') }}"></script>
-    <style>
-      .notification-bell-btn {
-        position: relative;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 50%;
-        transition: all 0.2s ease;
-      }
-      
-      .notification-bell-btn:hover {
-        background-color: rgba(59, 130, 246, 0.1);
-      }
-      
-      .notification-bell-btn:active {
-        transform: scale(0.95);
-      }
-      
-      .notification-dropdown {
-        transform-origin: top right;
-        animation: dropdownSlide 0.2s ease-out;
-      }
-      
-      .notification-dropdown.hidden {
-        display: none !important;
-      }
-      
-      @keyframes dropdownSlide {
-        from {
-          opacity: 0;
-          transform: scale(0.95) translateY(-10px);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
-      }
-      
-      .toast {
-        display: flex;
-        align-items: center;
-        padding: 12px 16px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        margin-bottom: 8px;
-        max-width: 400px;
-        min-width: 300px;
-        animation: slideIn 0.3s ease-out;
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .toast::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-      }
-      
-      .toast-success {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        color: #166534;
-      }
-      
-      .toast-success::before {
-        background: #22c55e;
-      }
-      
-      .toast-error {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #991b1b;
-      }
-      
-      .toast-error::before {
-        background: #ef4444;
-      }
-      
-      .toast-warning {
-        background: #fffbeb;
-        border: 1px solid #fed7aa;
-        color: #92400e;
-      }
-      
-      .toast-warning::before {
-        background: #f59e0b;
-      }
-      
-      .toast-info {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        color: #1e40af;
-      }
-      
-      .toast-info::before {
-        background: #3b82f6;
-      }
-      
-      .toast-content {
-        flex: 1;
-        margin-right: 12px;
-      }
-      
-      .toast-title {
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 2px;
-      }
-      
-      .toast-message {
-        font-size: 13px;
-        opacity: 0.9;
-      }
-      
-      .toast-close {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        padding: 4px;
-        border-radius: 4px;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-      }
-      
-      .toast-close:hover {
-        opacity: 1;
-      }
-      
-      @keyframes slideIn {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      
-      @keyframes slideOut {
-        from {
-          transform: translateX(0);
-          opacity: 1;
-        }
-        to {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-      }
-      
-      .toast.fade-out {
-        animation: slideOut 0.3s ease-in forwards;
-      }
-    </style>
-    
-
-    <script>
-      class ToastNotification {
-        constructor() {
-          this.container = document.getElementById('toast-container');
-        }
-        
-        show(message, type = 'success', title = null, duration = 5000) {
-          const toast = document.createElement('div');
-          toast.className = `toast toast-${type}`;
-          
-          const icon = this.getIcon(type);
-          const closeIcon = '×';
-          
-          toast.innerHTML = `
-            <div class="toast-content">
-              ${title ? `<div class="toast-title">${title}</div>` : ''}
-              <div class="toast-message">${message}</div>
-            </div>
-            <button class="toast-close" onclick="this.parentElement.remove()">${closeIcon}</button>
-          `;
-          
-          this.container.appendChild(toast);
-          
-          if (duration > 0) {
-            setTimeout(() => {
-              if (toast.parentElement) {
-                toast.classList.add('fade-out');
-                setTimeout(() => {
-                  if (toast.parentElement) {
-                    toast.remove();
-                  }
-                }, 300);
-              }
-            }, duration);
-          }
-          
-          return toast;
-        }
-        
-        getIcon(type) {
-          const icons = {
-            success: '✓',
-            error: '✕',
-            warning: '⚠',
-            info: 'ℹ'
-          };
-          return icons[type] || icons.info;
-        }
-        
-        success(message, title = null) {
-          return this.show(message, 'success', title);
-        }
-        
-        error(message, title = null) {
-          return this.show(message, 'error', title);
-        }
-        
-        warning(message, title = null) {
-          return this.show(message, 'warning', title);
-        }
-        
-        info(message, title = null) {
-          return this.show(message, 'info', title);
-        }
-      }
-      
-      window.toast = new ToastNotification();
-      
-      document.addEventListener('DOMContentLoaded', function() {
-        const flashMessages = document.querySelectorAll('.alert');
-        flashMessages.forEach(alert => {
-          const message = alert.textContent.trim();
-          const category = alert.className.includes('alert-success') ? 'success' :
-                          alert.className.includes('alert-danger') ? 'error' :
-                          alert.className.includes('alert-warning') ? 'warning' : 'info';
-          
-          window.toast.show(message, category);
-          
-          alert.remove();
-        });
-
-        initializeNotifications();
-      });
-
-      function updateNotificationCount() {
-        const notificationBell = document.querySelector('.notification-bell-btn');
-        if (!notificationBell) return;
-
-        fetch('/api/notifications/count')
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              const badge = notificationBell.querySelector('.absolute');
-              if (data.pending_count > 0) {
-                if (badge) {
-                  badge.textContent = data.pending_count;
-                } else {
-                  const newBadge = document.createElement('span');
-                  newBadge.className = 'absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center';
-                  newBadge.textContent = data.pending_count;
-                  notificationBell.appendChild(newBadge);
-                }
-              } else {
-                if (badge) {
-                  badge.remove();
-                }
-              }
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching notification count:', error);
-          });
-      }
-
-      function initializeNotifications() {
-        const notificationBell = document.querySelector('.notification-bell-btn');
-        if (notificationBell) {
-          updateNotificationCount();
-          
-          setInterval(updateNotificationCount, 30000);
-        }
-      }
-    </script>
-    
-    <style>
-    /* Animasi untuk menghilangkan notifikasi */
-    @keyframes fadeOutSlideUp {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(-10px);
-            height: 0;
-            padding: 0;
-            margin: 0;
-            border: none;
-        }
-    }
-    .fade-out-item {
-        animation: fadeOutSlideUp 0.5s ease forwards;
-    }
-    </style>
-    
-    <script>
-function approveSurat(suratId, buttonElement) {
-    event.stopPropagation();
-    fetch(`/surat-keluar/approve/${suratId}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            window.toast.success('Surat telah disetujui!');
-            const listItem = buttonElement.closest('li');
-            listItem.classList.add('fade-out-item');
-            setTimeout(() => {
-                listItem.remove();
-                updateNotificationCount();
-            }, 500);
-        } else {
-            window.toast.error(data.message || 'Gagal menyetujui surat!');
-        }
-    })
-    .catch(() => window.toast.error('Gagal menyetujui surat!'));
-}
-
-function rejectSurat(suratId, buttonElement) {
-    event.stopPropagation();
-    fetch(`/surat-keluar/reject/${suratId}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            window.toast.success('Surat telah ditolak!');
-            const listItem = buttonElement.closest('li');
-            listItem.classList.add('fade-out-item');
-            setTimeout(() => {
-                listItem.remove();
-                updateNotificationCount();
-            }, 500);
-        } else {
-            window.toast.error(data.message || 'Gagal menolak surat!');
-        }
-    })
-    .catch(() => window.toast.error('Gagal menolak surat!'));
-      }
-    </script>
+  <script src="{{ url_for('static', filename='assets/js/components/pcoded.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/plugins/bootstrap.min.js') }}"></script>
     
     {% block scripts %}{% endblock %}
   </body>

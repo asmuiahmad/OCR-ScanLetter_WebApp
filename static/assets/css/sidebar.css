@@ -4,6 +4,8 @@
 .sidebar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  width: 250px !important;
+  transition: none !important;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -46,12 +48,12 @@
   top: 0;
   left: 0;
   height: 100vh;
-  width: 250px;
+  width: 250px !important;
   background: linear-gradient(135deg, #11101d 0%, #1a1a2e 100%);
   padding: 20px 0 0 0;
   z-index: 100;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: none !important;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
@@ -59,6 +61,19 @@
 
 .modern-sidebar.sidebar-collapsed {
   width: 80px;
+}
+
+/* Ensure main content adjusts properly */
+.main-content {
+  margin-left: 250px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 100vh;
+  width: calc(100vw - 250px);
+}
+
+.modern-sidebar.sidebar-collapsed + .main-content {
+  margin-left: 80px;
+  width: calc(100vw - 80px);
 }
 
 /* Logo Section */
@@ -143,7 +158,9 @@
 
 .modern-sidebar ul.nav-links li a:hover {
   background: rgba(255, 255, 255, 0.1);
-  transform: translateX(5px);
+  /* transform: translateX(5px); */
+  /* Pastikan tidak ada pergeseran */
+  transform: none !important;
 }
 
 .modern-sidebar ul.nav-links li a.active {
@@ -320,4 +337,153 @@
 .modern-sidebar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Completely disable hover expand functionality */
+.modern-sidebar:hover {
+  width: inherit !important;
+}
+
+.modern-sidebar.sidebar-collapsed:hover {
+  width: 80px !important;
+}
+
+.modern-sidebar.sidebar-collapsed:hover .links_name,
+.modern-sidebar.sidebar-collapsed:hover .logo_name,
+.modern-sidebar.sidebar-collapsed:hover .fa-chevron-down {
+  opacity: 0 !important;
+  width: 0 !important;
+  pointer-events: none !important;
+}
+
+.modern-sidebar.sidebar-collapsed:hover .dropdown {
+  display: none !important;
+}
+
+/* Remove any transition delays that might cause gaps */
+.modern-sidebar * {
+  transition-delay: 0s !important;
+}
+
+/* Ensure no gaps or spacing issues */
+.modern-sidebar,
+.main-content {
+  box-sizing: border-box;
+}
+
+/* Fix any potential layout shifts */
+.modern-sidebar.sidebar-collapsed .user-info {
+  display: none;
+}
+
+.modern-sidebar.sidebar-collapsed .user-profile-container {
+  justify-content: center;
+  padding: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modern-sidebar {
+    width: 80px;
+  }
+  
+  .main-content {
+    margin-left: 80px;
+    width: calc(100vw - 80px);
+  }
+}
+
+/* Ensure smooth transitions without gaps */
+.modern-sidebar,
+.main-content {
+  will-change: width, margin-left;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* User profile section styling */
+.sidebar-user-profile {
+  margin-top: auto;
+  padding: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-profile-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.modern-sidebar.sidebar-collapsed .user-profile-container {
+  justify-content: center;
+  gap: 0;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+  transition: all 0.3s ease;
+}
+
+.modern-sidebar.sidebar-collapsed .user-info {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.user-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role-badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Pastikan teks sidebar selalu ellipsis dan tidak berubah saat hover */
+.modern-sidebar ul.nav-links li .links_name,
+.sidebar-link-text,
+.sidebar-header-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1 !important;
+  width: 100%;
+  transition: none !important;
+}
+
+/* Hapus/override aturan hover yang mengubah opacity atau width */
+.modern-sidebar ul.nav-links li a:hover .links_name,
+.sidebar:hover .sidebar-link-text,
+.sidebar:hover .sidebar-header-text {
+  opacity: 1 !important;
+  width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Pastikan tidak ada perubahan lebar pada elemen sidebar */
+.modern-sidebar * {
+  transition: none !important;
+  transform: none !important;
 }

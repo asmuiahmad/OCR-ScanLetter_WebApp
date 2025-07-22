@@ -1,14 +1,7 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-<style>
-  .form-card {
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  .form-card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
   .input-field {
     transition: all 0.2s ease;
   }
@@ -27,17 +20,25 @@
   }
   .floating-label {
     position: absolute;
-    top: -0.7rem;
-    left: 0.9rem;
-    padding: 0 0.25rem;
+    top: 0;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    padding: 0 0.2rem;
     background: white;
-    font-size: 0.75rem;
-    color: #111827;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    z-index: 10;
+    font-size: 0.7rem;
+    color: #2563eb;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    line-height: 1;
+    pointer-events: none;
+    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
   }
 </style>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+</head>
 <div id="toast-container" class="fixed bottom-6 left-1/2 z-50 flex flex-col items-center space-y-2" style="transform:translateX(-50%);"></div>
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-4xl mx-auto">
@@ -49,75 +50,112 @@
           </h2>
         </div>
       </div>
-      <form method="POST" action="{{ url_for('main.pegawai') }}" id="pegawaiForm" class="p-6">
+      <form method="POST" action="{{ url_for('pegawai.pegawai') }}" id="pegawaiForm" class="p-6">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-5">
-            <div class="relative">
-              <div class="floating-label">Nama</div>
-              <input name="nama" id="nama" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" placeholder="Nama Lengkap">
-            </div>
-            <div class="relative">
-              <div class="floating-label">Tanggal Lahir</div>
-              <input name="tanggal_lahir" id="tanggal_lahir" type="date" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none">
-            </div>
-            <div class="relative">
-              <div class="floating-label">NIP</div>
-              <input name="nip" id="nip" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" placeholder="NIP Pegawai">
-            </div>
-            <div class="relative">
-              <div class="floating-label">Golongan / Pangkat</div>
-              <input name="golongan" id="golongan" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" placeholder="Contoh: III/a">
-            </div>
-            <div class="relative">
-              <div class="floating-label">Jabatan</div>
-              <input name="jabatan" id="jabatan" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" placeholder="Contoh: Staf TU">
-            </div>
-            <div class="relative">
-              <div class="floating-label">Agama</div>
-              <select name="agama" id="agama" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none">
-                <option value="" disabled selected>Pilih Agama</option>
-                <option value="Islam">Islam</option>
-                <option value="Kristen">Kristen</option>
-                <option value="Katolik">Katolik</option>
-                <option value="Hindu">Hindu</option>
-                <option value="Budha">Budha</option>
-                <option value="Konghucu">Konghucu</option>
-              </select>
-            </div>
-            <div class="relative">
-              <div class="floating-label">Jenis Kelamin</div>
-              <div class="border rounded p-3 bg-gray-50 flex gap-6 mt-2">
-                <label class="inline-flex items-center">
-                  <input class="form-radio accent-blue-600" type="radio" name="jenis_kelamin" value="Laki-laki" id="laki" required checked>
-                  <span class="ml-2 text-gray-700">Laki-laki</span>
-                </label>
-                <label class="inline-flex items-center">
-                  <input class="form-radio accent-blue-600" type="radio" name="jenis_kelamin" value="Perempuan" id="perempuan" required>
-                  <span class="ml-2 text-gray-700">Perempuan</span>
-                </label>
+        <div class="columns is-multiline">
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" name="nama" id="nama" required placeholder=" " />
+                <label class="label is-floating-label" for="nama">Nama</label>
               </div>
             </div>
           </div>
-          <div class="space-y-5">
-            <div class="relative">
-              <div class="floating-label">Riwayat Pendidikan</div>
-              <textarea name="riwayat_pendidikan" id="riwayat_pendidikan" rows="4" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px]" placeholder="Contoh: SDN 1, SMPN 3, SMAN 1, S1 Ilmu Komputer"></textarea>
-            </div>
-            <div class="relative">
-              <div class="floating-label">Riwayat Pekerjaan</div>
-              <textarea name="riwayat_pekerjaan" id="riwayat_pekerjaan" rows="4" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[80px]" placeholder="Contoh: CPNS 2018 - sekarang, Staf TU, dst."></textarea>
-            </div>
-            <div class="relative">
-              <div class="floating-label">Nomor Telepon</div>
-              <input name="nomor_telpon" id="nomor_telpon" required class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none" placeholder="Contoh: 081234567890">
-            </div>
-            <div class="mt-8 flex justify-end">
-              <button type="submit" class="btn-submit px-8 py-3 rounded-lg text-white font-semibold flex items-center" id="submitBtn">
-                <i class="fas fa-save mr-2"></i> Simpan Data Pegawai
-              </button>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" name="tanggal_lahir" id="tanggal_lahir" type="date" required placeholder=" " />
+                <label class="label is-floating-label" for="tanggal_lahir">Tanggal Lahir</label>
+              </div>
             </div>
           </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" name="nip" id="nip" required placeholder=" " />
+                <label class="label is-floating-label" for="nip">NIP</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" name="golongan" id="golongan" required placeholder=" " />
+                <label class="label is-floating-label" for="golongan">Golongan / Pangkat</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" name="jabatan" id="jabatan" required placeholder=" " />
+                <label class="label is-floating-label" for="jabatan">Jabatan</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <select class="input" name="agama" id="agama" required>
+                  <option value="" disabled selected>Pilih Agama</option>
+                  <option value="Islam">Islam</option>
+                  <option value="Kristen">Kristen</option>
+                  <option value="Katolik">Katolik</option>
+                  <option value="Hindu">Hindu</option>
+                  <option value="Budha">Budha</option>
+                  <option value="Konghucu">Konghucu</option>
+                </select>
+                <label class="label is-floating-label" for="agama">Agama</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <div class="border rounded p-3 bg-gray-50 flex gap-6 mt-2">
+                  <label class="inline-flex items-center">
+                    <input class="form-radio accent-blue-600" type="radio" name="jenis_kelamin" value="Laki-laki" id="laki" required checked>
+                    <span class="ml-2 text-gray-700">Laki-laki</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input class="form-radio accent-blue-600" type="radio" name="jenis_kelamin" value="Perempuan" id="perempuan" required>
+                    <span class="ml-2 text-gray-700">Perempuan</span>
+                  </label>
+                </div>
+                <label class="label is-floating-label" for="jenis_kelamin">Jenis Kelamin</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                <textarea class="input" name="riwayat_pendidikan" id="riwayat_pendidikan" rows="4" required placeholder=" "></textarea>
+                <label class="label is-floating-label" for="riwayat_pendidikan">Riwayat Pendidikan</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                <textarea class="input" name="riwayat_pekerjaan" id="riwayat_pekerjaan" rows="4" required placeholder=" "></textarea>
+                <label class="label is-floating-label" for="riwayat_pekerjaan">Riwayat Pekerjaan</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                <input class="input" name="nomor_telpon" id="nomor_telpon" required placeholder=" " />
+                <label class="label is-floating-label" for="nomor_telpon">Nomor Telepon</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field mt-5 has-text-right">
+          <button type="submit" class="button is-primary is-medium" id="submitBtn">
+            <span class="icon"><i class="fas fa-save"></i></span>
+            <span>Simpan Data Pegawai</span>
+          </button>
         </div>
       </form>
     </div>

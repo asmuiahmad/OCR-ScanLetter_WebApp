@@ -146,21 +146,8 @@ body {
 
 /* Sidebar Styles */
 .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 85px; /* Collapsed width */
-  display: flex;
-  flex-direction: column;
-  background: #161a2d;
-  padding: 25px 10px;
-  transition: all 0.4s ease;
-  overflow: hidden;
-}
-
-.sidebar:hover {
-  width: 260px; /* Expanded width */
+  width: 250px !important;
+  transition: none !important;
 }
 
 .sidebar .sidebar-header {
@@ -186,10 +173,6 @@ body {
   transition: opacity 0.4s ease;
   justify-content: center;
   text-align: center;
-}
-
-.sidebar:hover .sidebar-header h2 {
-  opacity: 1;
 }
 
 .sidebar-links {
@@ -278,12 +261,8 @@ body {
 }
 
 .main-content {
-  margin-left: 85px;
-  transition: margin-left 0.4s ease;
-}
-
-.sidebar:hover + .main-content {
-  margin-left: 260px;
+  margin-left: 250px !important;
+  transition: none !important;
 }
 
 /* Submenu Styles */

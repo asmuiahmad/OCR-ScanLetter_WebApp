@@ -103,5 +103,55 @@ class Pegawai(db.Model):
     nomor_telpon = db.Column(db.String(20), nullable=True)
     jabatan = db.Column(db.String(100), nullable=True)
 
+class UserLoginLog(db.Model):
+    __tablename__ = 'user_login_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)
+    user_email = db.Column(db.String(255), nullable=False)
+    login_time = db.Column(db.DateTime, default=datetime.utcnow)
+    logout_time = db.Column(db.DateTime, nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    user_agent = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(20), default='success')
+    session_duration = db.Column(db.Integer, nullable=True)
+    browser_info = db.Column(db.String(255), nullable=True)
+    device_type = db.Column(db.String(50), nullable=True)
+    location = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship
+    user = db.relationship('User', backref='login_logs')
+    
+    def to_dict(self):
+        from datetime import timezone, timedelta
+        
+        # Indonesia timezone (UTC+7)
+        indonesia_tz = timezone(timedelta(hours=7))
+        
+        def convert_to_indonesia_time(dt):
+            if dt:
+                # Convert UTC to Indonesia time
+                return dt.replace(tzinfo=timezone.utc).astimezone(indonesia_tz).isoformat()
+            return None
+        
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'user_email': self.user_email,
+            'login_time': convert_to_indonesia_time(self.login_time),
+            'logout_time': convert_to_indonesia_time(self.logout_time),
+            'ip_address': self.ip_address,
+            'user_agent': self.user_agent,
+            'status': self.status,
+            'session_duration': self.session_duration,
+            'browser_info': self.browser_info,
+            'device_type': self.device_type,
+            'location': self.location,
+            'created_at': convert_to_indonesia_time(self.created_at),
+            'updated_at': convert_to_indonesia_time(self.updated_at)
+        }
+
 def load_user(user_id):
     return User.query.get(int(user_id))

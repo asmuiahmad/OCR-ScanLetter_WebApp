@@ -128,9 +128,9 @@
     </div>
 
     <!-- Recent Activity and User Login -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Recent Surat -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Recent Surat - Takes remaining space (~600px) -->
+        <div class="flex-1 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-700">Surat Terbaru</h3>
             </div>
@@ -174,8 +174,9 @@
                 </div>
             </div>
         </div>
-        <!-- Recent User Logins -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+        
+        <!-- Recent User Logins - Fixed width 300px -->
+        <div class="w-full lg:w-80 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-700">User Login Terakhir</h3>
             </div>
@@ -188,8 +189,8 @@
                                 <i class="fas fa-user text-indigo-600 text-lg"></i>
                             </div>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-900">{{ user.email }}</p>
+                        <div class="ml-4 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ user.email }}</p>
                             <p class="text-xs text-gray-500">Last login: {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}</p>
                         </div>
                     </li>
@@ -198,5 +199,92 @@
             </div>
         </div>
     </div>
+
+    <!-- User Login Logs Section -->
+    <div class="mt-8">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Log User Masuk
+                        </h3>
+                        <p class="text-white text-opacity-80 text-sm mt-1" id="backend-status">
+                            Memuat status sistem...
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-white text-sm opacity-90" id="login-count">
+                            Total: <span id="total-logins">0</span> login
+                        </span>
+                        <button onclick="refreshLoginLogs()" class="px-3 py-1 bg-purple-700 hover:bg-purple-800 rounded text-white text-sm font-medium transition-all duration-200 border border-purple-400">
+                            <i class="fas fa-sync-alt mr-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <!-- Filter Controls -->
+                <div class="mb-4 flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Filter Tanggal</label>
+                        <input type="date" id="date-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Filter User</label>
+                        <input type="text" id="user-filter" placeholder="Cari nama user..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="clearFilters()" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors duration-200">
+                            <i class="fas fa-times mr-1"></i>Clear
+                        </button>
+                    </div>
+                </div>
+
+
+
+                <!-- Login Logs Container with Scrollbar -->
+                <div class="border border-gray-200 rounded-lg">
+                    <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                        <div class="grid grid-cols-4 gap-4 text-sm font-medium text-gray-700">
+                            <div>Tanggal & Waktu</div>
+                            <div>User</div>
+                            <div>IP Address</div>
+                            <div>Status</div>
+                        </div>
+                    </div>
+                    <div id="login-logs-container" class="max-h-64 overflow-y-auto">
+                        <div id="login-logs-content">
+                            <!-- Login logs will be loaded here -->
+                            <div class="p-8 text-center text-gray-500">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>Memuat log login...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="text-sm text-gray-600">
+                        Menampilkan <span id="showing-count">0</span> dari <span id="total-count">0</span> log
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="loadLoginLogs(currentPage - 1)" id="prev-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-chevron-left mr-1"></i>Sebelumnya
+                        </button>
+                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded text-sm font-medium" id="page-info">
+                            Halaman 1
+                        </span>
+                        <button onclick="loadLoginLogs(currentPage + 1)" id="next-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Selanjutnya<i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script src="{{ url_for('static', filename='assets/js/dashboard/login-logs.js') }}"></script>
+
 {% endblock %} 

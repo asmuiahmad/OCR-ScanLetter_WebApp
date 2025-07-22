@@ -1,6 +1,4 @@
-/* ===== NOTIFICATION SYSTEM STYLES ===== */
-
-/* Notification Bell Styles */
+/* Notification Styles */
 .notification-bell-btn {
   position: relative;
   cursor: pointer;
@@ -37,7 +35,6 @@
   }
 }
 
-/* Toast Notification Styles */
 .toast {
   display: flex;
   align-items: center;
@@ -61,7 +58,6 @@
   width: 4px;
 }
 
-/* Toast Types */
 .toast-success {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
@@ -102,7 +98,6 @@
   background: #3b82f6;
 }
 
-/* Toast Content */
 .toast-content {
   flex: 1;
   margin-right: 12px;
@@ -134,7 +129,6 @@
   opacity: 1;
 }
 
-/* Toast Animations */
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -159,4 +153,24 @@
 
 .toast.fade-out {
   animation: slideOut 0.3s ease-in forwards;
+}
+
+/* Animasi untuk menghilangkan notifikasi */
+@keyframes fadeOutSlideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+    height: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+  }
+}
+
+.fade-out-item {
+  animation: fadeOutSlideUp 0.5s ease forwards;
 }

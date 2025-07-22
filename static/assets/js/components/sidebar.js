@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (isCollapsed) {
       sidebar.classList.add('sidebar-collapsed');
-      mainContent.style.marginLeft = '80px';
+      // CSS handles the margin transition automatically
       // Close all dropdowns when collapsing
       document.querySelectorAll('.dropdown.show').forEach(dropdown => {
         dropdown.classList.remove('show');
@@ -76,20 +76,30 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     } else {
       sidebar.classList.remove('sidebar-collapsed');
-      mainContent.style.marginLeft = '250px';
+      // CSS handles the margin transition automatically
     }
     
     // Save state to localStorage
     localStorage.setItem('sidebarCollapsed', isCollapsed);
   }
   
-  // Load saved state from localStorage
+  // Load saved state from localStorage and apply immediately
   const savedState = localStorage.getItem('sidebarCollapsed');
   if (savedState !== null) {
     const shouldCollapse = savedState === 'true';
     if (shouldCollapse !== isCollapsed) {
-      toggleSidebar();
+      isCollapsed = shouldCollapse;
+      if (isCollapsed) {
+        sidebar.classList.add('sidebar-collapsed');
+      } else {
+        sidebar.classList.remove('sidebar-collapsed');
+      }
     }
+  }
+  
+  // Ensure initial state is correct
+  if (isCollapsed) {
+    sidebar.classList.add('sidebar-collapsed');
   }
   
   // Add click event to toggle button
@@ -100,13 +110,31 @@ document.addEventListener('DOMContentLoaded', function() {
       toggleSidebar();
     });
     
-    // Add hover effect
+    // Add hover effect for toggle button only (not sidebar expand)
     sidebarToggle.addEventListener('mouseenter', function() {
       this.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
     });
     
     sidebarToggle.addEventListener('mouseleave', function() {
       this.style.backgroundColor = 'transparent';
+    });
+  }
+  
+  // Completely disable any sidebar hover expand functionality
+  if (sidebar) {
+    // Remove any existing hover event listeners
+    sidebar.onmouseenter = null;
+    sidebar.onmouseleave = null;
+    
+    // Ensure sidebar width is controlled only by CSS classes
+    sidebar.addEventListener('mouseenter', function(e) {
+      e.preventDefault();
+      // Do nothing - no hover expand
+    });
+    
+    sidebar.addEventListener('mouseleave', function(e) {
+      e.preventDefault();
+      // Do nothing - no hover collapse
     });
   }
   
@@ -182,6 +210,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Remove sidebar expand on hover (desktop only)
   // (No code for mouseenter/mouseleave on sidebar)
+});
+
+// Pastikan sidebar selalu collapse saat reload/launch laman baru
+window.addEventListener('DOMContentLoaded', function() {
+  var sidebar = document.querySelector('.modern-sidebar');
+  if (sidebar) {
+    sidebar.classList.add('sidebar-collapsed');
+    sidebar.classList.remove('sidebar-expanded');
+  }
 });
 
 // Export functions for global use

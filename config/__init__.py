@@ -1,1 +1,0 @@
-from .ocr import ocr_bp

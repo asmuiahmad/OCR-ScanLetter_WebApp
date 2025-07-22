@@ -3,11 +3,11 @@
 {% block title %}Input Surat Keluar - PA Banjarbaru{% endblock %}
 
 {% block content %}
-<style>
-  .form-card {
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  }
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+</head>
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
   .form-card:hover {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
@@ -29,15 +29,19 @@
   }
   .floating-label {
     position: absolute;
-    top: -0.7rem;
-    left: 0.9rem;
-    padding: 0 0.25rem;
+    top: 0;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    padding: 0 0.2rem;
     background: white;
-    font-size: 0.75rem;
-    color: #111827;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    z-index: 10;
+    font-size: 0.7rem;
+    color: #2563eb;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    line-height: 1;
+    pointer-events: none;
+    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
   }
 </style>
 <div class="container mx-auto py-8 px-4">
@@ -54,60 +58,65 @@
     <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
       <form method="POST" enctype="multipart/form-data" class="p-6">
         {{ form.csrf_token()|safe }}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {% for field in form if field.type != 'CSRFToken' and field.type != 'SubmitField' and field.type != 'FileField' and field.type != 'TextAreaField' %}
-            {% if field.label.text != 'CSRF Token' %}
-              <div class="relative">
-                <div class="floating-label">{{ field.label.text }}</div>
-                {{ field(class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none", required=field.flags.required) }}
-                {% if field.errors %}
-                  <div class="text-red-500 text-xs mt-1">{{ field.errors[0] }}</div>
-                {% endif %}
+        <div class="columns is-multiline">
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.pengirim_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="pengirim_suratKeluar">Pengirim</label>
               </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-        {# Isi Surat (TextAreaField) dan Gambar Surat (FileField) dalam 2 kolom #}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {% set textarea = form|selectattr('type', 'equalto', 'TextAreaField')|list %}
-          {% set filefield = form|selectattr('type', 'equalto', 'FileField')|list %}
-          <!-- Kolom Isi Surat -->
-          <div class="relative">
-            <div class="floating-label">{{ textarea[0].label.text }}</div>
-            {{ textarea[0](class="input-field w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none min-h-[120px]", required=textarea[0].flags.required) }}
-            {% if textarea[0].errors %}
-              <div class="text-red-500 text-xs mt-1">{{ textarea[0].errors[0] }}</div>
-            {% endif %}
+            </div>
           </div>
-          <!-- Kolom Gambar Surat - Diperbaiki -->
-          <div class="relative">
-            <div class="floating-label">{{ filefield[0].label.text }}</div>
-            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary transition">
-              <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                <p class="text-sm text-gray-500">Klik untuk mengunggah file</p>
-                <p class="text-xs text-gray-500">PDF, JPG, PNG (Maks. 10MB)</p>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.penerima_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="penerima_suratKeluar">Penerima</label>
               </div>
-              {{ filefield[0](class="hidden") }}
-            </label>
-            {% if filefield[0].errors %}
-              <div class="text-red-500 text-xs mt-1">{{ filefield[0].errors[0] }}</div>
-            {% endif %}
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.nomor_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="nomor_suratKeluar">Nomor Surat</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.tanggal_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="tanggal_suratKeluar">Tanggal Surat</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.isi_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="isi_suratKeluar">Isi Surat</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.gambar_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="gambar_suratKeluar">Gambar Surat</label>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="mt-8 flex justify-end">
-          {{ form.submit(class="btn-submit px-8 py-3 rounded-lg text-white font-semibold flex items-center") }}
+        <div class="field mt-5 has-text-right">
+          <button type="submit" class="button is-primary is-medium">
+            <span class="icon"><i class="fas fa-save"></i></span>
+            <span>Simpan Surat Keluar</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 </div>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const today = new Date().toISOString().split('T')[0];
-    document.querySelectorAll('input[type="date"]').forEach(input => {
-      if (!input.value) input.value = today;
-    });
-  });
-</script>
+<script src="{{ url_for('static', filename='assets/js/forms/input-surat.js') }}"></script>
 {% endblock %}

@@ -47,7 +47,7 @@ def calculate_file_hash(file_path):
     return hasher.hexdigest()
 
 def load_dictionary():
-    json_path = os.path.join('static', 'assets', 'js', 'dictionary.json')
+    json_path = os.path.join('static', 'assets', 'js', 'utils', 'dictionary.json')
     with open(json_path, 'r') as f:
         return json.load(f)
 
