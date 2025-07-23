@@ -295,12 +295,16 @@ def save_batch_results_to_db_surat_masuk(results):
                         tanggal_acara_suratMasuk = None
                 
                 # Buat dictionary untuk parameter SuratMasuk
+                kode_surat = item.get('kode_suratMasuk') or 'Not found'
+                jenis_surat = item.get('jenis_suratMasuk') or 'Not found'
                 surat_masuk_data = {
                     'tanggal_suratMasuk': tanggal_suratMasuk,
                     'pengirim_suratMasuk': item.get('pengirim', 'Not found'),
                     'penerima_suratMasuk': item.get('penerima', 'Not found'),
                     'nomor_suratMasuk': item.get('nomor_surat', 'Not found'),
                     'isi_suratMasuk': item.get('isi', 'Not found'),
+                    'kode_suratMasuk': kode_surat,
+                    'jenis_suratMasuk': jenis_surat,
                     'acara_suratMasuk': item.get('acara', ''),
                     'tempat_suratMasuk': item.get('tempat', ''),
                     'tanggal_acara_suratMasuk': tanggal_acara_suratMasuk,
@@ -311,6 +315,11 @@ def save_batch_results_to_db_surat_masuk(results):
                     'initial_penerima_suratMasuk': item.get('penerima', 'Not found'),
                     'initial_isi_suratMasuk': item.get('isi', 'Not found')
                 }
+                # Fallback jika masih None
+                if not surat_masuk_data['kode_suratMasuk']:
+                    surat_masuk_data['kode_suratMasuk'] = 'Not found'
+                if not surat_masuk_data['jenis_suratMasuk']:
+                    surat_masuk_data['jenis_suratMasuk'] = 'Not found'
                 
                 surat_masuk = SuratMasuk(**surat_masuk_data)
                 
@@ -390,6 +399,11 @@ def ocr_surat_masuk():
                 saved_count = save_batch_results_to_db_surat_masuk(extracted_data_list)
                 if saved_count > 0:
                     flash(f"Berhasil memproses {saved_count} dokumen", 'success')
+                # Jangan redirect, render_template agar tombol extracted data muncul
+                return render_template('ocr/ocr_surat_masuk.html', 
+                                      extracted_data_list=extracted_data_list, 
+                                      image_paths=image_paths,
+                                      currentIndex=0)
             
             return render_template('ocr/ocr_surat_masuk.html', 
                                    extracted_data_list=extracted_data_list, 
@@ -475,6 +489,8 @@ def save_extracted_data():
                     penerima_suratMasuk=item.get('penerima_suratMasuk', 'Not found'),
                     nomor_suratMasuk=item.get('full_letter_number', 'Not found'),
                     isi_suratMasuk=item.get('isi_suratMasuk', 'Not found'),
+                    kode_suratMasuk=item.get('kode_suratMasuk', 'Not found'),
+                    jenis_suratMasuk=item.get('jenis_suratMasuk', 'Not found'),
                     acara_suratMasuk=item.get('acara_suratMasuk', ''),
                     tempat_suratMasuk=item.get('tempat_suratMasuk', ''),
                     tanggal_acara_suratMasuk=tanggal_acara_obj,

@@ -43,30 +43,30 @@ def dashboard():
     week_start = today - timedelta(days=today.weekday())
 
     suratKeluar_this_year = SuratKeluar.query.filter(
-        extract('year', SuratKeluar.tanggal_suratKeluar) == year
+        extract('year', SuratKeluar.created_at) == year
     ).count()
     suratMasuk_this_year = SuratMasuk.query.filter(
-        extract('year', SuratMasuk.tanggal_suratMasuk) == year
+        extract('year', SuratMasuk.created_at) == year
     ).count()
 
     suratKeluar_this_month = SuratKeluar.query.filter(
-        extract('year', SuratKeluar.tanggal_suratKeluar) == year,
-        extract('month', SuratKeluar.tanggal_suratKeluar) == month
+        extract('year', SuratKeluar.created_at) == year,
+        extract('month', SuratKeluar.created_at) == month
     ).count()
     suratMasuk_this_month = SuratMasuk.query.filter(
-        extract('year', SuratMasuk.tanggal_suratMasuk) == year,
-        extract('month', SuratMasuk.tanggal_suratMasuk) == month
+        extract('year', SuratMasuk.created_at) == year,
+        extract('month', SuratMasuk.created_at) == month
     ).count()
 
     suratKeluar_this_week = SuratKeluar.query.filter(
-        SuratKeluar.tanggal_suratKeluar >= week_start
+        SuratKeluar.created_at >= week_start
     ).count()
     suratMasuk_this_week = SuratMasuk.query.filter(
-        SuratMasuk.tanggal_suratMasuk >= week_start
+        SuratMasuk.created_at >= week_start
     ).count()
 
-    recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.tanggal_suratKeluar.desc()).limit(5).all()
-    recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.tanggal_suratMasuk.desc()).limit(5).all()
+    recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.created_at.desc()).limit(20).all()
+    recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.created_at.desc()).limit(20).all()
 
     users = User.query.order_by(User.last_login.desc()).limit(5).all()
 

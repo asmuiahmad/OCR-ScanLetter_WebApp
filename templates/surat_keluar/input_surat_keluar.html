@@ -6,6 +6,31 @@
 <head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+  <style>
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin: 0;
+      filter: none;
+      opacity: 1;
+      cursor: pointer;
+    }
+    input[type="date"] {
+      padding-right: 2.5rem !important;
+    }
+    /* For Firefox */
+    input[type="date"]::-moz-calendar-picker-indicator {
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin: 0;
+      filter: none;
+      opacity: 1;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
   .form-card:hover {
@@ -47,7 +72,7 @@
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-4xl mx-auto">
     <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary p-6">
+      <div class="bg-gradient-to-r from-primary to-secondary px-4 py-2">
         <div class="flex items-center justify-between">
           <h2 class="text-2xl font-bold text-black">
             <i class="fas fa-file-import mr-3 text-yellow-400"></i>Input Surat Keluar
@@ -86,8 +111,24 @@
           <div class="column is-half">
             <div class="field is-floating-label">
               <div class="control">
-                {{ form.tanggal_suratKeluar(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="tanggal_suratKeluar">Tanggal Surat</label>
+                {{ form.tanggal_suratKeluar(class="input", type="date", placeholder=" ") }}
+              </div>
+              <label class="label is-floating-label" for="tanggal_suratKeluar">Tanggal Surat</label>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.kode_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="kode_suratKeluar">Kode Surat</label>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.jenis_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="jenis_suratKeluar">Jenis Surat</label>
               </div>
             </div>
           </div>
@@ -97,14 +138,19 @@
                 {{ form.isi_suratKeluar(class="input", placeholder=" ") }}
                 <label class="label is-floating-label" for="isi_suratKeluar">Isi Surat</label>
               </div>
-            </div>
+        </div>
           </div>
           <div class="column is-full">
             <div class="field is-floating-label">
               <div class="control">
-                {{ form.gambar_suratKeluar(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="gambar_suratKeluar">Gambar Surat</label>
+                <div id="drop-area-keluar" style="border:2px dashed #3b82f6;border-radius:0.75rem;padding:2rem;text-align:center;cursor:pointer;transition:background 0.2s;position:relative;background:#f8fafc;">
+                  <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:#3b82f6;"></i>
+                  <div style="font-weight:600;color:#1e40af;margin-top:0.5rem;">Drag & Drop atau Klik untuk Upload Gambar Surat</div>
+                  <div id="file-selected-name-keluar" style="margin-top:0.5rem;color:#2563eb;font-size:0.95em;font-weight:500;"></div>
+                  {{ form.image(class="custom-file-input", style="display:none;") }}
+                </div>
               </div>
+              <label class="label is-floating-label" for="image">Lampiran Surat</label>
             </div>
           </div>
         </div>
@@ -119,4 +165,53 @@
   </div>
 </div>
 <script src="{{ url_for('static', filename='assets/js/forms/input-surat.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Drag & drop untuk Gambar Surat (Surat Keluar)
+  const dropAreaKeluar = document.getElementById('drop-area-keluar');
+  const fileInputKeluar = document.querySelector('.custom-file-input');
+  const fileSelectedNameKeluar = document.getElementById('file-selected-name-keluar');
+  if (dropAreaKeluar && fileInputKeluar && fileSelectedNameKeluar) {
+    dropAreaKeluar.addEventListener('click', function() {
+      fileInputKeluar.click();
+    });
+    dropAreaKeluar.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      dropAreaKeluar.style.background = '#e0e7ff';
+      dropAreaKeluar.style.borderColor = '#1e40af';
+    });
+    dropAreaKeluar.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      dropAreaKeluar.style.background = '#f8fafc';
+      dropAreaKeluar.style.borderColor = '#3b82f6';
+    });
+    dropAreaKeluar.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropAreaKeluar.style.background = '#f8fafc';
+      dropAreaKeluar.style.borderColor = '#3b82f6';
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        fileInputKeluar.files = e.dataTransfer.files;
+        updateFileNameKeluar();
+      }
+    });
+    fileInputKeluar.addEventListener('change', updateFileNameKeluar);
+    function updateFileNameKeluar() {
+      if (fileInputKeluar.files && fileInputKeluar.files.length > 0) {
+        fileSelectedNameKeluar.textContent = fileInputKeluar.files[0].name;
+      } else {
+        fileSelectedNameKeluar.textContent = '';
+      }
+    }
+  }
+});
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  // Toast notification for flash messages (bottom-center)
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category, message in messages %}showToast({message: "{{ message|e }}", type: "{{ category }}", duration: 4000, position: 'bottom-center'});{% endfor %}{% endif %}{% endwith %}
+});
+</script>
 {% endblock %}

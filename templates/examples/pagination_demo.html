@@ -1,0 +1,60 @@
+{% extends "layouts/base.html" %}
+{% from 'components/pagination.html' import render_pagination %}
+
+{% block title %}Pagination Demo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Pagination Component Demo</h2>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Sample Data List</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Sample content -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(1, 11) %}
+                                <tr>
+                                    <td>{{ i }}</td>
+                                    <td>User {{ i }}</td>
+                                    <td>user{{ i }}@example.com</td>
+                                    <td>2024-01-{{ '%02d'|format(i) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination Examples -->
+                    <div class="mt-5">
+                        <h6>Example 1: Single Page (No pagination shown)</h6>
+                        {{ render_pagination(single_page_pagination, 'pagination_demo') }}
+                        
+                        <h6 class="mt-4">Example 2: First Page</h6>
+                        {{ render_pagination(first_page_pagination, 'pagination_demo') }}
+                        
+                        <h6 class="mt-4">Example 3: Middle Page</h6>
+                        {{ render_pagination(middle_page_pagination, 'pagination_demo') }}
+                        
+                        <h6 class="mt-4">Example 4: Last Page</h6>
+                        {{ render_pagination(last_page_pagination, 'pagination_demo') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

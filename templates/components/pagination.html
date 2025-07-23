@@ -1,0 +1,51 @@
+{% macro render_pagination(pagination, endpoint, **kwargs) %}
+{% if pagination and pagination.pages > 1 %}
+<nav aria-label="Page navigation" class="mt-6">
+    <div class="flex items-center justify-center space-x-1">
+        <!-- Previous Button -->
+        {% if pagination.has_prev %}
+            <a href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}" 
+               class="pagination-btn pagination-nav">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn pagination-nav pagination-disabled">
+                <i class="fas fa-angle-double-left"></i>
+            </span>
+        {% endif %}
+
+        <!-- Page Numbers -->
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <span class="pagination-btn pagination-current">{{ page_num }}</span>
+                {% else %}
+                    <a href="{{ url_for(endpoint, page=page_num, **kwargs) }}" 
+                       class="pagination-btn pagination-number">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span class="pagination-btn pagination-ellipsis">...</span>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Next Button -->
+        {% if pagination.has_next %}
+            <a href="{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}" 
+               class="pagination-btn pagination-nav">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        {% else %}
+            <span class="pagination-btn pagination-nav pagination-disabled">
+                <i class="fas fa-angle-double-right"></i>
+            </span>
+        {% endif %}
+    </div>
+    
+    <!-- Page Info -->
+    <div class="text-center mt-3 text-sm text-gray-600">
+        Halaman {{ pagination.page }} dari {{ pagination.pages }} 
+        ({{ pagination.total }} total item)
+    </div>
+</nav>
+{% endif %}
+{% endmacro %}

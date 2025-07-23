@@ -33,6 +33,10 @@ def create_app():
 
     db.init_app(app)
     
+    # Inisialisasi Flask-Migrate
+    from flask_migrate import Migrate
+    migrate = Migrate(app, db)
+    
     csrf.init_app(app)
 
     login_manager.init_app(app)

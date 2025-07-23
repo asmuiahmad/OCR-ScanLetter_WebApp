@@ -154,8 +154,8 @@
           <div class="column is-full">
             <div class="field is-floating-label">
               <div class="control">
-                <div class="border rounded p-3 bg-gray-50">
-                  {% for subfield in form.jenis_cuti %}
+              <div class="border rounded p-3 bg-gray-50">
+                {% for subfield in form.jenis_cuti %}
                   <div class="field is-checkradio">
                     <input type="radio" name="jenis_cuti" value="{{ subfield.data.value }}" class="is-checkradio">
                     <label class="label">{{ subfield.label }}</label>
@@ -179,7 +179,7 @@
               <div class="control">
                 {{ form.lama_cuti(class="input", placeholder=" ") }}
                 <label class="label is-floating-label" for="lama_cuti">Lama Cuti</label>
-              </div>
+            </div>
             </div>
           </div>
         </div>

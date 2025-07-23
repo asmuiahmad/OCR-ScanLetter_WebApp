@@ -3,7 +3,7 @@
 /* General styles for login and register */
 body {
   font-family: "Poppins", sans-serif;
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #ffffff 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 25%, #bbdefb 50%, #90caf9 75%, #64b5f6 100%);
   background-attachment: fixed;
   margin: 0;
   padding: 0;
@@ -18,7 +18,7 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+  background: radial-gradient(circle at center, transparent 0%, rgba(100, 181, 246, 0.1) 100%);
   pointer-events: none;
 }
 
@@ -34,41 +34,65 @@ body::before {
 
 .login {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 35px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 50%, rgba(214, 240, 253, 0.85) 100%);
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   animation: fadeIn 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.login::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(to right, #4776E6, #8E54E9);
+  z-index: 1;
+  animation: slideIn 1s ease-out forwards;
+  transform: scaleX(0);
+  transform-origin: left;
 }
 
 @keyframes fadeIn {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-50px);
   }
-  to {
+  20% {
+    opacity: 0.2;
+  }
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.login h1 {
-  color: #1e3c72;
+.login h1, .register-container h1 {
+  background: linear-gradient(45deg, #4776E6, #8E54E9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   text-align: center;
   margin-bottom: 30px;
   font-weight: 600;
   font-size: 2em;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .btn-primary {
   margin-top: 20px;
-  background: linear-gradient(to right, #1e3c72, #2a5298);
+  background: linear-gradient(45deg, #4776E6, #8E54E9);
+  background-size: 200% auto;
   border: none;
   width: 100%;
   padding: 12px;
@@ -77,13 +101,14 @@ body::before {
   font-size: 1.1em;
   color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
+  box-shadow: 0 4px 15px rgba(71, 118, 230, 0.2);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(to right, #2a5298, #1e3c72);
+  background-position: right center;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+  box-shadow: 0 6px 20px rgba(71, 118, 230, 0.4);
 }
 
 /* Input fields */
@@ -95,20 +120,24 @@ select.form-control {
   height: 45px;
   padding: 10px 15px;
   margin: 10px 0;
-  border: 2px solid #e1e5ea;
+  border: 1px solid rgba(225, 229, 234, 0.8);
   border-radius: 10px;
   font-size: 1em;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 input[type=text]:focus,
 input[type=password]:focus,
 input[type=email]:focus,
 select.form-control:focus {
-  border-color: #1e3c72;
+  border-color: #4776E6;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+  box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.15);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 label {
@@ -153,14 +182,16 @@ label {
 }
 
 a {
-  color: #1e3c72;
+  color: #4776E6;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 a:hover {
-  color: #2a5298;
-  text-decoration: underline;
+  color: #8E54E9;
+  text-decoration: none;
+  text-shadow: 0 0 1px rgba(142, 84, 233, 0.2);
 }
 
 .close {
@@ -181,20 +212,250 @@ a:hover {
   opacity: .75;
 }
 
+.register-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 35px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 50%, rgba(214, 240, 253, 0.85) 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.register-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(to right, #4776E6, #8E54E9);
+  z-index: 1;
+  animation: slideIn 1s ease-out forwards;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* Animation for form elements */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login h1, .register-container h1 {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.login form, .register-container form {
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+.login p, .register-container p {
+  animation: fadeInUp 0.6s ease-out 0.7s both;
+}
+
+/* Add a subtle animated gradient effect to both containers */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.9);
+  }
+  40% {
+    opacity: 0.6;
+    transform: translateY(10px) scale(1.01);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateY(-5px) scale(0.99);
+  }
+  80% {
+    opacity: 0.9;
+    transform: translateY(2px) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login, .register-container {
+  background-size: 200% 200%;
+  animation: bounceIn 1s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards, gradientShift 15s ease infinite;
+  transform-origin: top center;
+}
+
+/* Form styling consistency */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  height: 45px;
+  padding: 10px 15px;
+  margin: 5px 0;
+  border: 1px solid rgba(225, 229, 234, 0.8);
+  border-radius: 10px;
+  font-size: 1em;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #4776E6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Password toggle styling */
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  padding-right: 45px !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #6c757d;
+  transition: color 0.3s ease;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: #4776E6;
+}
+
+.password-toggle:focus {
+  outline: none;
+  color: #4776E6;
+}
+
+.eye-icon,
+.eye-off-icon {
+  width: 20px;
+  height: 20px;
+  transition: opacity 0.2s ease;
+}
+
+/* Password match validation styling */
+.password-match-message {
+  font-size: 0.875em;
+  margin-top: 5px;
+  padding: 8px;
+  border-radius: 5px;
+  transition: all 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+
+.password-match-message.match {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  animation: slideInMatch 0.3s ease-out;
+}
+
+@keyframes slideInMatch {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-primary:disabled {
+  background: linear-gradient(45deg, #ccc, #999);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-primary:disabled:hover {
+  background: linear-gradient(45deg, #ccc, #999);
+  transform: none;
+  box-shadow: none;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 480px) {
-  .login {
-    padding: 30px 20px;
+  .login, .register-container {
+    padding: 25px 20px;
+    max-width: 90%;
   }
   
-  .login h1 {
+  .login h1, .register-container h1 {
     font-size: 1.75em;
   }
   
   input[type=text],
   input[type=password],
   input[type=email],
-  select.form-control {
+  select.form-control,
+  .form-group input,
+  .form-group select {
     height: 40px;
   }
 }

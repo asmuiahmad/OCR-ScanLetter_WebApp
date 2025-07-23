@@ -39,6 +39,10 @@ class SuratMasuk(db.Model):
     initial_isi_suratMasuk = db.Column(db.Text)
     initial_nomor_suratMasuk = db.Column(db.String(255))
     status_suratMasuk = db.Column(db.String(20), default='pending', nullable=False)
+    acara_suratMasuk = db.Column(db.Text, nullable=True)
+    tempat_suratMasuk = db.Column(db.Text, nullable=True)
+    tanggal_acara_suratMasuk = db.Column(db.Date, nullable=True)
+    jam_suratMasuk = db.Column(db.String(10), nullable=True)
 
 class SuratKeluar(db.Model):
     id_suratKeluar = db.Column(db.Integer, primary_key=True)
@@ -60,6 +64,8 @@ class SuratKeluar(db.Model):
     tanggal_acara_suratKeluar = db.Column(db.Date, nullable=True)
     jam_suratKeluar = db.Column(db.String(10), nullable=True)
     status_suratKeluar = db.Column(db.String(20), default='pending', nullable=False)
+    kode_suratKeluar = db.Column(db.String(100), nullable=False)
+    jenis_suratKeluar = db.Column(db.String(100), nullable=False)
 
 class Cuti(db.Model):
     __tablename__ = 'cuti'
@@ -84,10 +90,9 @@ class Cuti(db.Model):
     approved_by = db.Column(db.String(100), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
     notes = db.Column(db.Text, nullable=True)
-    # Tambahan untuk digital signature dan file
-    qr_code = db.Column(db.Text, nullable=True)  # base64 string QR code
-    pdf_path = db.Column(db.Text, nullable=True) # path file PDF
-    docx_path = db.Column(db.Text, nullable=True) # path file DOCX
+    qr_code = db.Column(db.Text, nullable=True)
+    pdf_path = db.Column(db.Text, nullable=True)
+    docx_path = db.Column(db.Text, nullable=True)
 
 class Pegawai(db.Model):
     __tablename__ = 'pegawai'
@@ -121,18 +126,15 @@ class UserLoginLog(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationship
     user = db.relationship('User', backref='login_logs')
     
     def to_dict(self):
         from datetime import timezone, timedelta
         
-        # Indonesia timezone (UTC+7)
         indonesia_tz = timezone(timedelta(hours=7))
         
         def convert_to_indonesia_time(dt):
             if dt:
-                # Convert UTC to Indonesia time
                 return dt.replace(tzinfo=timezone.utc).astimezone(indonesia_tz).isoformat()
             return None
         

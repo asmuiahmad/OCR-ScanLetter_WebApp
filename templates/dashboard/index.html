@@ -6,7 +6,7 @@
 <div class="container mx-auto py-6 px-4">
   <div class="max-w-5xl mx-auto">
     <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary p-6">
+      <div class="bg-gradient-to-r from-primary to-secondary px-4 py-2">
         <div class="flex items-center justify-between">
           <h2 class="text-2xl font-bold text-black">
             Dashboard
@@ -25,7 +25,7 @@
                 </div>
                 <div class="ml-4">
                     <h5 class="text-xl font-semibold text-white">Total Surat Masuk</h5>
-                    <p class="text-4xl font-bold text-white">{{ suratKeluar_count }}</p>
+                    <p class="text-4xl font-bold text-white">{{ suratMasuk_count }}</p>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                 </div>
                 <div class="ml-4">
                     <h5 class="text-xl font-semibold text-white">Total Surat Keluar</h5>
-                    <p class="text-4xl font-bold text-white">{{ suratMasuk_count }}</p>
+                    <p class="text-4xl font-bold text-white">{{ suratKeluar_count }}</p>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_year }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_year }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
                         <i class="fas fa-arrow-down text-green-600"></i>
@@ -64,7 +64,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_year }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_year }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
                         <i class="fas fa-arrow-up text-yellow-400"></i>
@@ -82,7 +82,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_month }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_month }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100">
                         <i class="fas fa-arrow-down text-green-600"></i>
@@ -91,7 +91,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_month }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_month }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100">
                         <i class="fas fa-arrow-up text-yellow-400"></i>
@@ -108,7 +108,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_week }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_week }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
                         <i class="fas fa-arrow-down text-green-600"></i>
@@ -117,7 +117,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_week }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_week }}</p>
                     </div>
                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
                         <i class="fas fa-arrow-up text-yellow-400"></i>
@@ -129,44 +129,31 @@
 
     <!-- Recent Activity and User Login -->
     <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Recent Surat - Takes remaining space (~600px) -->
+        <!-- Log Surat Masuk & Keluar -->
         <div class="flex-1 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-700">Surat Terbaru</h3>
+                <h3 class="text-lg font-semibold text-gray-700">Log Surat Masuk & Keluar</h3>
             </div>
-            <div class="p-6">
+            <div class="p-6" style="max-height:420px; overflow-y:auto;">
                 <div class="space-y-4">
-                    {% for surat in recent_surat_keluar %}
+                    {% set all_surat = (recent_surat_masuk + recent_surat_keluar) %}
+                    {% set all_surat = all_surat|sort(attribute='created_at', reverse=True) %}
+                    {% for surat in all_surat %}
                     <div class="flex items-start">
                         <div class="flex-shrink-0 mt-1">
-                            <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
-                                <i class="fas fa-arrow-down text-green-600 text-sm"></i>
+                            <div class="flex items-center justify-center h-8 w-8 rounded-full {{ 'bg-blue-100' if surat.__class__.__name__ == 'SuratMasuk' else 'bg-green-100' }}">
+                                <i class="fas {{ 'fa-arrow-down text-green-600' if surat.__class__.__name__ == 'SuratMasuk' else 'fa-arrow-up text-yellow-400' }} text-sm"></i>
                             </div>
                         </div>
                         <div class="ml-3">
                             <p class="text-sm font-medium text-gray-900">
-                                {{ surat.pengirim_suratKeluar }}
+                                {{ surat.pengirim_suratMasuk if surat.__class__.__name__ == 'SuratMasuk' else surat.pengirim_suratKeluar }}
+                                <span class="ml-2 px-2 py-0.5 rounded text-xs font-semibold {{ 'bg-blue-200 text-blue-800' if surat.__class__.__name__ == 'SuratMasuk' else 'bg-green-200 text-green-800' }}">
+                                    {{ 'Masuk' if surat.__class__.__name__ == 'SuratMasuk' else 'Keluar' }}
+                                </span>
                             </p>
                             <p class="text-xs text-gray-500">
-                                {{ surat.tanggal_suratKeluar.strftime('%d %b %Y') }} - {{ surat.nomor_suratKeluar }}
-                            </p>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    
-                    {% for surat in recent_surat_masuk %}
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
-                                <i class="fas fa-arrow-up text-yellow-400 text-sm"></i>
-                            </div>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900">
-                                {{ surat.pengirim_suratMasuk }}
-                            </p>
-                            <p class="text-xs text-gray-500">
-                                {{ surat.tanggal_suratMasuk.strftime('%d %b %Y') }} - {{ surat.nomor_suratMasuk }}
+                                {{ surat.created_at.strftime('%d %b %Y %H:%M') }} - {{ surat.nomor_suratMasuk if surat.__class__.__name__ == 'SuratMasuk' else surat.nomor_suratKeluar }}
                             </p>
                         </div>
                     </div>
@@ -174,7 +161,6 @@
                 </div>
             </div>
         </div>
-        
         <!-- Recent User Logins - Fixed width 300px -->
         <div class="w-full lg:w-80 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
@@ -203,7 +189,7 @@
     <!-- User Login Logs Section -->
     <div class="mt-8">
         <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4 border-b border-gray-200">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-white">
@@ -269,13 +255,13 @@
                         Menampilkan <span id="showing-count">0</span> dari <span id="total-count">0</span> log
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="loadLoginLogs(currentPage - 1)" id="prev-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <button onclick="loadLoginLogs(currentPage - 1)" id="prev-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200" disabled>
                             <i class="fas fa-chevron-left mr-1"></i>Sebelumnya
                         </button>
                         <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded text-sm font-medium" id="page-info">
                             Halaman 1
                         </span>
-                        <button onclick="loadLoginLogs(currentPage + 1)" id="next-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <button onclick="loadLoginLogs(currentPage + 1)" id="next-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200" disabled>
                             Selanjutnya<i class="fas fa-chevron-right ml-1"></i>
                         </button>
                     </div>

@@ -51,72 +51,62 @@ function showUserInfo() {
 // Enhanced Sidebar toggle functionality
 document.addEventListener('DOMContentLoaded', function() {
   const sidebar = document.querySelector('.modern-sidebar');
-  const mainContent = document.querySelector('.main-content');
   const sidebarToggle = document.getElementById('sidebarToggle');
   
-  // Initialize sidebar state
-  let isCollapsed = sidebar?.classList.contains('sidebar-collapsed') || false;
+  // 1. PASTIKAN SIDEBAR COLLAPSE SAAT LOAD
+  let isCollapsed = true;
+  const savedState = localStorage.getItem('sidebarCollapsed');
   
-  // Function to toggle sidebar
-  function toggleSidebar() {
-    if (!sidebar || !mainContent) return;
-    
-    isCollapsed = !isCollapsed;
-    
+  if (savedState !== null) {
+    isCollapsed = savedState === 'true';
+  } else {
+    // Default: collapse di desktop dan mobile
+    isCollapsed = true;
+    localStorage.setItem('sidebarCollapsed', 'true');
+  }
+  
+  // Terapkan state awal
+  if (sidebar) {
     if (isCollapsed) {
       sidebar.classList.add('sidebar-collapsed');
-      // CSS handles the margin transition automatically
-      // Close all dropdowns when collapsing
-      document.querySelectorAll('.dropdown.show').forEach(dropdown => {
-        dropdown.classList.remove('show');
-      });
-      // Reset chevron rotations
-      document.querySelectorAll('.fa-chevron-down').forEach(chevron => {
-        chevron.style.transform = 'rotate(0deg)';
-      });
     } else {
       sidebar.classList.remove('sidebar-collapsed');
-      // CSS handles the margin transition automatically
     }
-    
-    // Save state to localStorage
+    // Hapus class no-transition setelah inisialisasi
+    setTimeout(() => {
+      sidebar.classList.remove('no-transition');
+    }, 100);
+  }
+
+  // 2. TOGGLE FUNCTION DENGAN PERBAIKAN LEBAR
+  function toggleSidebar() {
+    if (!sidebar) return;
+    isCollapsed = !isCollapsed;
+    if (isCollapsed) {
+      sidebar.classList.add('sidebar-collapsed');
+    } else {
+      sidebar.classList.remove('sidebar-collapsed');
+    }
     localStorage.setItem('sidebarCollapsed', isCollapsed);
-  }
-  
-  // Load saved state from localStorage and apply immediately
-  const savedState = localStorage.getItem('sidebarCollapsed');
-  if (savedState !== null) {
-    const shouldCollapse = savedState === 'true';
-    if (shouldCollapse !== isCollapsed) {
-      isCollapsed = shouldCollapse;
-      if (isCollapsed) {
-        sidebar.classList.add('sidebar-collapsed');
-      } else {
-        sidebar.classList.remove('sidebar-collapsed');
+    // Perbaiki tooltip saat toggle
+    document.querySelectorAll('.nav-links li a').forEach(link => {
+      if (isCollapsed && !link.getAttribute('data-tooltip')) {
+        const title = link.querySelector('.links_name')?.textContent || '';
+        link.setAttribute('data-tooltip', title);
       }
-    }
+    });
   }
-  
-  // Ensure initial state is correct
-  if (isCollapsed) {
-    sidebar.classList.add('sidebar-collapsed');
-  }
-  
-  // Add click event to toggle button
+
+  // 3. EVENT LISTENER UNTUK TOGGLE
   if (sidebarToggle) {
-    sidebarToggle.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleSidebar();
-    });
-    
-    // Add hover effect for toggle button only (not sidebar expand)
-    sidebarToggle.addEventListener('mouseenter', function() {
-      this.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-    });
-    
-    sidebarToggle.addEventListener('mouseleave', function() {
-      this.style.backgroundColor = 'transparent';
+    sidebarToggle.addEventListener('click', toggleSidebar);
+  }
+
+  // 4. PERBAIKI TOOLTIP SAAT COLLAPSE
+  if (isCollapsed) {
+    document.querySelectorAll('.nav-links li a').forEach(link => {
+      const title = link.querySelector('.links_name')?.textContent || '';
+      link.setAttribute('data-tooltip', title);
     });
   }
   
@@ -138,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Auto-collapse on mobile
+  // Auto-collapse on mobile only
   function handleResize() {
     if (window.innerWidth <= 768) {
       if (!isCollapsed) {
@@ -210,15 +200,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Remove sidebar expand on hover (desktop only)
   // (No code for mouseenter/mouseleave on sidebar)
-});
-
-// Pastikan sidebar selalu collapse saat reload/launch laman baru
-window.addEventListener('DOMContentLoaded', function() {
-  var sidebar = document.querySelector('.modern-sidebar');
-  if (sidebar) {
-    sidebar.classList.add('sidebar-collapsed');
-    sidebar.classList.remove('sidebar-expanded');
-  }
 });
 
 // Export functions for global use

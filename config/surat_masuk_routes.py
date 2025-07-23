@@ -99,7 +99,10 @@ def input_surat_masuk():
                 tempat_suratMasuk=form.tempat_suratMasuk.data,
                 tanggal_acara_suratMasuk=form.tanggal_acara_suratMasuk.data,
                 jam_suratMasuk=form.jam_suratMasuk.data,
-                status_suratMasuk='pending'
+                kode_suratMasuk='Not found',
+                jenis_suratMasuk='Not found',
+                status_suratMasuk='pending',
+                created_at=datetime.utcnow()
             )
             db.session.add(new_surat_masuk)
             db.session.commit()
@@ -107,7 +110,12 @@ def input_surat_masuk():
             return redirect(url_for('surat_masuk.show_surat_masuk'))
         except Exception as e:
             db.session.rollback()
+            current_app.logger.error(f"Error adding Surat Masuk: {str(e)}", exc_info=True)
             flash(f'Error adding Surat Masuk: {str(e)}', 'danger')
+    elif request.method == 'POST':
+        # Jika form tidak valid, tampilkan error detail
+        current_app.logger.error(f"Form validation errors: {form.errors}")
+        flash(f'Form validation errors: {form.errors}', 'danger')
     return render_template('surat_masuk/input_surat_masuk.html', form=form)
 
 

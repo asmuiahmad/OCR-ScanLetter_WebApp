@@ -1,8 +1,3 @@
-"""
-User management routes
-User administration and management functionality
-"""
-
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
@@ -13,11 +8,9 @@ from config.route_utils import role_required
 
 user_bp = Blueprint('user', __name__)
 
-
 @user_bp.route('/edit-user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def edit_user(user_id):
-    """Edit specific user"""
     if not current_user.is_admin and current_user.id != user_id:
         flash('You do not have permission to edit this user.', 'error')
         return redirect(url_for('main.index'))
@@ -35,11 +28,9 @@ def edit_user(user_id):
 
     return render_template('auth/edit_users.html', users=[user], single_user=True)
 
-
 @user_bp.route('/edit-user', methods=['GET', 'POST'])
 @login_required
 def edit_user_view():
-    """User management interface"""
     try:
         if not current_user.is_admin:
             flash('You do not have permission to edit users.', 'error')
@@ -64,7 +55,6 @@ def edit_user_view():
                 user.role = role
                 user.is_approved = is_approved
                 
-                # Set is_admin flag based on role
                 user.is_admin = (role == 'admin')
                 
                 if password:
@@ -84,11 +74,9 @@ def edit_user_view():
         flash('An error occurred while loading the user management page.', 'error')
         return redirect(url_for('main.index'))
 
-
 @user_bp.route('/get-user-data/<int:user_id>')
 @login_required
 def get_user_data(user_id):
-    """Get user data for editing"""
     if not current_user.is_admin:
         return jsonify({"success": False, "message": "Unauthorized"}), 403
     
@@ -106,11 +94,9 @@ def get_user_data(user_id):
     else:
         return jsonify({"success": False}), 404
 
-
 @user_bp.route('/approve-user/<int:user_id>', methods=['POST'])
 @login_required
 def approve_user(user_id):
-    """Approve user account"""
     if not current_user.is_admin:
         return jsonify({"success": False, "message": "Unauthorized"}), 403
     
@@ -127,7 +113,6 @@ def approve_user(user_id):
         db.session.rollback()
         current_app.logger.error(f"Error approving user {user_id}: {str(e)}")
         return jsonify({"success": False, "message": f"Error approving user: {str(e)}"}), 500
-
 
 @user_bp.route('/delete-user/<int:user_id>', methods=['POST'])
 @login_required
@@ -157,3 +142,103 @@ def delete_user(user_id):
         flash(f'Error deleting user: {str(e)}', 'error')
     
     return redirect(url_for('user.edit_user_view'))
+
+@user_bp.route('/user-activity-log')
+@login_required
+def user_activity_log():
+    """Get user activity log with pagination"""
+    if not current_user.is_admin:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+                
+        from datetime import datetime, timedelta
+        import json
+        
+        mock_logs = [
+            {
+                'id': 1,
+                'activity_type': 'user_created',
+                'target_user_email': 'john.doe@example.com',
+                'performed_by_email': 'admin@example.com',
+                'changes': None,
+                'created_at': (datetime.now() - timedelta(minutes=30)).isoformat()
+            },
+            {
+                'id': 2,
+                'activity_type': 'role_changed',
+                'target_user_email': 'jane.smith@example.com',
+                'performed_by_email': 'admin@example.com',
+                'changes': json.dumps({
+                    'role': {'old': 'karyawan', 'new': 'pimpinan'}
+                }),
+                'created_at': (datetime.now() - timedelta(hours=2)).isoformat()
+            },
+            {
+                'id': 3,
+                'activity_type': 'password_changed',
+                'target_user_email': 'user@example.com',
+                'performed_by_email': 'user@example.com',
+                'changes': json.dumps({
+                    'password': {'old': '••••••••', 'new': '••••••••'}
+                }),
+                'created_at': (datetime.now() - timedelta(days=1)).isoformat()
+            },
+            {
+                'id': 4,
+                'activity_type': 'user_approved',
+                'target_user_email': 'newuser@example.com',
+                'performed_by_email': 'admin@example.com',
+                'changes': None,
+                'created_at': (datetime.now() - timedelta(days=2)).isoformat()
+            },
+            {
+                'id': 5,
+                'activity_type': 'email_changed',
+                'target_user_email': 'updated@example.com',
+                'performed_by_email': 'admin@example.com',
+                'changes': json.dumps({
+                    'email': {'old': 'old@example.com', 'new': 'updated@example.com'}
+                }),
+                'created_at': (datetime.now() - timedelta(days=3)).isoformat()
+            },
+            {
+                'id': 6,
+                'activity_type': 'user_deleted',
+                'target_user_email': 'deleted@example.com',
+                'performed_by_email': 'admin@example.com',
+                'changes': None,
+                'created_at': (datetime.now() - timedelta(days=7)).isoformat()
+            }
+        ]
+        
+        total_logs = len(mock_logs)
+        start_index = (page - 1) * per_page
+        end_index = start_index + per_page
+        paginated_logs = mock_logs[start_index:end_index]
+        
+        total_pages = (total_logs + per_page - 1) // per_page
+        
+        pagination_info = {
+            'current_page': page,
+            'total_pages': total_pages,
+            'total': total_logs,
+            'showing': len(paginated_logs),
+            'has_prev': page > 1,
+            'has_next': page < total_pages
+        }
+        
+        return jsonify({
+            'success': True,
+            'logs': paginated_logs,
+            'pagination': pagination_info
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error loading activity log: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error loading activity log: {str(e)}'
+        }), 500

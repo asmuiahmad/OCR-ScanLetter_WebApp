@@ -1,74 +1,47 @@
 /* ===== MODERN SIDEBAR STYLES ===== */
 
-/* Base Sidebar Styles */
-.sidebar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-  width: 250px !important;
-  transition: none !important;
-}
-
-.sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-}
-
-.sidebar-submenu {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.sidebar-submenu.show {
-  max-height: 500px;
-  overflow: visible;
-}
-
-.content {
-  height: calc(100vh - 64px);
-  overflow-y: auto;
-}
-
-.sidebar:hover .sidebar-link-text,
-.sidebar:hover .sidebar-header-text {
-  opacity: 1 !important;
-}
-
 /* Modern Sidebar Main Container */
 .modern-sidebar {
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 250px !important;
+  width: 280px;
   background: linear-gradient(135deg, #11101d 0%, #1a1a2e 100%);
   padding: 20px 0 0 0;
   z-index: 100;
   overflow: hidden;
-  transition: none !important;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }
 
 .modern-sidebar.sidebar-collapsed {
-  width: 80px;
+  width: 80px !important;
+}
+
+/* Prevent initial animation on page load */
+.modern-sidebar.no-transition {
+  transition: none !important;
+}
+
+.modern-sidebar.no-transition .logo_name,
+.modern-sidebar.no-transition .links_name,
+.modern-sidebar.no-transition .fa-chevron-down {
+  transition: none !important;
+}
+
+.main-content.no-transition {
+  transition: none !important;
 }
 
 /* Ensure main content adjusts properly */
 .main-content {
-  margin-left: 250px;
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 280px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
-  width: calc(100vw - 250px);
+  width: calc(100vw - 280px);
 }
 
 .modern-sidebar.sidebar-collapsed + .main-content {
@@ -83,9 +56,9 @@
   align-items: center;
   padding: 0 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
   border-radius: 8px;
   margin: 0 10px;
+  transition: background-color 0.2s ease;
 }
 
 .modern-sidebar .logo-details:hover {
@@ -97,22 +70,22 @@
   color: #fff;
   min-width: 50px;
   text-align: center;
-  transition: all 0.3s ease;
 }
 
 .modern-sidebar .logo-details .logo_name {
   color: #fff;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   opacity: 1;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
   white-space: nowrap;
   overflow: hidden;
+  flex: 1;
+  margin-left: 10px;
 }
 
 .modern-sidebar.sidebar-collapsed .logo_name {
   opacity: 0;
-  width: 0;
   pointer-events: none;
 }
 
@@ -139,7 +112,7 @@
   position: relative;
   list-style: none;
   width: 100%;
-  margin: 2px 0;
+  margin: 0;
 }
 
 .modern-sidebar ul.nav-links li a {
@@ -147,20 +120,18 @@
   align-items: center;
   text-decoration: none;
   color: #fff;
-  padding: 8px 16px;
-  transition: all 0.3s ease;
+  padding: 10px 16px !important;
+  margin: 0 8px !important;
   border-radius: 8px;
   font-size: 15px;
-  margin: 0 6px;
   position: relative;
   overflow: hidden;
+  gap: 0.75rem;
+  line-height: 1.2;
 }
 
 .modern-sidebar ul.nav-links li a:hover {
   background: rgba(255, 255, 255, 0.1);
-  /* transform: translateX(5px); */
-  /* Pastikan tidak ada pergeseran */
-  transform: none !important;
 }
 
 .modern-sidebar ul.nav-links li a.active {
@@ -169,37 +140,59 @@
 }
 
 .modern-sidebar ul.nav-links li i {
-  min-width: 40px;
+  min-width: 35px;
   text-align: center;
-  font-size: 18px;
-  transition: all 0.3s ease;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.modern-sidebar ul.nav-links li a i {
+  min-width: 28px;
+  text-align: left;
+  font-size: 20px;
+  margin-right: 0.75rem;
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .modern-sidebar ul.nav-links li .links_name {
-  font-size: 15px;
-  font-weight: 400;
+  font-size: 15px !important;
+  font-weight: 500;
   white-space: nowrap;
   opacity: 1;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
+  flex: 1;
+  margin-left: 0 !important;
   overflow: hidden;
+  text-align: left;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
 }
 
 .modern-sidebar.sidebar-collapsed .links_name {
   opacity: 0;
-  width: 0;
   pointer-events: none;
+}
+
+/* Fix alignment for items without dropdown */
+.modern-sidebar ul.nav-links li a .ml-auto.w-4 {
+  display: none;
 }
 
 /* Dropdown Chevron */
 .modern-sidebar ul.nav-links li .fa-chevron-down {
   margin-left: auto;
-  transition: transform 0.3s ease;
-  font-size: 12px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  font-size: 14px !important;
+  flex-shrink: 0;
 }
 
 .modern-sidebar.sidebar-collapsed .fa-chevron-down {
   opacity: 0;
-  width: 0;
+  pointer-events: none;
 }
 
 /* Dropdown Menus */
@@ -252,7 +245,7 @@
 
 .modern-sidebar.sidebar-collapsed .badge {
   position: absolute;
-  right: 15px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -321,7 +314,7 @@
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 10000;
 }
 
 .modern-sidebar.sidebar-collapsed ul.nav-links li a:hover::after {
@@ -339,48 +332,6 @@
   scrollbar-width: none;
 }
 
-/* Completely disable hover expand functionality */
-.modern-sidebar:hover {
-  width: inherit !important;
-}
-
-.modern-sidebar.sidebar-collapsed:hover {
-  width: 80px !important;
-}
-
-.modern-sidebar.sidebar-collapsed:hover .links_name,
-.modern-sidebar.sidebar-collapsed:hover .logo_name,
-.modern-sidebar.sidebar-collapsed:hover .fa-chevron-down {
-  opacity: 0 !important;
-  width: 0 !important;
-  pointer-events: none !important;
-}
-
-.modern-sidebar.sidebar-collapsed:hover .dropdown {
-  display: none !important;
-}
-
-/* Remove any transition delays that might cause gaps */
-.modern-sidebar * {
-  transition-delay: 0s !important;
-}
-
-/* Ensure no gaps or spacing issues */
-.modern-sidebar,
-.main-content {
-  box-sizing: border-box;
-}
-
-/* Fix any potential layout shifts */
-.modern-sidebar.sidebar-collapsed .user-info {
-  display: none;
-}
-
-.modern-sidebar.sidebar-collapsed .user-profile-container {
-  justify-content: center;
-  padding: 0;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .modern-sidebar {
@@ -391,14 +342,6 @@
     margin-left: 80px;
     width: calc(100vw - 80px);
   }
-}
-
-/* Ensure smooth transitions without gaps */
-.modern-sidebar,
-.main-content {
-  will-change: width, margin-left;
-  backface-visibility: hidden;
-  transform: translateZ(0);
 }
 
 /* User profile section styling */
@@ -459,31 +402,60 @@
   text-transform: uppercase;
 }
 
-/* Pastikan teks sidebar selalu ellipsis dan tidak berubah saat hover */
-.modern-sidebar ul.nav-links li .links_name,
-.sidebar-link-text,
-.sidebar-header-text {
+/* Remove ellipsis and let text flow naturally when expanded */
+.modern-sidebar ul.nav-links li .links_name {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  opacity: 1 !important;
-  width: 100%;
-  transition: none !important;
 }
 
-/* Hapus/override aturan hover yang mengubah opacity atau width */
-.modern-sidebar ul.nav-links li a:hover .links_name,
-.sidebar:hover .sidebar-link-text,
-.sidebar:hover .sidebar-header-text {
-  opacity: 1 !important;
-  width: 100% !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+.modern-sidebar .logo_name {
+  white-space: nowrap;
 }
 
-/* Pastikan tidak ada perubahan lebar pada elemen sidebar */
-.modern-sidebar * {
-  transition: none !important;
-  transform: none !important;
+.modern-sidebar .logo_name,
+.modern-sidebar .links_name {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li a::after {
+  z-index: 10000;
+  min-width: 140px;
+}
+
+.modern-sidebar.sidebar-collapsed .badge {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.modern-sidebar {
+  width: 280px !important;
+  font-size: 14px !important;
+}
+
+.modern-sidebar .links_name {
+  font-size: 14px !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  max-width: 220px !important;
+}
+
+.modern-sidebar ul.nav-links li a .links_name {
+  margin-left: 0 !important;
+}
+
+.modern-sidebar .logo-details {
+  padding: 0 10px !important;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li a {
+  padding: 8px 16px !important;
+  justify-content: center;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li a i {
+  margin-right: 0 !important;
+  font-size: 20px !important;
+  min-width: auto !important;
 }

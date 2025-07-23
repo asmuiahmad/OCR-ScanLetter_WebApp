@@ -1,4 +1,4 @@
-/* Sidebar Layout Fix - Prevents gaps and ensures smooth transitions */
+/* Sidebar Layout Fix - Clean and simple */
 
 /* Reset any conflicting styles */
 * {
@@ -12,74 +12,30 @@ body, html {
   overflow-x: hidden;
 }
 
-/* Main layout container */
-.layout-container {
-  display: flex;
-  min-height: 100vh;
-  width: 100vw;
-}
-
-/* Sidebar - Fixed positioning with proper transitions */
-.modern-sidebar {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 250px;
-  z-index: 100;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(135deg, #11101d 0%, #1a1a2e 100%);
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.modern-sidebar.sidebar-collapsed {
-  width: 80px !important;
-}
-
-/* Main content - Proper margin and transitions */
-.main-content {
-  margin-left: 250px;
-  width: calc(100vw - 250px);
-  min-height: 100vh;
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #f8fafc;
-}
-
-/* When sidebar is collapsed */
-.modern-sidebar.sidebar-collapsed ~ .main-content,
-.sidebar-collapsed + .main-content {
+/* When sidebar is collapsed - ensure main content adjusts */
+.modern-sidebar.sidebar-collapsed ~ .main-content {
   margin-left: 80px !important;
   width: calc(100vw - 80px) !important;
 }
 
-/* Nonaktifkan semua efek hover pada sidebar */
-.modern-sidebar:hover {
-  width: inherit !important;
+/* When sidebar is expanded - ensure main content adjusts to new width */
+.modern-sidebar:not(.sidebar-collapsed) ~ .main-content {
+  margin-left: 280px !important;
+  width: calc(100vw - 280px) !important;
 }
 
-.modern-sidebar.sidebar-collapsed:hover {
-  width: 80px !important;
-}
-
-.modern-sidebar.sidebar-collapsed:hover .links_name,
-.modern-sidebar.sidebar-collapsed:hover .logo_name,
-.modern-sidebar.sidebar-collapsed:hover .fa-chevron-down {
-  opacity: 0 !important;
-  width: 0 !important;
-  pointer-events: none !important;
-}
-
-.modern-sidebar.sidebar-collapsed:hover .dropdown {
-  display: none !important;
-}
-
-/* Prevent any layout shifts during transitions */
-.modern-sidebar,
+/* Fix for any potential scrollbar issues */
 .main-content {
-  will-change: width, margin-left;
-  backface-visibility: hidden;
-  transform: translateZ(0);
+  overflow-x: hidden;
+  background: #f8fafc;
+}
+
+.modern-sidebar {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.main-content {
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Ensure no gaps on mobile */
@@ -92,24 +48,4 @@ body, html {
     margin-left: 80px !important;
     width: calc(100vw - 80px) !important;
   }
-}
-
-/* Fix for any potential scrollbar issues */
-.main-content {
-  overflow-x: hidden;
-}
-
-/* Ensure navigation and content areas don't have gaps */
-.main-content nav,
-.main-content .content {
-  width: 100%;
-  margin: 0;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* Remove any default margins that could cause gaps */
-.main-content > * {
-  margin-left: 0;
-  margin-right: 0;
 }

@@ -3,51 +3,88 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
-  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md flex flex-col items-center">
-    <h1 class="text-2xl font-bold mb-6 text-blue-900">Register</h1>
+<div class="container">
+  <div class="register-container">
+    <h1>Register</h1>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show mb-4 w-full text-center" role="alert">
+          <div class="alert alert-{{ category }} text-center" role="alert">
             {{ message }}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <button type="button" class="close" onclick="this.parentElement.style.display='none'">&times;</button>
           </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
     <form method="POST" action="{{ url_for('auth.register') }}" class="flex flex-col gap-4 w-full">
       {{ form.hidden_tag() }}
-      <div class="form-group mb-3">
-        {{ form.email(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-2", placeholder="Email", required="required") }}
+      <div class="form-group">
+        {{ form.email(placeholder="Email", required="required") }}
         {% if form.email.errors %}
           {% for error in form.email.errors %}
-            <small class="text-danger">{{ error }}</small>
+            <div class="error-message">{{ error }}</div>
           {% endfor %}
         {% endif %}
       </div>
-      <div class="form-group mb-3">
-        {{ form.password(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-2", placeholder="Password", required="required") }}
+      <div class="form-group">
+        <div class="password-container">
+          {{ form.password(placeholder="Password", required="required", id="registerPassword", oninput="checkPasswordMatch()") }}
+          <button type="button" class="password-toggle" onclick="togglePassword('registerPassword', this)">
+            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+              <path d="m1 1 22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6.71 6.71C4.68 8.04 3 10.53 3 12c0 0 4 8 11 8 1.99 0 3.73-.64 5.13-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10.5 10.5a3 3 0 1 0 4.24 4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
         {% if form.password.errors %}
           {% for error in form.password.errors %}
-            <small class="text-danger">{{ error }}</small>
+            <div class="error-message">{{ error }}</div>
           {% endfor %}
         {% endif %}
       </div>
-      <div class="form-group mb-3">
-        {{ form.role(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-2", required="required") }}
+      <div class="form-group">
+        <div class="password-container">
+          {{ form.confirm_password(placeholder="Confirm Password", required="required", id="confirmPassword", oninput="checkPasswordMatch()") }}
+          <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', this)">
+            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+              <path d="m1 1 22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6.71 6.71C4.68 8.04 3 10.53 3 12c0 0 4 8 11 8 1.99 0 3.73-.64 5.13-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10.5 10.5a3 3 0 1 0 4.24 4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        {% if form.confirm_password.errors %}
+          {% for error in form.confirm_password.errors %}
+            <div class="error-message">{{ error }}</div>
+          {% endfor %}
+        {% endif %}
+        <div id="passwordMatchMessage" class="password-match-message" style="display: none;"></div>
+      </div>
+      <div class="form-group">
+        {{ form.role(required="required") }}
         {% if form.role.errors %}
           {% for error in form.role.errors %}
-            <small class="text-danger">{{ error }}</small>
+            <div class="error-message">{{ error }}</div>
           {% endfor %}
         {% endif %}
       </div>
-      <div class="form-text mb-3 text-muted text-center">
+      <div class="form-text text-center">
         Akun Anda akan aktif setelah disetujui oleh admin.
       </div>
-      <button type="submit" class="btn-primary w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2 mt-2">Daftar</button>
+      <button type="submit" class="btn-primary" id="registerButton" disabled>Daftar</button>
     </form>
-    <p class="mt-4 text-sm text-gray-600">Sudah punya akun? <a href="{{ url_for('auth.login') }}" class="text-blue-600 hover:underline">Login di sini</a></p>
+    <p class="mt-4 text-center">Sudah punya akun? <a href="{{ url_for('auth.login') }}">Login di sini</a></p>
   </div>
 </div>
 {% endblock %}

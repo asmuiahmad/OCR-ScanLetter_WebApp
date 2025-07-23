@@ -178,7 +178,6 @@
     </style>
 {% endblock %}
 
-{% block title %}OCR Surat Keluar - PA Banjarbaru{% endblock %}
 
 {% block content %}
 <div class="container mx-auto py-8 px-4">
@@ -203,7 +202,7 @@
         {% endif %}
     {% endwith %}
     
-    <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Keluar</h1>
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Masuk</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6">
         <form action="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="uploadForm">
@@ -272,7 +271,7 @@
                     <div class="sm:flex sm:items-start">
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                             <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4" id="modal-title">
-                                Detail Ekstraksi Dokumen Surat Keluar
+                                Detail Ekstraksi Dokumen Surat Masuk
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <!-- Kolom Gambar -->
@@ -348,9 +347,6 @@
                 <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 sticky bottom-0">
                     <button type="button" id="saveExtractedData" class="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition">
                         Simpan
-                    </button>
-                    <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
-                        Tutup
                     </button>
                     <button type="button" id="prevModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
                         Sebelumnya

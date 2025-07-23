@@ -6,6 +6,7 @@ Outgoing document management functionality
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from flask_login import login_required
 from sqlalchemy import desc, asc, func
+from datetime import datetime
 
 from config.extensions import db
 from config.models import SuratKeluar
@@ -69,6 +70,9 @@ def show_surat_keluar():
 def input_surat_keluar():
     """Input new surat keluar"""
     form = SuratKeluarForm()
+    import logging
+    logging.info(f"Form data received: {request.form}")
+    logging.info(f"Files received: {request.files}")
     if form.validate_on_submit():
         try:
             new_surat_keluar = SuratKeluar(
@@ -79,15 +83,21 @@ def input_surat_keluar():
                 kode_suratKeluar=form.kode_suratKeluar.data,
                 jenis_suratKeluar=form.jenis_suratKeluar.data,
                 isi_suratKeluar=form.isi_suratKeluar.data,
-                status_suratKeluar='pending'
+                status_suratKeluar='pending',
+                created_at=datetime.utcnow()
             )
             db.session.add(new_surat_keluar)
             db.session.commit()
             flash('Surat Keluar has been added successfully!', 'success')
-            return redirect(url_for('surat_keluar.show_surat_keluar'))
+            # Tetap di laman input, tidak redirect
         except Exception as e:
             db.session.rollback()
+            current_app.logger.error(f"Error adding Surat Keluar: {str(e)}", exc_info=True)
             flash(f'Error adding Surat Keluar: {str(e)}', 'danger')
+    elif request.method == 'POST':
+        # Jika form tidak valid, tampilkan error detail
+        current_app.logger.error(f"Form validation errors: {form.errors}")
+        flash(f'Form validation errors: {form.errors}', 'danger')
     return render_template('surat_keluar/input_surat_keluar.html', form=form)
 
 

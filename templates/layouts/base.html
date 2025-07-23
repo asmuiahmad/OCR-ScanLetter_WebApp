@@ -4,7 +4,7 @@
 
 <body class="bg-gray-50">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <div class="modern-sidebar sidebar-collapsed">
+  <div class="modern-sidebar">
     <div class="logo-details" id="sidebarToggle" style="cursor: pointer; margin-bottom: -0.5rem;">
       <i class="fas fa-envelope-open-text"></i>
       <span class="logo_name">Surat App</span>
@@ -13,14 +13,14 @@
       <li>
         <a href="{{ url_for('dashboard.dashboard') }}" data-tooltip="Dashboard" class="flex items-center px-4 py-2">
           <i class="fas fa-home"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Dashboard">Dashboard</span>
-          <span class="invisible w-4"></span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Dashboard">Dashboard</span>
+          <span class="ml-auto w-4"></span>
         </a>
       </li>
       <li>
         <a href="#" onclick="toggleMenu(event, 'showSuratMenu')" data-tooltip="Show Surat">
           <i class="fas fa-envelope-open-text"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Show Surat">Show Surat</span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Show Surat">Show Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="showSuratMenu">
@@ -31,7 +31,7 @@
       <li>
         <a href="#" onclick="toggleMenu(event, 'templatesMenu')" data-tooltip="Templates Surat">
           <i class="fas fa-folder"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Templates Surat">Templates Surat</span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Templates Surat">Templates Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="templatesMenu">
@@ -42,7 +42,7 @@
       <li>
         <a href="#" onclick="toggleMenu(event, 'inputSuratMenu')" data-tooltip="Input Surat">
           <i class="fas fa-edit"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Input Surat">Input Surat</span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Input Surat">Input Surat</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="inputSuratMenu">
@@ -53,7 +53,7 @@
       <li>
         <a href="#" onclick="toggleMenu(event, 'ocrMenu')" data-tooltip="OCR">
           <i class="fas fa-eye"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="OCR">OCR</span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="OCR">OCR</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="ocrMenu">
@@ -66,7 +66,7 @@
       <li>
         <a href="#" onclick="toggleMenu(event, 'cutiMenu')" data-tooltip="Manajemen Cuti">
           <i class="fas fa-calendar-alt"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Manajemen Cuti">Manajemen Cuti</span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Manajemen Cuti">Manajemen Cuti</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="cutiMenu">
@@ -80,14 +80,14 @@
       <li>
         <a href="{{ url_for('laporan.laporan_statistik') }}" data-tooltip="Laporan Statistik" class="flex items-center px-4 py-2">
           <i class="fas fa-chart-bar"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Laporan Statistik">Laporan Statistik</span>
-          <span class="invisible w-4"></span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Laporan Statistik">Laporan Statistik</span>
+          <span class="ml-auto w-4"></span>
         </a>
       </li>
       <li>
         <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')" data-tooltip="Input Pegawai">
           <i class="fas fa-users"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Input Pegawai">Input Pegawai</span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Input Pegawai">Input Pegawai</span>
           <i class="fas fa-chevron-down ml-auto"></i>
         </a>
         <div class="dropdown" id="pegawaiMenu">
@@ -98,13 +98,15 @@
       {% endif %}
       {% if current_user.role == 'pimpinan' %}
       <li>
-        <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat" class="flex items-center px-4 py-2 relative hover:bg-blue-50 rounded-lg transition group">
+        <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat" class="flex items-center px-4 py-2 relative">
           <i class="fas fa-check-circle"></i>
-          <span class="links_name flex-grow truncate block max-w-[140px] ml-4 pr-12" title="Persetujuan Surat">Persetujuan Surat</span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Persetujuan Surat">Persetujuan Surat</span>
           {% if g.pending_surat_masuk_count > 0 %}
           <span class="absolute right-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold rounded-full shadow px-2 py-1 flex items-center justify-center min-w-[24px] h-6 ml-2 border-2 border-white z-10">
             {{ g.pending_surat_masuk_count }}
           </span>
+          {% else %}
+          <span class="ml-auto w-4"></span>
           {% endif %}
         </a>
       </li>
@@ -113,8 +115,8 @@
       <li>
         <a href="{{ url_for('user.edit_user_view') }}" data-tooltip="Manajemen User" class="flex items-center px-4 py-2">
           <i class="fas fa-user-cog"></i>
-          <span class="links_name truncate block max-w-[140px] ml-4 pr-2" title="Manajemen User">Manajemen User</span>
-          <span class="invisible w-4"></span>
+          <span class="links_name truncate block max-w-[140px] pr-2" title="Manajemen User">Manajemen User</span>
+          <span class="ml-auto w-4"></span>
         </a>
       </li>
       {% endif %}
@@ -230,22 +232,22 @@
       </div>
     </nav>
     
-    <nav class="bg-white px-4 py-3 border-b border-gray-200">
-      <ol class="flex flex-wrap items-center text-sm">
+    <nav class="bg-white px-3 py-2 border-b border-gray-200">
+      <ol class="flex flex-wrap items-center text-xs">
         {% for text, url in breadcrumbs %}
           <li class="flex items-center">
             {% if not loop.last %}
               <a href="{{ url }}" class="text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium">
                 {% if loop.first %}
-                  <i class="fas fa-home mr-1"></i>
+                  <i class="fas fa-home mr-1 text-xs"></i>
                 {% endif %}
                 {{ text }}
               </a>
-              <svg class="h-5 w-5 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="h-4 w-4 text-gray-400 mx-1.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
               </svg>
             {% else %}
-              <span class="text-gray-800 font-semibold">{{ text }}</span>
+              <span class="text-gray-800 font-medium">{{ text }}</span>
             {% endif %}
           </li>
         {% endfor %}
