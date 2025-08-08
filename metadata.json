@@ -7,5 +7,16 @@
             "saved_at": "2025-07-13T22:04:47.513829"
         }
     },
-    "surat_masuk": {}
+    "surat_masuk": {
+        "CamScanner_14.10.2024_09.48_8.jpg": {
+            "id": 60,
+            "nomor_surat": "12/HK2.6/X/2024",
+            "saved_at": "2025-08-07T00:17:47.120615"
+        },
+        "CamScanner_14.10.2024_09.48_7.jpg": {
+            "id": 62,
+            "nomor_surat": "PAN.PA.W15-A12/HK2.6/1X/2024",
+            "saved_at": "2025-08-07T00:23:50.708168"
+        }
+    }
 }

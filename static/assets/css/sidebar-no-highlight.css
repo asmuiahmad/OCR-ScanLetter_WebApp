@@ -1,0 +1,107 @@
+/* ===== REMOVE ALL SIDEBAR HIGHLIGHTING ===== */
+
+/* Remove all active state styling */
+.modern-sidebar .nav-links li a.active,
+.modern-sidebar .nav-links li a.active:hover,
+.modern-sidebar .nav-links li a.active:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: #f8fafc !important;
+    font-weight: 500 !important;
+    padding: 12px 16px !important;
+}
+
+.modern-sidebar .nav-links li a.active i {
+    color: #e2e8f0 !important;
+    font-weight: normal !important;
+}
+
+.modern-sidebar .nav-links li a.active .links_name {
+    color: #f8fafc !important;
+    font-weight: 500 !important;
+}
+
+/* Remove dropdown active states */
+.modern-sidebar .nav-links li .dropdown a.active,
+.modern-sidebar .nav-links li .dropdown a.active:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #cbd5e1 !important;
+    border: none !important;
+    font-weight: normal !important;
+}
+
+/* Remove any pseudo-elements that might create highlights */
+.modern-sidebar .nav-links li a.active::before,
+.modern-sidebar .nav-links li a.active::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Ensure collapsed state doesn't have active styling */
+.modern-sidebar.sidebar-collapsed .nav-links li a.active {
+    background: transparent !important;
+    border: none !important;
+    padding: 12px !important;
+    color: #e2e8f0 !important;
+}
+
+.modern-sidebar.sidebar-collapsed .nav-links li a.active i {
+    color: #e2e8f0 !important;
+}
+
+/* Remove any focus states that might look like active states */
+.modern-sidebar .nav-links li a:focus {
+    background: rgba(255, 255, 255, 0.05) !important;
+    outline: 1px solid rgba(255, 255, 255, 0.2) !important;
+    outline-offset: 1px !important;
+}
+
+/* Ensure hover states are consistent */
+.modern-sidebar .nav-links li a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+.modern-sidebar .nav-links li a:hover i {
+    color: #ffffff !important;
+}
+
+.modern-sidebar .nav-links li a:hover .links_name {
+    color: #ffffff !important;
+}
+
+/* Remove any gradient or special backgrounds */
+.modern-sidebar .nav-links li a {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* Ensure dropdown hover states are also clean */
+.modern-sidebar .nav-links li .dropdown a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Remove any transition effects on active states */
+.modern-sidebar .nav-links li a.active {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+/* Clean up any remaining visual artifacts */
+.modern-sidebar .nav-links li a.active,
+.modern-sidebar .nav-links li a.active * {
+    text-shadow: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+}

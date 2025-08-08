@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Permintaan Cuti</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            color: #000;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        
+        .header h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .form-section {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            margin-bottom: 8px;
+            align-items: flex-start;
+        }
+        
+        .form-label {
+            width: 200px;
+            font-weight: normal;
+            flex-shrink: 0;
+        }
+        
+        .form-colon {
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .form-value {
+            flex: 1;
+            border-bottom: 1px solid #000;
+            min-height: 20px;
+            padding-bottom: 2px;
+        }
+        
+        .checkbox-group {
+            margin: 15px 0;
+        }
+        
+        .checkbox-item {
+            display: inline-block;
+            margin-right: 30px;
+            margin-bottom: 8px;
+        }
+        
+        .checkbox {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #000;
+            margin-right: 8px;
+            text-align: center;
+            line-height: 13px;
+            font-size: 10pt;
+            vertical-align: middle;
+        }
+        
+        .signature-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-box {
+            width: 200px;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #000;
+            height: 60px;
+            margin-bottom: 5px;
+        }
+        
+        .date-section {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        
+        .qr-code {
+            position: absolute;
+            bottom: 2cm;
+            right: 2cm;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid #000;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .no-border {
+            border: none;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Formulir Permintaan Cuti</h1>
+        <h2>Pegawai Negeri Sipil</h2>
+    </div>
+
+    <div class="form-section">
+        <div class="form-row">
+            <div class="form-label">Nama</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«nama»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">NIP</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«nip»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Jabatan</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«jabatan»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Golongan/Ruang</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«gol_ruang»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Unit Kerja</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«unit_kerja»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Masa Kerja</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«masa_kerja»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Alamat</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«alamat»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">No. Telepon</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«telp»</div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Jenis Cuti yang Dimohon:</h3>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <span class="checkbox">«c_tahun»</span> Cuti Tahunan
+            </div>
+            <div class="checkbox-item">
+                <span class="checkbox">«c_besar»</span> Cuti Besar
+            </div>
+            <div class="checkbox-item">
+                <span class="checkbox">«c_sakit»</span> Cuti Sakit
+            </div>
+            <div class="checkbox-item">
+                <span class="checkbox">«c_lahir»</span> Cuti Melahirkan
+            </div>
+            <div class="checkbox-item">
+                <span class="checkbox">«c_penting»</span> Cuti Alasan Penting
+            </div>
+            <div class="checkbox-item">
+                <span class="checkbox">«c_luarnegara»</span> Cuti Luar Negara
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-row">
+            <div class="form-label">Alasan Cuti</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«alasan_cuti»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Lama Cuti</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«lama_cuti» hari</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Tanggal Mulai Cuti</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«tanggal_cuti»</div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-label">Tanggal Selesai Cuti</div>
+            <div class="form-colon">:</div>
+            <div class="form-value">«sampai_cuti»</div>
+        </div>
+    </div>
+
+    <div class="date-section">
+        <p>«tgl_lengkap_ajuan_cuti»</p>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <p class="bold">Mengetahui,</p>
+            <p>Atasan Langsung</p>
+            <div class="signature-line"></div>
+            <p>NIP: ________________</p>
+        </div>
+        
+        <div class="signature-box">
+            <p class="bold">Pemohon,</p>
+            <div class="signature-line"></div>
+            <p>«nama»</p>
+            <p>NIP: «nip»</p>
+        </div>
+    </div>
+
+    <div class="form-section" style="margin-top: 30px;">
+        <table>
+            <tr>
+                <th colspan="2" class="text-center">Keputusan Pejabat yang Berwenang</th>
+            </tr>
+            <tr>
+                <td style="width: 50%;">
+                    <div class="checkbox-item">
+                        <span class="checkbox">✓</span> Disetujui
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox"></span> Ditolak
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox"></span> Ditangguhkan
+                    </div>
+                </td>
+                <td>
+                    <p class="bold">Pejabat yang Berwenang</p>
+                    <div style="height: 60px;"></div>
+                    <p>NIP: ________________</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="qr-code">
+        {{QR_CODE}}
+    </div>
+</body>
+</html>

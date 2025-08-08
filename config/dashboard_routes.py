@@ -4,9 +4,9 @@ Main dashboard and overview functionality
 """
 
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, g, current_app
+from flask import Blueprint, render_template, g, current_app, jsonify
 from flask_login import login_required, current_user
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 
 from config.extensions import db
 from config.models import User, SuratKeluar, SuratMasuk
@@ -65,10 +65,12 @@ def dashboard():
         SuratMasuk.created_at >= week_start
     ).count()
 
-    recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.created_at.desc()).limit(20).all()
-    recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.created_at.desc()).limit(20).all()
+    # Limit to 10 items for better performance and UI
+    recent_surat_keluar = SuratKeluar.query.order_by(SuratKeluar.created_at.desc()).limit(10).all()
+    recent_surat_masuk = SuratMasuk.query.order_by(SuratMasuk.created_at.desc()).limit(10).all()
 
-    users = User.query.order_by(User.last_login.desc()).limit(5).all()
+    # Limit to 10 users for recent login display
+    users = User.query.order_by(User.last_login.desc()).limit(10).all()
 
     return render_template(
         'dashboard/index.html', 
@@ -100,3 +102,8 @@ def last_logins():
     users = User.query.order_by(User.last_login.desc()).limit(10).all()
     result = [{"username": user.email, "last_login": user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never'} for user in users]
     return jsonify(result)
+
+
+
+
+

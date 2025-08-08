@@ -106,12 +106,24 @@ def input_surat_masuk():
             )
             db.session.add(new_surat_masuk)
             db.session.commit()
-            flash('Surat Masuk has been added successfully!', 'success')
-            return redirect(url_for('surat_masuk.show_surat_masuk'))
+            
+            return jsonify({
+                'success': True,
+                'message': 'Surat Masuk berhasil ditambahkan',
+                'data': {
+                    'id': new_surat_masuk.id_suratMasuk,
+                    'nomor_surat': new_surat_masuk.nomor_suratMasuk,
+                    'pengirim': new_surat_masuk.pengirim_suratMasuk,
+                    'penerima': new_surat_masuk.penerima_suratMasuk
+                }
+            }), 200
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error adding Surat Masuk: {str(e)}", exc_info=True)
-            flash(f'Error adding Surat Masuk: {str(e)}', 'danger')
+            return jsonify({
+                'success': False,
+                'message': f'Gagal menambahkan Surat Masuk: {str(e)}'
+            }), 500
     elif request.method == 'POST':
         # Jika form tidak valid, tampilkan error detail
         current_app.logger.error(f"Form validation errors: {form.errors}")
@@ -156,8 +168,17 @@ def edit_surat_masuk(id):
             entry.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(entry, 'suratMasuk')
             
             db.session.commit()
-            flash('Surat Masuk has been updated successfully!', 'success')
-            return redirect(url_for('surat_masuk.show_surat_masuk'))
+            
+            return jsonify({
+                'success': True,
+                'message': 'Surat Masuk berhasil diperbarui',
+                'data': {
+                    'id': entry.id_suratMasuk,
+                    'nomor_surat': entry.nomor_suratMasuk,
+                    'pengirim': entry.pengirim_suratMasuk,
+                    'penerima': entry.penerima_suratMasuk
+                }
+            }), 200
         except Exception as e:
             db.session.rollback()
             flash(f'Error updating Surat Masuk: {str(e)}', 'error')

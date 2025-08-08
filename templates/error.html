@@ -1,19 +1,134 @@
 {% extends "layouts/base-login.html" %}
 
-{% block title %}Error{% endblock %}
+{% block title %}Error - {{ error_title or 'Terjadi Kesalahan' }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/error-pages-optimized.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-red-100 to-blue-100 p-4">
-  <div class="bg-white rounded-lg shadow-lg p-10 max-w-md w-full flex flex-col items-center">
-    <svg width="80" height="80" fill="none" viewBox="0 0 80 80" class="mb-6">
-      <circle cx="40" cy="40" r="38" stroke="#ef4444" stroke-width="4" fill="#fee2e2"/>
-      <path d="M28 28l24 24M52 28L28 52" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
-    </svg>
-    <h1 class="text-3xl font-bold text-red-600 mb-4">Oops! Error</h1>
-    <p class="text-lg text-gray-700 mb-6">{{ error_message }}</p>
-    <a href="{{ url_for('dashboard.dashboard') }}" class="inline-block bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-900 text-white font-bold py-3 px-8 rounded-xl transition duration-200 shadow-lg text-lg">
-      Kembali ke Dashboard
-            </a>
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full">
+        <!-- Main Error Container -->
+        <div class="relative bg-white/10 border border-white/20 rounded-2xl shadow-xl overflow-hidden">
+            <!-- Header Section -->
+            <div class="relative bg-gradient-to-r from-red-500/90 via-pink-500/90 to-purple-600/90 p-6 md:p-8">
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-4 animate-pulse">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                        {{ error_title or 'Oops! Terjadi Kesalahan' }}
+                    </h1>
+                    <p class="text-lg text-white/90 font-medium max-w-2xl mx-auto">
+                        {{ error_description or 'Sistem mengalami masalah dan tidak dapat memproses permintaan Anda.' }}
+                    </p>
+                </div>
+                
+                <!-- Decorative Elements -->
+                <div class="absolute top-4 left-4 w-2 h-2 bg-white/40 rounded-full animate-ping"></div>
+                <div class="absolute top-8 right-8 w-3 h-3 bg-white/30 rounded-full animate-pulse"></div>
+                <div class="absolute bottom-4 left-8 w-1 h-1 bg-white/50 rounded-full"></div>
+            </div>
+            
+            <!-- Content Section -->
+            <div class="p-6 md:p-8">
+                <!-- Error Message -->
+                {% if error_message %}
+                <div class="mb-6 p-5 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 pt-1">
+                            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-semibold text-white mb-1">Detail Error:</h3>
+                            <p class="text-red-100 text-sm">{{ error_message }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                    {% if show_retry %}
+                    <button onclick="location.reload()" 
+                            class="group relative flex-1 flex items-center justify-center px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg shadow hover:shadow-md transition-all duration-200">
+                        <svg class="w-4 h-4 mr-2 group-hover:animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Coba Lagi
+                    </button>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('dashboard.dashboard') }}" 
+                       class="group flex-1 flex items-center justify-center px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 hover:border-white/30 shadow hover:shadow-md transition-all duration-200">
+                        <svg class="w-4 h-4 mr-2 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                    
+                    <button onclick="history.back()" 
+                            class="group flex-1 flex items-center justify-center px-5 py-3 bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white font-medium rounded-lg border border-gray-600/50 hover:border-gray-500/50 transition-all duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Kembali
+                    </button>
+                </div>
+                
+                <!-- Help Section -->
+                <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Tips Mengatasi Masalah</h3>
+                        <p class="text-gray-300 text-sm">Beberapa langkah yang bisa Anda coba:</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg p-4 transition-all duration-200">
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mb-3 mx-auto">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-semibold text-center mb-1 text-sm">Periksa Koneksi</h4>
+                            <p class="text-gray-400 text-xs text-center">Pastikan koneksi internet stabil</p>
+                        </div>
+                        
+                        <div class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg p-4 transition-all duration-200">
+                            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center mb-3 mx-auto">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-semibold text-center mb-1 text-sm">Bersihkan Cache</h4>
+                            <p class="text-gray-400 text-xs text-center">Hapus cache dan cookies browser</p>
+                        </div>
+                        
+                        <div class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg p-4 transition-all duration-200">
+                            <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center mb-3 mx-auto">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-white font-semibold text-center mb-1 text-sm">Hubungi Admin</h4>
+                            <p class="text-gray-400 text-xs text-center">Laporkan masalah ke administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %} 

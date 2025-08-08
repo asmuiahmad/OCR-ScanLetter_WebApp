@@ -1,0 +1,75 @@
+/* ===== OPTIMIZED ERROR PAGES CSS ===== */
+
+/* Disable expensive animations on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Optimize rendering performance */
+.error-container {
+  will-change: opacity;
+  transform: translateZ(0);
+}
+
+/* Reduce paint complexity */
+.error-card {
+  contain: layout style paint;
+}
+
+/* Optimize button interactions */
+.error-btn {
+  transition: background-color 0.2s ease;
+}
+
+.error-btn:hover {
+  transform: none;
+}
+
+/* Disable heavy effects on mobile */
+@media (max-width: 768px) {
+  .backdrop-blur-xl,
+  .backdrop-blur-sm {
+    backdrop-filter: none !important;
+  }
+  
+  .shadow-2xl {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .animate-pulse,
+  .animate-ping,
+  .animate-bounce {
+    animation: none !important;
+  }
+}
+
+/* Optimize text rendering */
+.error-text {
+  text-rendering: optimizeSpeed;
+  font-smooth: never;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Reduce repaints */
+.error-icon {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Performance-first gradients */
+.error-gradient {
+  background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+}
+
+/* Optimize for 60fps */
+@media (prefers-reduced-motion: no-preference) {
+  .smooth-transition {
+    transition: opacity 0.2s ease-out;
+  }
+}

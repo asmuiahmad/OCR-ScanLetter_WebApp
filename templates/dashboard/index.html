@@ -2,16 +2,20 @@
 
 {% block title %}Dashboard - PA Banjarbaru{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/force-300px-height.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container mx-auto py-6 px-4">
   <div class="max-w-5xl mx-auto">
-    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary px-4 py-2">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-black">
-            Dashboard
-          </h2>
-        </div>
+    <div class="form-card">
+      <div class="page-header">
+        <h2>
+          <i class="fas fa-tachometer-alt"></i>
+          Dashboard
+        </h2>
       </div>
     </div>
 
@@ -134,7 +138,7 @@
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-700">Log Surat Masuk & Keluar</h3>
             </div>
-            <div class="p-6" style="max-height:420px; overflow-y:auto;">
+            <div class="p-6 log-container">
                 <div class="space-y-4">
                     {% set all_surat = (recent_surat_masuk + recent_surat_keluar) %}
                     {% set all_surat = all_surat|sort(attribute='created_at', reverse=True) %}
@@ -167,21 +171,23 @@
                 <h3 class="text-lg font-semibold text-gray-700">User Login Terakhir</h3>
             </div>
             <div class="p-6">
-                <ul class="divide-y divide-gray-200">
-                    {% for user in users %}
-                    <li class="py-3 flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100">
-                                <i class="fas fa-user text-indigo-600 text-lg"></i>
+                <div class="recent-users-container">
+                    <ul class="divide-y divide-gray-200">
+                        {% for user in users %}
+                        <li class="py-3 flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100">
+                                    <i class="fas fa-user text-indigo-600 text-lg"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="ml-4 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ user.email }}</p>
-                            <p class="text-xs text-gray-500">Last login: {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}</p>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
+                            <div class="ml-4 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ user.email }}</p>
+                                <p class="text-xs text-gray-500">Last login: {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}</p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -189,11 +195,11 @@
     <!-- User Login Logs Section -->
     <div class="mt-8">
         <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 border-b border-gray-200">
+            <div class="page-header">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold text-white">
-                            <i class="fas fa-sign-in-alt mr-2"></i>Log User Masuk
+                        <h3>
+                            <i class="fas fa-sign-in-alt"></i>Log User Masuk
                         </h3>
                         <p class="text-white text-opacity-80 text-sm mt-1" id="backend-status">
                             Memuat status sistem...
@@ -239,7 +245,7 @@
                             <div>Status</div>
                         </div>
                     </div>
-                    <div id="login-logs-container" class="max-h-64 overflow-y-auto">
+                    <div id="login-logs-container" class="login-logs-container">
                         <div id="login-logs-content">
                             <!-- Login logs will be loaded here -->
                             <div class="p-8 text-center text-gray-500">
@@ -271,6 +277,9 @@
     </div>
 </div>
 
+{% block extra_js %}
 <script src="{{ url_for('static', filename='assets/js/dashboard/login-logs.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/force-300px-height.js') }}"></script>
+{% endblock %}
 
 {% endblock %} 

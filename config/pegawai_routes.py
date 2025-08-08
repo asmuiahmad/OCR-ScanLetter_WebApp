@@ -97,8 +97,16 @@ def pegawai():
 @role_required('admin', 'pimpinan')
 def pegawai_list():
     """List all pegawai"""
-    daftar_pegawai = Pegawai.query.all()
-    return render_template('pegawai/list_pegawai.html', daftar_pegawai=daftar_pegawai)
+    try:
+        daftar_pegawai = Pegawai.query.all()
+        current_app.logger.info(f"Found {len(daftar_pegawai)} pegawai records")
+        return render_template('pegawai/list_pegawai_simple.html', daftar_pegawai=daftar_pegawai)
+    except Exception as e:
+        current_app.logger.error(f"Error in pegawai_list: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Terjadi kesalahan: {str(e)}'
+        }), 500
 
 
 @pegawai_bp.route('/pegawai/edit/<int:id>', methods=['POST'])
@@ -175,6 +183,86 @@ def edit_pegawai(id):
         db.session.rollback()
         current_app.logger.error(f"Error updating pegawai {id}: {str(e)}")
         return jsonify({"success": False, "message": f"Gagal mengupdate pegawai: {str(e)}"}), 500
+
+
+@pegawai_bp.route('/add', methods=['POST'])
+@login_required
+@role_required('admin', 'pimpinan')
+def add_pegawai():
+    """Add new pegawai via JSON API"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields based on actual model
+        required_fields = ['nama', 'nip', 'tanggal_lahir', 'jenis_kelamin']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'message': f'Field {field} wajib diisi'
+                }), 400
+        
+        # Check if NIP already exists
+        existing_pegawai = Pegawai.query.filter_by(nip=data['nip']).first()
+        if existing_pegawai:
+            return jsonify({
+                'success': False,
+                'message': f'NIP {data["nip"]} sudah terdaftar'
+            }), 400
+        
+        # Parse date
+        try:
+            tanggal_lahir = datetime.strptime(data['tanggal_lahir'], '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'message': 'Format tanggal lahir tidak valid (gunakan YYYY-MM-DD)'
+            }), 400
+        
+        # Create new pegawai
+        pegawai = Pegawai(
+            nama=data['nama'],
+            nip=data['nip'],
+            tanggal_lahir=tanggal_lahir,
+            jenis_kelamin=data['jenis_kelamin'],
+            jabatan=data.get('jabatan'),
+            golongan=data.get('golongan'),
+            agama=data.get('agama'),
+            nomor_telpon=data.get('nomor_telpon'),
+            riwayat_pendidikan=data.get('riwayat_pendidikan'),
+            riwayat_pekerjaan=data.get('riwayat_pekerjaan')
+        )
+        
+        db.session.add(pegawai)
+        db.session.commit()
+        
+        current_app.logger.info(f"Pegawai baru ditambahkan via API: {pegawai.nama} (NIP: {pegawai.nip})")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Pegawai {pegawai.nama} berhasil ditambahkan',
+            'data': {
+                'id': pegawai.id,
+                'nama': pegawai.nama,
+                'nip': pegawai.nip,
+                'tanggal_lahir': pegawai.tanggal_lahir.isoformat(),
+                'jenis_kelamin': pegawai.jenis_kelamin,
+                'jabatan': pegawai.jabatan,
+                'golongan': pegawai.golongan,
+                'agama': pegawai.agama,
+                'nomor_telpon': pegawai.nomor_telpon,
+                'riwayat_pendidikan': pegawai.riwayat_pendidikan,
+                'riwayat_pekerjaan': pegawai.riwayat_pekerjaan
+            }
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error adding pegawai via API: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Terjadi kesalahan saat menambahkan pegawai'
+        }), 500
 
 
 @pegawai_bp.route('/pegawai/hapus/<int:id>', methods=['POST'])

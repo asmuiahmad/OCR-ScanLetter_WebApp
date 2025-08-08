@@ -36,19 +36,20 @@
   }
   .toggle-password {
     position: absolute;
-    right: 0.75rem;
+    right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
     color: #6b7280;
     z-index: 20;
-    height: 2rem;
-    width: 2rem;
+    height: 2.25rem;
+    width: 2.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    border-radius: 0.25rem;
+    border-radius: 0.375rem;
+    background: transparent;
   }
   
   .toggle-password:hover {
@@ -57,27 +58,27 @@
   }
   
   .toggle-password i {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
   
   /* Password toggle button for modal */
   .password-toggle-btn {
     position: absolute;
-    right: 0.75rem;
+    right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    background: transparent;
     border: none;
     cursor: pointer;
     color: #6b7280;
     z-index: 20;
-    height: 2rem;
-    width: 2rem;
+    height: 2.25rem;
+    width: 2.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    border-radius: 0.25rem;
+    border-radius: 0.375rem;
   }
   
   .password-toggle-btn:hover {
@@ -92,7 +93,7 @@
   }
   
   .password-toggle-btn i {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
   
   /* Ensure password input containers have proper positioning */
@@ -101,7 +102,7 @@
   }
   
   .password-input-container .floating-label-input {
-    padding-right: 2.5rem;
+    padding-right: 3rem !important;
   }
   
   /* Regular form password inputs */
@@ -109,8 +110,9 @@
     position: relative;
   }
   
-  .field.is-floating-label .control input[type="password"] {
-    padding-right: 2.5rem;
+  .field.is-floating-label .control input[type="password"],
+  .field.is-floating-label .control input[type="text"] {
+    padding-right: 3rem !important;
   }
   
   /* Custom toast styles for bottom-center positioning */
@@ -275,6 +277,53 @@
     box-shadow: 0 2px 4px rgba(153, 27, 27, 0.2);
   }
   
+  /* Modern action buttons */
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+  }
+  
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  }
+  
+  .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #4b5563;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+  }
+  
+  .btn-danger {
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+  }
+  
   .pagination-btn {
     transition: all 0.2s ease;
     padding: 0.5rem 1rem;
@@ -436,67 +485,87 @@
       <!-- label floating Edit User Profile dihapus sesuai permintaan -->
     {% endif %}
     <!-- Header Judul Terpisah -->
-    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary p-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-black">
-            <i class="fas fa-user-edit mr-3 text-black"></i>{% if single_user %}Edit User Profile{% else %}Manajemen User{% endif %}
-          </h2>
-        </div>
+    <div class="form-card">
+      <div class="page-header">
+        <h2>
+          <i class="fas fa-user-edit"></i>
+          {% if single_user %}Edit User Profile{% else %}Manajemen User{% endif %}
+        </h2>
       </div>
     </div>
     <!-- Table dan Form dalam container terpisah -->
     <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
       {% if not single_user %}
       <div class="p-6">
-        <div class="overflow-x-auto mb-8">
-          <table class="modern-table table is-fullwidth is-striped is-hoverable">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Last Login</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-          <tbody>
-            {% for user in users %}
-              <tr>
-                <td class="text-sm">{{ user.email }}</td>
-                <td class="text-sm">{{ user.role }}</td>
-                <td class="text-sm">
-                {% if user.is_approved %}
-                    <span class="tag is-success is-light is-rounded is-small">Approved</span>
-                {% else %}
-                    <span class="tag is-warning is-light is-rounded is-small">Pending</span>
-                {% endif %}
-              </td>
-                <td class="text-sm">{{ user.last_login|default('Never', true) }}</td>
-                <td class="text-sm">
-                  <div class="buttons are-small">
-                  {% if not user.is_approved %}
-                    <button type="button" class="button is-success is-light" onclick="approveUser({{ user.id }}, '{{ user.email }}')">
-                      <span class="icon"><i class="fas fa-check"></i></span>
-                      </button>
-                  {% endif %}
-                    <button class="button is-info is-light" onclick="selectUser({{ user.id }}, '{{ user.email }}')">
-                      <span class="icon"><i class="fas fa-edit"></i></span>
-                      </button>
-                    <form method="POST" action="{{ url_for('user.delete_user', user_id=user.id) }}" onsubmit="return confirm('Are you sure you want to delete this user?');" class="inline">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                      <button type="submit" class="button is-danger is-light">
-                        <span class="icon"><i class="fas fa-trash"></i></span>
-                      </button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-    </div>
-  </div>
+        <div class="bg-white rounded-2xl shadow form-card p-4">
+          <div class="overflow-x-auto">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th><i class="fas fa-envelope mr-2"></i>Email</th>
+                  <th><i class="fas fa-user-tag mr-2"></i>Role</th>
+                  <th><i class="fas fa-check-circle mr-2"></i>Status</th>
+                  <th><i class="fas fa-clock mr-2"></i>Last Login</th>
+                  <th><i class="fas fa-cogs mr-2"></i>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                  <tr>
+                    <td>
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                          <i class="fas fa-user text-indigo-600 text-sm"></i>
+                        </div>
+                        <span class="font-medium text-gray-900 text-sm">{{ user.email }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {{ user.role|title }}
+                      </span>
+                    </td>
+                    <td>
+                      {% if user.is_approved %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <i class="fas fa-check mr-1"></i>Approved
+                        </span>
+                      {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <i class="fas fa-clock mr-1"></i>Pending
+                        </span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <span class="text-sm text-gray-600">
+                        {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="flex items-center space-x-2">
+                        {% if not user.is_approved %}
+                          <button type="button" class="btn-primary btn-action" onclick="approveUser({{ user.id }}, '{{ user.email }}')" title="Approve User">
+                            <i class="fas fa-check"></i>
+                          </button>
+                        {% endif %}
+                        <button type="button" class="btn-secondary btn-action" onclick="selectUser({{ user.id }}, '{{ user.email }}')" title="Edit User">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <form method="POST" action="{{ url_for('user.delete_user', user_id=user.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?')">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="btn-danger btn-action" title="Delete User">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
   {% endif %}
   
   <!-- Edit User Modal -->
@@ -700,7 +769,7 @@
                             <div>Diubah Oleh</div>
                         </div>
                     </div>
-                    <div id="activity-logs-container" class="max-h-64 overflow-y-auto">
+                    <div id="activity-logs-container">
                         <div id="activity-logs-content">
                             <!-- Activity logs will be loaded here -->
                             <div class="p-8 text-center text-gray-500">

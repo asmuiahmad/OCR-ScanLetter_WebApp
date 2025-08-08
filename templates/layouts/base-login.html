@@ -2,9 +2,12 @@
 <html lang="en">
 
     {% include 'includes/head-login.html' %}
+    
+    <!-- Auth-specific CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/auth.css') }}">
 
 <body>
-    <div class="container d-flex center justify-content-center align-items-center" style="height: 95vh;">
+    <div class="login-container">
         <div class="col-md-7">
             {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -16,76 +19,11 @@
         </div>
     </div>
 
-    <script>
-        function togglePassword(inputId, button) {
-            const passwordInput = document.getElementById(inputId);
-            const eyeIcon = button.querySelector('.eye-icon');
-            const eyeOffIcon = button.querySelector('.eye-off-icon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.style.display = 'none';
-                eyeOffIcon.style.display = 'block';
-            } else {
-                passwordInput.type = 'password';
-                eyeIcon.style.display = 'block';
-                eyeOffIcon.style.display = 'none';
-            }
-        }
-
-        function checkPasswordMatch() {
-            const password = document.getElementById('registerPassword');
-            const confirmPassword = document.getElementById('confirmPassword');
-            const registerButton = document.getElementById('registerButton');
-            const messageDiv = document.getElementById('passwordMatchMessage');
-            
-            if (!password || !confirmPassword || !registerButton || !messageDiv) {
-                return; // Elements not found, probably not on register page
-            }
-            
-            const passwordValue = password.value;
-            const confirmPasswordValue = confirmPassword.value;
-            
-            // Check if both fields have values
-            if (passwordValue === '' && confirmPasswordValue === '') {
-                messageDiv.style.display = 'none';
-                registerButton.disabled = true;
-                return;
-            }
-            
-            // Check if confirm password field has value
-            if (confirmPasswordValue === '') {
-                messageDiv.style.display = 'none';
-                registerButton.disabled = true;
-                return;
-            }
-            
-            // Check password length and if passwords match
-            if (passwordValue.length >= 6 && passwordValue === confirmPasswordValue) {
-                messageDiv.style.display = 'block';
-                messageDiv.className = 'password-match-message match';
-                messageDiv.textContent = '✓ Passwords match';
-                registerButton.disabled = false;
-                
-                // Auto-hide message after 4 seconds
-                setTimeout(function() {
-                    messageDiv.style.opacity = '0';
-                    setTimeout(function() {
-                        messageDiv.style.display = 'none';
-                        messageDiv.style.opacity = '1';
-                    }, 300);
-                }, 4000);
-            } else {
-                messageDiv.style.display = 'none';
-                registerButton.disabled = true;
-            }
-        }
-
-        // Initialize password check on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            checkPasswordMatch();
-        });
-    </script>
+    <!-- Session Management -->
+    <script src="{{ url_for('static', filename='assets/js/session-manager.js') }}"></script>
+    
+    <!-- Auth-specific JavaScript -->
+    <script src="{{ url_for('static', filename='assets/js/auth/auth.js') }}"></script>
 </body>
 
 </html>

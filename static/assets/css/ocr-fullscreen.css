@@ -1,0 +1,116 @@
+/* OCR Fullscreen Layout Styles */
+
+/* Ensure proper spacing without sidebar */
+.container {
+    max-width: none;
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Adjust form card for fullscreen */
+.form-card {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* OCR specific adjustments */
+.ocr-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .page-header h2 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Fix for modal z-index issues */
+.ocr-modal {
+    z-index: 9999;
+}
+
+/* Ensure content doesn't overlap with fixed nav */
+main {
+    padding-top: 4rem;
+}
+
+/* Better spacing for OCR content */
+.bg-white.rounded-lg.shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Flash messages styling */
+.mb-4.p-4.rounded-lg {
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Upload area improvements */
+#dropzone {
+    transition: all 0.3s ease;
+    border-width: 2px;
+    border-style: dashed;
+    border-radius: 0.5rem;
+    padding: 2rem;
+}
+
+#dropzone:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+/* Button improvements */
+.bg-blue-500 {
+    background-color: #3b82f6;
+    transition: all 0.2s ease;
+}
+
+.bg-blue-500:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.bg-green-500 {
+    background-color: #10b981;
+    transition: all 0.2s ease;
+}
+
+.bg-green-500:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}

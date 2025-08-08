@@ -1,17 +1,20 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block title %}Daftar Permohonan Cuti{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/cuti.css') }}">
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
   <div class="max-w-5xl mx-auto">
-    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary p-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-black">
-            <i class="fas fa-arrow-down text-green-600 mr-3"></i>Daftar Permohonan Cuti
-          </h2>
-        </div>
+    <div class="form-card">
+      <div class="page-header">
+        <h2>
+          <i class="fas fa-list text-green-400"></i>
+          Daftar Permohonan Cuti
+        </h2>
       </div>
     </div>
   </div>
@@ -77,8 +80,11 @@
                                             </button>
                                             {% endif %}
                                             
-                                            {% if cuti.status_cuti == 'approved' and cuti.pdf_path %}
-                                            <a href="{{ url_for('ocr_cuti.download_pdf', cuti_id=cuti.id_cuti) }}" class="btn btn-primary btn-sm">
+                                            {% if cuti.status_cuti == 'approved' %}
+                                            <a href="{{ url_for('cuti.preview_cuti_html', cuti_id=cuti.id_cuti) }}" class="btn btn-info btn-sm" target="_blank">
+                                                <i class="fas fa-eye"></i> Preview HTML
+                                            </a>
+                                            <a href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-download"></i> PDF
                                             </a>
                                             {% endif %}
@@ -194,151 +200,7 @@
     </div>
 </div>
 
-<script>
-let currentCutiId = null;
-
-function viewDetail(cutiId) {
-    // Load detail cuti via AJAX
-    fetch(`/cuti/detail/${cutiId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const cuti = data.cuti;
-                const content = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><strong>Data Pegawai</strong></h6>
-                            <table class="table table-sm">
-                                <tr><td>Nama</td><td>: ${cuti.nama}</td></tr>
-                                <tr><td>NIP</td><td>: ${cuti.nip}</td></tr>
-                                <tr><td>Jabatan</td><td>: ${cuti.jabatan}</td></tr>
-                                <tr><td>Gol/Ruang</td><td>: ${cuti.gol_ruang}</td></tr>
-                                <tr><td>Unit Kerja</td><td>: ${cuti.unit_kerja}</td></tr>
-                                <tr><td>Masa Kerja</td><td>: ${cuti.masa_kerja}</td></tr>
-                                <tr><td>Alamat</td><td>: ${cuti.alamat}</td></tr>
-                                <tr><td>Telepon</td><td>: ${cuti.telp}</td></tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><strong>Data Cuti</strong></h6>
-                            <table class="table table-sm">
-                                <tr><td>Jenis Cuti</td><td>: ${cuti.jenis_cuti}</td></tr>
-                                <tr><td>Alasan</td><td>: ${cuti.alasan_cuti}</td></tr>
-                                <tr><td>Lama Cuti</td><td>: ${cuti.lama_cuti}</td></tr>
-                                <tr><td>Tanggal Mulai</td><td>: ${cuti.tanggal_cuti}</td></tr>
-                                <tr><td>Tanggal Selesai</td><td>: ${cuti.sampai_cuti}</td></tr>
-                                <tr><td>Status</td><td>: <span class="badge badge-${cuti.status_cuti === 'approved' ? 'success' : cuti.status_cuti === 'rejected' ? 'danger' : 'warning'}">${cuti.status_cuti}</span></td></tr>
-                                ${cuti.approved_by ? `<tr><td>Disetujui oleh</td><td>: ${cuti.approved_by}</td></tr>` : ''}
-                                ${cuti.approved_at ? `<tr><td>Tanggal Persetujuan</td><td>: ${cuti.approved_at}</td></tr>` : ''}
-                                ${cuti.notes ? `<tr><td>Catatan</td><td>: ${cuti.notes}</td></tr>` : ''}
-                            </table>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('detailContent').innerHTML = content;
-                $('#detailModal').modal('show');
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat memuat detail');
-        });
-}
-
-function approveCuti(cutiId) {
-    currentCutiId = cutiId;
-    $('#approvalModal').modal('show');
-}
-
-function rejectCuti(cutiId) {
-    currentCutiId = cutiId;
-    $('#rejectionModal').modal('show');
-}
-
-function showQRCode(signatureHash) {
-    document.getElementById('qrHash').textContent = signatureHash;
-    
-    // Generate QR code URL for verification
-    const verifyUrl = `${window.location.origin}/cuti/verify/${signatureHash}`;
-    
-    // Create QR code using a simple QR code generator
-    const qrContainer = document.getElementById('qrCodeContainer');
-    qrContainer.innerHTML = `
-        <div class="text-center">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verifyUrl)}" alt="QR Code" class="img-fluid">
-            <p class="mt-2"><small>URL Verifikasi: <a href="${verifyUrl}" target="_blank">${verifyUrl}</a></small></p>
-        </div>
-    `;
-    
-    $('#qrModal').modal('show');
-}
-
-// Event listeners
-document.getElementById('confirmApprove').addEventListener('click', function() {
-    const notes = document.getElementById('notes').value;
-    
-    fetch(`/cuti/approve/${currentCutiId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
-        },
-        body: JSON.stringify({ notes: notes })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Cuti berhasil disetujui dengan tanda tangan digital!');
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat menyetujui cuti');
-    });
-    
-    $('#approvalModal').modal('hide');
-});
-
-document.getElementById('confirmReject').addEventListener('click', function() {
-    const notes = document.getElementById('rejectNotes').value;
-    
-    if (!notes.trim()) {
-        alert('Alasan penolakan harus diisi');
-        return;
-    }
-    
-    fetch(`/cuti/reject/${currentCutiId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
-        },
-        body: JSON.stringify({ notes: notes })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Cuti berhasil ditolak');
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan saat menolak cuti');
-    });
-    
-    $('#rejectionModal').modal('hide');
-});
-
-function getCsrfToken() {
-    return document.querySelector('meta[name=csrf-token]').getAttribute('content');
-}
-</script>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='assets/js/cuti/list-cuti.js') }}"></script>
+{% endblock %}
 {% endblock %}

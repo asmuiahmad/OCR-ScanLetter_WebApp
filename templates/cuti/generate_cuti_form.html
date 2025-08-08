@@ -1,6 +1,5 @@
-{% extends "layouts/base.html" %}
-{% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
+{% extends "layouts/base.html" %} {% block content %}
+<style>
   .input-field {
     transition: all 0.2s ease;
   }
@@ -15,7 +14,8 @@
   .btn-submit:hover {
     background: linear-gradient(135deg, #1e3a8a, #2563eb);
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   .floating-label {
     position: absolute;
@@ -31,27 +31,124 @@
     border-radius: 0.25rem;
     line-height: 1;
     pointer-events: none;
-    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
+    box-shadow: 0 1px 4px rgba(59, 130, 246, 0.07);
+  }
+
+  /* Radio button styling */
+  .radio-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+  }
+
+  .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .radio-item:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  .radio-item input[type="radio"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+  }
+
+  .radio-item label {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: #374151;
+  }
+
+  .radio-item input[type="radio"]:checked + label {
+    color: #1e40af;
+  }
+
+  /* Date input styling */
+  .date-input-wrapper {
+    position: relative;
+  }
+
+  .date-input-wrapper input[type="date"] {
+    padding-right: 2.5rem;
+  }
+
+  .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6b7280;
+    opacity: 1;
+  }
+
+  /* Phone input styling */
+  .phone-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .country-select {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    border: none;
+    background: transparent;
+    padding: 0 0.5rem;
+    font-size: 0.875rem;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  .phone-number-input {
+    padding-left: 85px !important;
   }
 </style>
 <head>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+  />
+  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css" />
 </head>
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-4xl mx-auto">
-    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary p-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-black">
-            <i class="fas fa-calendar-check text-red-600 mr-3"></i>Formulir Permintaan Cuti
-          </h2>
-        </div>
+    <div class="form-card">
+      <div class="page-header">
+        <h2>
+          <i class="fas fa-calendar-check text-red-400"></i>
+          Formulir Permintaan Cuti
+        </h2>
       </div>
     </div>
     <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
-      <form method="POST" action="{{ url_for('cuti.generate_cuti') }}" class="p-6">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <form
+        method="POST"
+        action="{{ url_for('cuti.generate_cuti') }}"
+        class="p-6"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="columns is-multiline">
           <div class="column is-half">
             <div class="field is-floating-label">
@@ -73,7 +170,9 @@
             <div class="field is-floating-label">
               <div class="control">
                 {{ form.jabatan(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="jabatan">Jabatan</label>
+                <label class="label is-floating-label" for="jabatan"
+                  >Jabatan</label
+                >
               </div>
             </div>
           </div>
@@ -81,7 +180,9 @@
             <div class="field is-floating-label">
               <div class="control">
                 {{ form.gol_ruang(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="gol_ruang">Gol. Ruang</label>
+                <label class="label is-floating-label" for="gol_ruang"
+                  >Gol. Ruang</label
+                >
               </div>
             </div>
           </div>
@@ -89,7 +190,9 @@
             <div class="field is-floating-label">
               <div class="control">
                 {{ form.unit_kerja(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="unit_kerja">Unit Kerja</label>
+                <label class="label is-floating-label" for="unit_kerja"
+                  >Unit Kerja</label
+                >
               </div>
             </div>
           </div>
@@ -97,15 +200,20 @@
             <div class="field is-floating-label">
               <div class="control">
                 {{ form.masa_kerja(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="masa_kerja">Masa Kerja</label>
+                <label class="label is-floating-label" for="masa_kerja"
+                  >Masa Kerja</label
+                >
               </div>
             </div>
           </div>
           <div class="column is-full">
             <div class="field is-floating-label">
               <div class="control">
-                {{ form.alamat(class="input", placeholder=" ", rows="3") }}
-                <label class="label is-floating-label" for="alamat">Alamat</label>
+                {{ form.alamat(class="textarea", placeholder=" ", rows="5",
+                style="min-height: 120px;") }}
+                <label class="label is-floating-label" for="alamat"
+                  >Alamat</label
+                >
               </div>
             </div>
           </div>
@@ -113,7 +221,9 @@
             <div class="field is-floating-label">
               <div class="control">
                 {{ form.no_suratmasuk(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="no_suratmasuk">Nomor Surat Masuk</label>
+                <label class="label is-floating-label" for="no_suratmasuk"
+                  >Nomor Surat Masuk</label
+                >
               </div>
             </div>
           </div>
@@ -121,7 +231,9 @@
             <div class="field is-floating-label">
               <div class="control">
                 {{ form.tgl_ajuan_cuti(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="tgl_ajuan_cuti">Tanggal Ajuan Cuti</label>
+                <label class="label is-floating-label" for="tgl_ajuan_cuti"
+                  >Tanggal Ajuan Cuti</label
+                >
               </div>
             </div>
           </div>
@@ -130,67 +242,209 @@
           <div class="column is-half">
             <div class="field is-floating-label">
               <div class="control">
-                {{ form.tanggal_cuti(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="tanggal_cuti">Tanggal Mulai Cuti</label>
+                <div class="date-input-wrapper">
+                  {{ form.tanggal_cuti(class="input", placeholder=" ",
+                  id="tanggal_mulai") }}
+                </div>
+                <label class="label is-floating-label" for="tanggal_cuti"
+                  >Tanggal Mulai Cuti</label
+                >
               </div>
             </div>
           </div>
           <div class="column is-half">
             <div class="field is-floating-label">
               <div class="control">
-                {{ form.sampai_cuti(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="sampai_cuti">Tanggal Selesai Cuti</label>
+                <div class="date-input-wrapper">
+                  {{ form.sampai_cuti(class="input", placeholder=" ",
+                  id="tanggal_selesai") }}
+                </div>
+                <label class="label is-floating-label" for="sampai_cuti"
+                  >Tanggal Selesai Cuti</label
+                >
               </div>
             </div>
           </div>
           <div class="column is-half">
             <div class="field is-floating-label">
               <div class="control">
-                {{ form.telp(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="telp">Nomor Telepon</label>
+                <div class="phone-input-wrapper">
+                  <select class="country-select" id="country_code">
+                    <option value="+62">🇮🇩 +62</option>
+                    <option value="+65">🇸🇬 +65</option>
+                    <option value="+60">🇲🇾 +60</option>
+                  </select>
+                  {{ form.telp(class="input phone-number-input", placeholder="
+                  ", id="phone_number") }}
+                </div>
+                <label class="label is-floating-label" for="telp"
+                  >Nomor Telepon</label
+                >
               </div>
             </div>
           </div>
           <div class="column is-full">
             <div class="field is-floating-label">
               <div class="control">
-              <div class="border rounded p-3 bg-gray-50">
-                {% for subfield in form.jenis_cuti %}
-                  <div class="field is-checkradio">
-                    <input type="radio" name="jenis_cuti" value="{{ subfield.data.value }}" class="is-checkradio">
-                    <label class="label">{{ subfield.label }}</label>
+                <div class="radio-group">
+                  {% for subfield in form.jenis_cuti %}
+                  <div class="radio-item">
+                    <input
+                      type="radio"
+                      name="jenis_cuti"
+                      value="{{ subfield.data }}"
+                      id="jenis_{{ subfield.data }}"
+                      {%
+                      if
+                      subfield.checked
+                      %}checked{%
+                      endif
+                      %}
+                    />
+                    <label for="jenis_{{ subfield.data }}"
+                      >{{ subfield.label.text }}</label
+                    >
                   </div>
                   {% endfor %}
                 </div>
-                <label class="label is-floating-label" for="jenis_cuti">Jenis Cuti</label>
+                <label class="label is-floating-label" for="jenis_cuti"
+                  >Jenis Cuti</label
+                >
               </div>
             </div>
           </div>
           <div class="column is-full">
             <div class="field is-floating-label">
               <div class="control">
-                {{ form.alasan_cuti(class="input", placeholder=" ", rows="3") }}
-                <label class="label is-floating-label" for="alasan_cuti">Alasan Cuti</label>
+                {{ form.alasan_cuti(class="textarea", placeholder=" ", rows="3")
+                }}
+                <label class="label is-floating-label" for="alasan_cuti"
+                  >Alasan Cuti</label
+                >
               </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.lama_cuti(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="lama_cuti">Lama Cuti</label>
-            </div>
             </div>
           </div>
         </div>
         <div class="field mt-5 has-text-right">
-          <button type="submit" class="button is-primary is-medium">
-            <span class="icon"><i class="fas fa-file-signature"></i></span>
-            <span>Generate Surat Cuti</span>
-          </button>
+          <div class="buttons">
+            <button type="submit" class="button is-primary is-large">
+              <span class="icon"><i class="fas fa-file-pdf"></i></span>
+              <span>Generate Surat Cuti PDF</span>
+            </button>
+          </div>
+          <p class="help has-text-centered mt-3">
+            <small>Sistem akan otomatis menggunakan template terbaik yang tersedia:<br>
+            <strong>DOCX Template</strong> → <strong>HTML Template</strong> → <strong>Basic Template</strong></small>
+          </p>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tanggalMulai = document.getElementById("tanggal_mulai");
+    const tanggalSelesai = document.getElementById("tanggal_selesai");
+    const phoneInput = document.getElementById("phone_number");
+    const countrySelect = document.getElementById("country_code");
+
+    // Set minimum date to today for both date inputs
+    const today = new Date().toISOString().split("T")[0];
+    tanggalMulai.setAttribute("min", today);
+    tanggalSelesai.setAttribute("min", today);
+
+    // Update minimum date for end date when start date changes
+    tanggalMulai.addEventListener("change", function () {
+      tanggalSelesai.setAttribute("min", this.value);
+      if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
+        tanggalSelesai.value = "";
+      }
+    });
+
+    // Phone number formatting
+    function formatPhoneNumber(value, countryCode) {
+      // Remove all non-digits
+      const digits = value.replace(/\D/g, "");
+
+      // Format based on country
+      if (countryCode === "+62") {
+        // Indonesia
+        if (digits.length <= 3) return digits;
+        if (digits.length <= 7)
+          return digits.slice(0, 3) + "-" + digits.slice(3);
+        if (digits.length <= 11)
+          return (
+            digits.slice(0, 3) +
+            "-" +
+            digits.slice(3, 7) +
+            "-" +
+            digits.slice(7)
+          );
+        return (
+          digits.slice(0, 3) +
+          "-" +
+          digits.slice(3, 7) +
+          "-" +
+          digits.slice(7, 11) +
+          "-" +
+          digits.slice(11, 15)
+        );
+      } else if (countryCode === "+65") {
+        // Singapore
+        if (digits.length <= 4) return digits;
+        if (digits.length <= 8)
+          return digits.slice(0, 4) + "-" + digits.slice(4);
+        return digits.slice(0, 4) + "-" + digits.slice(4, 8);
+      } else if (countryCode === "+60") {
+        // Malaysia
+        if (digits.length <= 2) return digits;
+        if (digits.length <= 6)
+          return digits.slice(0, 2) + "-" + digits.slice(2);
+        if (digits.length <= 10)
+          return (
+            digits.slice(0, 2) +
+            "-" +
+            digits.slice(2, 6) +
+            "-" +
+            digits.slice(6)
+          );
+        return (
+          digits.slice(0, 2) +
+          "-" +
+          digits.slice(2, 6) +
+          "-" +
+          digits.slice(6, 10)
+        );
+      }
+      return digits;
+    }
+
+    phoneInput.addEventListener("input", function (e) {
+      const countryCode = countrySelect.value;
+      const formatted = formatPhoneNumber(e.target.value, countryCode);
+      e.target.value = formatted;
+    });
+
+    countrySelect.addEventListener("change", function () {
+      const formatted = formatPhoneNumber(phoneInput.value, this.value);
+      phoneInput.value = formatted;
+    });
+
+    // Set initial placeholder based on country
+    function updatePlaceholder() {
+      const countryCode = countrySelect.value;
+      if (countryCode === "+62") {
+        phoneInput.placeholder = "811-1234-5678";
+      } else if (countryCode === "+65") {
+        phoneInput.placeholder = "9123-4567";
+      } else if (countryCode === "+60") {
+        phoneInput.placeholder = "12-345-6789";
+      }
+    }
+
+    countrySelect.addEventListener("change", updatePlaceholder);
+    updatePlaceholder(); // Set initial placeholder
+  });
+</script>
 {% endblock %}

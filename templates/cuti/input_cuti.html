@@ -3,6 +3,48 @@
 {% block title %}Input Cuti - PA Banjarbaru{% endblock %}
 
 {% block content %}
+<style>
+  /* Date input styling */
+  .date-input-wrapper {
+    position: relative;
+  }
+  
+  .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6b7280;
+    opacity: 1;
+  }
+  
+  /* Phone input styling */
+  .phone-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .country-select {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    border: none;
+    background: transparent;
+    padding: 0 0.5rem;
+    font-size: 0.875rem;
+    z-index: 1;
+    cursor: pointer;
+  }
+  
+  .phone-number-input {
+    padding-left: 85px !important;
+  }
+</style>
+
 <div class="container mt-4">
     <h1 class="mb-5 text-center font-bold text-2xl">Input Cuti</h1>
     
@@ -37,7 +79,7 @@
                 </div>
                 <div class="form-group">
                     {{ form.alamat.label(style="margin-bottom: 3px;") }}
-                    {{ form.alamat(class="form-control", style="height: 60px;", required=true) }}
+                    {{ form.alamat(class="form-control", style="height: 120px; resize: vertical;", required=true) }}
                 </div>
             </div>
 
@@ -53,15 +95,26 @@
                 </div>
                 <div class="form-group">
                     {{ form.tanggal_cuti.label(style="margin-bottom: 3px;") }}
-                    {{ form.tanggal_cuti(class="form-control", type="date", required=true) }}
+                    <div class="date-input-wrapper">
+                        {{ form.tanggal_cuti(class="form-control", type="date", id="tanggal_mulai_input", required=true) }}
+                    </div>
                 </div>
                 <div class="form-group">
                     {{ form.sampai_cuti.label(style="margin-bottom: 3px;") }}
-                    {{ form.sampai_cuti(class="form-control", type="date", required=true) }}
+                    <div class="date-input-wrapper">
+                        {{ form.sampai_cuti(class="form-control", type="date", id="tanggal_selesai_input", required=true) }}
+                    </div>
                 </div>
                 <div class="form-group">
                     {{ form.telp.label(style="margin-bottom: 3px;") }}
-                    {{ form.telp(class="form-control", required=true) }}
+                    <div class="phone-input-wrapper">
+                        <select class="country-select" id="country_code_input">
+                            <option value="+62">🇮🇩 +62</option>
+                            <option value="+65">🇸🇬 +65</option>
+                            <option value="+60">🇲🇾 +60</option>
+                        </select>
+                        {{ form.telp(class="form-control phone-number-input", id="phone_number_input", required=true) }}
+                    </div>
                 </div>
                 <div class="form-group">
                     {{ form.jenis_cuti.label(style="margin-bottom: 3px;") }}
@@ -70,10 +123,6 @@
                 <div class="form-group">
                     {{ form.alasan_cuti.label(style="margin-bottom: 3px;") }}
                     {{ form.alasan_cuti(class="form-control", style="height: 60px;", required=true) }}
-                </div>
-                <div class="form-group">
-                    {{ form.lama_cuti.label(style="margin-bottom: 3px;") }}
-                    {{ form.lama_cuti(class="form-control", required=true) }}
                 </div>
             </div>
         </div>
@@ -84,4 +133,76 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tanggalMulai = document.getElementById('tanggal_mulai_input');
+    const tanggalSelesai = document.getElementById('tanggal_selesai_input');
+    const phoneInput = document.getElementById('phone_number_input');
+    const countrySelect = document.getElementById('country_code_input');
+    
+    // Set minimum date to today for both date inputs
+    const today = new Date().toISOString().split('T')[0];
+    tanggalMulai.setAttribute('min', today);
+    tanggalSelesai.setAttribute('min', today);
+    
+    // Update minimum date for end date when start date changes
+    tanggalMulai.addEventListener('change', function() {
+        tanggalSelesai.setAttribute('min', this.value);
+        if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
+            tanggalSelesai.value = '';
+        }
+    });
+    
+    // Phone number formatting
+    function formatPhoneNumber(value, countryCode) {
+        // Remove all non-digits
+        const digits = value.replace(/\D/g, '');
+        
+        // Format based on country
+        if (countryCode === '+62') { // Indonesia
+            if (digits.length <= 3) return digits;
+            if (digits.length <= 7) return digits.slice(0, 3) + '-' + digits.slice(3);
+            if (digits.length <= 11) return digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+            return digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7, 11) + '-' + digits.slice(11, 15);
+        } else if (countryCode === '+65') { // Singapore
+            if (digits.length <= 4) return digits;
+            if (digits.length <= 8) return digits.slice(0, 4) + '-' + digits.slice(4);
+            return digits.slice(0, 4) + '-' + digits.slice(4, 8);
+        } else if (countryCode === '+60') { // Malaysia
+            if (digits.length <= 2) return digits;
+            if (digits.length <= 6) return digits.slice(0, 2) + '-' + digits.slice(2);
+            if (digits.length <= 10) return digits.slice(0, 2) + '-' + digits.slice(2, 6) + '-' + digits.slice(6);
+            return digits.slice(0, 2) + '-' + digits.slice(2, 6) + '-' + digits.slice(6, 10);
+        }
+        return digits;
+    }
+    
+    phoneInput.addEventListener('input', function(e) {
+        const countryCode = countrySelect.value;
+        const formatted = formatPhoneNumber(e.target.value, countryCode);
+        e.target.value = formatted;
+    });
+    
+    countrySelect.addEventListener('change', function() {
+        const formatted = formatPhoneNumber(phoneInput.value, this.value);
+        phoneInput.value = formatted;
+    });
+    
+    // Set initial placeholder based on country
+    function updatePlaceholder() {
+        const countryCode = countrySelect.value;
+        if (countryCode === '+62') {
+            phoneInput.placeholder = '811-1234-5678';
+        } else if (countryCode === '+65') {
+            phoneInput.placeholder = '9123-4567';
+        } else if (countryCode === '+60') {
+            phoneInput.placeholder = '12-345-6789';
+        }
+    }
+    
+    countrySelect.addEventListener('change', updatePlaceholder);
+    updatePlaceholder(); // Set initial placeholder
+});
+</script>
 {% endblock %} 

@@ -71,6 +71,113 @@ def load_metadata():
             return json.load(f)
     return {"surat_masuk": {}}
 
+def improve_text_spacing(text):
+    """
+    Improve text spacing by adding spaces between words that are stuck together
+    Only applies to text that looks like it has merged words (no spaces and long strings)
+    """
+    if not text or text == 'Not found':
+        return text
+    
+    # Check if text looks like it needs spacing improvement
+    # Only process if text has long words without spaces (likely merged words)
+    words = text.split()
+    has_long_merged_words = any(len(word) > 15 and word.isalpha() for word in words)
+    
+    # If text already has reasonable spacing or looks garbled, don't modify it
+    if not has_long_merged_words or len(text.split()) > len(text) / 8:
+        logger.info(f"Text spacing: No improvement needed for: {text[:50]}...")
+        return text
+    
+    # Only apply conservative patterns for clear merged words
+    conservative_patterns = [
+        # Only fix clear Indonesian word combinations
+        (r'permohonan([a-z]{4,})', r'permohonan \1'),
+        (r'sidang([a-z]{4,})', r'sidang \1'),
+        (r'secara([a-z]{4,})', r'secara \1'),
+        (r'dengan([a-z]{4,})', r'dengan \1'),
+        (r'kepada([a-z]{4,})', r'kepada \1'),
+        (r'untuk([a-z]{4,})', r'untuk \1'),
+        (r'dalam([a-z]{4,})', r'dalam \1'),
+        (r'mohon([a-z]{4,})', r'mohon \1'),
+        (r'surat([a-z]{4,})', r'surat \1'),
+        (r'pengadilan([a-z]{4,})', r'pengadilan \1'),
+        
+        # Only fix clear camelCase (lowercase followed by uppercase)
+        (r'([a-z]{3,})([A-Z][a-z]{3,})', r'\1 \2'),
+    ]
+    
+    # Apply conservative patterns
+    improved_text = text
+    for pattern, replacement in conservative_patterns:
+        improved_text = re.sub(pattern, replacement, improved_text, flags=re.IGNORECASE)
+    
+    # Only clean up if we actually made changes
+    if improved_text != text:
+        improved_text = re.sub(r'\s+', ' ', improved_text).strip()
+        logger.info(f"Text spacing improved:")
+        logger.info(f"  Original: {text}")
+        logger.info(f"  Improved: {improved_text}")
+        return improved_text
+    
+    return text
+
+def clean_letter_number(raw_text):
+    """
+    Clean up OCR-extracted letter number by removing common OCR errors
+    and extracting valid letter number patterns
+    """
+    if not raw_text:
+        return 'Not found'
+    
+    # Remove common OCR noise at the beginning
+    # These are common OCR misreadings that appear before actual letter numbers
+    noise_patterns = [
+        r'^[NGBUV]+',  # Remove NGBUV prefix
+        r'^[0O]+',     # Remove leading zeros/O's
+        r'^[Il1]+',    # Remove leading I/l/1 characters
+        r'^[^\w./\-]+', # Remove non-alphanumeric characters except . / -
+    ]
+    
+    cleaned = raw_text.strip()
+    for pattern in noise_patterns:
+        cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE)
+    
+    # Look for valid letter number patterns
+    # Common Indonesian letter number formats:
+    # PAN.PA.W15-A12/HK2.6/1X/2024
+    # 123/ABC/DEF/2024
+    # ABC.123/DEF/2024
+    letter_patterns = [
+        r'([A-Z]{2,4}\.?[A-Z]{2,4}\.?[A-Z0-9\-]+/[A-Z0-9\.]+/[A-Z0-9]+/\d{4})',  # PAN.PA.W15-A12/HK2.6/1X/2024
+        r'(\d+/[A-Z0-9\.]+/[A-Z0-9]+/\d{4})',  # 123/ABC/DEF/2024
+        r'([A-Z]+\.\d+/[A-Z0-9\.]+/[A-Z0-9]+/\d{4})',  # ABC.123/DEF/2024
+        r'([A-Z0-9\-\.]+/[A-Z0-9\.]+/[A-Z0-9]+/\d{4})',  # General pattern with year
+        r'([A-Z0-9\-\.]+/[A-Z0-9\.]+/[A-Z0-9]+)',  # Without year
+    ]
+    
+    for pattern in letter_patterns:
+        match = re.search(pattern, cleaned, re.IGNORECASE)
+        if match:
+            result = match.group(1)
+            logger.info(f"Found valid letter number pattern: {result}")
+            return result
+    
+    # If no specific pattern found, clean up the text and return if it looks valid
+    # Remove extra spaces and normalize
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    
+    # Check if it contains typical letter number elements (letters, numbers, slashes, dots)
+    if re.search(r'[A-Z]+.*[0-9]+.*/', cleaned, re.IGNORECASE) or re.search(r'[0-9]+.*[A-Z]+.*/', cleaned, re.IGNORECASE):
+        # Remove any remaining noise characters at the start
+        cleaned = re.sub(r'^[^A-Z0-9]+', '', cleaned, flags=re.IGNORECASE)
+        if cleaned:
+            logger.info(f"Cleaned letter number: {cleaned}")
+            return cleaned
+    
+    logger.warning(f"Could not clean letter number from: {raw_text}")
+    return 'Not found'
+
 def robust_parse_date(date_str):
     if not date_str or not isinstance(date_str, str):
         return None
@@ -133,9 +240,13 @@ def extract_ocr_data_surat_masuk(file_path):
         for line in lines:
             match = re.search(nomor_regex + r'.*[:：](.*)', line, re.IGNORECASE)
             if match:
-                nomor_suratMasuk = match.group(1).strip()
-                logger.info(f"Extracted nomor_surat: {nomor_suratMasuk}")
-                break
+                raw_nomor = match.group(1).strip()
+                # Clean up the extracted letter number
+                cleaned_nomor = clean_letter_number(raw_nomor)
+                if cleaned_nomor and cleaned_nomor != 'Not found':
+                    nomor_suratMasuk = cleaned_nomor
+                    logger.info(f"Extracted and cleaned nomor_surat: {nomor_suratMasuk}")
+                    break
         # Jika tidak ditemukan, tetap return 'Not found'
         
         # Field lain juga gunakan raw_text
@@ -164,7 +275,9 @@ def extract_ocr_data_surat_masuk(file_path):
         
         pengirim = extract_pengirim(raw_text)
         penerima = extract_penerima_surat_masuk(raw_text)
-        isi_surat = extract_isi_suratkeluar(raw_text)  # RAW, tanpa clean_text
+        isi_surat_raw = extract_isi_suratkeluar(raw_text)  # RAW, tanpa clean_text
+        # Improve text spacing for isi surat
+        isi_surat = improve_text_spacing(isi_surat_raw) if isi_surat_raw else isi_surat_raw
         acara = extract_acara(raw_text)
         tempat = extract_tempat(raw_text)
         tanggal_acara = extract_tanggal_acara(raw_text)
@@ -430,13 +543,26 @@ def surat_masuk_image(id):
     surat = SuratMasuk.query.get_or_404(id)
     return send_file(io.BytesIO(surat.gambar_suratMasuk), mimetype='image/png')
 
+@ocr_surat_masuk_bp.route('/test_endpoint', methods=['GET', 'POST'])
+@login_required
+def test_endpoint():
+    logger.info(f"Test endpoint called with method: {request.method}")
+    return jsonify({"success": True, "message": "Test endpoint working", "method": request.method})
+
 @ocr_surat_masuk_bp.route('/save_extracted_data', methods=['POST'])
 @login_required
 @role_required('admin', 'pimpinan')
 def save_extracted_data():
     try:
+        logger.info("Save extracted data endpoint called")
+        logger.info(f"Request method: {request.method}")
+        logger.info(f"Request headers: {dict(request.headers)}")
+        
         data = request.get_json()
+        logger.info(f"Received data: {data}")
+        
         if not data:
+            logger.error("No data provided in request")
             return jsonify({"success": False, "error": "No data provided"})
 
         # Load existing metadata

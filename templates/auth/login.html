@@ -5,16 +5,27 @@
 {% block content %}
 <div class="container">
   <div class="login">
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="alert alert-success text-center">
-          {{ messages[0] }}
-        </div>
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} text-center">
+            {{ message }}
+          </div>
+        {% endfor %}
       {% endif %}
     {% endwith %}
+    
+    {% if request.args.get('next') %}
+      <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle"></i> Sesi Anda telah berakhir. Silakan login kembali untuk melanjutkan.
+      </div>
+    {% endif %}
     <h1>Login</h1>
-    <form action="{{ url_for('auth.login') }}" method="POST" class="flex flex-col gap-4 w-full">
+    <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
       {{ form.hidden_tag() }}
+      {% if request.args.get('next') %}
+        <input type="hidden" name="next" value="{{ request.args.get('next') }}" />
+      {% endif %}
       <input type="email" name="email" placeholder="Email" required autocomplete="email" />
       <div class="password-container">
         <input type="password" name="password" id="loginPassword" placeholder="Password" required autocomplete="current-password" />

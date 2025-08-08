@@ -1,8 +1,3 @@
-"""
-API routes
-RESTful API endpoints for various functionalities
-"""
-
 import math
 from flask import Blueprint, jsonify, request, current_app
 from flask_login import login_required, current_user
@@ -262,7 +257,6 @@ def update_ocr_accuracy(id):
                 surat.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(surat, 'suratMasuk')
                 accuracy = surat.ocr_accuracy_suratMasuk
             except ImportError:
-                # Fallback if ocr_utils is not available
                 accuracy = 0
         else:
             return jsonify({"success": False, "error": "Invalid surat type"})

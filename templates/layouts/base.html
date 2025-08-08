@@ -11,17 +11,20 @@
     </div>
     <ul class="nav-links" style="margin-top: 0.25rem; height:500px;">
       <li>
-        <a href="{{ url_for('dashboard.dashboard') }}" data-tooltip="Dashboard" class="flex items-center px-4 py-2">
-          <i class="fas fa-home"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Dashboard">Dashboard</span>
-          <span class="ml-auto w-4"></span>
+        <a href="{{ url_for('dashboard.dashboard') }}" data-tooltip="Dashboard" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-home"></i>
+            <span class="links_name">Dashboard</span>
+          </div>
         </a>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'showSuratMenu')" data-tooltip="Show Surat">
-          <i class="fas fa-envelope-open-text"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Show Surat">Show Surat</span>
-          <i class="fas fa-chevron-down ml-auto"></i>
+        <a href="#" onclick="toggleMenu(event, 'showSuratMenu')" data-tooltip="Show Surat" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-envelope-open-text"></i>
+            <span class="links_name">Show Surat</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </a>
         <div class="dropdown" id="showSuratMenu">
           <a href="{{ url_for('surat_masuk.show_surat_masuk') }}">Surat Masuk</a>
@@ -29,10 +32,12 @@
         </div>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'templatesMenu')" data-tooltip="Templates Surat">
-          <i class="fas fa-folder"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Templates Surat">Templates Surat</span>
-          <i class="fas fa-chevron-down ml-auto"></i>
+        <a href="#" onclick="toggleMenu(event, 'templatesMenu')" data-tooltip="Templates Surat" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-folder"></i>
+            <span class="links_name">Templates Surat</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </a>
         <div class="dropdown" id="templatesMenu">
           <a href="{{ url_for('cuti.generate_cuti') }}">Generate Cuti</a>
@@ -40,10 +45,12 @@
       </li>
       {% if current_user.role != 'karyawan' %}
       <li>
-        <a href="#" onclick="toggleMenu(event, 'inputSuratMenu')" data-tooltip="Input Surat">
-          <i class="fas fa-edit"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Input Surat">Input Surat</span>
-          <i class="fas fa-chevron-down ml-auto"></i>
+        <a href="#" onclick="toggleMenu(event, 'inputSuratMenu')" data-tooltip="Input Surat" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-edit"></i>
+            <span class="links_name">Input Surat</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </a>
         <div class="dropdown" id="inputSuratMenu">
           <a href="{{ url_for('surat_masuk.input_surat_masuk') }}">Surat Masuk</a>
@@ -51,10 +58,12 @@
         </div>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'ocrMenu')" data-tooltip="OCR">
-          <i class="fas fa-eye"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="OCR">OCR</span>
-          <i class="fas fa-chevron-down ml-auto"></i>
+        <a href="#" onclick="toggleMenu(event, 'ocrMenu')" data-tooltip="OCR" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-eye"></i>
+            <span class="links_name">OCR</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </a>
         <div class="dropdown" id="ocrMenu">
           <a href="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}">OCR Surat Masuk</a>
@@ -64,10 +73,12 @@
         </div>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'cutiMenu')" data-tooltip="Manajemen Cuti">
-          <i class="fas fa-calendar-alt"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Manajemen Cuti">Manajemen Cuti</span>
-          <i class="fas fa-chevron-down ml-auto"></i>
+        <a href="#" onclick="toggleMenu(event, 'cutiMenu')" data-tooltip="Manajemen Cuti" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-calendar-alt"></i>
+            <span class="links_name">Manajemen Cuti</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </a>
         <div class="dropdown" id="cutiMenu">
           <a href="{{ url_for('ocr_cuti.ocr_cuti') }}">Input Cuti Baru</a>
@@ -78,17 +89,20 @@
         </div>
       </li>
       <li>
-        <a href="{{ url_for('laporan.laporan_statistik') }}" data-tooltip="Laporan Statistik" class="flex items-center px-4 py-2">
-          <i class="fas fa-chart-bar"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Laporan Statistik">Laporan Statistik</span>
-          <span class="ml-auto w-4"></span>
+        <a href="{{ url_for('laporan.laporan_statistik') }}" data-tooltip="Laporan Statistik" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-chart-bar"></i>
+            <span class="links_name">Laporan Statistik</span>
+          </div>
         </a>
       </li>
       <li>
-        <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')" data-tooltip="Input Pegawai">
-          <i class="fas fa-users"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Input Pegawai">Input Pegawai</span>
-          <i class="fas fa-chevron-down ml-auto"></i>
+        <a href="#" onclick="toggleMenu(event, 'pegawaiMenu')" data-tooltip="Input Pegawai" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-users"></i>
+            <span class="links_name">Input Pegawai</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </a>
         <div class="dropdown" id="pegawaiMenu">
           <a href="{{ url_for('pegawai.pegawai_list') }}">List Pegawai</a>
@@ -98,25 +112,26 @@
       {% endif %}
       {% if current_user.role == 'pimpinan' %}
       <li>
-        <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat" class="flex items-center px-4 py-2 relative">
-          <i class="fas fa-check-circle"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Persetujuan Surat">Persetujuan Surat</span>
-          {% if g.pending_surat_masuk_count > 0 %}
-          <span class="absolute right-4 top-1/2 -translate-y-1/2 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold rounded-full shadow px-2 py-1 flex items-center justify-center min-w-[24px] h-6 ml-2 border-2 border-white z-10">
-            {{ g.pending_surat_masuk_count }}
-          </span>
-          {% else %}
-          <span class="ml-auto w-4"></span>
-          {% endif %}
+        <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}" data-tooltip="Persetujuan Surat" class="flex items-center">
+          <div class="flex items-center w-full relative">
+            <i class="fas fa-check-circle"></i>
+            <span class="links_name">Persetujuan Surat</span>
+            {% if g.pending_surat_masuk_count > 0 %}
+            <span class="absolute right-0 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold rounded-full shadow px-2 py-1 flex items-center justify-center min-w-[24px] h-6 border-2 border-white">
+              {{ g.pending_surat_masuk_count }}
+            </span>
+            {% endif %}
+          </div>
         </a>
       </li>
       {% endif %}
       {% if current_user.is_admin %}
       <li>
-        <a href="{{ url_for('user.edit_user_view') }}" data-tooltip="Manajemen User" class="flex items-center px-4 py-2">
-          <i class="fas fa-user-cog"></i>
-          <span class="links_name truncate block max-w-[140px] pr-2" title="Manajemen User">Manajemen User</span>
-          <span class="ml-auto w-4"></span>
+        <a href="{{ url_for('user.edit_user_view') }}" data-tooltip="Manajemen User" class="flex items-center">
+          <div class="flex items-center w-full">
+            <i class="fas fa-user-cog"></i>
+            <span class="links_name">Manajemen User</span>
+          </div>
         </a>
       </li>
       {% endif %}
@@ -126,8 +141,8 @@
     {% if current_user.is_authenticated %}
     <div class="sidebar-user-profile">
       <div class="user-profile-container">
-        <a class="user-avatar flex items-center justify-center rounded-full bg-gray-200 hover:bg-blue-200 transition" id="sidebarUserAvatar" href="{{ url_for('user.edit_user', user_id=current_user.id) }}" style="width:54px; height:54px; cursor:pointer; position:relative; display:inline-flex;" data-tooltip="{{ current_user.email.split('@')[0] }} ({{ current_user.role.title() }})">
-          <i class="fas fa-user-circle text-4xl text-blue-700" style="font-size:40px;"></i>
+        <a class="user-avatar flex items-center justify-center rounded-full bg-gray-200 hover:bg-blue-200 transition" id="sidebarUserAvatar" href="{{ url_for('user.edit_user', user_id=current_user.id) }}" style="width:60px; height:60px; cursor:pointer; position:relative; display:inline-flex;" data-tooltip="{{ current_user.email.split('@')[0] }} ({{ current_user.role.title() }})">
+          <i class="fas fa-user-circle text-blue-700"></i>
         </a>
         <div class="user-info">
           <div class="user-name">{{ current_user.email.split('@')[0] }}</div>
@@ -139,6 +154,11 @@
     {% endif %}
   </div>
   <div class="main-content">
+    <!-- SPA Progress Bar -->
+    <div class="spa-progress" id="spaProgress">
+      <div class="spa-progress-bar" id="spaProgressBar"></div>
+    </div>
+    
     <nav class="bg-white shadow-sm sticky top-0 z-20">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -270,11 +290,25 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-fix.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/floating-labels.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/consistent-headers.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/spa-navigation.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-enhanced.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-override.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-no-highlight.css') }}">
+  
+  <!-- Session Management -->
+  <script src="{{ url_for('static', filename='assets/js/session-manager.js') }}"></script>
   
   <!-- Custom JavaScript -->
   <script src="{{ url_for('static', filename='assets/js/components/sidebar.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/components/toast-notification.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/components/notifications.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/components/scrollbar-utils.js') }}"></script>
+  
+  <!-- SPA Navigation System -->
+  <script src="{{ url_for('static', filename='assets/js/spa-navigation.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/spa-backend-support.js') }}"></script>
+  <script src="{{ url_for('static', filename='assets/js/spa-route-handler.js') }}"></script>
   
   {% block extra_js %}{% endblock %}
 

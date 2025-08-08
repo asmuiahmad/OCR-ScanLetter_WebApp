@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem;
+        }
+        .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .title { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .subtitle { font-size: 0.8rem; opacity: 0.9; }
+        .body { padding: 1rem; }
+        .message {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            color: #c53030;
+        }
+        .actions { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .btn {
+            padding: 0.6rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-1px); }
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #ddd;
+        }
+        .tips {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 0.75rem;
+            font-size: 0.7rem;
+            color: #666;
+            text-align: left;
+        }
+        .tips-title { font-weight: 600; margin-bottom: 0.5rem; color: #333; }
+        .tips-list { list-style: none; }
+        .tips-list li { margin-bottom: 0.25rem; }
+        .tips-list li:before { content: "• "; color: #667eea; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="icon">⚠️</div>
+            <div class="title">{{ error_title or 'Terjadi Kesalahan' }}</div>
+            <div class="subtitle">{{ error_description or 'Sistem bermasalah' }}</div>
+        </div>
+        <div class="body">
+            {% if error_message %}
+            <div class="message">{{ error_message }}</div>
+            {% endif %}
+            
+            <div class="actions">
+                {% if show_retry %}
+                <button onclick="location.reload()" class="btn btn-primary">🔄 Coba Lagi</button>
+                {% endif %}
+                <a href="{{ url_for('dashboard.dashboard') if url_for else '/' }}" class="btn btn-primary">🏠 Dashboard</a>
+                <button onclick="history.back()" class="btn btn-secondary">← Kembali</button>
+            </div>
+            
+            <div class="tips">
+                <div class="tips-title">Tips:</div>
+                <ul class="tips-list">
+                    <li>Periksa koneksi</li>
+                    <li>Refresh halaman</li>
+                    <li>Bersihkan cache</li>
+                    <li>Hubungi admin</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

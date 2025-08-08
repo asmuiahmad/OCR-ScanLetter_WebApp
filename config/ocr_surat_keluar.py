@@ -300,7 +300,6 @@ def save_batch_results_to_db(results):
                 
                 # Buat objek SuratKeluar baru
                 surat_keluar = SuratKeluar(
-                    full_letter_number=item.get('nomor_surat', 'Not found'),
                     nomor_suratKeluar=item.get('nomor_surat', 'Not found'),
                     tanggal_suratKeluar=datetime.strptime(item.get('tanggal')[0], '%Y-%m-%d') if item.get('tanggal') and item.get('tanggal')[0] else datetime.utcnow(),
                     pengirim_suratKeluar=item.get('pengirim', 'Not found'),
@@ -308,7 +307,6 @@ def save_batch_results_to_db(results):
                     kode_suratKeluar=kode_surat,
                     jenis_suratKeluar='Umum',
                     isi_suratKeluar=item.get('isi', 'Not found'),
-                    initial_full_letter_number=item.get('nomor_surat', 'Not found'),
                     initial_pengirim_suratKeluar=item.get('pengirim', 'Not found'),
                     initial_penerima_suratKeluar=item.get('penerima', 'Not found'),
                     initial_isi_suratKeluar=item.get('isi', 'Not found'),
@@ -515,7 +513,7 @@ def save_extracted_data():
 
                 # Ambil nilai initial dari data OCR asli (jika tersedia)
                 # Ini penting untuk perhitungan akurasi OCR
-                initial_nomor = item.get('initial_full_letter_number') or item.get('nomor_surat', 'Not found')
+                initial_nomor = item.get('initial_nomor_suratKeluar') or item.get('nomor_surat', 'Not found')
                 initial_pengirim = item.get('initial_pengirim_suratKeluar') or item.get('pengirim', 'Not found')
                 initial_penerima = item.get('initial_penerima_suratKeluar') or item.get('penerima', 'Not found')
                 initial_isi = item.get('initial_isi_suratKeluar') or item.get('isi', 'Not found')
@@ -531,9 +529,23 @@ def save_extracted_data():
                 logger.info(f"  edited_penerima: {penerima}")
                 logger.info(f"  edited_isi: {isi}")
 
+                # Handle optional fields for acara information
+                acara = item.get('acara_suratKeluar', '')
+                tempat = item.get('tempat_suratKeluar', '')
+                jam = item.get('jam_suratKeluar', '')
+                
+                # Handle tanggal acara
+                tanggal_acara = None
+                tanggal_acara_str = item.get('tanggal_acara_suratKeluar')
+                if tanggal_acara_str:
+                    try:
+                        tanggal_acara = datetime.strptime(tanggal_acara_str, '%Y-%m-%d').date()
+                    except ValueError:
+                        logger.warning(f"Failed to parse tanggal_acara: {tanggal_acara_str}")
+                        tanggal_acara = None
+
                 # Buat objek SuratKeluar baru dengan field yang benar
                 surat_keluar = SuratKeluar(
-                    full_letter_number=nomor_surat,
                     nomor_suratKeluar=nomor_surat,
                     tanggal_suratKeluar=tanggal_surat,
                     pengirim_suratKeluar=pengirim,
@@ -541,7 +553,10 @@ def save_extracted_data():
                     kode_suratKeluar=kode_surat,
                     jenis_suratKeluar=jenis_surat,
                     isi_suratKeluar=isi,
-                    initial_full_letter_number=initial_nomor,
+                    acara_suratKeluar=acara,
+                    tempat_suratKeluar=tempat,
+                    tanggal_acara_suratKeluar=tanggal_acara,
+                    jam_suratKeluar=jam,
                     initial_nomor_suratKeluar=initial_nomor,
                     initial_pengirim_suratKeluar=initial_pengirim,
                     initial_penerima_suratKeluar=initial_penerima,

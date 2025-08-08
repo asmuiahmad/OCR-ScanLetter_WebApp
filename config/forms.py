@@ -56,7 +56,6 @@ class CutiForm(FlaskForm):
         ('c_luarnegara', 'Luar Negara')
     ], validators=[DataRequired()])
     alasan_cuti = TextAreaField('Alasan Cuti', validators=[DataRequired()])
-    lama_cuti = StringField('Lama Cuti', validators=[DataRequired()])
 
 class InputCutiForm(FlaskForm):
     nama = StringField('Nama', validators=[DataRequired()])
@@ -80,7 +79,6 @@ class InputCutiForm(FlaskForm):
         ('c_luarnegara', 'Luar Negara')
     ], validators=[DataRequired()])
     alasan_cuti = TextAreaField('Alasan Cuti', validators=[DataRequired()])
-    lama_cuti = StringField('Lama Cuti', validators=[DataRequired()])
     submit = SubmitField('Simpan Cuti')
 
 class SuratMasukForm(FlaskForm):

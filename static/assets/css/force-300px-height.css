@@ -1,0 +1,83 @@
+/* Clean 300px Height CSS */
+
+/* Log Surat Masuk & Keluar - Clean 300px */
+.log-container {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+/* Log User Masuk - Clean 300px */
+.login-logs-container {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+/* Force with ID selector */
+#login-logs-container {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+}
+
+/* Custom scrollbar for webkit browsers */
+.log-container::-webkit-scrollbar,
+.login-logs-container::-webkit-scrollbar,
+#login-logs-container::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+.log-container::-webkit-scrollbar-track,
+.login-logs-container::-webkit-scrollbar-track,
+#login-logs-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.log-container::-webkit-scrollbar-thumb,
+.login-logs-container::-webkit-scrollbar-thumb,
+#login-logs-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.log-container::-webkit-scrollbar-thumb:hover,
+.login-logs-container::-webkit-scrollbar-thumb:hover,
+#login-logs-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Clean hover effects */
+.log-container:hover,
+.login-logs-container:hover {
+    border-color: #e2e8f0 !important;
+}
+
+/* Responsive - maintain 300px on all devices for testing */
+@media (max-width: 768px) {
+    .log-container,
+    .login-logs-container,
+    #login-logs-container {
+        height: 300px !important;
+        max-height: 300px !important;
+        min-height: 300px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .log-container,
+    .login-logs-container,
+    #login-logs-container {
+        height: 300px !important;
+        max-height: 300px !important;
+        min-height: 300px !important;
+    }
+}

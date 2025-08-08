@@ -1,0 +1,38 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container mx-auto py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4">Daftar Pegawai</h2>
+      
+      {% if daftar_pegawai %}
+        <div class="overflow-x-auto">
+          <table class="min-w-full table-auto">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="px-4 py-2 text-left">Nama</th>
+                <th class="px-4 py-2 text-left">NIP</th>
+                <th class="px-4 py-2 text-left">Jabatan</th>
+                <th class="px-4 py-2 text-left">Golongan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pegawai in daftar_pegawai %}
+              <tr class="border-b">
+                <td class="px-4 py-2">{{ pegawai.nama }}</td>
+                <td class="px-4 py-2">{{ pegawai.nip }}</td>
+                <td class="px-4 py-2">{{ pegawai.jabatan or '-' }}</td>
+                <td class="px-4 py-2">{{ pegawai.golongan or '-' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-gray-500">Tidak ada data pegawai.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

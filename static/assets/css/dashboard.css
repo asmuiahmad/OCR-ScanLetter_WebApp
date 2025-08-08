@@ -1,0 +1,368 @@
+/* Dashboard Specific Styles */
+
+/* Chart Loading Styles */
+.chart-container {
+    position: relative;
+}
+
+.chart-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.75);
+    z-index: 10;
+}
+
+.chart-loading.hidden {
+    display: none;
+}
+
+/* Log Container Styles - Clean 300px fixed height */
+.log-container {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc;
+    border: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.log-container:hover {
+    border-color: #e2e8f0;
+}
+
+/* Custom scrollbar for webkit browsers */
+.log-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.log-container::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+}
+
+.log-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.log-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Login Logs Container - Clean 300px fixed height */
+.login-logs-container {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc;
+    border-radius: 0 0 0.5rem 0.5rem;
+    border: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.login-logs-container:hover {
+    border-color: #e2e8f0;
+}
+
+/* Custom scrollbar for login logs */
+.login-logs-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.login-logs-container::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+}
+
+.login-logs-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.login-logs-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Recent User Logins Container - Compact fixed height */
+.recent-users-container {
+    height: 300px; /* Fixed compact height - doesn't grow */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.recent-users-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.recent-users-container::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+}
+
+.recent-users-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.recent-users-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Dashboard Cards Enhancement */
+.dashboard-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Statistics Cards */
+.stats-card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.stats-card-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.stats-card-content {
+    padding: 1.5rem;
+}
+
+/* Chart Canvas */
+#dailyChart {
+    width: 100% !important;
+    height: 200px !important;
+}
+
+/* Responsive adjustments - Both containers same height */
+@media (max-width: 768px) {
+    .log-container,
+    .login-logs-container {
+        height: 280px; /* Same height for both on tablet */
+    }
+    
+    .recent-users-container {
+        height: 280px;
+    }
+}
+
+@media (max-width: 480px) {
+    .log-container,
+    .login-logs-container {
+        height: 250px !important; /* Same height for both on mobile */
+    }
+    
+    .recent-users-container,
+    #activity-logs-container {
+        height: 250px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #activity-logs-container {
+        height: 300px !important;
+    }
+}
+
+/* Scroll indicator for better UX */
+.log-container,
+.login-logs-container,
+.recent-users-container,
+#activity-logs-container {
+    position: relative;
+}
+
+.log-container::after,
+.login-logs-container::after,
+.recent-users-container::after,
+#activity-logs-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 8px; /* Account for scrollbar width */
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.log-container:hover::after,
+.login-logs-container:hover::after,
+.recent-users-container:hover::after,
+#activity-logs-container:hover::after {
+    opacity: 1;
+}
+
+/* Fade effect at top and bottom when scrollable */
+.log-container::before,
+.login-logs-container::before,
+.recent-users-container::before,
+#activity-logs-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 8px; /* Account for scrollbar width */
+    height: 8px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.log-container.scrollable::before,
+.login-logs-container.scrollable::before,
+.recent-users-container.scrollable::before,
+#activity-logs-container.scrollable::before {
+    opacity: 1;
+}
+
+/* Additional fade effects based on scroll position */
+.log-container.scrolled-top::before,
+.login-logs-container.scrolled-top::before,
+.recent-users-container.scrolled-top::before,
+#activity-logs-container.scrolled-top::before {
+    opacity: 0.5;
+}
+
+.log-container.scrolled-bottom::after,
+.login-logs-container.scrolled-bottom::after,
+.recent-users-container.scrolled-bottom::after,
+#activity-logs-container.scrolled-bottom::after {
+    opacity: 0.8;
+    height: 8px;
+    background: linear-gradient(to top, rgba(255,255,255,0.8), transparent);
+}
+
+/* Scrollbar track styling improvements */
+.log-container::-webkit-scrollbar-track,
+.login-logs-container::-webkit-scrollbar-track,
+.recent-users-container::-webkit-scrollbar-track,
+#activity-logs-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+/* Scrollbar corner styling */
+.log-container::-webkit-scrollbar-corner,
+.login-logs-container::-webkit-scrollbar-corner,
+.recent-users-container::-webkit-scrollbar-corner,
+#activity-logs-container::-webkit-scrollbar-corner {
+    background: #f1f5f9;
+}
+
+/* Smooth scrolling */
+.log-container,
+.login-logs-container,
+.recent-users-container {
+    scroll-behavior: smooth;
+}
+
+/* Log item styling for consistent height */
+.log-container .flex {
+    min-height: 60px; /* Consistent height for each log item */
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.log-container .flex:last-child {
+    border-bottom: none;
+}
+
+/* Log item hover effects */
+.log-container .flex:hover,
+.recent-users-container li:hover {
+    background-color: #f8fafc;
+    transition: background-color 0.2s ease;
+    border-radius: 6px;
+    margin: 0 -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* Login logs row styling for consistent height */
+.login-logs-container .grid {
+    min-height: 48px; /* Consistent height for each login log row */
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    align-items: center;
+}
+
+.login-logs-container .grid:last-child {
+    border-bottom: none;
+}
+
+/* Login logs table row hover */
+.login-logs-container .grid:hover {
+    background-color: #f8fafc;
+    transition: background-color 0.2s ease;
+    border-radius: 6px;
+    margin: 0 -8px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/* Activity Logs Container - Compact fixed height */
+#activity-logs-container {
+    height: 320px !important; /* Fixed compact height - doesn't grow */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
+#activity-logs-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#activity-logs-container::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+}
+
+#activity-logs-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+#activity-logs-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Activity logs table row hover */
+#activity-logs-container .activity-log-item:hover {
+    background-color: #f8fafc;
+    transition: background-color 0.2s ease;
+}
+
+/* Clean ID selector for login logs */
+#login-logs-container {
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+}

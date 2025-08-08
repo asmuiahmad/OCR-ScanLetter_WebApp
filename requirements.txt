@@ -26,6 +26,12 @@ Pillow==10.0.1
 # PDF Generation & QR Codes
 reportlab==4.0.4
 qrcode==7.4.2
+WeasyPrint==60.2
+pdfkit==1.0.0
+
+# Document Processing
+python-docx==0.8.11
+mailmerge==0.2.1
 
 # Date/Time Utilities
 python-dateutil==2.8.2

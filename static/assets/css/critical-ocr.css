@@ -1,0 +1,11 @@
+/* Critical CSS - Inline untuk faster loading */
+#extractedDataModal{position:fixed;inset:0;z-index:9999;display:none;backdrop-filter:blur(4px)}
+#extractedDataModal .fixed.inset-0{position:fixed;inset:0;background:rgba(0,0,0,.6)}
+#extractedDataModal .fixed.inset-4{position:fixed;top:1rem;right:1rem;bottom:1rem;left:1rem;background:#fff;border-radius:12px;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column}
+#extractedDataModal .border-b{flex-shrink:0;background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);border-bottom:1px solid #e2e8f0;padding:1.5rem;display:flex;align-items:center;justify-content:space-between}
+#extractedDataModal .flex-1{flex:1;overflow:hidden}
+#extractedDataModal .h-full.flex{height:100%;display:flex}
+#extractedDataModal .w-1\/3{width:33.333333%;background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);border-right:1px solid #e2e8f0;padding:1rem;display:flex;flex-direction:column}
+#extractedDataModal .border-t{background:linear-gradient(135deg,#f8fafc 0%,#f1f5f9 100%);border-top:1px solid #e2e8f0;padding:1.5rem;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
+@media (max-width:1024px){#extractedDataModal .h-full.flex{flex-direction:column}#extractedDataModal .w-1\/3{width:100%;height:320px;border-right:none;border-bottom:1px solid #e2e8f0}}
+@media (max-width:480px){#extractedDataModal .fixed.inset-4{top:.5rem;right:.5rem;bottom:.5rem;left:.5rem}#extractedDataModal .border-t{flex-direction:column;gap:.75rem}}

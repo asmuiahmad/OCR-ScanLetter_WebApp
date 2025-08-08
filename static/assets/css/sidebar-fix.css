@@ -20,8 +20,8 @@ body, html {
 
 /* When sidebar is expanded - ensure main content adjusts to new width */
 .modern-sidebar:not(.sidebar-collapsed) ~ .main-content {
-  margin-left: 280px !important;
-  width: calc(100vw - 280px) !important;
+  margin-left: 300px !important;
+  width: calc(100vw - 300px) !important;
 }
 
 /* Fix for any potential scrollbar issues */

@@ -41,6 +41,8 @@ def create_app():
 
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Silakan login untuk mengakses halaman ini.'
+    login_manager.login_message_category = 'info'
     from config.ocr import ocr_bp
     from config.ocr_surat_keluar import ocr_surat_keluar_bp
     from config.ocr_surat_masuk import ocr_surat_masuk_bp
@@ -62,6 +64,13 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        """Handle unauthorized access - redirect to login with next parameter"""
+        from flask import redirect, url_for, request
+        # Store the current URL as the next parameter
+        return redirect(url_for('auth.login', next=request.url))
+
     @app.after_request
     def inject_csrf_token(response):
         if 'text/html' in response.headers.get('Content-Type', ''):
@@ -70,40 +79,76 @@ def create_app():
             logger.debug(f"Generated CSRF Token: {csrf_token}")
         return response
 
+    # Import error handler
+    from config.error_handler import ErrorHandler, handle_404, handle_500, handle_403, handle_micro_error
+
     @app.errorhandler(400)
     def handle_bad_request(e):
         logger.error(f"Bad Request Error: {str(e)}")
         if 'csrf_token' in str(e):
-            return render_template('error.html', error_message='CSRF token is missing or invalid. Please refresh the page and try again.'), 400
-        return render_template('error.html', error_message='Bad Request'), 400
+            error_msg = 'CSRF token is missing or invalid. Please refresh the page and try again.'
+        else:
+            error_msg = 'Bad Request - Permintaan tidak valid'
+        
+        return ErrorHandler.handle_error(
+            error=error_msg,
+            error_code=400,
+            template_size='minimal',
+            show_retry=True
+        )
 
-    @app.errorhandler(Exception)
-    def handle_exception(e):
-        logger.error(f"Unhandled exception: {str(e)}")
-        if isinstance(e, HTTPException):
-            if e.code == 400 and 'csrf_token' in str(e):
-                return render_template('error.html', error_message='CSRF token is missing or invalid. Please refresh the page and try again.'), 400
-            return render_template('error.html', error_message=f'Error {e.code}: {e.name} - {e.description}'), e.code
-        return render_template('error.html', error_message='An unexpected error occurred. Please try again later.'), 500
+    @app.errorhandler(403)
+    def handle_forbidden(e):
+        logger.error(f"Forbidden Error: {str(e)}")
+        return handle_403(e)
 
     @app.errorhandler(404)
     def not_found_error(error):
-        return render_template('404.html'), 404
+        logger.error(f"404 Error: {str(error)}")
+        return handle_404(error)
 
     @app.errorhandler(500)
     def internal_error(error):
+        logger.error(f"500 Error: {str(error)}")
         try:
             from config.extensions import db
             db.session.rollback()
         except Exception:
             pass
-        return render_template('500.html'), 500
+        return handle_500(error)
+
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        logger.error(f"Unhandled exception: {str(e)}")
+        
+        if isinstance(e, HTTPException):
+            if e.code == 400 and 'csrf_token' in str(e):
+                error_msg = 'CSRF token is missing or invalid. Please refresh the page and try again.'
+            else:
+                error_msg = f'{e.name} - {e.description}'
+            
+            return ErrorHandler.handle_error(
+                error=error_msg,
+                error_code=e.code,
+                template_size='compact',
+                show_retry=True
+            )
+        
+        # For non-HTTP exceptions, use micro template to save space
+        return handle_micro_error(
+            error='An unexpected error occurred. Please try again later.',
+            error_code=500
+        )
 
     with app.app_context():
         db.create_all()
 
         from config.breadcrumbs import register_breadcrumbs
         register_breadcrumbs(app)
+        
+        # Register error test routes in development
+        from config.error_test_routes import register_error_test_routes
+        register_error_test_routes(app)
 
     return app
 app = create_app()

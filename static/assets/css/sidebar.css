@@ -6,7 +6,7 @@
   top: 0;
   left: 0;
   height: 100vh;
-  width: 280px;
+  width: 300px;
   background: linear-gradient(135deg, #11101d 0%, #1a1a2e 100%);
   padding: 20px 0 0 0;
   z-index: 100;
@@ -38,10 +38,10 @@
 
 /* Ensure main content adjusts properly */
 .main-content {
-  margin-left: 280px;
+  margin-left: 300px;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
-  width: calc(100vw - 280px);
+  width: calc(100vw - 300px);
 }
 
 .modern-sidebar.sidebar-collapsed + .main-content {
@@ -177,9 +177,50 @@
   pointer-events: none;
 }
 
-/* Fix alignment for items without dropdown */
-.modern-sidebar ul.nav-links li a .ml-auto.w-4 {
+/* Perbaikan alignment untuk struktur konsisten */
+.modern-sidebar .nav-links li a {
+  padding: 10px 16px !important;
+}
+
+.modern-sidebar .nav-links li a > div {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.modern-sidebar .nav-links li a i:first-child {
+  width: 24px;
+  text-align: center;
+  font-size: 14px !important;
+}
+
+.modern-sidebar .nav-links li a .links_name {
+  margin-left: 12px;
+  flex-grow: 1;
+  font-size: 12px !important;
+  font-weight: 400;
+}
+
+/* Perbaikan untuk dropdown icon */
+.modern-sidebar .nav-links li a .fa-chevron-down {
+  font-size: 10px !important;
+  transition: transform 0.3s;
+}
+
+/* Animasi rotasi saat dropdown terbuka */
+.modern-sidebar .nav-links li a.active .fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+/* Konsistensi saat sidebar collapsed */
+.modern-sidebar.sidebar-collapsed .nav-links li a .links_name,
+.modern-sidebar.sidebar-collapsed .nav-links li a .fa-chevron-down {
   display: none;
+}
+
+.modern-sidebar.sidebar-collapsed .nav-links li a i:first-child {
+  width: 100%;
+  font-size: 16px !important;
 }
 
 /* Dropdown Chevron */

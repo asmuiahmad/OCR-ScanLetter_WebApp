@@ -1,65 +1,40 @@
 {% extends "layouts/base.html" %}
+
+{% set page_title = "OCR Surat Keluar" %}
+
 {% block head %}
     {{ super() }}
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/modal.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/ocr-pages.css') }}">
+    
+    <!-- OCR Specific CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/ocr-fullscreen.css') }}">
+    
+    <style>
+        .ocr-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
-            background-color: #f4f6f9;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-
-        .ocr-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #2c3e50;
-        }
-
-        .ocr-header h1 {
-            font-weight: 700;
-            color: #3498db;
-            margin-bottom: 0.5rem;
-        }
-
-        .ocr-header p {
-            color: #7f8c8d;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
+        
         .drag-drop-area {
             transition: all 0.3s ease;
             border: 2px dashed #d1d5db;
         }
-
+        
         .drag-drop-area.dragover {
             border-color: #3b82f6;
             background-color: #eff6ff;
         }
-
-        .drag-drop-area input[type="file"] {
-            display: none;
-        }
-
-        .drag-drop-label {
-            cursor: pointer;
-            color: #3498db;
-        font-weight: 600;
-    }
-    
+        
         .file-preview {
-        display: flex;
+            display: flex;
             align-items: center;
-        justify-content: space-between;
+            justify-content: space-between;
             background-color: #f1f8ff;
             padding: 1rem;
             border-radius: 8px;
             margin-top: 1rem;
         }
-
+        
         .file-preview img {
             max-width: 100px;
             max-height: 100px;
@@ -67,131 +42,184 @@
             margin-right: 1rem;
             border-radius: 6px;
         }
-
-        .file-details {
-            flex-grow: 1;
+        
+        /* Modern Modal Styling */
+        #extractedDataModal {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            animation: modalFadeIn 0.3s ease-out;
         }
-
-        .file-actions {
-            display: flex;
-            gap: 0.5rem;
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
-
-        .btn-ocr-primary {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        
+        #extractedDataModal.hidden {
+            animation: modalFadeOut 0.2s ease-in;
         }
-
-        .btn-ocr-primary:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        
+        @keyframes modalFadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95);
+            }
         }
-
-        .ocr-result-section {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        .ocr-result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #ecf0f1;
-            padding-bottom: 0.5rem;
-        }
-
-        .ocr-result-header h3 {
-            color: #2c3e50;
-            margin: 0;
-        }
-
-        .copy-btn {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .copy-btn:hover {
-            background-color: #27ae60;
-            transform: translateY(-1px);
-        }
-
-        /* CSS untuk zoom dan pan */
-        #imagePreview {
-            transition: transform 0.1s ease-out;
-            transform-origin: center;
-            user-select: none;
-        }
-
+        
+        /* Image container styling */
         #imagePreviewContainer {
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(45deg, #f8fafc 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f8fafc 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f8fafc 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f8fafc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
-
-        .zoom-controls {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
+        
+        /* Enhanced input and textarea styling */
+        input, textarea {
+            transition: all 0.2s ease;
         }
-
-        .zoom-btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: all 0.2s;
+        
+        input:hover, textarea:hover {
+            border-color: #94a3b8;
         }
-    
-    @media (max-width: 768px) {
+        
+        /* Textarea word wrapping */
+        textarea {
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow-wrap: break-word;
+        }
+        
+        /* Custom scrollbar */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Fullscreen modal adjustments */
+        #extractedDataModal .w-1\/2 {
+            min-height: 0;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            #extractedDataModal .w-1\/2:first-child {
+                width: 45% !important;
+            }
+            
+            #extractedDataModal .w-1\/2:last-child {
+                width: 55% !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
             .ocr-container {
                 padding: 1rem;
-        }
-        
-            .drag-drop-area {
-                padding: 2rem;
-        }
-        
+            }
+            
             .file-preview {
                 flex-direction: column;
                 text-align: center;
-        }
-        
+            }
+            
             .file-actions {
                 margin-top: 1rem;
-            flex-direction: column;
+                flex-direction: column;
                 width: 100%;
             }
-    }
-</style>
+            
+            #extractedDataModal .flex {
+                flex-direction: column !important;
+            }
+            
+            #extractedDataModal .w-1\/2 {
+                width: 100% !important;
+                height: 50% !important;
+            }
+            
+            #extractedDataModal .grid-cols-2 {
+                grid-template-columns: 1fr !important;
+            }
+            
+            #extractedDataModal .px-6 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+            
+            #extractedDataModal .py-4 {
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            #extractedDataModal .p-2 {
+                padding: 0.25rem !important;
+            }
+            
+            #extractedDataModal .rounded-lg {
+                border-radius: 0.375rem !important;
+            }
+        }
+        
+        /* Ensure proper height distribution */
+        #extractedDataModal .flex.flex-1 {
+            min-height: 0;
+            flex: 1 1 0%;
+        }
+        
+        /* Image container full height */
+        #imagePreviewContainer {
+            min-height: 300px;
+        }
+        
+        @media (min-height: 600px) {
+            #imagePreviewContainer {
+                min-height: calc(100vh - 300px);
+            }
+        }
+    </style>
 {% endblock %}
-
-{% block title %}OCR Surat Masuk - PA Banjarbaru{% endblock %}
 
 {% block content %}
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-4xl mx-auto">
-    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary p-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-black">
-            <i class="fas fa-arrow-up mr-3 text-yellow-500"></i>OCR Surat Keluar
-          </h2>
-        </div>
+    <div class="form-card">
+      <div class="page-header">
+        <h2>
+          <i class="fas fa-arrow-up text-blue-400"></i>
+          OCR Surat Keluar
+        </h2>
       </div>
     </div>
+    
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -203,7 +231,7 @@
         {% endif %}
     {% endwith %}
     
-    <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Masuk</h1>
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">OCR Surat Keluar</h1>
 
     <div class="bg-white rounded-lg shadow-md p-6">
         <form action="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="uploadForm">
@@ -230,11 +258,11 @@
                                 class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition inline-block cursor-pointer"
                             >
                                 Pilih Dokumen
-                        </label>
-                    </div>
+                            </label>
+                        </div>
                         <div id="filePreview" class="mt-4 hidden">
                             <p id="selectedFiles" class="text-sm text-gray-700"></p>
-                    </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Informasi Tambahan -->
@@ -245,8 +273,8 @@
                         <li>Ukuran maksimal dokumen: 10 MB</li>
                         <li>Format yang didukung: JPG, PNG, WEBP</li>
                     </ul>
-        </div>
-</div>
+                </div>
+            </div>
 
             <div class="flex justify-end">
                 <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
@@ -254,237 +282,358 @@
                 </button>
             </div>
         </form>
-                    </div>
+    </div>
                     
     <!-- Modal untuk Detail Ekstraksi -->
     {% if extracted_data_list %}
-    <div id="extractedDataModal" class="fixed inset-0 z-[9999] hidden overflow-y-auto overflow-x-hidden overscroll-contain" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" aria-hidden="true"></div>
-        
-        <div class="flex items-center justify-center min-h-screen w-full px-4 pt-4 pb-20 text-center absolute top-0 left-0 right-0 bottom-0">
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl w-[95%] md:w-[90%] max-h-[90vh] relative z-[10000]">
-                <!-- Close Button -->
-                <button 
-                    type="button" 
-                    id="closeModalBtn" 
-                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-50"
-                    aria-label="Close Modal"
-                >
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 overflow-y-auto max-h-[75vh]">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4" id="modal-title">
-                                Detail Ekstraksi Dokumen Surat Masuk
+    <div id="extractedDataModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-30" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Modal container -->
+        <div class="w-full h-full p-2">
+            <div class="bg-white rounded-lg shadow-2xl w-full h-full flex flex-col overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between flex-shrink-0">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-file-text text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white" id="modal-title">
+                                Detail Hasil Ekstraksi OCR
                             </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <!-- Kolom Gambar -->
-                                <div class="col-span-1 bg-gray-100 rounded-lg p-4">
-                                    <h4 class="text-md font-medium text-gray-700 mb-2">Gambar Dokumen</h4>
-                                    <p class="text-xs text-gray-500 mb-2">Gunakan mouse wheel untuk zoom, drag untuk pan</p>
-                                    <div class="zoom-controls">
-                                        <button id="zoomInBtn" class="zoom-btn bg-blue-500 text-white hover:bg-blue-600">Zoom In</button>
-                                        <button id="zoomOutBtn" class="zoom-btn bg-blue-500 text-white hover:bg-blue-600">Zoom Out</button>
-                                        <button id="resetZoomBtn" class="zoom-btn bg-gray-500 text-white hover:bg-gray-600">Reset</button>
-                                        <span id="zoomLevel" class="text-xs text-gray-600 ml-2">100%</span>
+                            <p class="text-slate-300 text-sm mt-1">Surat Keluar - Dokumen Processing</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="fullscreenToggleBtn" class="w-10 h-10 flex items-center justify-center text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition-all duration-200" title="Toggle Fullscreen">
+                            <i class="fas fa-expand text-sm"></i>
+                        </button>
+                        <button type="button" id="closeModalBtn" class="w-10 h-10 flex items-center justify-center text-white hover:bg-red-500 hover:bg-opacity-30 rounded-lg transition-all duration-200">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Body -->
+                <div class="flex flex-1 overflow-hidden">
+                    <!-- Left Panel - Image Preview -->
+                    <div class="w-1/2 bg-slate-50 border-r border-slate-200 flex flex-col">
+                        <!-- Image Header -->
+                        <div class="px-4 md:px-6 py-3 md:py-4 bg-white border-b border-slate-200 flex-shrink-0">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-lg font-semibold text-slate-800 flex items-center">
+                                    <i class="fas fa-image mr-3 text-blue-500"></i>
+                                    Preview Dokumen
+                                </h4>
+                                <span id="zoomLevel" class="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">100%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Controls -->
+                        <div class="px-4 md:px-6 py-2 md:py-3 bg-white border-b border-slate-200 flex-shrink-0">
+                            <div class="flex items-center justify-center space-x-2">
+                                <button id="zoomOutBtn" class="w-9 h-9 flex items-center justify-center text-slate-600 hover:text-white hover:bg-blue-500 rounded-lg transition-all duration-200" title="Zoom Out">
+                                    <i class="fas fa-search-minus text-sm"></i>
+                                </button>
+                                <button id="resetZoomBtn" class="w-9 h-9 flex items-center justify-center text-slate-600 hover:text-white hover:bg-slate-500 rounded-lg transition-all duration-200" title="Reset Zoom">
+                                    <i class="fas fa-undo text-sm"></i>
+                                </button>
+                                <button id="zoomInBtn" class="w-9 h-9 flex items-center justify-center text-slate-600 hover:text-white hover:bg-blue-500 rounded-lg transition-all duration-200" title="Zoom In">
+                                    <i class="fas fa-search-plus text-sm"></i>
+                                </button>
+                                <div class="w-px h-6 bg-slate-300 mx-2"></div>
+                                <button id="rotateBtn" class="w-9 h-9 flex items-center justify-center text-slate-600 hover:text-white hover:bg-purple-500 rounded-lg transition-all duration-200" title="Rotate">
+                                    <i class="fas fa-sync text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Container -->
+                        <div class="flex-1 p-4 md:p-6 min-h-0">
+                            <div id="imagePreviewContainer" class="w-full h-full flex items-center justify-center border-2 border-dashed border-slate-300 rounded-xl overflow-hidden bg-white">
+                                <img id="imagePreview" src="" alt="Preview Dokumen" class="max-w-full max-h-full object-contain cursor-move transition-transform duration-200">
+                                <div id="noImageText" class="text-center text-slate-400">
+                                    <i class="fas fa-image text-5xl mb-3 block opacity-50"></i>
+                                    <p class="text-lg font-medium">Tidak ada gambar</p>
+                                    <p class="text-sm mt-1 opacity-75">Gambar akan muncul di sini</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Panel - Form -->
+                    <div class="w-1/2 bg-white flex flex-col">
+                        <!-- Form Header -->
+                        <div class="px-4 md:px-6 py-3 md:py-4 bg-white border-b border-slate-200 flex-shrink-0">
+                            <h4 class="text-lg font-semibold text-slate-800 flex items-center">
+                                <i class="fas fa-edit mr-3 text-green-500"></i>
+                                Data Ekstraksi
+                            </h4>
+                        </div>
+                        
+                        <!-- Form Content -->
+                        <div class="flex-1 overflow-y-auto p-4 md:p-6">
+                            <form id="extractedDataForm" class="space-y-4">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                
+                                <!-- Required Fields Section -->
+                                <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                                    <h5 class="text-sm font-bold text-blue-800 mb-3 flex items-center">
+                                        <i class="fas fa-asterisk mr-2 text-xs"></i>
+                                        Field Wajib
+                                    </h5>
+                                    
+                                    <!-- Nomor Surat -->
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Nomor Surat
+                                        </label>
+                                        <input type="text" name="full_letter_number" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200" placeholder="Masukkan nomor surat">
                                     </div>
-                                    <div id="imagePreviewContainer" class="w-full h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg overflow-hidden relative">
-                                        <img id="imagePreview" src="" alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain hidden cursor-move">
-                                        <p id="noImageText" class="text-gray-500">Tidak ada gambar</p>
+                                    
+                                    <!-- Tanggal -->
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Tanggal
+                                        </label>
+                                        <input type="date" name="tanggal" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200">
+                                    </div>
+                                    
+                                    <!-- Pengirim -->
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Pengirim
+                                        </label>
+                                        <input type="text" name="pengirim_suratKeluar" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200" placeholder="Nama pengirim">
+                                    </div>
+                                    
+                                    <!-- Penerima -->
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Penerima
+                                        </label>
+                                        <input type="text" name="penerima_suratKeluar" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200" placeholder="Nama penerima">
+                                    </div>
+                                    
+                                    <!-- Isi Surat -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Isi Surat
+                                        </label>
+                                        <textarea name="isi_suratKeluar" rows="4" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical text-sm leading-relaxed transition-all duration-200" placeholder="Isi lengkap surat"></textarea>
                                     </div>
                                 </div>
                                 
-                                <!-- Kolom Input -->
-                                <div class="col-span-2">
-                                    <form id="extractedDataForm" class="space-y-4">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Nomor Surat</label>
-                                                <input type="text" name="full_letter_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Kode Surat</label>
-                                                <input type="text" name="kode_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" value="{{ item.kodesurat2 if item and item.kodesurat2 else '' }}">
-                                            </div>
-                                </div>
-                                        
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Pengirim</label>
-                                                <input type="text" name="pengirim_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Penerima</label>
-                                                <input type="text" name="penerima_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                            </div>
-                                        </div>
-                                        
+                                <!-- Optional Fields Section -->
+                                <div class="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                                    <h5 class="text-sm font-bold text-amber-800 mb-3 flex items-center">
+                                        <i class="fas fa-info-circle mr-2 text-xs"></i>
+                                        Informasi Acara (Opsional)
+                                    </h5>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <!-- Acara -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700">Isi Surat</label>
-                                            <textarea name="isi_suratKeluar" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200"></textarea>
+                                            <label class="block text-sm font-semibold text-slate-600 mb-2">
+                                                Acara
+                                            </label>
+                                            <input type="text" name="acara_suratKeluar" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 text-sm transition-all duration-200" placeholder="Nama acara">
                                         </div>
-
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Jenis Surat</label>
-                                                <input type="text" name="jenis_surat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                                                <input type="date" name="tanggal_suratKeluar" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200">
-                                            </div>
+                                        
+                                        <!-- Tempat -->
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-600 mb-2">
+                                                Tempat
+                                            </label>
+                                            <input type="text" name="tempat_suratKeluar" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 text-sm transition-all duration-200" placeholder="Lokasi acara">
                                         </div>
-                                    </form>
+                                        
+                                        <!-- Tanggal Acara -->
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-600 mb-2">
+                                                Tanggal Acara
+                                            </label>
+                                            <input type="date" name="tanggal_acara_suratKeluar" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 text-sm transition-all duration-200">
+                                        </div>
+                                        
+                                        <!-- Jam Acara -->
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-600 mb-2">
+                                                Jam Acara
+                                            </label>
+                                            <input type="time" name="jam_suratKeluar" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 text-sm transition-all duration-200">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+                
+                <!-- Footer -->
+                <div class="bg-slate-50 border-t border-slate-200 px-4 md:px-6 py-3 md:py-4 flex-shrink-0">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <button type="button" id="prevModalBtn" class="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 hover:border-blue-400 hover:text-blue-700 transition-all duration-200">
+                                <i class="fas fa-chevron-left mr-2 text-xs"></i>
+                                Sebelumnya
+                            </button>
+                            <button type="button" id="nextModalBtn" class="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 hover:border-blue-400 hover:text-blue-700 transition-all duration-200">
+                                Selanjutnya
+                                <i class="fas fa-chevron-right ml-2 text-xs"></i>
+                            </button>
+                            <div class="flex items-center bg-blue-100 px-3 py-2 rounded-lg border border-blue-200">
+                                <i class="fas fa-file-alt mr-2 text-blue-600 text-sm"></i>
+                                <span id="currentDocCounter" class="text-sm text-blue-800 font-semibold">Dokumen 1 dari {{ extracted_data_list|length }}</span>
+                            </div>
+                        </div>
+                        <button type="button" id="saveExtractedData" class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200">
+                            <i class="fas fa-save mr-2 text-sm"></i>
+                            Simpan Data
+                        </button>
                     </div>
-                </div>
-
-                <!-- Tombol Navigasi & Simpan di Modal -->
-                <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 sticky bottom-0">
-                    <button type="button" id="saveExtractedData" class="bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 transition">
-                        Simpan
-                    </button>
-                    <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
-                        Tutup
-                    </button>
-                    <button type="button" id="prevModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
-                        Sebelumnya
-                    </button>
-                    <button type="button" id="nextModalBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition mr-2">
-                        Selanjutnya
-                    </button>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
+// Simple drag and drop functionality
 document.addEventListener('DOMContentLoaded', function() {
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const filePreview = document.getElementById('file-preview');
-    
-    // Open file dialog on click
-    dropZone.addEventListener('click', () => fileInput.click());
-    
-    // Handle file selection
-    fileInput.addEventListener('change', function() {
-        filePreview.innerHTML = '';
-        Array.from(this.files).forEach(file => {
-            const preview = document.createElement('div');
-            preview.className = 'flex items-center p-3 bg-white rounded-lg border';
-            preview.innerHTML = `
-                <div class="flex-shrink-0">
-                    <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-                <div class="ml-4 flex-1">
-                    <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
-                    <p class="text-sm text-gray-500">${(file.size / 1024).toFixed(2)} KB</p>
-                </div>
-            `;
-            filePreview.appendChild(preview);
+    const fileInput = document.getElementById('fileInput');
+    const selectedFilesText = document.getElementById('selectedFiles');
+    const dropzone = document.getElementById('dropzone');
+
+    // Make data available for modal script
+    window.extractedDataList = {{ extracted_data_list | tojson | safe }};
+    window.imagePaths = {{ image_paths | tojson | safe }};
+
+    // File input change handler
+    if (fileInput && selectedFilesText) {
+        fileInput.addEventListener('change', function() {
+            updateFileDisplay(this.files);
         });
-    });
-    
+    }
+
     // Drag and drop functionality
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-    });
-    
+    if (dropzone) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        dropzone.addEventListener('drop', handleDrop, false);
+    }
+
     function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
     }
-    
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => {
-            dropZone.classList.add('border-blue-500', 'bg-blue-50');
-        }, false);
-    });
-    
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => {
-            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-        }, false);
-    });
-    
-    dropZone.addEventListener('drop', handleDrop, false);
-    
+
+    function highlight(e) {
+        dropzone.classList.add('border-blue-500', 'bg-blue-50');
+    }
+
+    function unhighlight(e) {
+        dropzone.classList.remove('border-blue-500', 'bg-blue-50');
+    }
+
     function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
-        fileInput.files = files;
         
-        // Trigger change event
-        const event = new Event('change');
-        fileInput.dispatchEvent(event);
+        if (fileInput) {
+            fileInput.files = files;
+            updateFileDisplay(files);
+        }
     }
-});
-</script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const extractedDataList = {{ extracted_data_list | tojson | safe }};
-    const imagePaths = {{ image_paths | tojson | safe }};
+    function updateFileDisplay(files) {
+        if (!selectedFilesText) return;
+        
+        if (files.length > 0) {
+            const fileNames = Array.from(files)
+                .map(file => file.name)
+                .join(', ');
+            
+            selectedFilesText.textContent = `Dipilih: ${fileNames}`;
+            selectedFilesText.classList.remove('text-gray-600');
+            selectedFilesText.classList.add('text-green-600');
+            
+            const filePreview = document.getElementById('filePreview');
+            if (filePreview) {
+                filePreview.classList.remove('hidden');
+            }
+        } else {
+            selectedFilesText.textContent = 'Belum ada file dipilih';
+            selectedFilesText.classList.remove('text-green-600');
+            selectedFilesText.classList.add('text-gray-600');
+        }
+    }
+
+    // Modal functionality for OCR Surat Keluar
+    const extractedDataList = window.extractedDataList || [];
     const extractedDataModal = document.getElementById('extractedDataModal');
-    console.log('Debug: extractedDataModal found:', extractedDataModal);
     let currentIndex = 0;
 
-    console.log('Debug: extractedDataList from backend:', extractedDataList);
-    console.log('Debug: extractedDataList length:', extractedDataList.length);
-    console.log('Debug: extractedDataList type:', typeof extractedDataList);
-    if (extractedDataList.length > 0) {
-        console.log('Debug: First item data:', extractedDataList[0]);
-        console.log('Debug: kodesurat2 in first item:', extractedDataList[0]['kodesurat2']);
-    } else {
-        console.log('Debug: extractedDataList is empty or null');
-    }
-
-    // Fungsi untuk mengisi form dengan data
-    function fillFormWithData(data) {
-        console.log('Debug: Data received in fillFormWithData:', data);
+    // Show extracted data button if there are results
+    if (extractedDataList && extractedDataList.length > 0) {
+        let viewDataBtn = document.createElement('button');
+        viewDataBtn.id = 'viewExtractedDataBtn';
+        viewDataBtn.className = 'mt-4 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg w-full';
+        viewDataBtn.innerHTML = `
+            <i class="fas fa-eye mr-2"></i>
+            Lihat Hasil Ekstraksi (${extractedDataList.length} dokumen)
+        `;
         
-        const form = document.getElementById('extractedDataForm');
-        if (!form) {
-            console.error('Form not found');
-            return;
-        }
-        
-        // Isi field dengan data yang benar
-        const fieldMappings = {
-            'full_letter_number': data['nomor_surat'] || '',
-            'kode_suratKeluar': data['kodesurat2'] || '',
-            'pengirim_suratKeluar': data['pengirim'] || '',
-            'penerima_suratKeluar': data['penerima'] || '',
-            'isi_suratKeluar': data['isi'] || '',
-            'jenis_surat': data['jenis_surat'] || '',
-            'tanggal_suratKeluar': data['tanggal'] || ''
-        };
-        
-        // Isi setiap field
-        Object.keys(fieldMappings).forEach(fieldName => {
-            const input = form.querySelector(`[name="${fieldName}"]`);
-            if (input) {
-                input.value = fieldMappings[fieldName];
-                console.log(`Set ${fieldName} = ${fieldMappings[fieldName]}`);
-            } else {
-                console.warn(`Field ${fieldName} not found in form`);
+        viewDataBtn.addEventListener('click', function() {
+            if (extractedDataModal) {
+                extractedDataModal.classList.remove('hidden');
+                fillFormWithData(extractedDataList[0]);
+                updateNavButtons();
             }
         });
         
-        // Update gambar preview
+        const uploadForm = document.getElementById('uploadForm');
+        if (uploadForm) {
+            uploadForm.parentNode.insertBefore(viewDataBtn, uploadForm.nextSibling);
+        }
+    }
+
+    // Fill form with extracted data
+    function fillFormWithData(data) {
+        const form = document.getElementById('extractedDataForm');
+        if (!form || !data) return;
+        
+        const fieldMappings = {
+            'full_letter_number': data['nomor_surat'] || '',
+            'pengirim_suratKeluar': data['pengirim'] || '',
+            'penerima_suratKeluar': data['penerima'] || '',
+            'isi_suratKeluar': data['isi'] || '',
+            'acara_suratKeluar': data['acara'] || '',
+            'tempat_suratKeluar': data['tempat'] || '',
+            'tanggal': data['tanggal'] || ''
+        };
+        
+        Object.entries(fieldMappings).forEach(([name, value]) => {
+            const input = form.querySelector(`[name="${name}"]`);
+            if (input) {
+                input.value = value;
+            }
+        });
+
+        // Update image preview
         const imagePreview = document.getElementById('imagePreview');
         const noImageText = document.getElementById('noImageText');
         if (data.filename) {
@@ -492,455 +641,140 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.src = imagePath;
             imagePreview.classList.remove('hidden');
             noImageText.classList.add('hidden');
-            
-            // Reset zoom dan pan ketika gambar baru dimuat
-            resetImageZoom();
-            
-            // Setup zoom dan pan events setelah gambar dimuat
-            setTimeout(() => {
-                setupZoomPanEvents();
-            }, 200);
         } else {
             imagePreview.classList.add('hidden');
             noImageText.classList.remove('hidden');
         }
     }
 
-    // Fungsi untuk zoom dan pan
-    let currentZoom = 1;
-    let isDragging = false;
-    let startX, startY, translateX = 0, translateY = 0;
-
-    function resetImageZoom() {
-        const imagePreview = document.getElementById('imagePreview');
-        if (imagePreview) {
-            currentZoom = 1;
-            translateX = 0;
-            translateY = 0;
-            updateImageTransform();
+    // Update document counter
+    function updateDocumentCounter(currentIndex) {
+        const counter = document.getElementById('currentDocCounter');
+        if (counter) {
+            counter.textContent = `Dokumen ${currentIndex + 1} dari ${extractedDataList.length}`;
         }
     }
 
-    function updateImageTransform() {
-        const imagePreview = document.getElementById('imagePreview');
-        const zoomLevel = document.getElementById('zoomLevel');
-        console.log('Debug: updateImageTransform called');
-        console.log('Debug: imagePreview found:', imagePreview);
-        console.log('Debug: zoomLevel found:', zoomLevel);
-        console.log('Debug: currentZoom:', currentZoom);
-        console.log('Debug: translateX:', translateX, 'translateY:', translateY);
+    // Navigation buttons
+    function updateNavButtons() {
+        const prevBtn = document.getElementById('prevModalBtn');
+        const nextBtn = document.getElementById('nextModalBtn');
         
-        if (imagePreview) {
-            const transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
-            imagePreview.style.transform = transform;
-            console.log('Debug: Applied transform:', transform);
-        }
-        if (zoomLevel) {
-            const zoomText = `${Math.round(currentZoom * 100)}%`;
-            zoomLevel.textContent = zoomText;
-            console.log('Debug: Updated zoom level text:', zoomText);
-        }
-    }
-
-    function zoomIn() {
-        console.log('Debug: zoomIn called, currentZoom before:', currentZoom);
-        currentZoom = Math.min(currentZoom * 1.2, 5);
-        console.log('Debug: zoomIn called, currentZoom after:', currentZoom);
-        updateImageTransform();
-    }
-
-    function zoomOut() {
-        console.log('Debug: zoomOut called, currentZoom before:', currentZoom);
-        currentZoom = Math.max(currentZoom / 1.2, 0.5);
-        console.log('Debug: zoomOut called, currentZoom after:', currentZoom);
-        updateImageTransform();
-    }
-
-    // Setup zoom dan pan event listeners
-    function setupZoomPanEvents() {
-        console.log('Debug: Setting up zoom and pan events');
-        const zoomInBtn = document.getElementById('zoomInBtn');
-        const zoomOutBtn = document.getElementById('zoomOutBtn');
-        const resetZoomBtn = document.getElementById('resetZoomBtn');
-        const imagePreview = document.getElementById('imagePreview');
-
-        console.log('Debug: zoomInBtn found:', zoomInBtn);
-        console.log('Debug: zoomOutBtn found:', zoomOutBtn);
-        console.log('Debug: resetZoomBtn found:', resetZoomBtn);
-        console.log('Debug: imagePreview found:', imagePreview);
-
-        if (zoomInBtn) {
-            zoomInBtn.addEventListener('click', function() {
-                console.log('Debug: Zoom In clicked');
-                zoomIn();
-            });
-        }
-
-        if (zoomOutBtn) {
-            zoomOutBtn.addEventListener('click', function() {
-                console.log('Debug: Zoom Out clicked');
-                zoomOut();
-            });
-        }
-
-        if (resetZoomBtn) {
-            resetZoomBtn.addEventListener('click', function() {
-                console.log('Debug: Reset Zoom clicked');
-                resetImageZoom();
-            });
-        }
-
-        // Mouse events untuk pan
-        if (imagePreview) {
-            imagePreview.addEventListener('mousedown', function(e) {
-                console.log('Debug: Mouse down on image, currentZoom:', currentZoom);
-                if (currentZoom > 1) {
-                    isDragging = true;
-                    startX = e.clientX - translateX;
-                    startY = e.clientY - translateY;
-                    imagePreview.style.cursor = 'grabbing';
-                    console.log('Debug: Started dragging');
-                }
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (isDragging && currentZoom > 1) {
-                    translateX = e.clientX - startX;
-                    translateY = e.clientY - startY;
-                    updateImageTransform();
-                }
-            });
-
-            document.addEventListener('mouseup', function() {
-                if (isDragging) {
-                    isDragging = false;
-                    imagePreview.style.cursor = 'grab';
-                    console.log('Debug: Stopped dragging');
-                }
-            });
-
-            // Wheel event untuk zoom
-            imagePreview.addEventListener('wheel', function(e) {
-                console.log('Debug: Wheel event on image');
-                e.preventDefault();
-                if (e.deltaY < 0) {
-                    zoomIn();
-                } else {
-                    zoomOut();
-                }
-            });
-        }
-    }
-
-    // Tampilkan tombol "View Extracted Data" jika ada data yang diekstrak
-    console.log('Debug: Checking if should create button, extractedDataList.length =', extractedDataList.length);
-    if (extractedDataList.length > 0) {
-        console.log('Debug: Creating View Extracted Data button');
-        // Buat tombol "View Extracted Data" jika belum ada
-        let viewDataBtn = document.getElementById('viewExtractedDataBtn');
-        console.log('Debug: Existing viewDataBtn:', viewDataBtn);
-        if (!viewDataBtn) {
-            viewDataBtn = document.createElement('button');
-            viewDataBtn.id = 'viewExtractedDataBtn';
-            viewDataBtn.className = 'bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 font-medium text-lg shadow-lg';
-            viewDataBtn.innerHTML = `
-                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-                View Extracted Data (${extractedDataList.length} items)
-            `;
-            
-            // Tambahkan tombol setelah form upload
-            const uploadForm = document.querySelector('form[enctype="multipart/form-data"]');
-            console.log('Debug: Found uploadForm:', uploadForm);
-            if (uploadForm) {
-                console.log('Debug: Creating button container');
-                // Tambahkan div container untuk tombol dengan margin
-                const buttonContainer = document.createElement('div');
-                buttonContainer.className = 'mt-6 text-center';
-                buttonContainer.appendChild(viewDataBtn);
-                uploadForm.parentNode.insertBefore(buttonContainer, uploadForm.nextSibling);
-                console.log('Debug: Button added to page');
-            } else {
-                console.log('Debug: uploadForm not found');
+        if (!extractedDataList || extractedDataList.length <= 1) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+        } else {
+            if (prevBtn) {
+                prevBtn.style.display = 'inline-block';
+                prevBtn.disabled = (currentIndex === 0);
+            }
+            if (nextBtn) {
+                nextBtn.style.display = 'inline-block';
+                nextBtn.disabled = (currentIndex === extractedDataList.length - 1);
             }
         }
         
-        // Event handler untuk tombol "View Extracted Data"
-        viewDataBtn.addEventListener('click', function() {
-            // Isi form dengan data pertama
-            fillFormWithData(extractedDataList[0]);
-            
-            // Tampilkan modal
-            extractedDataModal.classList.remove('hidden');
-            
-            // Setup zoom dan pan events setelah modal ditampilkan
-            setTimeout(() => {
-                setupZoomPanEvents();
-            }, 100);
-        });
+        // Update document counter
+        updateDocumentCounter(currentIndex);
     }
 
-    // Prevent scrolling of background when modal is open
-    function preventBackgroundScroll() {
-        document.body.style.overflow = 'hidden';
-    }
-
-    function allowBackgroundScroll() {
-        document.body.style.overflow = 'auto';
-    }
-
-    // Modify close modal logic
+    // Modal controls
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const prevModalBtn = document.getElementById('prevModalBtn');
+    const nextModalBtn = document.getElementById('nextModalBtn');
+    const saveExtractedData = document.getElementById('saveExtractedData');
+
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', function() {
             extractedDataModal.classList.add('hidden');
-            allowBackgroundScroll();
         });
     }
 
-    // Close modal if clicking outside
-    extractedDataModal.addEventListener('click', function(event) {
-        if (event.target === extractedDataModal) {
-            extractedDataModal.classList.add('hidden');
-            allowBackgroundScroll();
-        }
-    });
-
-    // Event handler untuk tombol navigasi
-    const prevModalBtn = document.getElementById('prevModalBtn');
-    const nextModalBtn = document.getElementById('nextModalBtn');
-    
     if (prevModalBtn) {
         prevModalBtn.addEventListener('click', function() {
             if (currentIndex > 0) {
                 currentIndex--;
                 fillFormWithData(extractedDataList[currentIndex]);
-            } else {
-                alert('Sudah di entri pertama.');
+                updateNavButtons();
+                updateDocumentCounter(currentIndex);
             }
         });
     }
-    
+
     if (nextModalBtn) {
         nextModalBtn.addEventListener('click', function() {
             if (currentIndex < extractedDataList.length - 1) {
                 currentIndex++;
                 fillFormWithData(extractedDataList[currentIndex]);
-            } else {
-                alert('Tidak ada entri lagi untuk diproses.');
+                updateNavButtons();
+                updateDocumentCounter(currentIndex);
             }
         });
     }
-    
-    // Simpan data
-    const saveExtractedDataBtn = document.getElementById('saveExtractedData');
-    if (saveExtractedDataBtn) {
-        saveExtractedDataBtn.addEventListener('click', function() {
-        const form = document.getElementById('extractedDataForm');
-        const formData = new FormData(form);
-        const extractedData = [];
 
-        // Ambil data dari extractedDataList untuk komponen yang tidak ditampilkan di form
-        const currentData = extractedDataList[currentIndex];
-        
-        // Ambil data dari form dengan nama field yang benar
-        const rowData = {
-            filename: currentData.filename || '',
-            full_letter_number: formData.get('full_letter_number') || '',
-            pengirim_suratKeluar: formData.get('pengirim_suratKeluar') || '',
-            penerima_suratKeluar: formData.get('penerima_suratKeluar') || '',
-            isi_suratKeluar: formData.get('isi_suratKeluar') || '',
-            kode_suratKeluar: formData.get('kode_suratKeluar') || '',
-            jenis_surat: formData.get('jenis_surat') || '',
-            tanggal: formData.get('tanggal_suratKeluar') || '', // Kirim sebagai 'tanggal' untuk backend
-            // Tambahkan field untuk kode surat dari backend
-            kodesurat2: currentData['kodesurat2'] || '',
-            // Tambahkan data initial dari hasil OCR asli untuk perhitungan akurasi
-            initial_full_letter_number: currentData['nomor_surat'] || '',
-            initial_pengirim_suratKeluar: currentData['pengirim'] || '',
-            initial_penerima_suratKeluar: currentData['penerima'] || '',
-            initial_isi_suratKeluar: currentData['isi'] || ''
-        };
+    if (saveExtractedData) {
+        saveExtractedData.addEventListener('click', function() {
+            const form = document.getElementById('extractedDataForm');
+            const formData = new FormData(form);
+            const extractedData = [];
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Validasi field wajib
-        const requiredFields = {
-            "Nomor Surat": rowData.full_letter_number,
-            "Pengirim": rowData.pengirim_suratKeluar,
-            "Penerima": rowData.penerima_suratKeluar,
-            "Isi": rowData.isi_suratKeluar,
-            "Tanggal": rowData.tanggal
-        };
-        
-        const missingFields = [];
-        for (const [fieldName, value] of Object.entries(requiredFields)) {
-            if (!value) {
-                missingFields.push(fieldName);
-            }
-        }
-        
-        if (missingFields.length > 0) {
-            alert(`Harap isi semua field wajib:\n- ${missingFields.join('\n- ')}`);
-            return;
-        }
+            const rowData = {};
+            formData.forEach((value, key) => {
+                rowData[key] = value;
+            });
+            extractedData.push(rowData);
 
-        extractedData.push(rowData);
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+            this.disabled = true;
 
-        // Debug: Log data yang akan dikirim
-        console.log('Data yang akan dikirim ke server:', extractedData);
-
-        // Ambil CSRF token dari input tersembunyi
-        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
-
-        // Kirim data ke server
-        fetch("{{ url_for('ocr_surat_keluar.save_extracted_data') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify(extractedData),
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                console.error('Response status:', response.status);
-                return response.text().then(text => {
-                    console.error('Response text:', text);
-                    throw new Error('Network response was not ok');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                const message = data.message || 'Data berhasil disimpan';
-                alert(message);
-                extractedDataModal.classList.add('hidden');
-                // Redirect ke halaman OCR yang bersih
-                window.location.href = "{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}";
-            } else {
-                alert('Gagal menyimpan data: ' + (data.error || 'Unknown error'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data');
+            fetch('/surat-keluar/save_extracted_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(extractedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.innerHTML = '<i class="fas fa-check mr-2"></i>Berhasil!';
+                    this.style.backgroundColor = '#059669';
+                    setTimeout(() => {
+                        extractedDataModal.classList.add('hidden');
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error(data.error || 'Gagal menyimpan data');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Gagal!';
+                this.style.backgroundColor = '#dc2626';
+                alert('Terjadi kesalahan saat menyimpan data: ' + error.message);
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.style.backgroundColor = '';
+                    this.disabled = false;
+                }, 3000);
+            });
         });
+    }
+
+    // Close modal when clicking outside
+    if (extractedDataModal) {
+        extractedDataModal.addEventListener('click', function(event) {
+            if (event.target === extractedDataModal) {
+                extractedDataModal.classList.add('hidden');
+            }
         });
     }
 });
-</script>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const dragDropContainer = document.getElementById('drag-drop-container');
-        const fileInput = document.getElementById('file-input');
-        const filePreview = document.getElementById('file-preview');
-        const previewImage = document.getElementById('preview-image');
-        const fileName = document.getElementById('file-name');
-        const fileSize = document.getElementById('file-size');
-        const removeFileBtn = document.getElementById('remove-file');
-        const copyTextBtn = document.getElementById('copy-text');
-
-        // Drag and drop functionality
-        if (dragDropContainer) {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dragDropContainer.addEventListener(eventName, preventDefaults, false);
-            });
-        }
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        if (dragDropContainer) {
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dragDropContainer.addEventListener(eventName, highlight, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dragDropContainer.addEventListener(eventName, unhighlight, false);
-            });
-        }
-
-        function highlight() {
-            dragDropContainer.classList.add('dragover');
-        }
-
-        function unhighlight() {
-            dragDropContainer.classList.remove('dragover');
-        }
-
-        if (dragDropContainer) {
-            dragDropContainer.addEventListener('drop', handleDrop, false);
-        }
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
-
-        if (fileInput) {
-            fileInput.addEventListener('change', function(e) {
-                handleFiles(this.files);
-            });
-        }
-
-        function handleFiles(files) {
-            if (files.length > 0) {
-                const file = files[0];
-                
-                // Validate file type
-                const validTypes = ['image/jpeg', 'image/png', 'image/tiff'];
-                if (!validTypes.includes(file.type)) {
-                    alert('Format file tidak didukung. Harap unggah JPG, PNG, atau TIFF.');
-                    fileInput.value = ''; // Clear the input
-            return;
-        }
-
-                // File preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    fileName.textContent = file.name;
-                    fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-                    filePreview.style.display = 'flex';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Remove file
-        if (removeFileBtn) {
-            removeFileBtn.addEventListener('click', function() {
-                if (fileInput) fileInput.value = '';
-                if (filePreview) filePreview.style.display = 'none';
-                if (previewImage) previewImage.src = '';
-            });
-        }
-
-        // Copy text functionality
-        if (copyTextBtn) {
-            copyTextBtn.addEventListener('click', function() {
-                const extractedText = document.getElementById('extracted-text');
-                if (extractedText) {
-                    extractedText.select();
-                    document.execCommand('copy');
-                    
-                    // Temporary visual feedback
-                    copyTextBtn.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
-                    setTimeout(() => {
-                        copyTextBtn.innerHTML = '<i class="fas fa-copy"></i> Salin Teks';
-                    }, 2000);
-                }
-            });
-        }
-    });
 </script>
 {% endblock %}

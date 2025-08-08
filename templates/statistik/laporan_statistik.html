@@ -3,21 +3,31 @@
 {% block content %}
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-5xl mx-auto">
-    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary px-4 py-2">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-black">
-            <i class="fas fa-chart-bar mr-3 text-blue-600"></i>Laporan Statistik
-          </h2>
-        </div>
+    <div class="form-card">
+      <div class="page-header">
+        <h2>
+          <i class="fas fa-chart-bar"></i>
+          Laporan Statistik
+        </h2>
       </div>
     </div>
-    <div class="form-card bg-white rounded-2xl overflow-hidden mb-8 shadow">
-      <div class="bg-gradient-to-r from-primary to-secondary px-4 py-2">
-        <h3 class="text-xl font-bold text-black flex items-center">Grafik Harian Surat Masuk & Keluar</h3>
+    <div class="form-card">
+      <div class="page-header">
+        <h3>
+          <i class="fas fa-chart-line"></i>
+          Grafik Harian Surat Masuk & Keluar
+        </h3>
       </div>
       <div class="p-6">
-        <canvas id="suratChart" height="90"></canvas>
+        <div class="relative">
+          <canvas id="suratChart" height="90"></canvas>
+          <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+            <div class="text-center">
+              <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
+              <p class="text-gray-500">Memuat grafik...</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -200,65 +210,160 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  async function loadChartData() {
-    try {
-      const response = await fetch("/chart-data");
-      const data = await response.json();
+console.log('Script loaded');
 
-      const ctx = document.getElementById("suratChart").getContext("2d");
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: data.labels,
-          datasets: [
-            {
-              label: "📥 Surat Masuk",
-              data: data.surat_keluar,
-              borderColor: "rgba(54, 162, 235, 1)",
-              backgroundColor: "rgba(54, 162, 235, 0.2)",
-              tension: 0.3
-            },
-            {
-              label: "📤 Surat Keluar",
-              data: data.surat_masuk,
-              borderColor: "rgba(255, 99, 132, 1)",
-              backgroundColor: "rgba(255, 99, 132, 0.2)",
-              tension: 0.3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: "Jumlah Surat Berdasarkan Tanggal"
-            },
-            tooltip: {
-              mode: 'index',
-              intersect: false,
-            }
-          },
-          interaction: {
-            mode: 'nearest',
-            axis: 'x',
-            intersect: false
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1
-              }
-            }
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Failed to load chart data:", error);
+function loadChartData() {
+    console.log('loadChartData called');
+    
+    const loadingElement = document.getElementById('chart-loading');
+    const chartElement = document.getElementById('suratChart');
+    
+    if (!chartElement) {
+        console.error('Chart element not found');
+        return;
     }
-  }
+    
+    console.log('Elements found');
+    
+    // First, let's try to create chart with dummy data to test if Chart.js works
+    console.log('Creating chart with dummy data...');
+    
+    try {
+        // Hide loading
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
+        
+        // Create chart with dummy data
+        const ctx = chartElement.getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['20/01', '21/01', '22/01', '23/01', '24/01', '25/01', '26/01'],
+                datasets: [{
+                    label: '📥 Surat Masuk',
+                    data: [3, 5, 2, 7, 4, 6, 8],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true
+                }, {
+                    label: '📤 Surat Keluar',
+                    data: [2, 4, 1, 5, 3, 4, 6],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Grafik Harian Surat Masuk & Keluar (Data Dummy)'
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Jumlah Surat'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tanggal'
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('Chart created successfully with dummy data');
+        
+        // Now try to load real data and update the chart
+        setTimeout(() => {
+            console.log('Attempting to load real data...');
+            loadRealData(chart);
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error creating chart:', error);
+        
+        // Hide loading
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
+        
+        // Show error
+        const container = chartElement.parentElement;
+        container.innerHTML = '<div class="text-center p-8"><p class="text-red-500">Gagal membuat grafik: ' + error.message + '</p><button onclick="loadChartData()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded">Coba Lagi</button></div>';
+    }
+}
 
-  document.addEventListener("DOMContentLoaded", loadChartData);
+function loadRealData(chart) {
+    const urls = [
+        '/chart-data',
+        '/laporan/chart-data',
+        '{{ url_for("laporan.chart_data") }}'
+    ];
+    
+    let urlIndex = 0;
+    
+    function tryFetch() {
+        const url = urls[urlIndex];
+        console.log('Trying to load real data from URL:', url);
+        
+        fetch(url)
+            .then(response => {
+                console.log('Response received from', url, ':', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Real data received:', data);
+                
+                // Update chart with real data
+                chart.data.labels = data.labels;
+                chart.data.datasets[0].data = data.surat_masuk;
+                chart.data.datasets[1].data = data.surat_keluar;
+                chart.options.plugins.title.text = 'Grafik Harian Surat Masuk & Keluar (Data Real)';
+                chart.update();
+                
+                console.log('Chart updated with real data');
+            })
+            .catch(error => {
+                console.error('Error loading real data from', url, ':', error);
+                
+                // Try next URL
+                urlIndex++;
+                if (urlIndex < urls.length) {
+                    console.log('Trying next URL for real data...');
+                    tryFetch();
+                } else {
+                    console.log('All URLs failed, keeping dummy data');
+                    // Chart will continue showing dummy data
+                }
+            });
+    }
+    
+    tryFetch();
+}
+
+// Load chart when page is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, calling loadChartData');
+    loadChartData();
+});
 </script>
 {% endblock %}

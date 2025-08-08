@@ -1,0 +1,291 @@
+{% extends "layouts/base-login.html" %}
+
+{% block title %}Error - {{ error_title or 'Terjadi Kesalahan' }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.error-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.error-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    max-width: 480px;
+    width: 100%;
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-header {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.error-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.error-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+}
+
+.error-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.error-body {
+    padding: 1.5rem;
+}
+
+.error-message {
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: #c53030;
+}
+
+.error-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #f7fafc;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background: #edf2f7;
+}
+
+.help-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.help-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 0.75rem;
+    text-align: center;
+}
+
+.help-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.help-item {
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.help-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    font-size: 0.8rem;
+}
+
+.help-icon.green { background: #48bb78; color: white; }
+.help-icon.purple { background: #805ad5; color: white; }
+.help-icon.pink { background: #ed64a6; color: white; }
+
+.help-text {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #2d3748;
+    margin: 0 0 0.25rem;
+}
+
+.help-desc {
+    font-size: 0.65rem;
+    color: #718096;
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .error-container {
+        padding: 0.5rem;
+    }
+    
+    .error-header {
+        padding: 1.5rem 1rem 1rem;
+    }
+    
+    .error-title {
+        font-size: 1.25rem;
+    }
+    
+    .error-body {
+        padding: 1rem;
+    }
+    
+    .help-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .help-item {
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <!-- Header -->
+        <div class="error-header">
+            <div class="error-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>
+            </div>
+            <h1 class="error-title">{{ error_title or 'Oops! Terjadi Kesalahan' }}</h1>
+            <p class="error-subtitle">{{ error_description or 'Sistem mengalami masalah dan tidak dapat memproses permintaan Anda.' }}</p>
+        </div>
+        
+        <!-- Body -->
+        <div class="error-body">
+            <!-- Error Message -->
+            {% if error_message %}
+            <div class="error-message">
+                <strong>Detail Error:</strong><br>
+                {{ error_message }}
+            </div>
+            {% endif %}
+            
+            <!-- Actions -->
+            <div class="error-actions">
+                {% if show_retry %}
+                <button onclick="location.reload()" class="btn btn-primary">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Coba Lagi
+                </button>
+                {% endif %}
+                
+                <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-primary">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Dashboard
+                </a>
+                
+                <button onclick="history.back()" class="btn btn-secondary">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Kembali
+                </button>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="help-section">
+                <h3 class="help-title">Tips Mengatasi Masalah</h3>
+                <div class="help-grid">
+                    <div class="help-item">
+                        <div class="help-icon green">📶</div>
+                        <p class="help-text">Periksa Koneksi</p>
+                        <p class="help-desc">Pastikan internet stabil</p>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-icon purple">🗑️</div>
+                        <p class="help-text">Bersihkan Cache</p>
+                        <p class="help-desc">Hapus cache browser</p>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-icon pink">👨‍💻</div>
+                        <p class="help-text">Hubungi Admin</p>
+                        <p class="help-desc">Laporkan masalah</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
