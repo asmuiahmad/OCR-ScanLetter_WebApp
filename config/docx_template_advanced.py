@@ -293,13 +293,16 @@ class AdvancedDocxTemplateHandler:
                     'signature_hash': signature_hash
                 }
             else:
-                # If PDF conversion fails, still return the DOCX
+                # If PDF conversion fails, clean up and return failure
+                # This allows the system to fall back to HTML template handler
+                try:
+                    os.remove(filled_docx)
+                except:
+                    pass
+                
                 return {
-                    'success': True,
-                    'pdf_path': filled_docx,  # Return DOCX instead
-                    'qr_path': qr_path,
-                    'signature_hash': signature_hash,
-                    'note': 'PDF conversion failed, returning DOCX file'
+                    'success': False,
+                    'error': 'PDF conversion failed - no PDF converter available (docx2pdf, LibreOffice, or pypandoc)'
                 }
                 
         except Exception as e:

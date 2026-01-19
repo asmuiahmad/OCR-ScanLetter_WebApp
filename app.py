@@ -71,6 +71,12 @@ def create_app():
         # Store the current URL as the next parameter
         return redirect(url_for('auth.login', next=request.url))
 
+    # Make csrf_token available in templates
+    @app.template_global()
+    def csrf_token():
+        """Generate CSRF token for use in templates"""
+        return generate_csrf()
+    
     @app.after_request
     def inject_csrf_token(response):
         if 'text/html' in response.headers.get('Content-Type', ''):

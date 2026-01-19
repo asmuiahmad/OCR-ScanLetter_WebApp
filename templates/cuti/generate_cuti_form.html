@@ -143,11 +143,43 @@
       </div>
     </div>
     <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="p-6 pb-0">
+            {% for category, message in messages %}
+              <div class="notification {% if category == 'error' %}is-danger{% elif category == 'success' %}is-success{% elif category == 'warning' %}is-warning{% else %}is-info{% endif %}">
+                <button class="delete" onclick="this.parentElement.remove()"></button>
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      
+      <!-- Form Validation Errors -->
+      {% if form.errors %}
+        <div class="p-6 pb-0">
+          <div class="notification is-danger">
+            <button class="delete" onclick="this.parentElement.remove()"></button>
+            <strong>Terjadi kesalahan validasi:</strong>
+            <ul class="mt-2">
+              {% for field, errors in form.errors.items() %}
+                {% for error in errors %}
+                  <li>{{ field }}: {{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+      
       <form
         method="POST"
         action="{{ url_for('cuti.generate_cuti') }}"
         class="p-6"
         id="cutiForm"
+        data-no-ajax
       >
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="columns is-multiline">

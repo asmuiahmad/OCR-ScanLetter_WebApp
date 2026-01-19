@@ -178,6 +178,22 @@ def generate_cuti():
     """Generate cuti form and PDF"""
     form = CutiForm()
     
+    # Handle POST request - let Flask-WTF handle CSRF automatically
+    if request.method == 'POST':
+        # Check if form is valid (this includes CSRF validation)
+        if not form.validate():
+            # Log validation errors
+            current_app.logger.warning(f"Form validation failed: {form.errors}")
+            # Check if it's a CSRF error
+            if 'csrf_token' in form.errors:
+                flash('Token keamanan tidak valid atau telah kedaluwarsa. Silakan refresh halaman dan coba lagi.', 'error')
+            else:
+                # Log other validation errors
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        flash(f'{field}: {error}', 'error')
+            return render_template('cuti/generate_cuti_form.html', form=form)
+    
     if form.validate_on_submit():
         try:
             # Calculate lama_cuti automatically
@@ -209,58 +225,121 @@ def generate_cuti():
             db.session.add(new_cuti)
             db.session.commit()
             
-            # Try Advanced DOCX template first, then HTML, then basic DOCX
+            # Prioritize HTML template first (most reliable for PDF generation)
             result = None
             
-            # Method 1: Advanced DOCX Template (docxtpl)
+            # Method 1: HTML Template (prioritas utama - selalu menghasilkan PDF)
             try:
-                from config.docx_template_advanced import AdvancedDocxTemplateHandler
-                template_handler = AdvancedDocxTemplateHandler()
+                from config.html_template_handler import HtmlTemplateHandler
+                template_handler = HtmlTemplateHandler()
+                current_app.logger.info(f"Attempting PDF generation for cuti ID: {new_cuti.id_cuti}")
                 result = template_handler.fill_template_and_generate_pdf(new_cuti)
-                if result['success']:
-                    print("✅ Advanced DOCX template successful")
-            except Exception as advanced_error:
-                print(f"Advanced DOCX template failed: {advanced_error}")
+                if result and result.get('success'):
+                    current_app.logger.info(f"✅ HTML template successful - PDF at: {result.get('pdf_path')}")
+                    print("✅ HTML template successful")
+                else:
+                    current_app.logger.warning(f"HTML template returned failure: {result.get('error', 'Unknown error') if result else 'No result'}")
+            except Exception as html_error:
+                current_app.logger.error(f"HTML template failed: {str(html_error)}")
+                import traceback
+                current_app.logger.error(traceback.format_exc())
+                print(f"HTML template failed: {html_error}")
             
-            # Method 2: HTML Template (fallback)
+            # Method 2: Advanced DOCX Template (fallback - hanya jika berhasil convert ke PDF)
             if not result or not result['success']:
                 try:
-                    from config.html_template_handler import HtmlTemplateHandler
-                    template_handler = HtmlTemplateHandler()
+                    from config.docx_template_advanced import AdvancedDocxTemplateHandler
+                    template_handler = AdvancedDocxTemplateHandler()
                     result = template_handler.fill_template_and_generate_pdf(new_cuti)
                     if result['success']:
-                        print("✅ HTML template successful")
-                except Exception as html_error:
-                    print(f"HTML template failed: {html_error}")
+                        # Verify that the result is actually a PDF file
+                        pdf_path = result.get('pdf_path', '')
+                        if pdf_path and pdf_path.endswith('.pdf') and os.path.exists(pdf_path):
+                            print("✅ Advanced DOCX template successful")
+                        else:
+                            # If not PDF, mark as failed and try next method
+                            result = None
+                            print("⚠️ Advanced DOCX template returned non-PDF file")
+                except Exception as advanced_error:
+                    print(f"Advanced DOCX template failed: {advanced_error}")
             
-            # Method 3: Basic DOCX Template (last resort)
+            # Method 3: Basic DOCX Template (last resort - hanya jika berhasil convert ke PDF)
             if not result or not result['success']:
                 try:
                     from config.docx_template_handler import DocxTemplateHandler
                     template_handler = DocxTemplateHandler()
                     result = template_handler.fill_template_and_generate_pdf(new_cuti)
                     if result['success']:
-                        print("✅ Basic DOCX template successful")
+                        # Verify that the result is actually a PDF file
+                        pdf_path = result.get('pdf_path', '')
+                        if pdf_path and pdf_path.endswith('.pdf') and os.path.exists(pdf_path):
+                            print("✅ Basic DOCX template successful")
+                        else:
+                            result = {'success': False, 'error': 'PDF conversion failed'}
+                            print("⚠️ Basic DOCX template returned non-PDF file")
                 except Exception as docx_error:
                     print(f"Basic DOCX template failed: {docx_error}")
                     result = {'success': False, 'error': 'All template methods failed'}
             
-            if result['success']:
+            if result and result.get('success'):
+                pdf_path = result.get('pdf_path', '')
+                
+                # Verify file is actually a PDF
+                if not pdf_path or not pdf_path.endswith('.pdf'):
+                    flash('Error: File yang dihasilkan bukan PDF', 'error')
+                    current_app.logger.error(f"Generated file is not PDF: {pdf_path}")
+                    db.session.commit()
+                    return redirect(url_for('cuti.list_cuti'))
+                
+                if not os.path.exists(pdf_path):
+                    flash('Error: File PDF tidak ditemukan', 'error')
+                    current_app.logger.error(f"PDF file not found: {pdf_path}")
+                    db.session.commit()
+                    return redirect(url_for('cuti.list_cuti'))
+                
                 # Update cuti record with generated files info
-                new_cuti.qr_code = result['signature_hash']
-                new_cuti.pdf_path = result['pdf_path']
+                new_cuti.qr_code = result.get('signature_hash', '')
+                new_cuti.pdf_path = pdf_path
                 db.session.commit()
                 
+                # Convert to absolute path for send_file
+                if not os.path.isabs(pdf_path):
+                    # Try relative to app root first
+                    abs_path1 = os.path.join(current_app.root_path, pdf_path)
+                    # Try relative to project root
+                    abs_path2 = os.path.abspath(pdf_path)
+                    # Use whichever exists
+                    if os.path.exists(abs_path1):
+                        pdf_path = abs_path1
+                    elif os.path.exists(abs_path2):
+                        pdf_path = abs_path2
+                    else:
+                        # Fallback to absolute path
+                        pdf_path = os.path.abspath(pdf_path)
+                
                 # Return PDF file for download
-                return send_file(
-                    result['pdf_path'],
-                    as_attachment=True,
-                    download_name=f"surat_cuti_{new_cuti.nama.replace(' ', '_')}_{new_cuti.id_cuti}.pdf",
-                    mimetype='application/pdf'
-                )
+                try:
+                    current_app.logger.info(f"Sending PDF file: {pdf_path}")
+                    response = send_file(
+                        pdf_path,
+                        as_attachment=True,
+                        download_name=f"surat_cuti_{new_cuti.nama.replace(' ', '_')}_{new_cuti.id_cuti}.pdf",
+                        mimetype='application/pdf'
+                    )
+                    # Ensure proper headers
+                    response.headers['Content-Type'] = 'application/pdf'
+                    response.headers['Content-Disposition'] = f'attachment; filename="surat_cuti_{new_cuti.nama.replace(" ", "_")}_{new_cuti.id_cuti}.pdf"'
+                    return response
+                except Exception as send_error:
+                    current_app.logger.error(f"Error sending PDF file: {str(send_error)}")
+                    import traceback
+                    current_app.logger.error(traceback.format_exc())
+                    flash('Error: Gagal mengirim file PDF', 'error')
+                    return redirect(url_for('cuti.list_cuti'))
             else:
-                flash(f'Error: Tidak dapat menghasilkan PDF - {result["error"]}', 'error')
-                current_app.logger.error(f"PDF generation failed for cuti ID: {new_cuti.id_cuti} - {result['error']}")
+                error_msg = result.get('error', 'Unknown error') if result else 'PDF generation failed - no result returned'
+                flash(f'Error: Tidak dapat menghasilkan PDF - {error_msg}', 'error')
+                current_app.logger.error(f"PDF generation failed for cuti ID: {new_cuti.id_cuti} - {error_msg}")
                 
                 # Still commit the cuti record but redirect to list
                 db.session.commit()
@@ -270,7 +349,10 @@ def generate_cuti():
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error creating cuti: {str(e)}")
+            import traceback
+            current_app.logger.error(traceback.format_exc())
             flash(f'Error creating cuti form: {str(e)}', 'error')
+            return redirect(url_for('cuti.list_cuti'))
     
     return render_template('cuti/generate_cuti_form.html', form=form)
 
@@ -483,7 +565,9 @@ def preview_cuti_html(cuti_id):
         # Replace QR code placeholder with text for preview
         html_content = html_content.replace('{{QR_CODE}}', '<div style="border: 1px dashed #ccc; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 10px;">QR CODE</div>')
         
-        return html_content
+        # Return HTML content with proper content type for preview
+        from flask import Response
+        return Response(html_content, mimetype='text/html')
         
     except Exception as e:
         current_app.logger.error(f"Error previewing HTML for cuti {cuti_id}: {str(e)}")
@@ -500,61 +584,113 @@ def download_cuti_pdf(cuti_id):
         
         # Check if PDF already exists
         if cuti.pdf_path and os.path.exists(cuti.pdf_path):
-            return send_file(
-                cuti.pdf_path,
-                as_attachment=True,
-                download_name=f"surat_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
-                mimetype='application/pdf'
-            )
+            pdf_path = cuti.pdf_path
+            # Convert to absolute path for send_file
+            if not os.path.isabs(pdf_path):
+                pdf_path = os.path.join(current_app.root_path, '..', pdf_path)
+                pdf_path = os.path.abspath(pdf_path)
+            
+            try:
+                response = send_file(
+                    pdf_path,
+                    as_attachment=True,
+                    download_name=f"surat_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
+                    mimetype='application/pdf'
+                )
+                # Ensure proper headers
+                response.headers['Content-Type'] = 'application/pdf'
+                response.headers['Content-Disposition'] = f'attachment; filename="surat_cuti_{cuti.nama.replace(" ", "_")}_{cuti.id_cuti}.pdf"'
+                return response
+            except Exception as send_error:
+                current_app.logger.error(f"Error sending existing PDF file: {str(send_error)}")
+                # If sending fails, regenerate PDF
+                pass
         
         # If PDF doesn't exist, generate it using multiple template methods
         result = None
         
-        # Method 1: Advanced DOCX Template (docxtpl) - prioritas utama
+        # Method 1: HTML Template (prioritas utama - selalu menghasilkan PDF)
         try:
-            from config.docx_template_advanced import AdvancedDocxTemplateHandler
-            template_handler = AdvancedDocxTemplateHandler()
+            from config.html_template_handler import HtmlTemplateHandler
+            template_handler = HtmlTemplateHandler()
             result = template_handler.fill_template_and_generate_pdf(cuti)
             if result['success']:
-                print("✅ Advanced DOCX template successful for download")
-        except Exception as advanced_error:
-            print(f"Advanced DOCX template failed: {advanced_error}")
+                print("✅ HTML template successful for download")
+        except Exception as html_error:
+            print(f"HTML template failed: {html_error}")
         
-        # Method 2: HTML Template (fallback)
+        # Method 2: Advanced DOCX Template (fallback - hanya jika berhasil convert ke PDF)
         if not result or not result['success']:
             try:
-                from config.html_template_handler import HtmlTemplateHandler
-                template_handler = HtmlTemplateHandler()
+                from config.docx_template_advanced import AdvancedDocxTemplateHandler
+                template_handler = AdvancedDocxTemplateHandler()
                 result = template_handler.fill_template_and_generate_pdf(cuti)
                 if result['success']:
-                    print("✅ HTML template successful for download")
-            except Exception as html_error:
-                print(f"HTML template failed: {html_error}")
+                    # Verify that the result is actually a PDF file
+                    pdf_path = result.get('pdf_path', '')
+                    if pdf_path and pdf_path.endswith('.pdf') and os.path.exists(pdf_path):
+                        print("✅ Advanced DOCX template successful for download")
+                    else:
+                        result = None
+                        print("⚠️ Advanced DOCX template returned non-PDF file")
+            except Exception as advanced_error:
+                print(f"Advanced DOCX template failed: {advanced_error}")
         
-        # Method 3: Basic DOCX Template (last resort)
+        # Method 3: Basic DOCX Template (last resort - hanya jika berhasil convert ke PDF)
         if not result or not result['success']:
             try:
                 from config.docx_template_handler import DocxTemplateHandler
                 template_handler = DocxTemplateHandler()
                 result = template_handler.fill_template_and_generate_pdf(cuti)
                 if result['success']:
-                    print("✅ Basic DOCX template successful for download")
+                    # Verify that the result is actually a PDF file
+                    pdf_path = result.get('pdf_path', '')
+                    if pdf_path and pdf_path.endswith('.pdf') and os.path.exists(pdf_path):
+                        print("✅ Basic DOCX template successful for download")
+                    else:
+                        result = {'success': False, 'error': 'PDF conversion failed'}
+                        print("⚠️ Basic DOCX template returned non-PDF file")
             except Exception as docx_error:
                 print(f"Basic DOCX template failed: {docx_error}")
                 result = {'success': False, 'error': 'All template methods failed'}
         
-        if result['success']:
+        if result and result['success']:
+            pdf_path = result['pdf_path']
+            
+            # Verify file is actually a PDF
+            if not pdf_path.endswith('.pdf') or not os.path.exists(pdf_path):
+                flash('Error: File PDF tidak dapat dihasilkan', 'error')
+                current_app.logger.error(f"PDF file invalid or not found: {pdf_path}")
+                return redirect(url_for('cuti.list_cuti'))
+            
+            # Convert to absolute path for send_file
+            if not os.path.isabs(pdf_path):
+                pdf_path = os.path.join(current_app.root_path, '..', pdf_path)
+                pdf_path = os.path.abspath(pdf_path)
+            
             # Update cuti record with generated files info
             cuti.qr_code = result['signature_hash']
-            cuti.pdf_path = result['pdf_path']
+            cuti.pdf_path = pdf_path
             db.session.commit()
             
-            return send_file(
-                result['pdf_path'],
-                as_attachment=True,
-                download_name=f"surat_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
-                mimetype='application/pdf'
-            )
+            try:
+                current_app.logger.info(f"Sending PDF file: {pdf_path}")
+                response = send_file(
+                    pdf_path,
+                    as_attachment=True,
+                    download_name=f"surat_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
+                    mimetype='application/pdf'
+                )
+                # Ensure proper headers
+                response.headers['Content-Type'] = 'application/pdf'
+                response.headers['Content-Disposition'] = f'attachment; filename="surat_cuti_{cuti.nama.replace(" ", "_")}_{cuti.id_cuti}.pdf"'
+                return response
+            except Exception as send_error:
+                current_app.logger.error(f"Error sending PDF file: {str(send_error)}")
+                import traceback
+                current_app.logger.error(traceback.format_exc())
+                flash('Error: Gagal mengirim file PDF', 'error')
+                return redirect(url_for('cuti.list_cuti'))
         
         flash('PDF tidak dapat dihasilkan. Pastikan cuti sudah disetujui.', 'error')
         return redirect(url_for('cuti.list_cuti'))
