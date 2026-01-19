@@ -85,17 +85,14 @@ def create_app():
     @app.errorhandler(400)
     def handle_bad_request(e):
         logger.error(f"Bad Request Error: {str(e)}")
-        if 'csrf_token' in str(e):
+        if 'csrf_token' in str(e) or 'csrf' in str(e).lower():
             error_msg = 'CSRF token is missing or invalid. Please refresh the page and try again.'
         else:
             error_msg = 'Bad Request - Permintaan tidak valid'
         
-        return ErrorHandler.handle_error(
-            error=error_msg,
-            error_code=400,
-            template_size='minimal',
-            show_retry=True
-        )
+        return render_template('errors/400.html', 
+                             error_message=error_msg,
+                             error_code=400)
 
     @app.errorhandler(403)
     def handle_forbidden(e):

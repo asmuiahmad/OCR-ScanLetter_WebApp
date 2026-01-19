@@ -147,6 +147,7 @@
         method="POST"
         action="{{ url_for('cuti.generate_cuti') }}"
         class="p-6"
+        id="cutiForm"
       >
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="columns is-multiline">
@@ -327,15 +328,27 @@
         </div>
         <div class="field mt-5 has-text-right">
           <div class="buttons">
-            <button type="submit" class="button is-primary is-large">
+            <button type="submit" class="button is-primary is-large" id="submitBtn">
               <span class="icon"><i class="fas fa-file-pdf"></i></span>
-              <span>Generate Surat Cuti PDF</span>
+              <span id="btnText">Generate Surat Cuti PDF</span>
             </button>
           </div>
           <p class="help has-text-centered mt-3">
             <small>Sistem akan otomatis menggunakan template terbaik yang tersedia:<br>
             <strong>DOCX Template</strong> → <strong>HTML Template</strong> → <strong>Basic Template</strong></small>
           </p>
+          <div id="loadingMessage" class="notification is-info mt-3" style="display: none;">
+            <p class="has-text-centered">
+              <span class="icon"><i class="fas fa-spinner fa-spin"></i></span>
+              <span>Sedang membuat PDF... Mohon tunggu...</span>
+            </p>
+          </div>
+          <div id="successMessage" class="notification is-success mt-3" style="display: none;">
+            <p class="has-text-centered">
+              <span class="icon"><i class="fas fa-check-circle"></i></span>
+              <span>PDF berhasil dibuat! Download akan dimulai otomatis...</span>
+            </p>
+          </div>
         </div>
       </form>
     </div>
@@ -348,6 +361,11 @@
     const tanggalSelesai = document.getElementById("tanggal_selesai");
     const phoneInput = document.getElementById("phone_number");
     const countrySelect = document.getElementById("country_code");
+    const cutiForm = document.getElementById("cutiForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const btnText = document.getElementById("btnText");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const successMessage = document.getElementById("successMessage");
 
     // Set minimum date to today for both date inputs
     const today = new Date().toISOString().split("T")[0];
@@ -360,6 +378,33 @@
       if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
         tanggalSelesai.value = "";
       }
+    });
+
+    // Form submission handler
+    cutiForm.addEventListener("submit", function(e) {
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.classList.add("is-loading");
+      btnText.textContent = "Membuat PDF...";
+      loadingMessage.style.display = "block";
+      successMessage.style.display = "none";
+      
+      // Note: We don't prevent default because we want normal form submission
+      // The PDF will be downloaded via the response
+      
+      // Set a timeout to show success message
+      setTimeout(function() {
+        loadingMessage.style.display = "none";
+        successMessage.style.display = "block";
+        
+        // Reset button after a delay
+        setTimeout(function() {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove("is-loading");
+          btnText.textContent = "Generate Surat Cuti PDF";
+          successMessage.style.display = "none";
+        }, 3000);
+      }, 2000);
     });
 
     // Phone number formatting

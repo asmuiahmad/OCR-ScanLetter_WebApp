@@ -63,6 +63,12 @@ def create_error_test_blueprint():
             show_retry=False
         )
     
+    @error_test_bp.route('/400')
+    def test_400():
+        """Test 400 error"""
+        from flask import abort
+        abort(400, 'CSRF token is missing or invalid. Please refresh the page and try again.')
+    
     @error_test_bp.route('/403')
     def test_403():
         """Test 403 error"""

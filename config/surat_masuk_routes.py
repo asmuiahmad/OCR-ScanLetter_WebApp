@@ -140,51 +140,76 @@ def edit_surat_masuk(id):
         return redirect(url_for('main.index'))
 
     entry = SuratMasuk.query.get_or_404(id)
+    
     if request.method == 'POST':
         try:
+            # Update basic fields
             entry.tanggal_suratMasuk = datetime.strptime(request.form['tanggal_suratMasuk'], '%Y-%m-%d')
             entry.pengirim_suratMasuk = request.form['pengirim_suratMasuk']
             entry.penerima_suratMasuk = request.form['penerima_suratMasuk']
             entry.nomor_suratMasuk = request.form['nomor_suratMasuk']
             entry.isi_suratMasuk = request.form['isi_suratMasuk']
             
-            # Handle optional fields that might not exist in SuratMasuk model
-            if hasattr(entry, 'acara_suratMasuk'):
-                entry.acara_suratMasuk = request.form.get('acara_suratMasuk', '')
-            if hasattr(entry, 'tempat_suratMasuk'):
-                entry.tempat_suratMasuk = request.form.get('tempat_suratMasuk', '')
-            if hasattr(entry, 'jam_suratMasuk'):
-                entry.jam_suratMasuk = request.form.get('jam_suratMasuk', '')
+            # Handle optional fields
+            entry.acara_suratMasuk = request.form.get('acara_suratMasuk', '')
+            entry.tempat_suratMasuk = request.form.get('tempat_suratMasuk', '')
+            entry.jam_suratMasuk = request.form.get('jam_suratMasuk', '')
             
-            if hasattr(entry, 'tanggal_acara_suratMasuk') and request.form.get('tanggal_acara_suratMasuk'):
+            # Handle tanggal_acara_suratMasuk
+            if request.form.get('tanggal_acara_suratMasuk'):
                 try:
                     entry.tanggal_acara_suratMasuk = datetime.strptime(request.form['tanggal_acara_suratMasuk'], '%Y-%m-%d').date()
                 except ValueError:
                     entry.tanggal_acara_suratMasuk = None
-            elif hasattr(entry, 'tanggal_acara_suratMasuk'):
+            else:
                 entry.tanggal_acara_suratMasuk = None
             
-            from config.ocr_utils import calculate_overall_ocr_accuracy
-            entry.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(entry, 'suratMasuk')
+            # Calculate OCR accuracy if function exists
+            try:
+                from config.ocr_utils import calculate_overall_ocr_accuracy
+                entry.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(entry, 'suratMasuk')
+            except ImportError:
+                pass  # OCR utils not available
             
             db.session.commit()
             
-            return jsonify({
-                'success': True,
-                'message': 'Surat Masuk berhasil diperbarui',
-                'data': {
-                    'id': entry.id_suratMasuk,
-                    'nomor_surat': entry.nomor_suratMasuk,
-                    'pengirim': entry.pengirim_suratMasuk,
-                    'penerima': entry.penerima_suratMasuk
-                }
-            }), 200
+            # Check if this is an AJAX request (check for XMLHttpRequest header)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return jsonify({
+                    'success': True,
+                    'message': 'Surat Masuk berhasil diperbarui',
+                    'data': {
+                        'id': entry.id_suratMasuk,
+                        'nomor_surat': entry.nomor_suratMasuk,
+                        'pengirim': entry.pengirim_suratMasuk,
+                        'penerima': entry.penerima_suratMasuk
+                    }
+                }), 200
+            else:
+                # Regular form submission
+                flash('Surat Masuk berhasil diperbarui!', 'success')
+                return redirect(url_for('surat_masuk.show_surat_masuk'))
+                
         except Exception as e:
             db.session.rollback()
-            flash(f'Error updating Surat Masuk: {str(e)}', 'error')
-            return render_template('surat_masuk/edit_surat_masuk.html', entry=entry)
+            error_msg = f'Error updating Surat Masuk: {str(e)}'
+            
+            # Check if this is an AJAX request
+            if request.headers.get('Content-Type') == 'application/json' or request.is_json:
+                return jsonify({
+                    'success': False,
+                    'message': error_msg
+                }), 500
+            else:
+                flash(error_msg, 'error')
+                return render_template('surat_masuk/edit_surat_masuk_simple.html', entry=entry)
     
-    return render_template('surat_masuk/edit_surat_masuk.html', entry=entry)
+    # GET request - show the form
+    try:
+        return render_template('surat_masuk/edit_surat_masuk_simple.html', entry=entry)
+    except Exception as e:
+        flash(f'Error loading edit form: {str(e)}', 'error')
+        return redirect(url_for('surat_masuk.show_surat_masuk'))
 
 
 @surat_masuk_bp.route('/delete_surat_masuk/<int:id>', methods=['POST'])
@@ -217,36 +242,90 @@ def list_pending_surat_masuk():
 @login_required
 @role_required('pimpinan')
 def approve_surat(surat_id):
-    """Approve surat"""
+    """Approve surat - hanya pimpinan yang dapat menyetujui"""
     try:
         surat = SuratMasuk.query.get(surat_id)
-        if surat:
-            surat.status_suratMasuk = 'approved'
-            db.session.commit()
-            return jsonify({"success": True, "message": "Surat berhasil disetujui"})
-        else:
-            return jsonify({"success": False, "error": "Surat tidak ditemukan"}), 404
+        if not surat:
+            return jsonify({
+                "success": False, 
+                "message": "Surat tidak ditemukan"
+            }), 404
+        
+        if surat.status_suratMasuk != 'pending':
+            return jsonify({
+                "success": False, 
+                "message": f"Surat sudah {surat.status_suratMasuk}. Tidak dapat diubah lagi."
+            }), 400
+        
+        # Update status
+        surat.status_suratMasuk = 'approved'
+        
+        db.session.commit()
+        
+        current_app.logger.info(f"Surat ID {surat_id} disetujui oleh {current_user.email}")
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Surat dari {surat.pengirim_suratMasuk} berhasil disetujui",
+            "surat_info": {
+                "nomor": surat.nomor_suratMasuk,
+                "pengirim": surat.pengirim_suratMasuk,
+                "status": surat.status_suratMasuk
+            }
+        })
+        
     except Exception as e:
         db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
+        current_app.logger.error(f"Error approving surat {surat_id}: {str(e)}")
+        return jsonify({
+            "success": False, 
+            "message": "Terjadi kesalahan saat menyetujui surat"
+        }), 500
 
 
 @surat_masuk_bp.route('/reject-surat/<int:surat_id>', methods=['POST'])
 @login_required
 @role_required('pimpinan')
 def reject_surat(surat_id):
-    """Reject surat"""
+    """Reject surat - hanya pimpinan yang dapat menolak"""
     try:
         surat = SuratMasuk.query.get(surat_id)
-        if surat:
-            surat.status_suratMasuk = 'rejected'
-            db.session.commit()
-            return jsonify({"success": True, "message": "Surat berhasil ditolak"})
-        else:
-            return jsonify({"success": False, "error": "Surat tidak ditemukan"}), 404
+        if not surat:
+            return jsonify({
+                "success": False, 
+                "message": "Surat tidak ditemukan"
+            }), 404
+        
+        if surat.status_suratMasuk != 'pending':
+            return jsonify({
+                "success": False, 
+                "message": f"Surat sudah {surat.status_suratMasuk}. Tidak dapat diubah lagi."
+            }), 400
+        
+        # Update status
+        surat.status_suratMasuk = 'rejected'
+        
+        db.session.commit()
+        
+        current_app.logger.info(f"Surat ID {surat_id} ditolak oleh {current_user.email}")
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Surat dari {surat.pengirim_suratMasuk} berhasil ditolak",
+            "surat_info": {
+                "nomor": surat.nomor_suratMasuk,
+                "pengirim": surat.pengirim_suratMasuk,
+                "status": surat.status_suratMasuk
+            }
+        })
+        
     except Exception as e:
         db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
+        current_app.logger.error(f"Error rejecting surat {surat_id}: {str(e)}")
+        return jsonify({
+            "success": False, 
+            "message": "Terjadi kesalahan saat menolak surat"
+        }), 500
 
 
 @surat_masuk_bp.route('/api/surat-masuk/detail/<int:surat_id>', methods=['GET'])
@@ -319,6 +398,65 @@ def view_surat_masuk_image(id):
     except Exception as e:
         return jsonify({'error': 'Terjadi kesalahan saat memuat gambar'}), 500
 
+@surat_masuk_bp.route('/test-ocr-enhancement', methods=['POST'])
+@login_required
+@role_required('admin', 'pimpinan')
+def test_ocr_enhancement():
+    """Test OCR text enhancement"""
+    try:
+        from config.ocr_text_processor import ocr_processor
+        from config.ocr_surat_masuk_enhancer import surat_masuk_enhancer
+        
+        # Get test text from request
+        test_text = request.json.get('text', '')
+        field_type = request.json.get('field_type', 'isi_surat')
+        
+        if not test_text:
+            return jsonify({
+                'success': False,
+                'message': 'No text provided for testing'
+            }), 400
+        
+        # Process with OCR text processor
+        cleaned_text = ocr_processor.clean_ocr_text(test_text)
+        
+        # Enhance with surat masuk enhancer
+        enhanced_text = surat_masuk_enhancer.enhance_surat_masuk_text(cleaned_text, field_type)
+        
+        # Get quality score
+        quality_score = ocr_processor.get_text_quality_score(enhanced_text)
+        
+        # Detect surat type if isi_surat
+        surat_type = None
+        if field_type == 'isi_surat':
+            surat_type = surat_masuk_enhancer.detect_surat_type(enhanced_text)
+        
+        return jsonify({
+            'success': True,
+            'original': test_text,
+            'cleaned': cleaned_text,
+            'enhanced': enhanced_text,
+            'quality_score': quality_score,
+            'surat_type': surat_type,
+            'improvements': {
+                'length_change': len(enhanced_text) - len(test_text),
+                'word_count_change': len(enhanced_text.split()) - len(test_text.split())
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error testing OCR enhancement: {str(e)}'
+        }), 500
+
+@surat_masuk_bp.route('/test-ocr-enhancement-page')
+@login_required
+@role_required('admin', 'pimpinan')
+def test_ocr_enhancement_page():
+    """Halaman untuk test OCR enhancement"""
+    return render_template('surat_masuk/test_ocr_enhancement.html')
+
 @surat_masuk_bp.route('/update-ocr-accuracy/<int:id>', methods=['POST'])
 @login_required
 @role_required('admin', 'pimpinan')
@@ -326,17 +464,27 @@ def update_ocr_accuracy(id):
     try:
         surat_type = request.form.get('type')  # 'masuk' or 'keluar'
         if surat_type == 'masuk':
-            surat = SuratKeluar.query.get_or_404(id)
-            from config.ocr_utils import calculate_overall_ocr_accuracy
-            surat.ocr_accuracy_suratKeluar = calculate_overall_ocr_accuracy(surat, 'suratKeluar')
-        elif surat_type == 'keluar':
             surat = SuratMasuk.query.get_or_404(id)
-            from config.ocr_utils import calculate_overall_ocr_accuracy
-            surat.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(surat, 'suratMasuk')
+            try:
+                from config.ocr_utils import calculate_overall_ocr_accuracy
+                surat.ocr_accuracy_suratMasuk = calculate_overall_ocr_accuracy(surat, 'suratMasuk')
+            except ImportError:
+                surat.ocr_accuracy_suratMasuk = 0
+        elif surat_type == 'keluar':
+            surat = SuratKeluar.query.get_or_404(id)
+            try:
+                from config.ocr_utils import calculate_overall_ocr_accuracy
+                surat.ocr_accuracy_suratKeluar = calculate_overall_ocr_accuracy(surat, 'suratKeluar')
+            except ImportError:
+                surat.ocr_accuracy_suratKeluar = 0
         else:
             return jsonify({"success": False, "error": "Invalid surat type"})
+        
         db.session.commit()
-        return jsonify({"success": True, "accuracy": getattr(surat, f'ocr_accuracy_{surat_type}', 0)})
+        accuracy_field = f'ocr_accuracy_surat{surat_type.title()}'
+        accuracy_value = getattr(surat, accuracy_field, 0)
+        return jsonify({"success": True, "accuracy": accuracy_value})
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)})
@@ -373,6 +521,36 @@ def debug_surat_detail(surat_id):
             'success': False,
             'error': str(e),
             'error_type': type(e).__name__
+        }), 500
+
+@surat_masuk_bp.route('/api/surat-masuk/<int:id>')
+@login_required
+def get_surat_masuk_api(id):
+    """API endpoint to get surat masuk data for editing"""
+    try:
+        entry = SuratMasuk.query.get_or_404(id)
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'id_suratMasuk': entry.id_suratMasuk,
+                'tanggal_suratMasuk': entry.tanggal_suratMasuk.strftime('%Y-%m-%d') if entry.tanggal_suratMasuk else '',
+                'pengirim_suratMasuk': entry.pengirim_suratMasuk,
+                'penerima_suratMasuk': entry.penerima_suratMasuk,
+                'nomor_suratMasuk': entry.nomor_suratMasuk,
+                'isi_suratMasuk': entry.isi_suratMasuk,
+                'acara_suratMasuk': entry.acara_suratMasuk,
+                'tempat_suratMasuk': entry.tempat_suratMasuk,
+                'tanggal_acara_suratMasuk': entry.tanggal_acara_suratMasuk.strftime('%Y-%m-%d') if entry.tanggal_acara_suratMasuk else '',
+                'jam_suratMasuk': entry.jam_suratMasuk,
+                'status_suratMasuk': entry.status_suratMasuk
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
         }), 500
 
 @surat_masuk_bp.route('/surat_masuk/detail/<int:id>')

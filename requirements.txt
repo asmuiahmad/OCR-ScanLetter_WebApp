@@ -1,58 +1,107 @@
-# Core Flask Framework
-Flask==2.3.3
-Werkzeug==2.3.7
+Flask==3.0.0
+Werkzeug==3.0.1
 Jinja2==3.1.2
 MarkupSafe==2.1.3
 itsdangerous==2.1.2
 click==8.1.7
 
-# Database
-Flask-SQLAlchemy==3.0.5
+# Database & ORM
+Flask-SQLAlchemy==3.1.1
 Flask-Migrate==4.0.5
-SQLAlchemy==2.0.21
-alembic==1.12.0
-greenlet==2.0.2
+SQLAlchemy==2.0.23
+alembic==1.13.1
+greenlet==3.0.1
+
+# MySQL/PostgreSQL Support (optional)
+PyMySQL==1.1.0
+psycopg2-binary==2.9.9
 
 # Authentication & Security
 Flask-Login==0.6.3
-Flask-WTF==1.1.1
-WTForms==3.0.1
-email-validator==2.0.0
+Flask-WTF==1.2.1
+WTForms==3.1.1
+email-validator==2.1.0
+Flask-Bcrypt==1.0.1
+cryptography==41.0.7
 
-# OCR Processing
+# OCR Processing & Image Handling
 pytesseract==0.3.10
-Pillow==10.0.1
+Pillow==10.1.0
+opencv-python==4.8.1.78
+numpy==1.24.4
+scikit-image==0.22.0
 
-# PDF Generation & QR Codes
-reportlab==4.0.4
-qrcode==7.4.2
-WeasyPrint==60.2
+# PDF Generation & Document Processing
+reportlab==4.0.7
+qrcode[pil]==7.4.2
+WeasyPrint==61.2
 pdfkit==1.0.0
+python-docx==1.1.0
+openpyxl==3.1.2
+xlsxwriter==3.1.9
 
-# Document Processing
-python-docx==0.8.11
-mailmerge==0.2.1
+# Email & Notifications
+Flask-Mail==0.9.1
+docx-mailmerge2==0.9.0
 
-# Date/Time Utilities
+# Date/Time & Localization
 python-dateutil==2.8.2
+pytz==2023.3
+Babel==2.13.1
 
-# Development & Debugging
+# Environment & Configuration
 python-dotenv==1.0.0
+configparser==6.0.0
 
-# HTTP and Networking
+# HTTP Client & API
 requests==2.31.0
-urllib3==2.0.5
-certifi==2023.7.22
-charset-normalizer==3.2.0
-idna==3.4
+urllib3==2.1.0
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6
 
-# Performance and Production
+# Caching & Performance
+Flask-Caching==2.1.0
+redis==5.0.1
+
+# File Upload & Validation
+Flask-Uploads==0.2.1
+python-magic==0.4.27
+
+# Logging & Monitoring
+Flask-Logging==0.1.0
+structlog==23.2.0
+
+# Development & Testing
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+coverage==7.3.2
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+
+# Production Server
 gunicorn==21.2.0
-blinker==1.6.2
+gevent==23.9.1
+eventlet==0.33.3
 
-# Utilities
+# System Utilities
+blinker==1.7.0
 six==1.16.0
-difflib-sequence-matcher==0.0.1
+setuptools==69.0.2
+wheel==0.42.0
+
+# Additional OCR & AI Libraries (optional)
+# easyocr==1.7.0
+# transformers==4.35.2
+# torch==2.1.1
+# torchvision==0.16.1
+
+# Cloud OCR Services (optional)
+# google-cloud-vision==3.4.5
+# boto3==1.34.0  # for AWS Textract
+# azure-cognitiveservices-vision-computervision==0.9.0
 
 # System dependencies (install via system package manager):
 # - tesseract-ocr (for OCR functionality)

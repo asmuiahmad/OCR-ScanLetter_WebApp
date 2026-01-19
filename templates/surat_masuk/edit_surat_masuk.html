@@ -1,68 +1,191 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Input Surat Masuk - PA Banjarbaru{% endblock %}
+{% block title %}Edit Surat Masuk - PA Banjarbaru{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-<h1 class="mb-5 text-center font-bold text-2xl">Input Surat Masuk</h1>
-<form method="POST" enctype="multipart/form-data" class="form-horizontal">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="tanggal_suratMasuk" style="margin-bottom: 3px;">Tanggal Surat Masuk:</label>
-                <input type="date" name="tanggal_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
-            </div>
-            <div class="form-group">
-                <label for="pengirim_suratMasuk" style="margin-bottom: 3px;">Pengirim:</label>
-                <input type="text" name="pengirim_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
-            </div>
-            <div class="form-group">
-                <label for="penerima_suratMasuk" style="margin-bottom: 3px;">Penerima:</label>
-                <input type="text" name="penerima_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
-            </div>
-            <div class="form-group">
-                <label for="nomor_suratMasuk" style="margin-bottom: 3px;">Nomor Surat:</label>
-                <input type="text" name="nomor_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
+    <div class="max-w-5xl mx-auto">
+        <div class="form-card">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-edit text-yellow-400"></i>
+                    Edit Surat Masuk
+                </h2>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="kode_suratMasuk" style="margin-bottom: 3px;">Kode Surat:</label>
-                <input type="text" name="kode_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
-            </div>
-            <div class="form-group">
-                <label for="jenis_suratMasuk" style="margin-bottom: 3px;">Jenis Surat:</label>
-                <input type="text" name="jenis_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %} required>
-            </div>
-            <div class="form-group">
-                <label for="isi_suratMasuk" style="margin-bottom: 3px;">Isi Surat:</label>
-                <textarea name="isi_suratMasuk" class="form-control" style="height: 38px;" {% if not current_user.is_admin %}disabled{% endif %} required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="acara_suratMasuk" style="margin-bottom: 3px;">Acara (Opsional):</label>
-                <input type="text" name="acara_suratMasuk" class="form-control" placeholder="Nama acara jika ada" {% if not current_user.is_admin %}disabled{% endif %}>
-            </div>
-            <div class="form-group">
-                <label for="tempat_suratMasuk" style="margin-bottom: 3px;">Tempat (Opsional):</label>
-                <input type="text" name="tempat_suratMasuk" class="form-control" placeholder="Tempat acara jika ada" {% if not current_user.is_admin %}disabled{% endif %}>
-            </div>
-            <div class="form-group">
-                <label for="tanggal_acara_suratMasuk" style="margin-bottom: 3px;">Tanggal Acara (Opsional):</label>
-                <input type="date" name="tanggal_acara_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %}>
-            </div>
-            <div class="form-group">
-                <label for="jam_suratMasuk" style="margin-bottom: 3px;">Jam Acara (Opsional):</label>
-                <input type="time" name="jam_suratMasuk" class="form-control" {% if not current_user.is_admin %}disabled{% endif %}>
-            </div>
-            <div class="form-group">
-                <label for="image" style="margin-bottom: 3px;">Upload Image:</label>
-                <input type="file" name="image" class="form-control" accept="image/*" {% if not current_user.is_admin %}disabled{% endif %} required>
-            </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="bg-white rounded-lg shadow-md p-6 mt-4">
+            <form method="POST" id="editForm" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label for="tanggal_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tanggal Surat Masuk <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" 
+                                   name="tanggal_suratMasuk" 
+                                   id="tanggal_suratMasuk"
+                                   value="{% if entry.tanggal_suratMasuk %}{{ entry.tanggal_suratMasuk.strftime('%Y-%m-%d') }}{% endif %}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pengirim_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pengirim <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="pengirim_suratMasuk" 
+                                   id="pengirim_suratMasuk"
+                                   value="{{ entry.pengirim_suratMasuk or '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="penerima_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Penerima <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="penerima_suratMasuk" 
+                                   id="penerima_suratMasuk"
+                                   value="{{ entry.penerima_suratMasuk or '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nomor_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Nomor Surat <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="nomor_suratMasuk" 
+                                   id="nomor_suratMasuk"
+                                   value="{{ entry.nomor_suratMasuk or '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label for="isi_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Isi Surat <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="isi_suratMasuk" 
+                                      id="isi_suratMasuk"
+                                      rows="4"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                      required>{{ entry.isi_suratMasuk or '' }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="acara_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Acara (Opsional)
+                            </label>
+                            <input type="text" 
+                                   name="acara_suratMasuk" 
+                                   id="acara_suratMasuk"
+                                   value="{{ entry.acara_suratMasuk or '' }}"
+                                   placeholder="Nama acara jika ada"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tempat_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tempat (Opsional)
+                            </label>
+                            <input type="text" 
+                                   name="tempat_suratMasuk" 
+                                   id="tempat_suratMasuk"
+                                   value="{{ entry.tempat_suratMasuk or '' }}"
+                                   placeholder="Tempat acara jika ada"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label for="tanggal_acara_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Tanggal Acara (Opsional)
+                                </label>
+                                <input type="date" 
+                                       name="tanggal_acara_suratMasuk" 
+                                       id="tanggal_acara_suratMasuk"
+                                       value="{% if entry.tanggal_acara_suratMasuk %}{{ entry.tanggal_acara_suratMasuk.strftime('%Y-%m-%d') }}{% endif %}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="jam_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Jam Acara (Opsional)
+                                </label>
+                                <input type="time" 
+                                       name="jam_suratMasuk" 
+                                       id="jam_suratMasuk"
+                                       value="{{ entry.jam_suratMasuk or '' }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <a href="{{ url_for('surat_masuk.show_surat_masuk') }}" 
+                       class="btn-base btn-outline">
+                        <i class="fas fa-times mr-2"></i>
+                        Batal
+                    </a>
+                    <button type="submit" 
+                            class="btn-base btn-primary btn-ripple"
+                            id="submitBtn">
+                        <i class="fas fa-save mr-2"></i>
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="form-group" style="margin-top: 8px;">
-        <button type="submit" class="btn btn-primary" {% if not current_user.is_admin %}disabled{% endif %}>Submit</button>
-    </div>
-</form>
 </div>
+
+<script>
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+    
+    // Let the form submit normally (no preventDefault)
+    // The server will handle the redirect
+});
+
+// Re-enable button if user navigates back
+window.addEventListener('pageshow', function(event) {
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Simpan Perubahan';
+    }
+});
+</script>
 {% endblock %}

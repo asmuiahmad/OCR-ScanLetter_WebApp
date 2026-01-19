@@ -22,6 +22,9 @@
             <a href="{{ url_for('surat_masuk.input_surat_masuk') }}" class="create-button">
                 <i class="fas fa-plus mr-2"></i>Tambah Surat Masuk
             </a>
+            <a href="{{ url_for('surat_masuk.test_ocr_enhancement_page') }}" class="create-button" style="background: #10b981; margin-left: 8px;">
+                <i class="fas fa-cogs mr-2"></i>Test OCR Enhancement
+            </a>
             <form method="GET" action="{{ url_for('surat_masuk.show_surat_masuk') }}" class="search-form">
                 <input type="text" name="search" placeholder="Cari surat masuk..." 
                        value="{{ request.args.get('search', '') }}" class="search-input">
@@ -78,10 +81,11 @@
                 </td>
                 <td class="py-2 px-4 text-center">
                   <div class="flex justify-center gap-2">
-                    <a href="{{ url_for('surat_masuk.edit_surat_masuk', id=entry.id_suratMasuk) }}"
-                        class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition">
+                    <button onclick="openEditModal({{ entry.id_suratMasuk }})"
+                        class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition"
+                        title="Edit Surat Masuk">
                         <i class="feather icon-edit"></i>
-                    </a>
+                    </button>
                     <form action="{{ url_for('surat_masuk.delete_surat_masuk', id=entry.id_suratMasuk) }}" method="POST"
                         style="display:inline;" onsubmit="return confirmDelete();">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -144,5 +148,246 @@
 
 </div>
 
+<!-- Modal Edit Surat Masuk -->
+<div id="editModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 px-6 py-4 flex items-center justify-between">
+            <h3 class="text-xl font-bold text-white flex items-center">
+                <i class="fas fa-edit mr-3"></i>
+                Edit Surat Masuk
+            </h3>
+            <button onclick="closeEditModal()" class="text-white hover:text-gray-200 transition">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6">
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" id="edit_id" name="id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label for="edit_tanggal_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tanggal Surat Masuk <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" 
+                                   name="tanggal_suratMasuk" 
+                                   id="edit_tanggal_suratMasuk"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_pengirim_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pengirim <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="pengirim_suratMasuk" 
+                                   id="edit_pengirim_suratMasuk"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_penerima_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Penerima <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="penerima_suratMasuk" 
+                                   id="edit_penerima_suratMasuk"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_nomor_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Nomor Surat <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="nomor_suratMasuk" 
+                                   id="edit_nomor_suratMasuk"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label for="edit_isi_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Isi Surat <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="isi_suratMasuk" 
+                                      id="edit_isi_suratMasuk"
+                                      rows="4"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                      required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_acara_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Acara (Opsional)
+                            </label>
+                            <input type="text" 
+                                   name="acara_suratMasuk" 
+                                   id="edit_acara_suratMasuk"
+                                   placeholder="Nama acara jika ada"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_tempat_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tempat (Opsional)
+                            </label>
+                            <input type="text" 
+                                   name="tempat_suratMasuk" 
+                                   id="edit_tempat_suratMasuk"
+                                   placeholder="Tempat acara jika ada"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label for="edit_tanggal_acara_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Tanggal Acara (Opsional)
+                                </label>
+                                <input type="date" 
+                                       name="tanggal_acara_suratMasuk" 
+                                       id="edit_tanggal_acara_suratMasuk"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit_jam_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Jam Acara (Opsional)
+                                </label>
+                                <input type="time" 
+                                       name="jam_suratMasuk" 
+                                       id="edit_jam_suratMasuk"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <button type="button" 
+                            onclick="closeEditModal()"
+                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fas fa-times mr-2"></i>
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            id="saveBtn"
+                            class="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">
+                        <i class="fas fa-save mr-2"></i>
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='assets/js/utils/confirm-delete.js') }}"></script>
+
+<script>
+// Modal functions
+function openEditModal(id) {
+    // Fetch data for the specific surat masuk
+    fetch(`/api/surat-masuk/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                populateEditForm(data.data);
+                document.getElementById('editModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Gagal memuat data surat masuk');
+        });
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+    document.body.style.overflow = 'auto'; // Restore scroll
+    document.getElementById('editForm').reset();
+}
+
+function populateEditForm(data) {
+    document.getElementById('edit_id').value = data.id_suratMasuk;
+    document.getElementById('edit_tanggal_suratMasuk').value = data.tanggal_suratMasuk;
+    document.getElementById('edit_pengirim_suratMasuk').value = data.pengirim_suratMasuk || '';
+    document.getElementById('edit_penerima_suratMasuk').value = data.penerima_suratMasuk || '';
+    document.getElementById('edit_nomor_suratMasuk').value = data.nomor_suratMasuk || '';
+    document.getElementById('edit_isi_suratMasuk').value = data.isi_suratMasuk || '';
+    document.getElementById('edit_acara_suratMasuk').value = data.acara_suratMasuk || '';
+    document.getElementById('edit_tempat_suratMasuk').value = data.tempat_suratMasuk || '';
+    document.getElementById('edit_tanggal_acara_suratMasuk').value = data.tanggal_acara_suratMasuk || '';
+    document.getElementById('edit_jam_suratMasuk').value = data.jam_suratMasuk || '';
+}
+
+// Form submission
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const saveBtn = document.getElementById('saveBtn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+    
+    const formData = new FormData(this);
+    const id = document.getElementById('edit_id').value;
+    
+    fetch(`/edit_surat_masuk/${id}`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Surat Masuk berhasil diperbarui!');
+            closeEditModal();
+            location.reload(); // Refresh the page to show updated data
+        } else {
+            alert('Error: ' + (data.message || 'Gagal memperbarui surat masuk'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyimpan data');
+    })
+    .finally(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+    });
+});
+
+// Close modal when clicking outside
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeEditModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('editModal').classList.contains('hidden')) {
+        closeEditModal();
+    }
+});
+</script>
 {% endblock %}

@@ -395,7 +395,7 @@ class OCRModalSuratKeluar {
         extractedData.push(rowData);
         
         try {
-            const response = await fetch('/ocr_surat_keluar/save_extracted_data', {
+            const response = await fetch('/surat-keluar/save_extracted_data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

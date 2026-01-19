@@ -450,12 +450,15 @@ def uploaded_file_surat_keluar(filename):
 @role_required('admin', 'pimpinan')
 def save_extracted_data():
     try:
-        # Validate CSRF token
-        if not request.headers.get('X-CSRFToken'):
+        # Validate CSRF token - check both headers
+        csrf_token = request.headers.get('X-CSRFToken') or request.headers.get('X-CSRF-Token')
+        if not csrf_token:
+            logger.warning("CSRF token missing in request headers")
             return jsonify({"success": False, "error": "CSRF token is missing"}), 400
 
         data = request.get_json()
         if not data:
+            logger.warning("No JSON data provided in request")
             return jsonify({"success": False, "error": "No data provided"}), 400
 
         # Debug: Log the received data

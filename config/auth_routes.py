@@ -31,7 +31,10 @@ def login():
     next_page = request.args.get('next') or request.form.get('next')
     
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        # Normalize email (strip spaces and enforce lowercase)
+        email_input = (form.email.data or '').strip().lower()
+        from sqlalchemy import func
+        user = User.query.filter(func.lower(User.email) == email_input).first()
         if user and form.password.data and check_password_hash(user.password, form.password.data):
             if not user.is_approved:
                 flash('Your account is pending approval by an administrator.', 'warning')
@@ -59,9 +62,9 @@ def login():
                 return redirect(url_for('dashboard.dashboard', from_login='true'))
         else:
             if user:
-                log_user_login(user.id, form.email.data, 'failed', request)
+                log_user_login(user.id, email_input, 'failed', request)
             else:
-                log_user_login(None, form.email.data, 'failed', request)
+                log_user_login(None, email_input, 'failed', request)
             flash('Invalid email or password', 'error')
     
     return render_template('auth/login.html', form=form)

@@ -201,3 +201,93 @@ def chart_data():
         "surat_masuk": [data_keluar_dict.get(t, 0) for t in tanggal_sorted],
     }
     return jsonify(data)
+
+
+@surat_keluar_bp.route('/approve-surat/<int:surat_id>', methods=['POST'])
+@login_required
+@role_required('pimpinan')
+def approve_surat_keluar(surat_id):
+    """Approve surat keluar - hanya pimpinan yang dapat menyetujui"""
+    try:
+        surat = SuratKeluar.query.get(surat_id)
+        if not surat:
+            return jsonify({
+                "success": False, 
+                "message": "Surat tidak ditemukan"
+            }), 404
+        
+        if surat.status_suratKeluar != 'pending':
+            return jsonify({
+                "success": False, 
+                "message": f"Surat sudah {surat.status_suratKeluar}. Tidak dapat diubah lagi."
+            }), 400
+        
+        # Update status
+        surat.status_suratKeluar = 'approved'
+        
+        db.session.commit()
+        
+        current_app.logger.info(f"Surat Keluar ID {surat_id} disetujui oleh {current_user.email}")
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Surat dari {surat.pengirim_suratKeluar} berhasil disetujui",
+            "surat_info": {
+                "nomor": surat.nomor_suratKeluar,
+                "pengirim": surat.pengirim_suratKeluar,
+                "status": surat.status_suratKeluar
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error approving surat keluar {surat_id}: {str(e)}")
+        return jsonify({
+            "success": False, 
+            "message": "Terjadi kesalahan saat menyetujui surat"
+        }), 500
+
+
+@surat_keluar_bp.route('/reject-surat/<int:surat_id>', methods=['POST'])
+@login_required
+@role_required('pimpinan')
+def reject_surat_keluar(surat_id):
+    """Reject surat keluar - hanya pimpinan yang dapat menolak"""
+    try:
+        surat = SuratKeluar.query.get(surat_id)
+        if not surat:
+            return jsonify({
+                "success": False, 
+                "message": "Surat tidak ditemukan"
+            }), 404
+        
+        if surat.status_suratKeluar != 'pending':
+            return jsonify({
+                "success": False, 
+                "message": f"Surat sudah {surat.status_suratKeluar}. Tidak dapat diubah lagi."
+            }), 400
+        
+        # Update status
+        surat.status_suratKeluar = 'rejected'
+        
+        db.session.commit()
+        
+        current_app.logger.info(f"Surat Keluar ID {surat_id} ditolak oleh {current_user.email}")
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Surat dari {surat.pengirim_suratKeluar} berhasil ditolak",
+            "surat_info": {
+                "nomor": surat.nomor_suratKeluar,
+                "pengirim": surat.pengirim_suratKeluar,
+                "status": surat.status_suratKeluar
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error rejecting surat keluar {surat_id}: {str(e)}")
+        return jsonify({
+            "success": False, 
+            "message": "Terjadi kesalahan saat menolak surat"
+        }), 500

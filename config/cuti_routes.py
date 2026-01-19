@@ -563,3 +563,43 @@ def download_cuti_pdf(cuti_id):
         current_app.logger.error(f"Error downloading PDF for cuti {cuti_id}: {str(e)}")
         flash('Error downloading PDF', 'error')
         return redirect(url_for('cuti.list_cuti'))
+
+@cuti_bp.route('/generate-form-pdf/<int:cuti_id>')
+@login_required
+def generate_form_pdf(cuti_id):
+    """Generate PDF formulir cuti dengan format resmi Mahkamah Agung"""
+    try:
+        # Get cuti data
+        cuti = Cuti.query.get_or_404(cuti_id)
+        
+        # Generate PDF
+        pdf_generator = CutiFormPDFGenerator()
+        pdf_path = pdf_generator.create_cuti_form_from_model(cuti)
+        
+        # Return PDF file
+        return send_file(
+            pdf_path,
+            as_attachment=True,
+            download_name=f"formulir_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        current_app.logger.error(f"Error generating PDF form for cuti {cuti_id}: {str(e)}")
+        flash(f'Error generating PDF form: {str(e)}', 'error')
+        return redirect(url_for('cuti.list_cuti'))
+
+@cuti_bp.route('/preview-form-pdf/<int:cuti_id>')
+@login_required
+def preview_form_pdf(cuti_id):
+    """Preview formulir cuti sebelum generate PDF"""
+    try:
+        # Get cuti data
+        cuti = Cuti.query.get_or_404(cuti_id)
+        
+        return render_template('cuti/preview_form_pdf.html', cuti=cuti)
+        
+    except Exception as e:
+        current_app.logger.error(f"Error previewing PDF form for cuti {cuti_id}: {str(e)}")
+        flash(f'Error loading preview: {str(e)}', 'error')
+        return redirect(url_for('cuti.list_cuti'))

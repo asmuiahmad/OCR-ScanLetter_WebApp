@@ -91,19 +91,36 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ url_for('cuti.detail_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-info">
+                                    <a href="{{ url_for('cuti.detail_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-info" title="Lihat Detail">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    
+                                    <!-- Preview Formulir Button -->
+                                    <a href="{{ url_for('cuti.preview_form_pdf', cuti_id=cuti.id_cuti) }}" 
+                                       class="btn btn-sm btn-secondary" 
+                                       title="Preview Formulir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <!-- Generate PDF Formulir Button -->
+                                    <a href="{{ url_for('cuti.generate_form_pdf', cuti_id=cuti.id_cuti) }}" 
+                                       class="btn btn-sm btn-primary" 
+                                       title="Download Formulir PDF"
+                                       target="_blank">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    
                                     {% if current_user.role in ['admin', 'pimpinan'] %}
-                                    <a href="{{ url_for('cuti.edit_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ url_for('cuti.edit_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     {% endif %}
+                                    
                                     {% if cuti.status_cuti == 'pending' and current_user.role in ['admin', 'pimpinan'] %}
-                                    <button type="button" class="btn btn-sm btn-success" onclick="approveCuti({{ cuti.id_cuti }})">
+                                    <button type="button" class="btn btn-sm btn-success" onclick="approveCuti({{ cuti.id_cuti }})" title="Setujui">
                                         <i class="fas fa-check"></i>
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-danger" onclick="rejectCuti({{ cuti.id_cuti }})">
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="rejectCuti({{ cuti.id_cuti }})" title="Tolak">
                                         <i class="fas fa-times"></i>
                                     </button>
                                     {% endif %}

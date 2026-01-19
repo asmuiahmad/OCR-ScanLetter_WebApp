@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request, current_app
 from flask_login import login_required, current_user
 
 from config.extensions import db
-from config.models import SuratMasuk, UserLoginLog
+from config.models import SuratMasuk, SuratKeluar, UserLoginLog
 from config.route_utils import role_required
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -12,24 +12,113 @@ api_bp = Blueprint('api', __name__, url_prefix='/api')
 @api_bp.route('/notifications/count', methods=['GET'])
 @login_required
 def get_notification_count():
-    """Get notification count for current user"""
+    """Get notification count for current user - only for pimpinan"""
     try:
-        if current_user.role in ['pimpinan', 'admin']:
-            pending_count = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
+        # Hanya pimpinan yang dapat melihat jumlah notifikasi
+        if current_user.role != 'pimpinan':
             return jsonify({
                 'success': True,
-                'pending_count': pending_count
+                'pending_count': 0,
+                'message': 'Akses terbatas untuk pimpinan'
             })
-        else:
-            return jsonify({
-                'success': False,
-                'message': 'Unauthorized'
-            }), 403
+        
+        # Hitung surat masuk dan surat keluar yang pending
+        pending_masuk = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
+        pending_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+        total_pending = pending_masuk + pending_keluar
+        
+        return jsonify({
+            'success': True,
+            'pending_count': total_pending,
+            'pending_masuk': pending_masuk,
+            'pending_keluar': pending_keluar,
+            'message': f'{total_pending} surat menunggu persetujuan' if total_pending > 0 else 'Tidak ada surat yang menunggu persetujuan'
+        })
+        
     except Exception as e:
         current_app.logger.error(f"Error getting notification count: {str(e)}")
         return jsonify({
             'success': False,
-            'message': 'Internal server error'
+            'message': 'Terjadi kesalahan saat memuat jumlah notifikasi'
+        }), 500
+
+
+@api_bp.route('/notifications/recent', methods=['GET'])
+@login_required
+def get_recent_notifications():
+    """Get recent pending surat masuk and surat keluar for notifications - only for pimpinan"""
+    try:
+        # Hanya pimpinan yang dapat melihat notifikasi persetujuan
+        if current_user.role != 'pimpinan':
+            return jsonify({
+                'success': False,
+                'message': 'Akses ditolak. Hanya pimpinan yang dapat melihat notifikasi persetujuan surat.'
+            }), 403
+        
+        # Ambil surat masuk yang pending, diurutkan berdasarkan waktu dibuat (terbaru dulu)
+        recent_masuk = SuratMasuk.query.filter_by(status_suratMasuk='pending')\
+            .order_by(SuratMasuk.created_at.desc())\
+            .limit(10)\
+            .all()
+        
+        # Ambil surat keluar yang pending, diurutkan berdasarkan waktu dibuat (terbaru dulu)
+        recent_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending')\
+            .order_by(SuratKeluar.created_at.desc())\
+            .limit(10)\
+            .all()
+        
+        surat_list = []
+        
+        # Tambahkan surat masuk
+        for surat in recent_masuk:
+            surat_data = {
+                'id': surat.id_suratMasuk,
+                'type': 'masuk',
+                'pengirim': surat.pengirim_suratMasuk or 'Pengirim tidak diketahui',
+                'penerima': surat.penerima_suratMasuk or 'Penerima tidak diketahui',
+                'nomor': surat.nomor_suratMasuk or 'Nomor tidak tersedia',
+                'tanggal_display': surat.tanggal_suratMasuk.strftime('%d %b %Y') if surat.tanggal_suratMasuk else 'Tanggal tidak diketahui',
+                'created_at_display': surat.created_at.strftime('%d %b %Y %H:%M') if surat.created_at else '',
+                'created_at_sort': surat.created_at.isoformat() if surat.created_at else '',
+                'ringkasan': (surat.isi_suratMasuk[:100] + '...') if surat.isi_suratMasuk and len(surat.isi_suratMasuk) > 100 else (surat.isi_suratMasuk or '')
+            }
+            surat_list.append(surat_data)
+        
+        # Tambahkan surat keluar
+        for surat in recent_keluar:
+            surat_data = {
+                'id': surat.id_suratKeluar,
+                'type': 'keluar',
+                'pengirim': surat.pengirim_suratKeluar or 'Pengirim tidak diketahui',
+                'penerima': surat.penerima_suratKeluar or 'Penerima tidak diketahui',
+                'nomor': surat.nomor_suratKeluar or 'Nomor tidak tersedia',
+                'tanggal_display': surat.tanggal_suratKeluar.strftime('%d %b %Y') if surat.tanggal_suratKeluar else 'Tanggal tidak diketahui',
+                'created_at_display': surat.created_at.strftime('%d %b %Y %H:%M') if surat.created_at else '',
+                'created_at_sort': surat.created_at.isoformat() if surat.created_at else '',
+                'ringkasan': (surat.isi_suratKeluar[:100] + '...') if surat.isi_suratKeluar and len(surat.isi_suratKeluar) > 100 else (surat.isi_suratKeluar or '')
+            }
+            surat_list.append(surat_data)
+        
+        # Urutkan berdasarkan created_at (terbaru dulu)
+        surat_list.sort(key=lambda x: x.get('created_at_sort') or '', reverse=True)
+        
+        # Batasi total menjadi 15 item
+        surat_list = surat_list[:15]
+        
+        return jsonify({
+            'success': True,
+            'surat_list': surat_list,
+            'pending_count': len(surat_list),
+            'pending_masuk': pending_masuk,
+            'pending_keluar': pending_keluar,
+            'message': f'Ditemukan {len(surat_list)} surat yang menunggu persetujuan'
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error getting recent notifications: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Terjadi kesalahan saat memuat notifikasi'
         }), 500
 
 

@@ -23,6 +23,8 @@ import io
 from functools import wraps
 from config.models import SuratMasuk
 from sqlalchemy.exc import SQLAlchemyError
+from config.ocr_text_processor import ocr_processor
+from config.ocr_surat_masuk_enhancer import surat_masuk_enhancer
 import random
 import string
 
@@ -283,6 +285,52 @@ def extract_ocr_data_surat_masuk(file_path):
         tanggal_acara = extract_tanggal_acara(raw_text)
         tanggal_acara = parse_date_to_ddmmyyyy(tanggal_acara) or tanggal_acara
         jam = extract_jam(raw_text)
+        
+        # === PERBAIKAN OCR TEXT PROCESSING ===
+        # Buat dictionary data untuk diproses
+        extracted_data = {
+            'pengirim_suratMasuk': pengirim,
+            'penerima_suratMasuk': penerima,
+            'isi_suratMasuk': isi_surat,
+            'acara_suratMasuk': acara,
+            'tempat_suratMasuk': tempat
+        }
+        
+        # Proses dengan OCR text processor untuk memperbaiki teks terpotong
+        logger.info("Processing OCR text with advanced text processor...")
+        processed_data = ocr_processor.process_surat_masuk_fields(extracted_data)
+        
+        # Update variabel dengan hasil yang sudah diproses
+        pengirim = processed_data.get('pengirim_suratMasuk', pengirim)
+        penerima = processed_data.get('penerima_suratMasuk', penerima)
+        isi_surat = processed_data.get('isi_suratMasuk', isi_surat)
+        acara = processed_data.get('acara_suratMasuk', acara)
+        tempat = processed_data.get('tempat_suratMasuk', tempat)
+        
+        # === ENHANCEMENT KHUSUS SURAT MASUK ===
+        logger.info("Applying surat masuk specific enhancements...")
+        
+        # Enhance setiap field dengan konteks yang sesuai
+        pengirim = surat_masuk_enhancer.enhance_surat_masuk_text(pengirim, 'pengirim')
+        penerima = surat_masuk_enhancer.enhance_surat_masuk_text(penerima, 'penerima')
+        isi_surat = surat_masuk_enhancer.enhance_surat_masuk_text(isi_surat, 'isi_surat')
+        acara = surat_masuk_enhancer.enhance_surat_masuk_text(acara, 'acara')
+        tempat = surat_masuk_enhancer.enhance_surat_masuk_text(tempat, 'tempat')
+        
+        # Deteksi jenis surat untuk logging
+        surat_type = surat_masuk_enhancer.detect_surat_type(isi_surat)
+        logger.info(f"Detected surat type: {surat_type}")
+        
+        # Hitung skor kualitas teks
+        text_quality_score = ocr_processor.get_text_quality_score(isi_surat)
+        logger.info(f"Text quality score: {text_quality_score:.2f}")
+        
+        # Log perbaikan yang dilakukan
+        if isi_surat_raw != isi_surat:
+            logger.info("OCR Enhancement Results:")
+            logger.info(f"  Original: {isi_surat_raw[:100]}...")
+            logger.info(f"  Enhanced: {isi_surat[:100]}...")
+        # === END ENHANCEMENT KHUSUS SURAT MASUK ===
         
         # Calculate hash for file identification
         file_hash = calculate_file_hash(file_path)

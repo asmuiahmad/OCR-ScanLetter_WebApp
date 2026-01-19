@@ -1,4 +1,5 @@
-from flask import request, url_for
+from flask import request, url_for, g
+from flask_login import current_user
 
 class Breadcrumb:
     def __init__(self, text, url=None):
@@ -55,6 +56,77 @@ def generate_breadcrumbs(endpoint, **view_args):
     return breadcrumbs
 
 def register_breadcrumbs(app):
+    @app.before_request
+    def load_notification_data():
+        """Load notification data for pimpinan only"""
+        if current_user.is_authenticated and current_user.role == 'pimpinan':
+            try:
+                from config.models import SuratMasuk, SuratKeluar
+
+                pending_masuk = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
+                pending_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+
+                g.pending_surat_masuk_count = pending_masuk + pending_keluar
+                g.pending_masuk_count = pending_masuk
+                g.pending_keluar_count = pending_keluar
+
+                recent_masuk = SuratMasuk.query.filter_by(status_suratMasuk='pending')\
+                    .order_by(SuratMasuk.created_at.desc())\
+                    .limit(15)\
+                    .all()
+
+                recent_keluar = SuratKeluar.query.filter_by(status_suratKeluar='pending')\
+                    .order_by(SuratKeluar.created_at.desc())\
+                    .limit(15)\
+                    .all()
+
+                notification_items = []
+
+                for surat in recent_masuk:
+                    notification_items.append({
+                        'id': surat.id_suratMasuk,
+                        'type': 'masuk',
+                        'pengirim': surat.pengirim_suratMasuk or 'Pengirim tidak diketahui',
+                        'penerima': surat.penerima_suratMasuk or 'Penerima tidak diketahui',
+                        'nomor': surat.nomor_suratMasuk or 'Nomor tidak tersedia',
+                        'tanggal_display': surat.tanggal_suratMasuk.strftime('%d %b %Y') if surat.tanggal_suratMasuk else 'Tanggal tidak diketahui',
+                        'created_at_display': surat.created_at.strftime('%d %b %Y %H:%M') if surat.created_at else '',
+                        'created_at_sort': surat.created_at.isoformat() if surat.created_at else '',
+                        'ringkasan': (surat.isi_suratMasuk[:100] + '...') if surat.isi_suratMasuk and len(surat.isi_suratMasuk) > 100 else (surat.isi_suratMasuk or '')
+                    })
+
+                for surat in recent_keluar:
+                    notification_items.append({
+                        'id': surat.id_suratKeluar,
+                        'type': 'keluar',
+                        'pengirim': surat.pengirim_suratKeluar or 'Pengirim tidak diketahui',
+                        'penerima': surat.penerima_suratKeluar or 'Penerima tidak diketahui',
+                        'nomor': surat.nomor_suratKeluar or 'Nomor tidak tersedia',
+                        'tanggal_display': surat.tanggal_suratKeluar.strftime('%d %b %Y') if surat.tanggal_suratKeluar else 'Tanggal tidak diketahui',
+                        'created_at_display': surat.created_at.strftime('%d %b %Y %H:%M') if surat.created_at else '',
+                        'created_at_sort': surat.created_at.isoformat() if surat.created_at else '',
+                        'ringkasan': (surat.isi_suratKeluar[:100] + '...') if surat.isi_suratKeluar and len(surat.isi_suratKeluar) > 100 else (surat.isi_suratKeluar or '')
+                    })
+
+                notification_items.sort(key=lambda item: item.get('created_at_sort') or '', reverse=True)
+
+                g.surat_masuk_list = recent_masuk
+                g.notification_items = notification_items
+            except Exception as e:
+                app.logger.error(f"Error loading notification data: {str(e)}")
+                g.pending_surat_masuk_count = 0
+                g.pending_masuk_count = 0
+                g.pending_keluar_count = 0
+                g.surat_masuk_list = []
+                g.notification_items = []
+        else:
+            # Non-pimpinan tidak mendapat data notifikasi
+            g.pending_surat_masuk_count = 0
+            g.pending_masuk_count = 0
+            g.pending_keluar_count = 0
+            g.surat_masuk_list = []
+            g.notification_items = []
+
     @app.context_processor
     def inject_breadcrumbs():
         """Inject breadcrumbs into all templates"""
@@ -62,6 +134,17 @@ def register_breadcrumbs(app):
         view_args = request.view_args or {}
         breadcrumbs = generate_breadcrumbs(endpoint, **view_args)
         return dict(breadcrumbs=breadcrumbs)
+    
+    @app.context_processor
+    def inject_notifications():
+        """Inject notification data into all templates"""
+        return dict(
+            surat_masuk_list=getattr(g, 'surat_masuk_list', []),
+            pending_surat_masuk_count=getattr(g, 'pending_surat_masuk_count', 0),
+            pending_masuk_count=getattr(g, 'pending_masuk_count', 0),
+            pending_keluar_count=getattr(g, 'pending_keluar_count', 0),
+            notification_items=getattr(g, 'notification_items', [])
+        )
     
     # Add utilities to Jinja2
     app.jinja_env.globals['zip'] = zip

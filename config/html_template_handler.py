@@ -131,16 +131,28 @@ class HtmlTemplateHandler:
     def html_to_pdf_weasyprint(self, html_content, pdf_path):
         """Convert HTML to PDF using WeasyPrint"""
         try:
-            import weasyprint
-            # Create PDF from HTML
-            weasyprint.HTML(string=html_content).write_pdf(pdf_path)
+            from weasyprint import HTML, CSS
+            from weasyprint.text.fonts import FontConfiguration
+            
+            # Create font configuration
+            font_config = FontConfiguration()
+            
+            # Create PDF from HTML with proper configuration
+            HTML(string=html_content).write_pdf(
+                pdf_path,
+                font_config=font_config
+            )
+            
+            print(f"✅ PDF generated successfully with WeasyPrint: {pdf_path}")
             return True
             
-        except ImportError:
-            print("WeasyPrint not available")
+        except ImportError as e:
+            print(f"WeasyPrint not available: {str(e)}")
             return False
         except Exception as e:
             print(f"Error converting HTML to PDF with WeasyPrint: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def html_to_pdf_playwright(self, html_content, pdf_path):
@@ -168,37 +180,202 @@ class HtmlTemplateHandler:
         """Convert HTML to PDF using ReportLab (basic HTML parsing)"""
         try:
             from reportlab.lib.pagesizes import A4
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-            from reportlab.lib.styles import getSampleStyleSheet
-            from reportlab.lib.units import inch
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch, cm
+            from reportlab.lib import colors
+            from reportlab.lib.enums import TA_CENTER, TA_LEFT
             from bs4 import BeautifulSoup
             
             # Parse HTML content
             soup = BeautifulSoup(html_content, 'html.parser')
             
             # Create PDF
-            doc = SimpleDocTemplate(pdf_path, pagesize=A4)
+            doc = SimpleDocTemplate(
+                pdf_path, 
+                pagesize=A4,
+                rightMargin=2*cm,
+                leftMargin=2*cm,
+                topMargin=2*cm,
+                bottomMargin=2*cm
+            )
+            
             styles = getSampleStyleSheet()
+            
+            # Custom styles
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=14,
+                textColor=colors.black,
+                spaceAfter=12,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )
+            
+            normal_style = ParagraphStyle(
+                'CustomNormal',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.black,
+                spaceAfter=6,
+                alignment=TA_LEFT
+            )
+            
             story = []
             
-            # Extract text content and convert to PDF
-            for element in soup.find_all(['p', 'div', 'h1', 'h2', 'h3']):
-                text = element.get_text().strip()
-                if text:
-                    if element.name in ['h1', 'h2', 'h3']:
-                        story.append(Paragraph(text, styles['Heading1']))
-                    else:
-                        story.append(Paragraph(text, styles['Normal']))
-                    story.append(Spacer(1, 6))
+            # Add title
+            story.append(Paragraph("FORMULIR PERMINTAAN CUTI", title_style))
+            story.append(Spacer(1, 0.5*cm))
             
+            # Extract text content and convert to PDF
+            for element in soup.find_all(['p', 'div', 'h1', 'h2', 'h3', 'td', 'th']):
+                text = element.get_text().strip()
+                if text and len(text) > 2:  # Skip very short texts
+                    if element.name in ['h1', 'h2', 'h3']:
+                        story.append(Paragraph(text, title_style))
+                    else:
+                        story.append(Paragraph(text, normal_style))
+                    story.append(Spacer(1, 0.2*cm))
+            
+            # Build PDF
             doc.build(story)
+            print(f"✅ PDF generated successfully with ReportLab: {pdf_path}")
             return True
             
-        except ImportError:
-            print("ReportLab or BeautifulSoup not available")
+        except ImportError as e:
+            print(f"ReportLab or BeautifulSoup not available: {str(e)}")
             return False
         except Exception as e:
             print(f"Error converting HTML to PDF with ReportLab: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def generate_pdf_direct_reportlab(self, cuti_data, pdf_path):
+        """Generate PDF directly using ReportLab without HTML template"""
+        try:
+            from reportlab.lib.pagesizes import A4
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import cm
+            from reportlab.lib import colors
+            from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+            
+            # Create PDF
+            doc = SimpleDocTemplate(
+                pdf_path,
+                pagesize=A4,
+                rightMargin=2*cm,
+                leftMargin=2*cm,
+                topMargin=2*cm,
+                bottomMargin=2*cm
+            )
+            
+            styles = getSampleStyleSheet()
+            
+            # Custom styles
+            title_style = ParagraphStyle(
+                'Title',
+                parent=styles['Heading1'],
+                fontSize=16,
+                textColor=colors.black,
+                spaceAfter=20,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )
+            
+            heading_style = ParagraphStyle(
+                'Heading',
+                parent=styles['Heading2'],
+                fontSize=12,
+                textColor=colors.black,
+                spaceAfter=10,
+                fontName='Helvetica-Bold'
+            )
+            
+            normal_style = ParagraphStyle(
+                'Normal',
+                parent=styles['Normal'],
+                fontSize=10,
+                textColor=colors.black,
+                spaceAfter=6,
+                alignment=TA_LEFT
+            )
+            
+            story = []
+            
+            # Title
+            story.append(Paragraph("FORMULIR PERMINTAAN CUTI", title_style))
+            story.append(Spacer(1, 0.5*cm))
+            
+            # Data Pegawai
+            story.append(Paragraph("I. DATA PEGAWAI", heading_style))
+            
+            data_pegawai = [
+                ['Nama', ':', cuti_data.nama],
+                ['NIP', ':', cuti_data.nip],
+                ['Jabatan', ':', cuti_data.jabatan],
+                ['Golongan/Ruang', ':', cuti_data.gol_ruang],
+                ['Unit Kerja', ':', cuti_data.unit_kerja],
+                ['Masa Kerja', ':', cuti_data.masa_kerja],
+                ['Alamat', ':', cuti_data.alamat],
+                ['Nomor Telepon', ':', cuti_data.telp],
+            ]
+            
+            table = Table(data_pegawai, colWidths=[4*cm, 0.5*cm, 11*cm])
+            table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            story.append(table)
+            story.append(Spacer(1, 0.5*cm))
+            
+            # Data Cuti
+            story.append(Paragraph("II. JENIS CUTI YANG DIMOHONKAN", heading_style))
+            story.append(Paragraph(f"Jenis Cuti: {self.format_jenis_cuti(cuti_data.jenis_cuti)}", normal_style))
+            story.append(Spacer(1, 0.3*cm))
+            
+            data_cuti = [
+                ['Alasan Cuti', ':', cuti_data.alasan_cuti],
+                ['Lama Cuti', ':', cuti_data.lama_cuti],
+                ['Tanggal Mulai', ':', self.format_date_indonesian(cuti_data.tanggal_cuti)],
+                ['Tanggal Selesai', ':', self.format_date_indonesian(cuti_data.sampai_cuti)],
+                ['Tanggal Ajuan', ':', self.format_date_indonesian(cuti_data.tgl_ajuan_cuti)],
+                ['No. Surat Masuk', ':', cuti_data.no_suratmasuk],
+            ]
+            
+            table2 = Table(data_cuti, colWidths=[4*cm, 0.5*cm, 11*cm])
+            table2.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            story.append(table2)
+            story.append(Spacer(1, 1*cm))
+            
+            # Signature section
+            story.append(Paragraph("Pemohon,", normal_style))
+            story.append(Spacer(1, 1.5*cm))
+            story.append(Paragraph(f"({cuti_data.nama})", normal_style))
+            story.append(Paragraph(f"NIP. {cuti_data.nip}", normal_style))
+            
+            # Build PDF
+            doc.build(story)
+            print(f"✅ PDF generated successfully with direct ReportLab: {pdf_path}")
+            return True
+            
+        except Exception as e:
+            print(f"Error generating PDF with direct ReportLab: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def fill_template_and_generate_pdf(self, cuti_data):
@@ -242,17 +419,25 @@ class HtmlTemplateHandler:
             # Try multiple PDF conversion methods
             pdf_success = False
             
-            # Try WeasyPrint first
+            # Method 1: Try WeasyPrint first (best HTML rendering)
             if not pdf_success:
+                print("Trying WeasyPrint...")
                 pdf_success = self.html_to_pdf_weasyprint(html_content, pdf_path)
             
-            # Try Playwright as fallback
+            # Method 2: Try Playwright as fallback
             if not pdf_success:
+                print("Trying Playwright...")
                 pdf_success = self.html_to_pdf_playwright(html_content, pdf_path)
             
-            # Try ReportLab as last resort
+            # Method 3: Try ReportLab with HTML parsing
             if not pdf_success:
+                print("Trying ReportLab with HTML...")
                 pdf_success = self.html_to_pdf_reportlab(html_content, pdf_path)
+            
+            # Method 4: Direct PDF generation with ReportLab (no HTML)
+            if not pdf_success:
+                print("Trying direct ReportLab generation...")
+                pdf_success = self.generate_pdf_direct_reportlab(cuti_data, pdf_path)
             
             if pdf_success:
                 return {

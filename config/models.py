@@ -31,6 +31,7 @@ class SuratMasuk(db.Model):
     jenis_suratMasuk = db.Column(db.Text, nullable=False)
     isi_suratMasuk = db.Column(db.Text, nullable=False)
     gambar_suratMasuk = db.Column(db.LargeBinary, nullable=True)
+    file_suratMasuk = db.Column(db.LargeBinary, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     ocr_accuracy_suratMasuk = db.Column(db.Float)
     initial_full_letter_number = db.Column(db.String(255))

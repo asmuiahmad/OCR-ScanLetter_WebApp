@@ -171,58 +171,116 @@
           <div class="flex items-center">
             <div class="flex items-center">
               <div class="hidden sm:flex sm:items-center">
-            {% if current_user.role in ['pimpinan', 'admin'] %}
+            {% if current_user.role == 'pimpinan' %}
                 <div class="relative flex items-center gap-2">
-              <button class="notification-bell-btn relative">
-                <i class="fas fa-bell text-gray-600 hover:text-blue-600 transition-colors duration-200"></i>
+              <button class="notification-bell-btn relative {% if g.pending_surat_masuk_count > 0 %}has-notifications{% endif %}" title="Notifikasi Persetujuan Surat">
+                <i class="fas fa-bell"></i>
                 {% if g.pending_surat_masuk_count > 0 %}
-                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                <span class="absolute bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center font-bold px-1" style="top: -4px; right: -4px; z-index: 10;">
                   {{ g.pending_surat_masuk_count }}
                 </span>
                 {% endif %}
               </button>
-                  <div class="notification-dropdown hidden absolute right-0 top-full mt-2 w-96 max-h-80 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 transform transition-all duration-200 ease-in-out overflow-y-auto p-0">
-                    <div class="p-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white rounded-t-xl">
+                  <div class="notification-dropdown hidden absolute right-0 top-full mt-2 w-96 max-h-96 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 transform transition-all duration-200 ease-in-out overflow-y-auto">
+                    <div class="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                       <h3 class="text-base font-bold text-blue-700 mb-1 flex items-center gap-2">
-                        <i class="fas fa-envelope-open-text"></i> Semua Surat Masuk
+                        <i class="fas fa-bell"></i> 
+                        Surat Menunggu Persetujuan
                       </h3>
+                      <p class="text-xs text-blue-600">Surat masuk dan surat keluar yang perlu persetujuan</p>
+                      <div class="flex flex-wrap gap-2 mt-3 text-xs">
+                        <span id="notifCountMasuk" class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
+                          <i class="fas fa-inbox"></i>
+                          <span>Masuk:</span>
+                          <span id="notifCountMasukValue" class="font-semibold">{{ pending_masuk_count or 0 }}</span>
+                        </span>
+                        <span id="notifCountKeluar" class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-purple-100 text-purple-700 font-medium">
+                          <i class="fas fa-paper-plane"></i>
+                          <span>Keluar:</span>
+                          <span id="notifCountKeluarValue" class="font-semibold">{{ pending_keluar_count or 0 }}</span>
+                        </span>
+                      </div>
                     </div>
-                    {% if surat_masuk_list and surat_masuk_list|length > 0 %}
-                      <ul class="divide-y divide-gray-100">
-                        {% for surat in surat_masuk_list %}
-                        <li>
-                          <div class="flex flex-col gap-1 py-4 px-5 hover:bg-blue-50 transition rounded-xl group border-b last:border-b-0 border-gray-100">
-                            <div class="flex flex-row sm:items-center sm:justify-between gap-1">
-                              <span class="font-semibold text-gray-800 group-hover:text-blue-700">{{ surat.pengirim_suratMasuk }}</span>
-                              <div class="flex flex-col items-center gap-1 ml-2">
-                                <span class="inline-block text-xs text-white bg-blue-500 px-3 py-0.5 rounded-full group-hover:bg-blue-700 text-center">Pending</span>
-                                <div class="flex gap-2 mt-1">
-                                  <button onclick="approveSurat({{ surat.id_suratMasuk }}, this)" class="approve-btn flex items-center justify-center w-7 h-7 rounded-full bg-green-100 hover:bg-green-200 text-green-700 border border-green-200 transition" title="Setujui">
-                                    <i class="fas fa-check"></i>
-                                  </button>
-                                  <button onclick="rejectSurat({{ surat.id_suratMasuk }}, this)" class="reject-btn flex items-center justify-center w-7 h-7 rounded-full bg-red-100 hover:bg-red-200 text-red-700 border border-red-200 transition" title="Tolak">
-                                    <i class="fas fa-times"></i>
-                                  </button>
+                    
+                    <!-- Content will be loaded dynamically -->
+                    <div class="notification-content">
+                      {% if notification_items %}
+                        <ul class="divide-y divide-gray-100">
+                          {% for item in notification_items %}
+                          <li>
+                            <div class="flex flex-col gap-2 py-4 px-5 hover:bg-blue-50 transition group border-b last:border-b-0 border-gray-100">
+                              <div class="flex flex-row items-start justify-between gap-2">
+                                <div class="flex-1 min-w-0">
+                                  <div class="flex items-center gap-2 mb-1">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {% if item.type == 'masuk' %}bg-blue-100 text-blue-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                                      <i class="fas {% if item.type == 'masuk' %}fa-inbox{% else %}fa-paper-plane{% endif %} mr-1"></i>
+                                      {{ 'Surat Masuk' if item.type == 'masuk' else 'Surat Keluar' }}
+                                    </span>
+                                  </div>
+                                  <div class="font-semibold text-gray-800 group-hover:text-blue-700 truncate">
+                                    {{ item.pengirim }}
+                                  </div>
+                                  <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                                    <i class="far fa-calendar-alt"></i>
+                                    {{ item.tanggal_display or 'Tanggal tidak diketahui' }}
+                                  </div>
+                                  <div class="text-xs text-gray-600 truncate mt-1 flex items-center gap-2">
+                                    <i class="fas fa-hashtag"></i>{{ item.nomor or 'No. surat tidak diketahui' }}
+                                  </div>
+                                  <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                                    <i class="fas fa-user"></i>{{ item.penerima or 'Penerima tidak diketahui' }}
+                                  </div>
+                                  {% if item.created_at_display %}
+                                  <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                                    <i class="far fa-clock"></i>{{ item.created_at_display }}
+                                  </div>
+                                  {% endif %}
+                                  {% if item.ringkasan %}
+                                  <div class="text-xs text-gray-500 mt-2 leading-snug">
+                                    {{ item.ringkasan | e }}
+                                  </div>
+                                  {% endif %}
+                                </div>
+                                <div class="flex flex-col items-end gap-2 ml-2">
+                                  <span class="inline-block text-xs text-white bg-orange-500 px-2 py-1 rounded-full text-center whitespace-nowrap">
+                                    Menunggu Persetujuan
+                                  </span>
+                                  <div class="flex gap-1">
+                                    <button onclick="approveSurat({{ item.id }}, this, '{{ item.type }}')"
+                                            class="approve-btn flex items-center justify-center w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 text-green-700 border border-green-200 transition-all duration-200 hover:scale-105"
+                                            title="Setujui Surat">
+                                      <i class="fas fa-check text-sm"></i>
+                                    </button>
+                                    <button onclick="rejectSurat({{ item.id }}, this, '{{ item.type }}')"
+                                            class="reject-btn flex items-center justify-center w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-700 border border-red-200 transition-all duration-200 hover:scale-105"
+                                            title="Tolak Surat">
+                                      <i class="fas fa-times text-sm"></i>
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                            <div class="flex items-center text-xs text-gray-500 gap-2 mt-1">
-                              <i class="far fa-calendar-alt mr-1"></i>
-                              {{ surat.tanggal_suratMasuk.strftime('%d %b %Y') if surat.tanggal_suratMasuk else '' }}
-                            </div>
-                            <div class="text-xs text-gray-600 truncate mt-1">
-                              <i class="fas fa-hashtag mr-1"></i>{{ surat.nomor_suratMasuk }}
-                            </div>
+                          </li>
+                          {% endfor %}
+                        </ul>
+                      {% else %}
+                        <div class="py-8 px-5 text-center text-gray-400">
+                          <div class="flex flex-col items-center gap-2">
+                            <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                            <div class="text-sm font-medium">Semua surat sudah diproses</div>
+                            <div class="text-xs">Tidak ada surat yang menunggu persetujuan</div>
                           </div>
-                        </li>
-                        {% endfor %}
-                      </ul>
-                  {% else %}
-                      <div class="py-6 px-5 text-center text-gray-400 text-sm">
-                        <i class="fas fa-check-circle mr-2 text-green-400"></i>
-                        Tidak ada surat masuk
-                  </div>
-                  {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                    
+                    <div class="p-3 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+                      <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}" 
+                         class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center gap-1">
+                        <i class="fas fa-list"></i>
+                        Lihat Semua Surat Pending
+                      </a>
+                    </div>
               </div>
             </div>
             {% endif %}
@@ -288,6 +346,7 @@
   
   <!-- Custom CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications-enhanced.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-fix.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/floating-labels.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/consistent-headers.css') }}">
