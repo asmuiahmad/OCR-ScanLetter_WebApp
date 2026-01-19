@@ -1,0 +1,63 @@
+# =============================================================================
+# DEVELOPMENT REQUIREMENTS
+# =============================================================================
+# Additional packages needed for development
+# Install with: pip install -r requirements-dev.txt
+# =============================================================================
+
+# Include base requirements
+-r requirements.txt
+
+# Development Tools
+Flask-DebugToolbar==0.13.1
+Flask-Shell-IPython==1.4.0
+ipython==8.17.2
+jupyter==1.0.0
+
+# Code Quality & Formatting
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+mypy==1.7.1
+pre-commit==3.6.0
+autopep8==2.0.4
+
+# Testing Framework
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-xdist==3.5.0
+coverage==7.3.2
+factory-boy==3.3.0
+faker==20.1.0
+
+# Documentation
+Sphinx==7.2.6
+sphinx-rtd-theme==1.3.0
+sphinx-autodoc-typehints==1.25.2
+
+# Performance Profiling
+py-spy==0.3.14
+memory-profiler==0.61.0
+line-profiler==4.1.1
+
+# Database Tools
+flask-shell-ipython==1.4.0
+alembic-utils==0.8.2
+
+# API Development & Testing
+httpie==3.2.2
+postman-collection==0.0.10
+
+# Environment Management
+pipenv==2023.11.15
+virtualenv==20.25.0
+
+# Git Hooks & Automation
+gitpython==3.1.40
+watchdog==3.0.0
+
+# Debugging & Monitoring
+flask-profiler==1.8.1
+py-spy==0.3.14

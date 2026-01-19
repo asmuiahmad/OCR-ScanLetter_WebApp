@@ -1,15 +1,13 @@
-{% extends "layouts/base.html" %}
-
-{% block title %}Verifikasi Digital Signature{% endblock %}
-
-{% block content %}
+{% extends "layouts/base.html" %} {% block title %}Verifikasi Digital
+Signature{% endblock %} {% block content %}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header text-center">
                     <h3 class="card-title">
-                        <i class="fas fa-shield-alt"></i> Verifikasi Digital Signature
+                        <i class="fas fa-shield-alt"></i> Verifikasi Digital
+                        Signature
                     </h3>
                 </div>
                 <div class="card-body">
@@ -17,9 +15,12 @@
                     <div class="alert alert-success text-center">
                         <i class="fas fa-check-circle fa-3x mb-3"></i>
                         <h4>Digital Signature Valid</h4>
-                        <p>Surat persetujuan cuti ini telah diverifikasi dan sah.</p>
+                        <p>
+                            Surat persetujuan cuti ini telah diverifikasi dan
+                            sah.
+                        </p>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <h5><strong>Data Pegawai</strong></h5>
@@ -51,11 +52,17 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Tanggal Mulai</strong></td>
-                                    <td>{{ cuti.tanggal_cuti.strftime('%d %B %Y') }}</td>
+                                    <td>
+                                        {{ cuti.tanggal_cuti.strftime('%d %B
+                                        %Y') }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><strong>Tanggal Selesai</strong></td>
-                                    <td>{{ cuti.sampai_cuti.strftime('%d %B %Y') }}</td>
+                                    <td>
+                                        {{ cuti.sampai_cuti.strftime('%d %B %Y')
+                                        }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><strong>Lama Cuti</strong></td>
@@ -64,7 +71,7 @@
                             </table>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-4">
                         <div class="col-12">
                             <h5><strong>Informasi Persetujuan</strong></h5>
@@ -73,7 +80,8 @@
                                     <td><strong>Status</strong></td>
                                     <td>
                                         <span class="badge badge-success">
-                                            <i class="fas fa-check"></i> DISETUJUI
+                                            <i class="fas fa-check"></i>
+                                            DISETUJUI
                                         </span>
                                     </td>
                                 </tr>
@@ -82,8 +90,13 @@
                                     <td>{{ cuti.approved_by }}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Tanggal Persetujuan</strong></td>
-                                    <td>{{ cuti.approved_at.strftime('%d %B %Y, %H:%M:%S') }}</td>
+                                    <td>
+                                        <strong>Tanggal Persetujuan</strong>
+                                    </td>
+                                    <td>
+                                        {{ cuti.approved_at.strftime('%d %B %Y,
+                                        %H:%M:%S') }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><strong>Signature Hash</strong></td>
@@ -98,36 +111,45 @@
                             </table>
                         </div>
                     </div>
-                    
+
                     <div class="text-center mt-4">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle"></i>
-                            <strong>Pengadilan Agama Watampone</strong><br>
-                            Dokumen ini telah diverifikasi secara digital dan sah menurut sistem.
+                            <strong>Pengadilan Agama Watampone</strong><br />
+                            Dokumen ini telah diverifikasi secara digital dan
+                            sah menurut sistem.
                         </div>
                     </div>
-                    
+
                     {% else %}
                     <div class="alert alert-danger text-center">
                         <i class="fas fa-times-circle fa-3x mb-3"></i>
                         <h4>Digital Signature Tidak Valid</h4>
                         <p>{{ message }}</p>
                     </div>
-                    
+
                     <div class="text-center">
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle"></i>
-                            Dokumen ini tidak dapat diverifikasi atau telah dimodifikasi.
+                            Dokumen ini tidak dapat diverifikasi atau telah
+                            dimodifikasi.
                         </div>
                     </div>
                     {% endif %}
-                    
+
                     <div class="text-center mt-4">
-                        <a href="{{ url_for('ocr_cuti.list_cuti') }}" class="btn btn-primary">
-                            <i class="fas fa-arrow-left"></i> Kembali ke Daftar Cuti
+                        <a
+                            href="{{ url_for('ocr_cuti_v2.list_cuti_v2') }}"
+                            class="btn btn-primary"
+                        >
+                            <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+                            Cuti
                         </a>
                         {% if valid and cuti.pdf_path %}
-                        <a href="{{ url_for('ocr_cuti.download_pdf', cuti_id=cuti.id_cuti) }}" class="btn btn-success">
+                        <a
+                            href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}"
+                            class="btn btn-success"
+                        >
                             <i class="fas fa-download"></i> Download PDF
                         </a>
                         {% endif %}
@@ -135,8 +157,9 @@
                 </div>
                 <div class="card-footer text-center text-muted">
                     <small>
-                        <i class="fas fa-clock"></i> 
-                        Verifikasi dilakukan pada {{ moment().format('DD MMMM YYYY, HH:mm:ss') }}
+                        <i class="fas fa-clock"></i>
+                        Verifikasi dilakukan pada {{ moment().format('DD MMMM
+                        YYYY, HH:mm:ss') }}
                     </small>
                 </div>
             </div>
@@ -145,23 +168,23 @@
 </div>
 
 <style>
-.fa-check-circle {
-    color: #28a745;
-}
+    .fa-check-circle {
+        color: #28a745;
+    }
 
-.fa-times-circle {
-    color: #dc3545;
-}
+    .fa-times-circle {
+        color: #dc3545;
+    }
 
-.fa-shield-alt {
-    color: #007bff;
-}
+    .fa-shield-alt {
+        color: #007bff;
+    }
 
-code {
-    background-color: #f8f9fa;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-size: 0.9em;
-}
+    code {
+        background-color: #f8f9fa;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 0.9em;
+    }
 </style>
 {% endblock %}

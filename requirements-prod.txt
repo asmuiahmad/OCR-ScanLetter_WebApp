@@ -1,0 +1,45 @@
+# =============================================================================
+# PRODUCTION REQUIREMENTS
+# =============================================================================
+# Minimal requirements for production deployment
+# Install with: pip install -r requirements-prod.txt
+# =============================================================================
+
+# Include base requirements
+-r requirements.txt
+
+# Production Web Server
+gunicorn==21.2.0
+gevent==23.9.1
+eventlet==0.33.3
+
+# Production Database Drivers
+PyMySQL==1.1.0
+psycopg2-binary==2.9.9
+
+# Caching & Performance
+redis==5.0.1
+Flask-Caching==2.1.0
+
+# Monitoring & Logging
+sentry-sdk[flask]==1.38.0
+newrelic==9.2.0
+structlog==23.2.0
+
+# Security Enhancements
+flask-talisman==1.1.0
+flask-limiter==3.5.0
+
+# SSL & HTTPS
+pyOpenSSL==23.3.0
+certifi==2023.11.17
+
+# Process Management
+supervisor==4.2.5
+
+# Health Checks
+flask-healthz==1.0.1
+
+# Backup & Maintenance
+schedule==1.2.0
+python-crontab==3.0.0

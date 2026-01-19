@@ -1,316 +1,860 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulir Permintaan Cuti</title>
-    <style>
-        /* Disetel agar muat 1 lembar A4 */
-        @page {
-            size: A4;
-            margin: 1.5cm;
-        }
-        
-        body {
-            font-family: 'Times New Roman', serif;
-            font-size: 11pt;
-            line-height: 1.3;
-            margin: 0;
-            padding: 0;
-            color: #000;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 18px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-        }
-        
-        .header h1 {
-            font-size: 15pt;
-            font-weight: bold;
-            margin: 0;
-            text-transform: uppercase;
-        }
-        
-        .header h2 {
-            font-size: 13pt;
-            font-weight: bold;
-            margin: 4px 0;
-        }
-        
-        .form-section {
-            margin-bottom: 14px;
-        }
-        
-        .form-row {
-            display: flex;
-            margin-bottom: 6px;
-            align-items: flex-start;
-        }
-        
-        .form-label {
-            width: 200px;
-            font-weight: normal;
-            flex-shrink: 0;
-        }
-        
-        .form-colon {
-            width: 20px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        
-        .form-value {
-            flex: 1;
-            border-bottom: 1px solid #000;
-            min-height: 20px;
-            padding-bottom: 2px;
-        }
-        
-        .checkbox-group {
-            margin: 12px 0;
-        }
-        
-        .checkbox-item {
-            display: inline-block;
-            margin-right: 30px;
-            margin-bottom: 8px;
-        }
-        
-        .checkbox {
-            display: inline-block;
-            width: 15px;
-            height: 15px;
-            border: 1px solid #000;
-            margin-right: 8px;
-            text-align: center;
-            line-height: 13px;
-            font-size: 10pt;
-            vertical-align: middle;
-        }
-        
-        .signature-section {
-            margin-top: 24px;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .signature-box {
-            width: 200px;
-            text-align: center;
-        }
-        
-        .signature-line {
-            border-bottom: 1px solid #000;
-            height: 45px;
-            margin-bottom: 4px;
-        }
-        
-        .date-section {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-        
-        .qr-code {
-            position: absolute;
-            bottom: 2cm;
-            right: 2cm;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 12px;
-        }
-        
-        table, th, td {
-            border: 1px solid #000;
-        }
-        
-        th, td {
-            padding: 6px;
-            text-align: left;
-            vertical-align: top;
-        }
-        
-        th {
-            background-color: #f0f0f0;
-            font-weight: bold;
-        }
-        
-        .no-border {
-            border: none;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
-        .text-right {
-            text-align: right;
-        }
-        
-        .bold {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Formulir Permintaan Cuti</h1>
-        <h2>Pegawai Negeri Sipil</h2>
-    </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Formulir Permintaan Cuti - Pengadilan Agama</title>
+        <style>
+            /* Disetel agar muat 1 lembar A4 dengan margin yang lebih baik */
+            @page {
+                size: A4;
+                margin: 0.5cm;
+            }
 
-    <div class="form-section">
-        <div class="form-row">
-            <div class="form-label">Nama</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«nama»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">NIP</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«nip»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Jabatan</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«jabatan»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Golongan/Ruang</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«gol_ruang»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Unit Kerja</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«unit_kerja»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Masa Kerja</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«masa_kerja»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Alamat</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«alamat»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">No. Telepon</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«telp»</div>
-        </div>
-    </div>
+            body {
+                font-family: "Times New Roman", serif;
+                font-size: 9pt;
+                line-height: 1;
+                margin: 0;
+                padding: 0;
+                color: #000;
+                background: #fff;
+            }
 
-    <div class="form-section">
-        <h3>Jenis Cuti yang Dimohon:</h3>
-        <div class="checkbox-group">
-            <div class="checkbox-item">
-                <span class="checkbox">«c_tahun»</span> Cuti Tahunan
-            </div>
-            <div class="checkbox-item">
-                <span class="checkbox">«c_besar»</span> Cuti Besar
-            </div>
-            <div class="checkbox-item">
-                <span class="checkbox">«c_sakit»</span> Cuti Sakit
-            </div>
-            <div class="checkbox-item">
-                <span class="checkbox">«c_lahir»</span> Cuti Melahirkan
-            </div>
-            <div class="checkbox-item">
-                <span class="checkbox">«c_penting»</span> Cuti Alasan Penting
-            </div>
-            <div class="checkbox-item">
-                <span class="checkbox">«c_luarnegara»</span> Cuti Luar Negara
-            </div>
-        </div>
-    </div>
+            /* Header dengan Logo - Centered */
+            .official-header {
+                text-align: center;
+                margin-bottom: 5px;
+                border-bottom: 3px double #2c5530;
+                padding-bottom: 15px;
+                position: relative;
+            }
 
-    <div class="form-section">
-        <div class="form-row">
-            <div class="form-label">Alasan Cuti</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«alasan_cuti»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Lama Cuti</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«lama_cuti» hari</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Tanggal Mulai Cuti</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«tanggal_cuti»</div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-label">Tanggal Selesai Cuti</div>
-            <div class="form-colon">:</div>
-            <div class="form-value">«sampai_cuti»</div>
-        </div>
-    </div>
+            .logo-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
 
-    <div class="date-section">
-        <p>«tgl_lengkap_ajuan_cuti»</p>
-    </div>
+            .logo-placeholder {
+                width: 100px;
+                height: 100px;
+                border: 3px solid #2c5530;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 20px;
+                background: linear-gradient(135deg, #2c5530, #4a7c59);
+                color: white;
+                font-weight: bold;
+                font-size: 7pt;
+                text-align: center;
+                line-height: 1;
+                position: relative;
+                box-shadow: 0 4px 8px rgba(44, 85, 48, 0.3);
+            }
 
-    <div class="signature-section">
-        <div class="signature-box">
-            <p class="bold">Mengetahui,</p>
-            <p>Atasan Langsung</p>
-            <div class="signature-line"></div>
-            <p>NIP: ________________</p>
-        </div>
-        
-        <div class="signature-box">
-            <p class="bold">Pemohon,</p>
-            <div class="signature-line"></div>
-            <p>«nama»</p>
-            <p>NIP: «nip»</p>
-        </div>
-    </div>
+            /* Alternative: Use actual logo image when available */
+            .logo-image {
+                width: 90px;
+                height: 90px;
+                margin-bottom: 15px;
+                object-fit: contain;
+                filter: drop-shadow(0 2px 4px rgba(44, 85, 48, 0.2));
+            }
 
-    <div class="form-section" style="margin-top: 30px;">
-        <table>
-            <tr>
-                <th colspan="2" class="text-center">Keputusan Pejabat yang Berwenang</th>
-            </tr>
-            <tr>
-                <td style="width: 50%;">
-                    <div class="checkbox-item">
-                        <span class="checkbox">✓</span> Disetujui
+            .header-text {
+                text-align: center;
+                width: 100%;
+            }
+
+            .header-text h1 {
+                font-size: 12pt;
+                font-weight: bold;
+                margin: 0 0 3px 0;
+                color: #2c5530;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+            }
+
+            .header-text h2 {
+                font-size: 16pt;
+                font-weight: bold;
+                margin: 0 0 15px 0;
+                color: #2c5530;
+            }
+
+            .header-text .address {
+                font-size: 11pt;
+                margin: 0;
+                color: #666;
+                font-style: italic;
+                line-height: 1.4;
+            }
+
+            /* Form Title */
+            .form-title {
+                text-align: center;
+                margin: 3px 0 8px 0;
+                padding: 8px;
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                border: 1px solid #2c5530;
+                border-radius: 8px;
+            }
+
+            .form-title h3 {
+                font-size: 16pt;
+                font-weight: bold;
+                margin: 0;
+                color: #2c5530;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+            }
+
+            .form-title .subtitle {
+                font-size: 11pt;
+                color: #666;
+                margin: 3px 0 0 0;
+                font-style: italic;
+            }
+
+            /* Form Sections */
+            .form-section {
+                margin-bottom: 3px;
+                padding: 4px;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                background: #fafbfc;
+                page-break-inside: avoid;
+            }
+
+            .section-title {
+                font-size: 11pt;
+                font-weight: bold;
+                color: #2c5530;
+                margin: 0 0 8px 0;
+                padding-bottom: 6px;
+                border-bottom: 2px solid #2c5530;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .form-row {
+                display: flex;
+                margin-bottom: 1px;
+                align-items: flex-start;
+                background: white;
+                padding: 3px;
+                border-radius: 2px;
+                border: 1px solid #e9ecef;
+            }
+
+            .form-row:hover {
+                background: #f8f9fa;
+                border-color: #2c5530;
+            }
+
+            .form-label {
+                width: 120px;
+                font-weight: 500;
+                flex-shrink: 0;
+                color: #495057;
+            }
+
+            .form-colon {
+                width: 25px;
+                text-align: center;
+                flex-shrink: 0;
+                font-weight: bold;
+                color: #2c5530;
+            }
+
+            .form-value {
+                flex: 1;
+                border-bottom: none;
+                min-height: 18px;
+                padding: 1px 4px;
+                background: white;
+                border-radius: 2px;
+                font-weight: 500;
+            }
+
+            /* Checkbox Styling */
+            .checkbox-section {
+                background: white;
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+            }
+
+            .checkbox-group {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+                margin: 6px 0;
+            }
+
+            .checkbox-item {
+                display: flex;
+                align-items: center;
+                padding: 10px;
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+            }
+
+            .checkbox-item:hover {
+                background: #e9ecef;
+                border-color: #2c5530;
+            }
+
+            .checkbox {
+                width: 10px;
+                height: 10px;
+                border: 1px solid #2c5530;
+                margin-right: 8px;
+                text-align: center;
+                line-height: 12px;
+                font-size: 10pt;
+                font-weight: bold;
+                background: white;
+                border-radius: 2px;
+                color: #2c5530;
+            }
+
+            .checkbox-label {
+                font-weight: 500;
+                color: #495057;
+            }
+
+            /* Date Section */
+            .date-section {
+                text-align: right;
+                margin: 3px 0;
+                padding: 4px;
+                background: #f8f9fa;
+                border-radius: 6px;
+                border-left: 3px solid #2c5530;
+            }
+
+            .date-section p {
+                margin: 0;
+                font-weight: 600;
+                color: #2c5530;
+                font-size: 13pt;
+            }
+
+            /* Signature Section */
+            .signature-section {
+                margin-top: 10px;
+                display: flex;
+                justify-content: space-between;
+                page-break-inside: avoid;
+                gap: 15px;
+            }
+
+            .signature-box {
+                flex: 1;
+                text-align: center;
+                padding: 15px;
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 10px;
+            }
+
+            .signature-title {
+                font-weight: bold;
+                color: #2c5530;
+                margin-bottom: 10px;
+                font-size: 13pt;
+            }
+
+            .signature-role {
+                color: #666;
+                margin-bottom: 15px;
+                font-style: italic;
+            }
+
+            .signature-line {
+                border-bottom: 2px solid #2c5530;
+                height: 50px;
+                margin: 12px 0;
+                position: relative;
+            }
+
+            .signature-name {
+                font-weight: bold;
+                color: #2c5530;
+                margin: 8px 0;
+            }
+
+            .signature-nip {
+                color: #666;
+                font-size: 11pt;
+            }
+
+            /* Decision Table */
+            .decision-section {
+                margin-top: 25px;
+                page-break-inside: avoid;
+            }
+
+            .decision-table {
+                width: 100%;
+                border-collapse: collapse;
+                border: 2px solid #2c5530;
+                border-radius: 8px;
+                overflow: hidden;
+                background: white;
+            }
+
+            .decision-table th {
+                background: linear-gradient(135deg, #2c5530, #4a7c59);
+                color: white;
+                padding: 5px;
+                text-align: center;
+                font-size: 14pt;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .decision-table td {
+                padding: 15px;
+                border: 1px solid #dee2e6;
+                vertical-align: top;
+            }
+
+            .decision-options {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .decision-option {
+                display: flex;
+                align-items: center;
+                padding: 8px;
+                background: #f8f9fa;
+                border-radius: 5px;
+            }
+
+            .decision-checkbox {
+                width: 20px;
+                height: 20px;
+                border: 2px solid #2c5530;
+                margin-right: 12px;
+                text-align: center;
+                line-height: 16px;
+                font-weight: bold;
+                background: white;
+                border-radius: 3px;
+                color: #2c5530;
+            }
+
+            .decision-authority {
+                text-align: center;
+            }
+
+            .authority-title {
+                font-weight: bold;
+                color: #2c5530;
+                margin-bottom: 15px;
+                font-size: 13pt;
+            }
+
+            .authority-signature {
+                height: 60px;
+                border-bottom: 2px solid #2c5530;
+                margin: 15px 0;
+            }
+
+            /* QR Code */
+            .qr-section {
+                position: relative;
+                margin: 5px auto;
+                text-align: center;
+                padding: 10px;
+                background: white;
+                border: 2px solid #2c5530;
+                border-radius: 8px;
+            }
+
+            .qr-title {
+                font-size: 8pt;
+                color: #2c5530;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            /* Print Optimizations */
+            @media print {
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                .form-section,
+                .signature-box,
+                .decision-table {
+                    break-inside: avoid;
+                }
+            }
+
+            /* Responsive adjustments */
+            @media screen and (max-width: 768px) {
+                .logo-section {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .logo-placeholder,
+                .logo-image {
+                    margin-bottom: 15px;
+                }
+
+                .header-text {
+                    text-align: center;
+                }
+
+                .header-text h1 {
+                    font-size: 16pt;
+                    letter-spacing: 1px;
+                }
+
+                .header-text h2 {
+                    font-size: 14pt;
+                }
+
+                .header-text .address {
+                    font-size: 10pt;
+                }
+
+                .checkbox-group {
+                    grid-template-columns: 1fr;
+                }
+
+                .signature-section {
+                    flex-direction: column;
+                    gap: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Official Header -->
+        <div
+            class="official-header"
+            style="display: flex; align-items: center; margin-bottom: 10px"
+        >
+            <div
+                class="logo-section"
+                style="flex-shrink: 0; text-align: center; margin-right: 15px"
+            >
+                <!-- Official Pengadilan Agama Logo -->
+                <img
+                    src="/static/assets/images/logo-pengadilan-agama.png"
+                    alt="Logo Pengadilan Agama"
+                    class="logo-image"
+                    style="width: 100px; height: 100px; object-fit: contain"
+                    onerror="
+                        this.style.display = 'none';
+                        this.nextElementSibling.style.display = 'flex';
+                    "
+                />
+
+                <!-- Fallback placeholder if logo fails to load -->
+            </div>
+            <div class="header-text" style="flex-grow: 1; text-align: center">
+                <h1
+                    style="
+                        font-size: 16pt;
+                        margin: 0;
+                        text-transform: uppercase;
+                    "
+                >
+                    PENGADILAN AGAMA BANJARBARU
+                </h1>
+                <h2 style="font-size: 14pt; margin: 5px 0">
+                    Mahkamah Agung Republik Indonesia
+                </h2>
+                <div class="address" style="font-size: 10pt; color: #666">
+                    Jl. Trikora No. 10, Kelurahan Guntung Payung, Kecamatan
+                    Landasan Ulin, Kota Banjarbaru, Kalimantan Selatan<br />
+                    Telp: (0511) 4773321, Fax: (0511) 4773322, E-mail:
+                    pa.banjarbaru@yahoo.com
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Title -->
+        <div class="form-title">
+            <h3>Formulir Permintaan Cuti</h3>
+            <div class="subtitle">Pegawai Negeri Sipil</div>
+        </div>
+
+        <!-- Data Pegawai and Jenis Cuti Section -->
+        <div
+            class="form-section"
+            style="
+                display: flex;
+                justify-content: space-between;
+                gap: 20px;
+                align-items: flex-start;
+                padding: 10px;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                background: #f9f9f9;
+            "
+        >
+            <!-- Data Pegawai -->
+            <div
+                style="
+                    flex: 1;
+                    padding-right: 10px;
+                    border-right: 1px solid #ccc;
+                "
+            >
+                <div class="section-title">I. Data Pegawai</div>
+
+                <div class="form-row">
+                    <div class="form-label">Nama Lengkap</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«nama»</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-label">Nomor Induk Pegawai (NIP)</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«nip»</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-label">Jabatan</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«jabatan»</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-label">Golongan/Ruang</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«gol_ruang»</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-label">Unit Kerja</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«unit_kerja»</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-label">Masa Kerja</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«masa_kerja»</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-label">Alamat Lengkap</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«alamat»</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-label">Nomor Telepon</div>
+                    <div class="form-colon">:</div>
+                    <div class="form-value">«telp»</div>
+                </div>
+            </div>
+
+            <!-- Jenis Cuti -->
+            <div style="flex: 1; padding-left: 10px">
+                <div class="section-title">II. Jenis Cuti yang Dimohon</div>
+                <div
+                    class="checkbox-section"
+                    style="padding: 8px; background: #fff"
+                >
+                    <div
+                        class="checkbox-group"
+                        style="gap: 4px; grid-template-columns: repeat(2, 1fr)"
+                    >
+                        <div
+                            class="checkbox-item"
+                            style="display: flex; align-items: center; gap: 5px"
+                        >
+                            <div class="checkbox">«c_tahun»</div>
+                            <div class="checkbox-label">Cuti Tahunan</div>
+                        </div>
+                        <div
+                            class="checkbox-item"
+                            style="display: flex; align-items: center; gap: 5px"
+                        >
+                            <div class="checkbox">«c_besar»</div>
+                            <div class="checkbox-label">Cuti Besar</div>
+                        </div>
+                        <div
+                            class="checkbox-item"
+                            style="display: flex; align-items: center; gap: 5px"
+                        >
+                            <div class="checkbox">«c_sakit»</div>
+                            <div class="checkbox-label">Cuti Sakit</div>
+                        </div>
+                        <div
+                            class="checkbox-item"
+                            style="display: flex; align-items: center; gap: 5px"
+                        >
+                            <div class="checkbox">«c_lahir»</div>
+                            <div class="checkbox-label">Cuti Melahirkan</div>
+                        </div>
+                        <div class="checkbox-item">
+                            <div class="checkbox">«c_penting»</div>
+                            <div class="checkbox-label">
+                                Cuti Alasan Penting
+                            </div>
+                        </div>
+                        <div
+                            class="checkbox-item"
+                            style="display: flex; align-items: center; gap: 5px"
+                        >
+                            <div class="checkbox">«c_luarnegara»</div>
+                            <div class="checkbox-label">Cuti Luar Negara</div>
+                        </div>
                     </div>
-                    <div class="checkbox-item">
-                        <span class="checkbox"></span> Ditolak
-                    </div>
-                    <div class="checkbox-item">
-                        <span class="checkbox"></span> Ditangguhkan
-                    </div>
-                </td>
-                <td>
-                    <p class="bold">Pejabat yang Berwenang</p>
-                    <div style="height: 60px;"></div>
-                    <p>NIP: ________________</p>
-                </td>
-            </tr>
-        </table>
-    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="qr-code">
-        {{QR_CODE}}
-    </div>
-</body>
+        <!-- Detail Cuti Section -->
+        <div class="form-section">
+            <div class="section-title">III. Detail Permohonan Cuti</div>
+
+            <div class="form-row">
+                <div class="form-label">Alasan Cuti</div>
+                <div class="form-colon">:</div>
+                <div class="form-value">«alasan_cuti»</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-label">Lama Cuti</div>
+                <div class="form-colon">:</div>
+                <div class="form-value">«lama_cuti» hari</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-label">Tanggal Mulai Cuti</div>
+                <div class="form-colon">:</div>
+                <div class="form-value">«tanggal_cuti»</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-label">Tanggal Selesai Cuti</div>
+                <div class="form-colon">:</div>
+                <div class="form-value">«sampai_cuti»</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-label">Nomor Surat Masuk</div>
+                <div class="form-colon">:</div>
+                <div class="form-value">«no_suratmasuk»</div>
+            </div>
+        </div>
+
+        <!-- Date Section -->
+        <div class="date-section">
+            <p>«tgl_lengkap_ajuan_cuti»</p>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div
+                class="signature-box"
+                style="font-size: 7pt; line-height: 1; padding: 5px"
+            >
+                <div class="signature-title" style="margin-bottom: 3px">
+                    Mengetahui
+                </div>
+                <div class="signature-role" style="margin-bottom: 3px">
+                    Atasan Langsung
+                </div>
+                <div
+                    class="signature-line"
+                    style="height: 20px; margin-bottom: 3px"
+                ></div>
+                <div class="signature-name" style="margin-bottom: 2px">
+                    (_____________________)
+                </div>
+                <div class="signature-nip" style="margin-bottom: 2px">
+                    NIP: ________________
+                </div>
+            </div>
+
+            <div
+                class="signature-box"
+                style="font-size: 7pt; line-height: 1; padding: 5px"
+            >
+                <div class="signature-title" style="margin-bottom: 3px">
+                    Pemohon
+                </div>
+                <div class="signature-role" style="margin-bottom: 3px">
+                    Yang Mengajukan Cuti
+                </div>
+                <div
+                    class="signature-line"
+                    style="height: 20px; margin-bottom: 3px"
+                ></div>
+                <div class="signature-name" style="margin-bottom: 2px">
+                    Ahmad Asmui
+                </div>
+                <div class="signature-nip" style="margin-bottom: 2px">
+                    NIP: 21212
+                </div>
+            </div>
+        </div>
+
+        <!-- Decision Section -->
+        <div
+            class="decision-section"
+            style="
+                margin-top: 10px;
+                font-size: 8pt;
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+            "
+        >
+            <!-- Decision Options -->
+            <div
+                style="
+                    flex: 1;
+                    border: 1px solid #ccc;
+                    padding: 5px;
+                    border-radius: 3px;
+                "
+            >
+                <div
+                    style="
+                        font-weight: bold;
+                        text-align: center;
+                        margin-bottom: 5px;
+                    "
+                >
+                    Keputusan
+                </div>
+                <div style="line-height: 1.4">
+                    <div
+                        style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 5px;
+                        "
+                    >
+                        <div
+                            class="decision-checkbox"
+                            style="
+                                width: 12px;
+                                height: 12px;
+                                border: 1px solid #000;
+                                margin-right: 5px;
+                                text-align: center;
+                            "
+                        >
+                            ✓
+                        </div>
+                        <span>Disetujui</span>
+                    </div>
+                    <div
+                        style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 5px;
+                        "
+                    >
+                        <div
+                            class="decision-checkbox"
+                            style="
+                                width: 12px;
+                                height: 12px;
+                                border: 1px solid #000;
+                                margin-right: 5px;
+                            "
+                        ></div>
+                        <span>Ditolak</span>
+                    </div>
+                    <div style="display: flex; align-items: center">
+                        <div
+                            class="decision-checkbox"
+                            style="
+                                width: 12px;
+                                height: 12px;
+                                border: 1px solid #000;
+                                margin-right: 5px;
+                            "
+                        ></div>
+                        <span>Ditangguhkan</span>
+                    </div>
+                </div>
+                <div
+                    style="
+                        margin-top: 10px;
+                        padding: 5px;
+                        border: 1px solid #ccc;
+                        border-radius: 3px;
+                    "
+                >
+                    <strong>Catatan:</strong>
+                    <div
+                        style="
+                            height: 50px;
+                            border: 1px solid #ccc;
+                            margin-top: 5px;
+                        "
+                    ></div>
+                </div>
+            </div>
+
+            <!-- Authority Section -->
+            <div
+                style="
+                    flex: 1;
+                    border: 1px solid #ccc;
+                    padding: 5px;
+                    border-radius: 3px;
+                    text-align: center;
+                "
+            >
+                <div style="font-weight: bold; margin-bottom: 5px">
+                    Pejabat yang Berwenang
+                </div>
+                <div
+                    style="
+                        height: 40px;
+                        border-bottom: 1px solid #000;
+                        margin-bottom: 5px;
+                    "
+                ></div>
+                <div>(_____________________)</div>
+                <div style="margin-top: 5px">NIP: ________________</div>
+                <div style="margin-top: 10px">Tanggal: _______________</div>
+            </div>
+
+            <!-- Digital Verification -->
+            <div
+                style="
+                    flex: 1;
+                    border: 1px solid #ccc;
+                    padding: 5px;
+                    border-radius: 3px;
+                    text-align: center;
+                "
+            >
+                <div style="font-weight: bold; margin-bottom: 5px">
+                    Verifikasi Digital
+                </div>
+                <div style="margin-bottom: 5px">{{QR_CODE}}</div>
+            </div>
+        </div>
+    </body>
 </html>

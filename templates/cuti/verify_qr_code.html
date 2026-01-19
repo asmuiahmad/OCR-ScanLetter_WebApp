@@ -1,0 +1,225 @@
+{% extends "layouts/base.html" %}
+{% set page_title = "Verifikasi QR Code Surat Cuti" %}
+
+{% block head %}
+{{ super() }}
+<style>
+  .verification-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
+  .verification-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin: 1rem 0;
+  }
+
+  .status-valid {
+    background: #10b981;
+    color: white;
+  }
+
+  .status-invalid {
+    background: #ef4444;
+    color: white;
+  }
+
+  .verification-icon {
+    font-size: 4rem;
+    margin: 1rem 0;
+  }
+
+  .icon-valid {
+    color: #10b981;
+  }
+
+  .icon-invalid {
+    color: #ef4444;
+  }
+
+  .data-table {
+    width: 100%;
+    margin-top: 2rem;
+  }
+
+  .data-table tr {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .data-table td {
+    padding: 0.75rem;
+  }
+
+  .data-table td:first-child {
+    font-weight: 600;
+    color: #6b7280;
+    width: 40%;
+  }
+
+  .signature-hash {
+    font-family: monospace;
+    background: #f3f4f6;
+    padding: 0.5rem;
+    border-radius: 4px;
+    word-break: break-all;
+    font-size: 0.9rem;
+  }
+
+  .print-button {
+    margin-top: 2rem;
+  }
+
+  @media print {
+    .no-print {
+      display: none;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verification-container">
+  <div class="verification-card">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold mb-4">Verifikasi QR Code</h1>
+      <h2 class="text-xl text-gray-600 mb-4">Surat Persetujuan Cuti</h2>
+
+      {% if result.valid %}
+        <div class="verification-icon icon-valid">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="status-badge status-valid">
+          <i class="fas fa-shield-alt mr-2"></i>
+          TERVERIFIKASI
+        </div>
+        <p class="text-lg text-gray-700 mt-4">{{ result.message }}</p>
+      {% else %}
+        <div class="verification-icon icon-invalid">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="status-badge status-invalid">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          TIDAK VALID
+        </div>
+        <p class="text-lg text-gray-700 mt-4">{{ result.message }}</p>
+      {% endif %}
+    </div>
+
+    {% if result.valid and result.data %}
+    <div class="mt-6">
+      <h3 class="text-xl font-bold mb-4 text-center">Detail Surat Cuti</h3>
+      
+      <table class="data-table">
+        <tr>
+          <td>ID Cuti</td>
+          <td>{{ result.data.id_cuti }}</td>
+        </tr>
+        <tr>
+          <td>Nama Pegawai</td>
+          <td><strong>{{ result.data.nama }}</strong></td>
+        </tr>
+        <tr>
+          <td>NIP</td>
+          <td>{{ result.data.nip }}</td>
+        </tr>
+        <tr>
+          <td>Jenis Cuti</td>
+          <td>{{ result.data.jenis_cuti }}</td>
+        </tr>
+        <tr>
+          <td>Tanggal Mulai</td>
+          <td>{{ result.data.tanggal_mulai }}</td>
+        </tr>
+        <tr>
+          <td>Tanggal Selesai</td>
+          <td>{{ result.data.tanggal_selesai }}</td>
+        </tr>
+        <tr>
+          <td>Lama Cuti</td>
+          <td>{{ result.data.lama_cuti }}</td>
+        </tr>
+        <tr>
+          <td>Alasan Cuti</td>
+          <td>{{ result.data.alasan_cuti }}</td>
+        </tr>
+        <tr>
+          <td>Status</td>
+          <td>
+            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+              {{ result.data.status|upper }}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td>Tanggal Pengajuan</td>
+          <td>{{ result.data.tanggal_pengajuan }}</td>
+        </tr>
+      </table>
+
+      <div class="mt-6">
+        <h4 class="font-bold text-gray-700 mb-2">Signature Hash:</h4>
+        <div class="signature-hash">
+          {{ result.data.signature_hash }}
+        </div>
+      </div>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-600">
+          <i class="fas fa-info-circle mr-2"></i>
+          Dokumen ini telah diverifikasi secara digital dan sah menurut sistem
+        </p>
+        <p class="text-xs text-gray-500 mt-2">
+          Waktu Verifikasi: {{ now().strftime('%d %B %Y, %H:%M:%S WIB') }}
+        </p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-8 text-center no-print">
+      <button onclick="window.print()" class="btn-base btn-primary btn-ripple">
+        <i class="fas fa-print mr-2"></i>
+        Cetak Hasil Verifikasi
+      </button>
+      
+      <a href="{{ url_for('qr_verify.scan_qr_code') }}" class="btn-base btn-outline ml-2">
+        <i class="fas fa-qrcode mr-2"></i>
+        Scan QR Code Lain
+      </a>
+    </div>
+
+    <div class="mt-6 text-center no-print">
+      <a href="{{ url_for('dashboard.index') }}" class="text-blue-600 hover:text-blue-800">
+        <i class="fas fa-home mr-2"></i>
+        Kembali ke Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  // Auto print if requested
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('print') === 'true') {
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  }
+</script>
+{% endblock %}

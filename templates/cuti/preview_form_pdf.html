@@ -1,0 +1,256 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Preview Formulir Cuti - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Preview Formulir Permintaan dan Pemberian Cuti</h1>
+        <div>
+            <a href="{{ url_for('cuti.generate_form_pdf', cuti_id=cuti.id_cuti) }}" 
+               class="btn btn-primary" target="_blank">
+                <i class="fas fa-download"></i> Download PDF
+            </a>
+            <a href="{{ url_for('cuti.list_cuti') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+    </div>
+
+    <!-- Preview Card -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-file-pdf"></i>
+                Formulir Permintaan dan Pemberian Cuti
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Header Information -->
+            <div class="text-center mb-4">
+                <h6 class="font-weight-bold">LAMPIRAN II : SURAT EDARAN SEKRETARIS MAHKAMAH AGUNG</h6>
+                <h6 class="font-weight-bold">REPUBLIK INDONESIA</h6>
+                <h6 class="font-weight-bold">NOMOR 13 TAHUN 2019</h6>
+                <br>
+                <p class="text-right">
+                    Banjarbaru, {{ moment().format('DD MMMM YYYY') }}<br>
+                    Yth. Ketua Pengadilan Agama Banjarbaru<br>
+                    Di -<br>
+                    Banjarbaru
+                </p>
+                <br>
+                <h5 class="font-weight-bold">FORMULIR PERMINTAAN DAN PEMBERIAN CUTI</h5>
+                <p>Nomor : {{ cuti.no_suratmasuk or '/' + moment().format('YYYY') + '/KPA-W15-A12/KP5.3/X/' + moment().format('YYYY') }}</p>
+            </div>
+
+            <!-- I. DATA PEGAWAI -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold bg-light p-2">I. DATA PEGAWAI</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td width="30%"><strong>NAMA</strong></td>
+                                <td width="5%">:</td>
+                                <td>{{ cuti.nama }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>JABATAN</strong></td>
+                                <td>:</td>
+                                <td>{{ cuti.jabatan }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>UNIT KERJA</strong></td>
+                                <td>:</td>
+                                <td>{{ cuti.unit_kerja }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td width="30%"><strong>NIP</strong></td>
+                                <td width="5%">:</td>
+                                <td>{{ cuti.nip }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>GOL/RUANG</strong></td>
+                                <td>:</td>
+                                <td>{{ cuti.gol_ruang }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>MASA KERJA</strong></td>
+                                <td>:</td>
+                                <td>{{ cuti.masa_kerja }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- II. JENIS CUTI YANG DIAMBIL -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold bg-light p-2">II. JENIS CUTI YANG DIAMBIL</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Tahunan' %}checked{% endif %} disabled>
+                            <label class="form-check-label">1. CUTI TAHUNAN</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Sakit' %}checked{% endif %} disabled>
+                            <label class="form-check-label">3. CUTI SAKIT</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Karena Alasan Penting' %}checked{% endif %} disabled>
+                            <label class="form-check-label">5. CUTI KARENA ALASAN PENTING</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Besar' %}checked{% endif %} disabled>
+                            <label class="form-check-label">2. CUTI BESAR</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Melahirkan' %}checked{% endif %} disabled>
+                            <label class="form-check-label">4. CUTI MELAHIRKAN</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Di Luar Tanggungan Negara' %}checked{% endif %} disabled>
+                            <label class="form-check-label">6. CUTI DI LUAR TANGGUNGAN NEGARA</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- III. ALASAN CUTI -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold bg-light p-2">III. ALASAN CUTI</h6>
+                <p class="border p-3">{{ cuti.alasan_cuti }}</p>
+            </div>
+
+            <!-- IV. LAMANYA CUTI -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold bg-light p-2">IV. LAMANYA CUTI</h6>
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>
+                            Selama <strong>{{ cuti.lama_cuti }}</strong> hari<br>
+                            Tanggal <strong>{{ cuti.tanggal_cuti.strftime('%d %B %Y') }}</strong> 
+                            Sampai Tanggal <strong>{{ cuti.sampai_cuti.strftime('%d %B %Y') }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- V. ALAMAT SELAMA MENJALANKAN CUTI -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold bg-light p-2">VI. ALAMAT SELAMA MENJALANKAN CUTI</h6>
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="border p-3">{{ cuti.alamat }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <td><strong>Telp.</strong></td>
+                                <td>:</td>
+                                <td>{{ cuti.telp }}</td>
+                            </tr>
+                        </table>
+                        <div class="text-center mt-4">
+                            <p>{{ cuti.nama }}</p>
+                            <p>NIP. {{ cuti.nip }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VII. PERTIMBANGAN ATASAN LANGSUNG -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold bg-light p-2">VII. PERTIMBANGAN ATASAN LANGSUNG</h6>
+                <div class="row">
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled>
+                            <label class="form-check-label">DISETUJUI</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled>
+                            <label class="form-check-label">PERUBAHAN</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled>
+                            <label class="form-check-label">DITANGGUHKAN</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled>
+                            <label class="form-check-label">TIDAK DISETUJUI</label>
+                        </div>
+                        <div class="mt-4">
+                            <p><strong>Panitera</strong></p>
+                            <br><br>
+                            <p><strong>H. Murnianti, S.H.</strong></p>
+                            <p><small>NIP. 196201110 198601 2 001</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIII. KEPUTUSAN PEJABAT YANG BERWENANG -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold bg-light p-2">VIII. KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI</h6>
+                <div class="row">
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.status_cuti == 'approved' %}checked{% endif %} disabled>
+                            <label class="form-check-label">DISETUJUI</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled>
+                            <label class="form-check-label">PERUBAHAN</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled>
+                            <label class="form-check-label">DITANGGUHKAN</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center border p-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" {% if cuti.status_cuti == 'rejected' %}checked{% endif %} disabled>
+                            <label class="form-check-label">TIDAK DISETUJUI</label>
+                        </div>
+                        <div class="mt-4">
+                            <br><br><br>
+                            <p><strong>Rasyid Rizani, S.H.I., M.H.I.</strong></p>
+                            <p><small>NIP.19850628 200904 1 003</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Notes -->
+            <div class="mt-5">
+                <h6 class="font-weight-bold">Catatan:</h6>
+                <ul class="small">
+                    <li>* Coret yang tidak perlu</li>
+                    <li>** Pilih salah satu dengan memberi tanda centang (√)</li>
+                    <li>*** Diisi oleh pejabat yang berwenang memberikan cuti</li>
+                    <li>**** Bila tidak disetujui atau ditangguhkan, sebutkan alasannya</li>
+                    <li>***** Diberikan kepada yang bersangkutan setelah diisi lengkap dan ditandatangani</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

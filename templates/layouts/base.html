@@ -68,7 +68,7 @@
         <div class="dropdown" id="ocrMenu">
           <a href="{{ url_for('ocr_surat_masuk.ocr_surat_masuk') }}">OCR Surat Masuk</a>
           <a href="{{ url_for('ocr_surat_keluar.ocr_surat_keluar') }}">OCR Surat Keluar</a>
-          <a href="{{ url_for('ocr_cuti.ocr_cuti') }}">OCR Cuti & Formulir Cuti</a>
+          <a href="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}">OCR Cuti & Formulir Cuti</a>
           <a href="{{ url_for('ocr_routes.ocr_test') }}">OCR Test</a>
         </div>
       </li>
@@ -81,10 +81,10 @@
           </div>
         </a>
         <div class="dropdown" id="cutiMenu">
-          <a href="{{ url_for('ocr_cuti.ocr_cuti') }}">Input Cuti Baru</a>
-          <a href="{{ url_for('ocr_cuti.list_cuti') }}">Daftar Permohonan Cuti</a>
+          <a href="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}">Input Cuti Baru</a>
+          <a href="{{ url_for('ocr_cuti_v2.list_cuti_v2') }}">Daftar Permohonan Cuti</a>
           {% if current_user.role in ['pimpinan', 'admin'] %}
-          <a href="{{ url_for('ocr_cuti.list_cuti') }}?status=pending">Cuti Menunggu Persetujuan</a>
+          <a href="{{ url_for('ocr_cuti_v2.list_cuti_v2') }}?status=pending">Cuti Menunggu Persetujuan</a>
           {% endif %}
         </div>
       </li>
@@ -136,7 +136,7 @@
       </li>
       {% endif %}
     </ul>
-    
+
 
     {% if current_user.is_authenticated %}
     <div class="sidebar-user-profile">
@@ -158,7 +158,7 @@
     <div class="spa-progress" id="spaProgress">
       <div class="spa-progress-bar" id="spaProgressBar"></div>
     </div>
-    
+
     <nav class="bg-white shadow-sm sticky top-0 z-20">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -184,7 +184,7 @@
                   <div class="notification-dropdown hidden absolute right-0 top-full mt-2 w-96 max-h-96 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 transform transition-all duration-200 ease-in-out overflow-y-auto">
                     <div class="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                       <h3 class="text-base font-bold text-blue-700 mb-1 flex items-center gap-2">
-                        <i class="fas fa-bell"></i> 
+                        <i class="fas fa-bell"></i>
                         Surat Menunggu Persetujuan
                       </h3>
                       <p class="text-xs text-blue-600">Surat masuk dan surat keluar yang perlu persetujuan</p>
@@ -201,7 +201,7 @@
                         </span>
                       </div>
                     </div>
-                    
+
                     <!-- Content will be loaded dynamically -->
                     <div class="notification-content">
                       {% if notification_items %}
@@ -273,9 +273,9 @@
                         </div>
                       {% endif %}
                     </div>
-                    
+
                     <div class="p-3 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-                      <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}" 
+                      <a href="{{ url_for('surat_masuk.list_pending_surat_masuk') }}"
                          class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center gap-1">
                         <i class="fas fa-list"></i>
                         Lihat Semua Surat Pending
@@ -309,7 +309,7 @@
         </div>
       </div>
     </nav>
-    
+
     <nav class="bg-white px-3 py-2 border-b border-gray-200">
       <ol class="flex flex-wrap items-center text-xs">
         {% for text, url in breadcrumbs %}
@@ -331,11 +331,11 @@
         {% endfor %}
       </ol>
     </nav>
-    
+
     <div class="content p-4 sm:p-6 overflow-y-auto">
       {% block content %}{% endblock %}
     </div>
-    
+
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
   </div>
   <!-- External Libraries -->
@@ -343,7 +343,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.3/viewer.min.js"></script>
-  
+
   <!-- Custom CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications-enhanced.css') }}">
@@ -354,26 +354,26 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-enhanced.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-override.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sidebar-no-highlight.css') }}">
-  
+
   <!-- Session Management -->
   <script src="{{ url_for('static', filename='assets/js/session-manager.js') }}"></script>
-  
+
   <!-- Custom JavaScript -->
   <script src="{{ url_for('static', filename='assets/js/components/sidebar.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/components/toast-notification.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/components/notifications.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/components/scrollbar-utils.js') }}"></script>
-  
+
   <!-- SPA Navigation System -->
   <script src="{{ url_for('static', filename='assets/js/spa-navigation.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/spa-backend-support.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/spa-route-handler.js') }}"></script>
-  
+
   {% block extra_js %}{% endblock %}
 
   <script src="{{ url_for('static', filename='assets/js/components/pcoded.js') }}"></script>
   <script src="{{ url_for('static', filename='assets/js/plugins/bootstrap.min.js') }}"></script>
-    
+
     {% block scripts %}{% endblock %}
   </body>
 

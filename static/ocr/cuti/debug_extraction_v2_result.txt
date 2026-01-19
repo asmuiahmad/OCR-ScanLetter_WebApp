@@ -1,0 +1,23 @@
+======================================================================
+HASIL EKSTRAKSI OCR CUTI (V2)
+======================================================================
+✗ nomor_surat              : Tidak terbaca
+✓ nama                     : Ahmad Asmui
+✓ nip                      : 21412321312231
+✓ jabatan                  : test
+✓ gol_ruang                : test
+✓ unit_kerja               : test
+✓ masa_kerja               : test
+✓ alamat                   : Komp. Sa'adah 2 Gg. Tomat No. 37
+✓ telp                     : 1421241412
+✓ jenis_cuti               : Cuti Tahunan
+✓ alasan_cuti              : 21412321312231
+✓ lama_cuti                : 8
+✓ tanggal_mulai_cuti       : 14 Januari 2026
+✓ tanggal_selesai_cuti     : 21 Januari 2026
+✓ no_suratmasuk            : 124
+✓ jenis_surat              : Cuti
+✓ pengirim                 : Ahmad Asmui
+✓ penerima                 : Ketua Pengadilan Agama
+✓ isi                      : Surat Permintaan Cuti oleh Ahmad Asmui (NIP: 21412321312231) - Cuti Tahunan
+======================================================================

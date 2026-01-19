@@ -1,0 +1,964 @@
+{% extends "layouts/base.html" %} {% block head %} {{ super() }}
+<meta name="csrf-token" content="{{ csrf_token() }}" />
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='assets/css/modal.css') }}"
+/>
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='assets/css/ocr_cuti.css') }}"
+/>
+{% endblock %} {% block title %}OCR Cuti V2 & Formulir Cuti - PA Banjarbaru{%
+endblock %} {% block content %}
+<div class="container mx-auto py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="form-card">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-eye"></i>
+                    OCR Cuti V2 & Formulir Cuti (Improved)
+                </h2>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- Page Title -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                    OCR Formulir Cuti V2 (Improved)
+                </h1>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Unggah gambar formulir cuti untuk mengekstrak informasi
+                    penting secara otomatis. Sistem akan membaca dan menampilkan
+                    data pegawai serta detail cuti.
+                </p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %} {%
+            if messages %} {% for category, message in messages %}
+            <div class="mb-6">
+                <div
+                    class="bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded relative"
+                    role="alert"
+                >
+                    <strong class="font-bold"
+                        >{{ 'Sukses!' if category == 'success' else 'Error!'
+                        }}</strong
+                    >
+                    <span class="block sm:inline">{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %} {% endif %} {% endwith %}
+
+            <!-- Upload Section -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+                    id="uploadForm"
+                    action="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}"
+                >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}"
+                    />
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                        Unggah Formulir Cuti
+                    </h3>
+
+                    <div
+                        id="dropzone"
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                    >
+                        <input
+                            type="file"
+                            id="fileInput"
+                            name="image"
+                            multiple
+                            accept="image/jpeg,image/png,image/webp,application/pdf"
+                            class="hidden"
+                        />
+
+                        <div class="text-gray-500 mb-4">
+                            <i
+                                class="fas fa-cloud-upload-alt text-4xl text-blue-400 mb-3"
+                            ></i>
+                            <p class="font-medium">
+                                Seret dan lepas formulir di sini
+                            </p>
+                            <p class="mt-1">atau</p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onclick="
+                                document.getElementById('fileInput').click()
+                            "
+                            class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+                        >
+                            Pilih File
+                        </button>
+
+                        <p class="text-sm text-gray-500 mt-4">
+                            Format: PDF, JPG, PNG, WEBP (Max 16MB)
+                        </p>
+                    </div>
+
+                    <div id="filePreview" class="mt-4 hidden">
+                        <h4 class="text-md font-medium text-gray-700 mb-2">
+                            File yang akan diproses:
+                        </h4>
+                        <div id="fileList"></div>
+                    </div>
+
+                    <div class="mt-6">
+                        <button
+                            type="submit"
+                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition"
+                        >
+                            <i class="fas fa-cogs mr-2"></i>Proses Dokumen
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            {% if extracted_data_list %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">
+                        Hasil Ekstraksi Formulir Cuti
+                    </h3>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <span class="text-gray-600 mr-3"
+                                >Total Dokumen:</span
+                            >
+                            <span
+                                class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium"
+                                >{{ extracted_data_list|length }}</span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button
+                        id="toggleExtractedDataBtn"
+                        type="button"
+                        class="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition"
+                    >
+                        <i class="fas fa-eye mr-2"></i>Lihat Data Ekstraksi
+                    </button>
+
+                    <button
+                        onclick="saveAllData()"
+                        type="button"
+                        class="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition"
+                    >
+                        <i class="fas fa-save mr-2"></i>Simpan ke Database
+                    </button>
+
+                    <a
+                        href="{{ url_for('ocr_cuti_v2.list_cuti_v2') }}"
+                        class="bg-purple-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-600 transition"
+                    >
+                        <i class="fas fa-database mr-2"></i>Lihat Data Tersimpan
+                    </a>
+
+                    <button
+                        onclick="resetForm()"
+                        type="button"
+                        class="bg-gray-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-600 transition"
+                    >
+                        <i class="fas fa-sync-alt mr-2"></i>Reset Form
+                    </button>
+
+                    <button
+                        onclick="checkDependencies()"
+                        type="button"
+                        class="bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 transition"
+                        title="Cek status dependencies OCR"
+                    >
+                        <i class="fas fa-tools mr-2"></i>Cek Dependencies
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal Detail Ekstraksi -->
+    <div
+        id="extractedDataModal"
+        class="fixed inset-0 z-[9999] hidden overflow-y-auto overflow-x-hidden"
+        aria-labelledby="modal-title"
+        role="dialog"
+        aria-modal="true"
+    >
+        <div
+            class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+            aria-hidden="true"
+        ></div>
+
+        <div
+            class="flex items-center justify-center min-h-screen w-full px-4 pt-4 pb-20 text-center absolute top-0 left-0 right-0 bottom-0"
+        >
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl w-[95%] md:w-[90%] max-h-[90vh] relative z-[10000]"
+            >
+                <!-- Close Button -->
+                <button
+                    type="button"
+                    id="closeModalBtn"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-50"
+                    aria-label="Close Modal"
+                >
+                    <svg
+                        class="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+
+                <div
+                    class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 overflow-y-auto max-h-[75vh]"
+                >
+                    <div class="sm:flex sm:items-start">
+                        <div
+                            class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"
+                        >
+                            <h3
+                                class="text-lg leading-6 font-semibold text-gray-900 mb-4"
+                                id="modal-title"
+                            >
+                                Detail Ekstraksi Formulir Cuti
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Kolom Gambar -->
+                                <div
+                                    class="col-span-1 bg-gray-100 rounded-lg p-4"
+                                >
+                                    <h4
+                                        class="text-md font-medium text-gray-700 mb-2"
+                                    >
+                                        Dokumen
+                                    </h4>
+                                    <p class="text-xs text-gray-500 mb-2">
+                                        Gunakan mouse wheel untuk zoom, drag
+                                        untuk pan
+                                    </p>
+
+                                    <div class="zoom-controls">
+                                        <button
+                                            id="zoomInBtn"
+                                            class="zoom-btn bg-blue-500 text-white hover:bg-blue-600"
+                                        >
+                                            Zoom In
+                                        </button>
+                                        <button
+                                            id="zoomOutBtn"
+                                            class="zoom-btn bg-blue-500 text-white hover:bg-blue-600"
+                                        >
+                                            Zoom Out
+                                        </button>
+                                        <button
+                                            id="resetZoomBtn"
+                                            class="zoom-btn bg-gray-500 text-white hover:bg-gray-600"
+                                        >
+                                            Reset
+                                        </button>
+                                        <span
+                                            id="zoomLevel"
+                                            class="text-xs text-gray-600 ml-2"
+                                            >100%</span
+                                        >
+                                    </div>
+
+                                    <div
+                                        id="imagePreviewContainer"
+                                        class="w-full h-96 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg overflow-hidden relative"
+                                    >
+                                        <img
+                                            id="imagePreview"
+                                            src=""
+                                            alt="Preview"
+                                            class="max-w-full max-h-full object-contain hidden cursor-move"
+                                        />
+                                        <iframe
+                                            id="pdfPreview"
+                                            src=""
+                                            class="w-full h-full hidden"
+                                            frameborder="0"
+                                        ></iframe>
+                                        <p
+                                            id="noImageText"
+                                            class="text-gray-500"
+                                        >
+                                            Tidak ada dokumen
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Kolom Input -->
+                                <div class="col-span-2">
+                                    <form
+                                        id="extractedDataForm"
+                                        class="space-y-4"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="{{ csrf_token() }}"
+                                        />
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Nama Pegawai</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="nama"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >NIP</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="nip"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Jabatan</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="jabatan"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Gol. Ruang</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="gol_ruang"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Unit Kerja</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="unit_kerja"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Masa Kerja</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="masa_kerja"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Jenis Cuti</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="jenis_cuti"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Lama Cuti</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="lama_cuti"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Tanggal Mulai</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="tanggal_mulai_cuti"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Tanggal Selesai</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="tanggal_selesai_cuti"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                class="block text-sm font-medium text-gray-700"
+                                                >Alamat</label
+                                            >
+                                            <textarea
+                                                name="alamat"
+                                                rows="2"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                            ></textarea>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >Telepon</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="telp"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium text-gray-700"
+                                                    >No. Surat Masuk</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    name="no_suratmasuk"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                class="block text-sm font-medium text-gray-700"
+                                                >Alasan Cuti</label
+                                            >
+                                            <textarea
+                                                name="alasan_cuti"
+                                                rows="2"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                            ></textarea>
+                                        </div>
+
+                                        <input
+                                            type="hidden"
+                                            name="nomor_surat"
+                                        />
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2"
+                >
+                    <button
+                        type="button"
+                        id="prevModalBtn"
+                        onclick="navigatePrevious()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                    >
+                        Previous
+                    </button>
+                    <button
+                        type="button"
+                        id="nextModalBtn"
+                        onclick="navigateNext()"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                        Next
+                    </button>
+                    <button
+                        type="button"
+                        id="closeModalBtnBottom"
+                        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Initialize Data and Other Functions -->
+<script>
+    // Global variables
+    let extractedData = {{ extracted_data_list|tojson|safe if extracted_data_list else '[]' }};
+    let currentDataIndex = 0;
+    let currentZoom = 1;
+    let isDragging = false;
+    let startX, startY, translateX = 0, translateY = 0;
+
+    console.log('OCR Cuti V2 - Data initialized:', extractedData.length, 'items');
+
+    // Toggle modal visibility
+    function toggleExtractedData() {
+        console.log('toggleExtractedData called');
+
+        if (!extractedData || extractedData.length === 0) {
+            alert('Tidak ada data ekstraksi. Silakan upload dan proses dokumen terlebih dahulu.');
+            return;
+        }
+
+        const modal = document.getElementById('extractedDataModal');
+        const button = document.getElementById('toggleExtractedDataBtn');
+
+        if (!modal) {
+            console.error('Modal not found');
+            alert('Error: Modal tidak ditemukan. Refresh halaman dan coba lagi.');
+            return;
+        }
+
+        if (modal.classList.contains('hidden')) {
+            // Show modal
+            console.log('Showing modal...');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            if (button) button.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Sembunyikan Data Ekstraksi';
+
+            currentDataIndex = 0;
+            fillModalForm(0);
+            updateModalNavigation();
+        } else {
+            // Hide modal
+            console.log('Hiding modal...');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            if (button) button.innerHTML = '<i class="fas fa-eye mr-2"></i>Lihat Data Ekstraksi';
+        }
+    }
+
+    // Fill modal form with data
+    function fillModalForm(index) {
+        if (index < 0 || index >= extractedData.length) return;
+
+        const data = extractedData[index];
+        console.log('Filling form with data:', data);
+
+        try {
+            const fields = {
+                'nama': data.nama || '',
+                'nip': data.nip || '',
+                'jabatan': data.jabatan || '',
+                'gol_ruang': data.gol_ruang || '',
+                'unit_kerja': data.unit_kerja || '',
+                'masa_kerja': data.masa_kerja || '',
+                'jenis_cuti': data.jenis_cuti || '',
+                'tanggal_mulai_cuti': data.tanggal_mulai_cuti || '',
+                'tanggal_selesai_cuti': data.tanggal_selesai_cuti || '',
+                'lama_cuti': data.lama_cuti || '',
+                'no_suratmasuk': data.no_suratmasuk || '',
+                'alasan_cuti': data.alasan_cuti || '',
+                'telp': data.telp || '',
+                'alamat': data.alamat || '',
+                'nomor_surat': data.nomor_surat || ''
+            };
+
+            for (const [name, value] of Object.entries(fields)) {
+                const element = document.querySelector(`[name="${name}"]`);
+                if (element) {
+                    element.value = value;
+                }
+            }
+
+            updateFilePreview(data);
+            console.log('Form filled successfully');
+        } catch (error) {
+            console.error('Error filling form:', error);
+        }
+    }
+
+    // Update file preview
+    function updateFilePreview(data) {
+        const imagePreview = document.getElementById('imagePreview');
+        const pdfPreview = document.getElementById('pdfPreview');
+        const noImageText = document.getElementById('noImageText');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+
+        if (!imagePreview || !pdfPreview || !noImageText) return;
+
+        imagePreview.classList.add('hidden');
+        pdfPreview.classList.add('hidden');
+        noImageText.classList.remove('hidden');
+
+        if (data.file_path) {
+            const filePath = '/static/' + data.file_path;
+            const fileType = data.file_type || '';
+
+            if (fileType === 'pdf') {
+                pdfPreview.src = filePath;
+                pdfPreview.classList.remove('hidden');
+                noImageText.classList.add('hidden');
+                if (zoomInBtn) zoomInBtn.style.display = 'none';
+                if (zoomOutBtn) zoomOutBtn.style.display = 'none';
+                if (resetZoomBtn) resetZoomBtn.style.display = 'none';
+            } else if (['png', 'jpg', 'jpeg', 'webp'].includes(fileType)) {
+                imagePreview.src = filePath;
+                imagePreview.classList.remove('hidden');
+                noImageText.classList.add('hidden');
+                if (zoomInBtn) zoomInBtn.style.display = 'inline-block';
+                if (zoomOutBtn) zoomOutBtn.style.display = 'inline-block';
+                if (resetZoomBtn) resetZoomBtn.style.display = 'inline-block';
+                resetImageZoom();
+            } else {
+                noImageText.textContent = 'Format file tidak didukung';
+            }
+        } else {
+            noImageText.textContent = 'Tidak ada dokumen';
+        }
+    }
+
+    // Reset image zoom
+    function resetImageZoom() {
+        const imagePreview = document.getElementById('imagePreview');
+        if (imagePreview) {
+            currentZoom = 1;
+            translateX = 0;
+            translateY = 0;
+            imagePreview.style.transform = 'scale(1) translate(0px, 0px)';
+            const zoomLevel = document.getElementById('zoomLevel');
+            if (zoomLevel) zoomLevel.textContent = '100%';
+        }
+    }
+
+    // Update navigation buttons
+    function updateModalNavigation() {
+        const prevBtn = document.getElementById('prevModalBtn');
+        const nextBtn = document.getElementById('nextModalBtn');
+
+        if (prevBtn) {
+            prevBtn.disabled = (currentDataIndex === 0);
+            prevBtn.style.opacity = (currentDataIndex === 0) ? '0.5' : '1';
+        }
+
+        if (nextBtn) {
+            nextBtn.disabled = (currentDataIndex === extractedData.length - 1);
+            nextBtn.style.opacity = (currentDataIndex === extractedData.length - 1) ? '0.5' : '1';
+        }
+    }
+
+    // Navigate previous
+    function navigatePrevious() {
+        if (currentDataIndex > 0) {
+            currentDataIndex--;
+            fillModalForm(currentDataIndex);
+            updateModalNavigation();
+        }
+    }
+
+    // Navigate next
+    function navigateNext() {
+        if (currentDataIndex < extractedData.length - 1) {
+            currentDataIndex++;
+            fillModalForm(currentDataIndex);
+            updateModalNavigation();
+        }
+    }
+
+    // Close modal
+    function closeModal() {
+        const modal = document.getElementById('extractedDataModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        const button = document.getElementById('toggleExtractedDataBtn');
+        if (button) {
+            button.innerHTML = '<i class="fas fa-eye mr-2"></i>Lihat Data Ekstraksi';
+        }
+    }
+
+    // Setup zoom and pan
+    function setupZoomAndPan() {
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+        const zoomLevel = document.getElementById('zoomLevel');
+
+        if (!imagePreview || !imagePreviewContainer) return;
+
+        function updateTransform() {
+            imagePreview.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
+            if (zoomLevel) zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+        }
+
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', function() {
+                currentZoom = Math.min(currentZoom * 1.2, 5);
+                updateTransform();
+            });
+        }
+
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', function() {
+                currentZoom = Math.max(currentZoom / 1.2, 0.1);
+                updateTransform();
+            });
+        }
+
+        if (resetZoomBtn) {
+            resetZoomBtn.addEventListener('click', function() {
+                currentZoom = 1;
+                translateX = 0;
+                translateY = 0;
+                updateTransform();
+            });
+        }
+
+        imagePreviewContainer.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            currentZoom = Math.max(0.1, Math.min(5, currentZoom * delta));
+            updateTransform();
+        });
+
+        imagePreview.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            imagePreview.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            if (imagePreview) imagePreview.style.cursor = 'grab';
+        });
+    }
+
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Ready - Initializing...');
+
+        // Setup toggle button
+        const toggleBtn = document.getElementById('toggleExtractedDataBtn');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', toggleExtractedData);
+            console.log('Toggle button listener added');
+        }
+
+        // Setup close buttons
+        const closeBtn = document.getElementById('closeModalBtn');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+        const closeBottomBtn = document.getElementById('closeModalBtnBottom');
+        if (closeBottomBtn) closeBottomBtn.addEventListener('click', closeModal);
+
+        // Setup navigation buttons
+        const prevBtn = document.getElementById('prevModalBtn');
+        if (prevBtn) prevBtn.addEventListener('click', navigatePrevious);
+
+        const nextBtn = document.getElementById('nextModalBtn');
+        if (nextBtn) nextBtn.addEventListener('click', navigateNext);
+
+        // Close on outside click
+        const modal = document.getElementById('extractedDataModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        }
+
+        // Setup zoom and pan
+        setupZoomAndPan();
+
+        console.log('All event listeners initialized');
+    });
+
+    // Save all data function
+    function saveAllData() {
+        if (!window.extractedData || window.extractedData.length === 0) {
+            alert('Tidak ada data untuk disimpan');
+            return;
+        }
+
+        if (confirm(`Apakah Anda yakin ingin menyimpan ${window.extractedData.length} data cuti ke database?`)) {
+            fetch('/cuti-v2/save_extracted_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                },
+                body: JSON.stringify(window.extractedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Berhasil menyimpan ${window.extractedData.length} data cuti ke database!`);
+                    setTimeout(() => window.location.href = '/cuti-v2/list', 2000);
+                } else {
+                    alert('Error: ' + (data.error || 'Gagal menyimpan data'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data.');
+            });
+        }
+    }
+
+    // Reset form function
+    function resetForm() {
+        document.getElementById('fileInput').value = '';
+        document.getElementById('filePreview').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Check dependencies function
+    function checkDependencies() {
+        fetch('/cuti-v2/check_dependencies')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let message = '=== Status Dependencies OCR ===\n\n';
+                    message += `PDF Support: ${data.PDF_SUPPORT ? '✅ Aktif' : '❌ Tidak Aktif'}\n\n`;
+
+                    for (const [key, value] of Object.entries(data.dependencies)) {
+                        message += `${key}:\n`;
+                        if (value.installed) {
+                            message += `  ✅ Terinstall\n`;
+                            if (value.version) message += `  Version: ${value.version}\n`;
+                        } else {
+                            message += `  ❌ Tidak Terinstall\n`;
+                            if (value.note) message += `  Note: ${value.note}\n`;
+                        }
+                        message += '\n';
+                    }
+
+                    alert(message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // File upload handlers
+    const dropZone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileList = document.getElementById('fileList');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('border-blue-400', 'bg-blue-50'));
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('border-blue-400', 'bg-blue-50'));
+    });
+
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        fileInput.files = files;
+        handleFiles(files);
+    });
+
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            filePreview.classList.remove('hidden');
+            fileList.innerHTML = '';
+
+            Array.from(files).forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'flex items-center justify-between bg-blue-50 p-3 rounded mb-2';
+                fileDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-file-${file.type.includes('pdf') ? 'pdf' : 'image'} text-blue-500 text-xl mr-3"></i>
+                        <div>
+                            <p class="font-medium text-gray-800">${file.name}</p>
+                            <p class="text-sm text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                    </div>
+                `;
+                fileList.appendChild(fileDiv);
+            });
+        }
+    }
+
+    // Make functions global for debugging
+    window.toggleExtractedData = toggleExtractedData;
+    window.extractedData = extractedData;
+</script>
+{% endblock %}

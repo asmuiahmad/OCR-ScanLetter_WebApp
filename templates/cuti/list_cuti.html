@@ -1,30 +1,31 @@
-{% extends "layouts/base.html" %}
-
-{% block title %}Daftar Permohonan Cuti{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/cuti.css') }}">
-{% endblock %}
-
-{% block content %}
+{% extends "layouts/base.html" %} {% block title %}Daftar Permohonan Cuti{%
+endblock %} {% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='assets/css/cuti.css') }}"
+/>
+{% endblock %} {% block content %}
 <div class="container-fluid">
-  <div class="max-w-5xl mx-auto">
-    <div class="form-card">
-      <div class="page-header">
-        <h2>
-          <i class="fas fa-list text-green-400"></i>
-          Daftar Permohonan Cuti
-        </h2>
-      </div>
+    <div class="max-w-5xl mx-auto">
+        <div class="form-card">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-list text-green-400"></i>
+                    Daftar Permohonan Cuti
+                </h2>
+            </div>
+        </div>
     </div>
-  </div>
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Daftar Permohonan Cuti</h3>
                     <div class="card-tools">
-                        <a href="{{ url_for('ocr_cuti.ocr_cuti') }}" class="btn btn-primary btn-sm">
+                        <a
+                            href="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}"
+                            class="btn btn-primary btn-sm"
+                        >
                             <i class="fas fa-plus"></i> Tambah Cuti Baru
                         </a>
                     </div>
@@ -53,44 +54,88 @@
                                     <td>{{ cuti.nama }}</td>
                                     <td>{{ cuti.nip }}</td>
                                     <td>{{ cuti.jenis_cuti }}</td>
-                                    <td>{{ cuti.tanggal_cuti.strftime('%d/%m/%Y') }} - {{ cuti.sampai_cuti.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {{
+                                        cuti.tanggal_cuti.strftime('%d/%m/%Y')
+                                        }} - {{
+                                        cuti.sampai_cuti.strftime('%d/%m/%Y') }}
+                                    </td>
                                     <td>{{ cuti.lama_cuti }}</td>
                                     <td>
                                         {% if cuti.status_cuti == 'pending' %}
-                                            <span class="badge badge-warning">Menunggu Persetujuan</span>
-                                        {% elif cuti.status_cuti == 'approved' %}
-                                            <span class="badge badge-success">Disetujui</span>
-                                        {% elif cuti.status_cuti == 'rejected' %}
-                                            <span class="badge badge-danger">Ditolak</span>
+                                        <span class="badge badge-warning"
+                                            >Menunggu Persetujuan</span
+                                        >
+                                        {% elif cuti.status_cuti == 'approved'
+                                        %}
+                                        <span class="badge badge-success"
+                                            >Disetujui</span
+                                        >
+                                        {% elif cuti.status_cuti == 'rejected'
+                                        %}
+                                        <span class="badge badge-danger"
+                                            >Ditolak</span
+                                        >
                                         {% endif %}
                                     </td>
-                                    <td>{{ cuti.tgl_ajuan_cuti.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {{
+                                        cuti.tgl_ajuan_cuti.strftime('%d/%m/%Y')
+                                        }}
+                                    </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-info btn-sm" onclick="viewDetail({{ cuti.id_cuti }})">
-                                                <i class="fas fa-eye"></i> Detail
+                                            <button
+                                                type="button"
+                                                class="btn btn-info btn-sm"
+                                                onclick="viewDetail({{ cuti.id_cuti }})"
+                                            >
+                                                <i class="fas fa-eye"></i>
+                                                Detail
                                             </button>
-                                            
-                                            {% if current_user.role in ['pimpinan', 'admin'] and cuti.status_cuti == 'pending' %}
-                                            <button type="button" class="btn btn-success btn-sm" onclick="approveCuti({{ cuti.id_cuti }})">
-                                                <i class="fas fa-check"></i> Setujui
+
+                                            {% if current_user.role in
+                                            ['pimpinan', 'admin'] and
+                                            cuti.status_cuti == 'pending' %}
+                                            <button
+                                                type="button"
+                                                class="btn btn-success btn-sm"
+                                                onclick="approveCuti({{ cuti.id_cuti }})"
+                                            >
+                                                <i class="fas fa-check"></i>
+                                                Setujui
                                             </button>
-                                            <button type="button" class="btn btn-danger btn-sm" onclick="rejectCuti({{ cuti.id_cuti }})">
-                                                <i class="fas fa-times"></i> Tolak
+                                            <button
+                                                type="button"
+                                                class="btn btn-danger btn-sm"
+                                                onclick="rejectCuti({{ cuti.id_cuti }})"
+                                            >
+                                                <i class="fas fa-times"></i>
+                                                Tolak
                                             </button>
-                                            {% endif %}
-                                            
-                                            {% if cuti.status_cuti == 'approved' %}
-                                            <a href="{{ url_for('cuti.preview_cuti_html', cuti_id=cuti.id_cuti) }}" class="btn btn-info btn-sm" target="_blank">
-                                                <i class="fas fa-eye"></i> Preview HTML
+                                            {% endif %} {% if cuti.status_cuti
+                                            == 'approved' %}
+                                            <a
+                                                href="{{ url_for('cuti.preview_cuti_html', cuti_id=cuti.id_cuti) }}"
+                                                class="btn btn-info btn-sm"
+                                                target="_blank"
+                                            >
+                                                <i class="fas fa-eye"></i>
+                                                Preview HTML
                                             </a>
-                                            <a href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-download"></i> PDF
+                                            <a
+                                                href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}"
+                                                class="btn btn-primary btn-sm"
+                                            >
+                                                <i class="fas fa-download"></i>
+                                                PDF
                                             </a>
-                                            {% endif %}
-                                            
-                                            {% if cuti.qr_code %}
-                                            <button type="button" class="btn btn-secondary btn-sm" onclick="showQRCode('{{ cuti.qr_code }}')">
+                                            {% endif %} {% if cuti.qr_code %}
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary btn-sm"
+                                                onclick="showQRCode('{{ cuti.qr_code }}')"
+                                            >
                                                 <i class="fas fa-qrcode"></i> QR
                                             </button>
                                             {% endif %}
@@ -103,7 +148,8 @@
                     </div>
                     {% else %}
                     <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Belum ada data permohonan cuti.
+                        <i class="fas fa-info-circle"></i> Belum ada data
+                        permohonan cuti.
                     </div>
                     {% endif %}
                 </div>
@@ -114,7 +160,7 @@
 
 <!-- Modal Detail Cuti -->
 <div class="modal fade" id="detailModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document" style="max-width: 95%">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detail Permohonan Cuti</h5>
@@ -143,13 +189,31 @@
                 <form id="approvalForm">
                     <div class="form-group">
                         <label for="notes">Catatan (Opsional):</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Masukkan catatan persetujuan..."></textarea>
+                        <textarea
+                            class="form-control"
+                            id="notes"
+                            name="notes"
+                            rows="3"
+                            placeholder="Masukkan catatan persetujuan..."
+                        ></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-success" id="confirmApprove">Setujui Cuti</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                >
+                    Batal
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    id="confirmApprove"
+                >
+                    Setujui Cuti
+                </button>
             </div>
         </div>
     </div>
@@ -169,13 +233,28 @@
                 <form id="rejectionForm">
                     <div class="form-group">
                         <label for="rejectNotes">Alasan Penolakan:</label>
-                        <textarea class="form-control" id="rejectNotes" name="notes" rows="3" placeholder="Masukkan alasan penolakan..." required></textarea>
+                        <textarea
+                            class="form-control"
+                            id="rejectNotes"
+                            name="notes"
+                            rows="3"
+                            placeholder="Masukkan alasan penolakan..."
+                            required
+                        ></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" id="confirmReject">Tolak Cuti</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                >
+                    Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmReject">
+                    Tolak Cuti
+                </button>
             </div>
         </div>
     </div>
@@ -193,8 +272,12 @@
             </div>
             <div class="modal-body text-center">
                 <div id="qrCodeContainer"></div>
-                <p class="mt-3">Scan QR code untuk verifikasi digital signature</p>
-                <p><small>Hash: <span id="qrHash"></span></small></p>
+                <p class="mt-3">
+                    Scan QR code untuk verifikasi digital signature
+                </p>
+                <p>
+                    <small>Hash: <span id="qrHash"></span></small>
+                </p>
             </div>
         </div>
     </div>
@@ -202,5 +285,4 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='assets/js/cuti/list-cuti.js') }}"></script>
-{% endblock %}
-{% endblock %}
+{% endblock %} {% endblock %}

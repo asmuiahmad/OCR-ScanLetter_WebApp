@@ -122,11 +122,38 @@ class HtmlTemplateHandler:
             for placeholder, value in replacements.items():
                 html_content = html_content.replace(placeholder, str(value))
             
+            # Handle logo embedding for PDF generation
+            html_content = self.embed_logo_in_html(html_content)
+            
             return html_content
             
         except Exception as e:
             print(f"Error replacing placeholders: {str(e)}")
             return html_content
+    
+    def embed_logo_in_html(self, html_content):
+        """Embed logo as base64 data for reliable PDF generation"""
+        try:
+            logo_path = 'static/assets/images/logo-pengadilan-agama.png'
+            
+            if os.path.exists(logo_path):
+                with open(logo_path, 'rb') as logo_file:
+                    logo_data = logo_file.read()
+                    logo_base64 = base64.b64encode(logo_data).decode('utf-8')
+                    
+                    # Replace the logo src with base64 data
+                    old_src = 'src="/static/assets/images/logo-pengadilan-agama.png"'
+                    new_src = f'src="data:image/png;base64,{logo_base64}"'
+                    html_content = html_content.replace(old_src, new_src)
+                    
+                    print("✅ Logo embedded as base64 data for PDF generation")
+            else:
+                print(f"⚠️ Logo file not found at: {logo_path}")
+                
+        except Exception as e:
+            print(f"Error embedding logo: {str(e)}")
+            
+        return html_content
     
     def html_to_pdf_weasyprint(self, html_content, pdf_path):
         """Convert HTML to PDF using WeasyPrint"""

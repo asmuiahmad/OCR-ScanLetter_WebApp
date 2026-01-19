@@ -1,0 +1,120 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Surat Masuk - PA Banjarbaru{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-5 text-center font-bold text-2xl">Edit Surat Masuk</h1>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="form-horizontal">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="tanggal_suratMasuk" style="margin-bottom: 3px;">Tanggal Surat Masuk:</label>
+                    <input type="date" 
+                           name="tanggal_suratMasuk" 
+                           class="form-control" 
+                           value="{% if entry.tanggal_suratMasuk %}{{ entry.tanggal_suratMasuk.strftime('%Y-%m-%d') }}{% endif %}"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pengirim_suratMasuk" style="margin-bottom: 3px;">Pengirim:</label>
+                    <input type="text" 
+                           name="pengirim_suratMasuk" 
+                           class="form-control" 
+                           value="{{ entry.pengirim_suratMasuk or '' }}"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="penerima_suratMasuk" style="margin-bottom: 3px;">Penerima:</label>
+                    <input type="text" 
+                           name="penerima_suratMasuk" 
+                           class="form-control" 
+                           value="{{ entry.penerima_suratMasuk or '' }}"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomor_suratMasuk" style="margin-bottom: 3px;">Nomor Surat:</label>
+                    <input type="text" 
+                           name="nomor_suratMasuk" 
+                           class="form-control" 
+                           value="{{ entry.nomor_suratMasuk or '' }}"
+                           required>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="isi_suratMasuk" style="margin-bottom: 3px;">Isi Surat:</label>
+                    <textarea name="isi_suratMasuk" 
+                              class="form-control" 
+                              rows="4"
+                              required>{{ entry.isi_suratMasuk or '' }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="acara_suratMasuk" style="margin-bottom: 3px;">Acara (Opsional):</label>
+                    <input type="text" 
+                           name="acara_suratMasuk" 
+                           class="form-control" 
+                           value="{{ entry.acara_suratMasuk or '' }}"
+                           placeholder="Nama acara jika ada">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tempat_suratMasuk" style="margin-bottom: 3px;">Tempat (Opsional):</label>
+                    <input type="text" 
+                           name="tempat_suratMasuk" 
+                           class="form-control" 
+                           value="{{ entry.tempat_suratMasuk or '' }}"
+                           placeholder="Tempat acara jika ada">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tanggal_acara_suratMasuk" style="margin-bottom: 3px;">Tanggal Acara (Opsional):</label>
+                    <input type="date" 
+                           name="tanggal_acara_suratMasuk" 
+                           class="form-control" 
+                           value="{% if entry.tanggal_acara_suratMasuk %}{{ entry.tanggal_acara_suratMasuk.strftime('%Y-%m-%d') }}{% endif %}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="jam_suratMasuk" style="margin-bottom: 3px;">Jam Acara (Opsional):</label>
+                    <input type="time" 
+                           name="jam_suratMasuk" 
+                           class="form-control" 
+                           value="{{ entry.jam_suratMasuk or '' }}">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Simpan Perubahan
+            </button>
+            <a href="{{ url_for('surat_masuk.show_surat_masuk') }}" class="btn btn-secondary ml-2">
+                <i class="fas fa-times"></i> Batal
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -9,7 +9,7 @@ import tempfile
 from io import BytesIO
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app, Response
 from flask_login import login_required, current_user
 from docx import Document
 from mailmerge import MailMerge
@@ -20,6 +20,77 @@ from config.forms import CutiForm, InputCutiForm
 from config.route_utils import role_required
 
 cuti_bp = Blueprint('cuti', __name__)
+
+
+def create_download_response(file_path, filename, mimetype='application/pdf'):
+    """
+    Create a proper download response that forces download to Downloads folder
+    """
+    try:
+        # Ensure file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+        
+        # Create response with proper headers for forced download
+        response = send_file(
+            file_path,
+            as_attachment=True,
+            download_name=filename,
+            mimetype=mimetype
+        )
+        
+        # Enhanced headers to force download to Downloads folder
+        response.headers['Content-Type'] = mimetype
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        
+        # Additional headers to ensure proper download behavior
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['Content-Transfer-Encoding'] = 'binary'
+        
+        return response
+        
+    except Exception as e:
+        current_app.logger.error(f"Error creating download response: {str(e)}")
+        raise
+
+
+def generate_cuti_filename(nama, tanggal_dibuat, file_type="surat_cuti"):
+    """
+    Generate standardized filename for cuti documents
+    Format: surat_cuti_[nama]_[YYYY-MM-DD].pdf
+    
+    Args:
+        nama (str): Employee name
+        tanggal_dibuat (datetime/date): Date when the document was created
+        file_type (str): Type of document (default: "surat_cuti")
+    
+    Returns:
+        str: Formatted filename
+    """
+    try:
+        # Clean the name - remove spaces, special characters, and convert to lowercase
+        clean_nama = nama.replace(' ', '_').replace('-', '_').replace('.', '').replace(',', '')
+        clean_nama = ''.join(c for c in clean_nama if c.isalnum() or c == '_').lower()
+        
+        # Format date as YYYY-MM-DD
+        if hasattr(tanggal_dibuat, 'strftime'):
+            date_str = tanggal_dibuat.strftime('%Y-%m-%d')
+        else:
+            # If it's already a string, try to parse it
+            date_str = str(tanggal_dibuat)
+        
+        # Generate filename
+        filename = f"{file_type}_{clean_nama}_{date_str}.pdf"
+        
+        return filename
+        
+    except Exception as e:
+        # Fallback to simple format if there's an error
+        clean_nama = str(nama).replace(' ', '_')
+        return f"{file_type}_{clean_nama}.pdf"
 
 
 @cuti_bp.route('/generate-cuti-direct', methods=['GET', 'POST'])
@@ -317,19 +388,11 @@ def generate_cuti():
                         # Fallback to absolute path
                         pdf_path = os.path.abspath(pdf_path)
                 
-                # Return PDF file for download
+                # Return PDF file for download with enhanced headers
                 try:
                     current_app.logger.info(f"Sending PDF file: {pdf_path}")
-                    response = send_file(
-                        pdf_path,
-                        as_attachment=True,
-                        download_name=f"surat_cuti_{new_cuti.nama.replace(' ', '_')}_{new_cuti.id_cuti}.pdf",
-                        mimetype='application/pdf'
-                    )
-                    # Ensure proper headers
-                    response.headers['Content-Type'] = 'application/pdf'
-                    response.headers['Content-Disposition'] = f'attachment; filename="surat_cuti_{new_cuti.nama.replace(" ", "_")}_{new_cuti.id_cuti}.pdf"'
-                    return response
+                    filename = generate_cuti_filename(new_cuti.nama, new_cuti.tgl_ajuan_cuti)
+                    return create_download_response(pdf_path, filename)
                 except Exception as send_error:
                     current_app.logger.error(f"Error sending PDF file: {str(send_error)}")
                     import traceback
@@ -591,16 +654,8 @@ def download_cuti_pdf(cuti_id):
                 pdf_path = os.path.abspath(pdf_path)
             
             try:
-                response = send_file(
-                    pdf_path,
-                    as_attachment=True,
-                    download_name=f"surat_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
-                    mimetype='application/pdf'
-                )
-                # Ensure proper headers
-                response.headers['Content-Type'] = 'application/pdf'
-                response.headers['Content-Disposition'] = f'attachment; filename="surat_cuti_{cuti.nama.replace(" ", "_")}_{cuti.id_cuti}.pdf"'
-                return response
+                filename = generate_cuti_filename(cuti.nama, cuti.tgl_ajuan_cuti)
+                return create_download_response(pdf_path, filename)
             except Exception as send_error:
                 current_app.logger.error(f"Error sending existing PDF file: {str(send_error)}")
                 # If sending fails, regenerate PDF
@@ -675,16 +730,8 @@ def download_cuti_pdf(cuti_id):
             
             try:
                 current_app.logger.info(f"Sending PDF file: {pdf_path}")
-                response = send_file(
-                    pdf_path,
-                    as_attachment=True,
-                    download_name=f"surat_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
-                    mimetype='application/pdf'
-                )
-                # Ensure proper headers
-                response.headers['Content-Type'] = 'application/pdf'
-                response.headers['Content-Disposition'] = f'attachment; filename="surat_cuti_{cuti.nama.replace(" ", "_")}_{cuti.id_cuti}.pdf"'
-                return response
+                filename = generate_cuti_filename(cuti.nama, cuti.tgl_ajuan_cuti)
+                return create_download_response(pdf_path, filename)
             except Exception as send_error:
                 current_app.logger.error(f"Error sending PDF file: {str(send_error)}")
                 import traceback
@@ -712,13 +759,9 @@ def generate_form_pdf(cuti_id):
         pdf_generator = CutiFormPDFGenerator()
         pdf_path = pdf_generator.create_cuti_form_from_model(cuti)
         
-        # Return PDF file
-        return send_file(
-            pdf_path,
-            as_attachment=True,
-            download_name=f"formulir_cuti_{cuti.nama.replace(' ', '_')}_{cuti.id_cuti}.pdf",
-            mimetype='application/pdf'
-        )
+        # Return PDF file with enhanced download headers
+        filename = generate_cuti_filename(cuti.nama, cuti.tgl_ajuan_cuti, "formulir_cuti")
+        return create_download_response(pdf_path, filename)
         
     except Exception as e:
         current_app.logger.error(f"Error generating PDF form for cuti {cuti_id}: {str(e)}")
