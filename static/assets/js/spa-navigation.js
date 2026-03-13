@@ -58,6 +58,7 @@ class SPANavigation {
       href.includes("user") ||
       href.includes("laporan") ||
       href.includes("statistik") ||
+      href.includes("cuti") ||
       href.startsWith("#") ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:") ||
