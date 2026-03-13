@@ -5,6 +5,7 @@ Common functions used across different route modules
 
 import math
 from datetime import datetime, timedelta, timezone
+import threading
 from functools import wraps
 
 from flask import jsonify, request
@@ -73,8 +74,20 @@ def role_required(*roles):
     return decorator
 
 
-def log_user_login(user_id, user_email, status="success", request=None):
-    """Log user login activity"""
+def log_user_login(user_id, user_email, status="success", request_obj=None):
+    """Log user login activity (asynchronous to prevent blocking)"""
+    # Run logging in background thread to avoid blocking login
+    thread = threading.Thread(
+        target=_log_user_login_async,
+        args=(user_id, user_email, status, request_obj)
+    )
+    thread.daemon = True
+    thread.start()
+    return None
+
+
+def _log_user_login_async(user_id, user_email, status="success", request_obj=None):
+    """Async logging function (runs in background thread)"""
     try:
         log_data = {
             "user_id": user_id,
@@ -83,12 +96,12 @@ def log_user_login(user_id, user_email, status="success", request=None):
             "login_time": datetime.utcnow(),
         }
 
-        if request:
-            log_data["ip_address"] = request.remote_addr
-            log_data["user_agent"] = request.headers.get("User-Agent", "")
+        if request_obj:
+            log_data["ip_address"] = request_obj.remote_addr
+            log_data["user_agent"] = request_obj.headers.get("User-Agent", "")
 
             # Simple user agent parsing
-            ua = request.headers.get("User-Agent", "")
+            ua = request_obj.headers.get("User-Agent", "")
             if "Mobile" in ua or "Android" in ua or "iPhone" in ua:
                 log_data["device_type"] = "mobile"
             elif "Tablet" in ua or "iPad" in ua:
@@ -108,11 +121,9 @@ def log_user_login(user_id, user_email, status="success", request=None):
         login_log = UserLoginLog(**log_data)
         db.session.add(login_log)
         db.session.commit()
-        return login_log
     except Exception as e:
         print(f"Error logging login: {str(e)}")
         db.session.rollback()
-        return None
 
 
 def log_user_logout(user_id):
