@@ -2,22 +2,22 @@
 HASIL EKSTRAKSI OCR CUTI (V2)
 ======================================================================
 ✗ nomor_surat              : Tidak terbaca
-✓ nama                     : Gusti
+✗ nama                     : Tidak terbaca
 ✗ nip                      : Tidak terbaca
-✓ jabatan                  : Panglima
-✓ gol_ruang                : Illa
-✓ unit_kerja               : Pemakaman
-✓ masa_kerja               : 13
+✗ jabatan                  : Tidak terbaca
+✗ gol_ruang                : Tidak terbaca
+✗ unit_kerja               : Tidak terbaca
+✗ masa_kerja               : Tidak terbaca
 ✗ alamat                   : Tidak terbaca
 ✗ telp                     : Tidak terbaca
-✓ jenis_cuti               : Cuti Tahunan
-✓ alasan_cuti              : 11 Maret 2026
+✗ jenis_cuti               : Tidak terbaca
+✗ alasan_cuti              : Tidak terbaca
 ✗ lama_cuti                : Tidak terbaca
 ✗ tanggal_mulai_cuti       : Tidak terbaca
 ✗ tanggal_selesai_cuti     : Tidak terbaca
 ✗ no_suratmasuk            : Tidak terbaca
 ✓ jenis_surat              : Cuti
-✓ pengirim                 : Gusti
+✓ pengirim                 : N/A
 ✓ penerima                 : Ketua Pengadilan Agama
-✓ isi                      : Surat Permintaan Cuti oleh Gusti (NIP: Tidak terbaca) - Cuti Tahunan
+✓ isi                      : Surat Permintaan Cuti oleh Tidak terbaca (NIP: Tidak terbaca) - Tidak terbaca
 ======================================================================
