@@ -31,7 +31,7 @@ def create_app():
     app.config["WTF_CSRF_CHECK_DEFAULT"] = True
     app.config["WTF_CSRF_METHODS"] = ["POST", "PUT", "PATCH", "DELETE"]
     app.config["WTF_CSRF_HEADERS"] = ["X-CSRFToken", "X-CSRF-Token"]
-    app.config["WTF_CSRF_TIME_LIMIT"] = 3600
+    app.config["WTF_CSRF_TIME_LIMIT"] = 86400  # 24 hours
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SECURE"] = False
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
