@@ -4,7 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/cuti.css') }}">
-<style></style>
+<style>
   .summary { display:flex; gap:.6rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
   .summary .badge { padding:.35rem .6rem; border-radius:.375rem; font-weight:600; }
   .needs-approval { background-color: rgba(255, 249, 196, 0.35); }
@@ -18,12 +18,12 @@
 {% block content %}
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <div></div>
+    <div>
       <h2 class="mb-0">Daftar Permohonan Cuti</h2>
       <small class="text-muted">Lihat dan kelola permohonan cuti</small>
     </div>
     <div>
-      <a href</div>="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}" class="btn btn-primary btn-sm">Tambah Cuti</a>
+      <a href="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}" class="btn btn-primary btn-sm">Tambah Cuti</a>
     </div>
   </div>
 
@@ -47,27 +47,27 @@
         <table class="table table-striped table-small mb-0 align-middle">
           <thead class="table-light">
             <tr>
-              <th style="width:60</tr>px">No</th>
+              <th style="width:60px">No</th>
               <th>Nama</th>
-              <th>N</th>IP</th>
-              <th></th>Jenis</th>
+              <th>NIP</th>
+              <th>Jenis</th>
               <th>Tgl Mulai</th>
               <th>Tgl Selesai</th>
               <th>Lama</th>
               <th>Status</th>
-              <th></th>Perlu Persetujuan?</th>
+              <th>Perlu Persetujuan?</th>
               <th class="text-center" style="width:220px">Aksi</th>
             </tr>
           </thead>
 
           <tbody>
-            {% if rows and rows</tbody>|length > 0 %}
+            {% if rows and rows|length > 0 %}
               {% for cuti in rows %}
                 {% set status = (cuti.status_cuti or '') | lower %}
                 {% set needs_approval = (status == 'pending') %}
                 <tr class="{% if needs_approval %}needs-approval{% endif %}" data-cuti-id="{{ cuti.id_cuti }}">
                   <td>
-                    {% if is_paginated</td> %}
+                    {% if is_paginated %}
                       {{ (entries.page - 1) * entries.per_page + loop.index }}
                     {% else %}
                       {{ loop.index }}
@@ -78,7 +78,7 @@
                   <td>{{ cuti.nip or '-' }}</td>
                   <td>{{ cuti.jenis_cuti or '-' }}</td>
 
-                  <td></td>
+                  <td>
                     {% if cuti.tanggal_cuti %}
                       {% if cuti.tanggal_cuti.strftime is defined %}
                         {{ cuti.tanggal_cuti.strftime('%d/%m/%Y') }}
@@ -91,7 +91,7 @@
                   </td>
 
                   <td>
-                    {%</td> if cuti.sampai_cuti %}
+                    {% if cuti.sampai_cuti %}
                       {% if cuti.sampai_cuti.strftime is defined %}
                         {{ cuti.sampai_cuti.strftime('%d/%m/%Y') }}
                       {% else %}
@@ -105,7 +105,7 @@
                   <td>{{ cuti.lama_cuti or '-' }}</td>
 
                   <td>
-                    {% if status</td> == 'pending' %}
+                    {% if status == 'pending' %}
                       <span class="badge bg-warning text-dark">Pending</span>
                     {% elif status == 'approved' %}
                       <span class="badge bg-success text-white">Disetujui{% if cuti.approved_role %} ({{ cuti.approved_role|capitalize }}){% endif %}</span>
@@ -118,7 +118,7 @@
 
                   <td>
                     {% if status == 'pending' %}
-                      {% if current_user.is_authenticated and current_user</td>.role in ['pimpinan', 'admin'] %}
+                      {% if current_user.is_authenticated and current_user.role in ['pimpinan', 'admin'] %}
                         <span class="text-success">Perlu Persetujuan Anda</span>
                       {% else %}
                         <span class="text-warning">Menunggu Persetujuan</span>
@@ -231,4 +231,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
-</tr></script>
