@@ -48,6 +48,9 @@ class SPANavigation {
   shouldSkipLink(href, link) {
     return (
       !href ||
+      link.hasAttribute("data-no-spa") ||
+      href.includes("input_") ||
+      href.includes("edit_") ||
       href.startsWith("#") ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:") ||
