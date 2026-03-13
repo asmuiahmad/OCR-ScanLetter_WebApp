@@ -51,6 +51,9 @@ class SPANavigation {
       link.hasAttribute("data-no-spa") ||
       href.includes("input_") ||
       href.includes("edit_") ||
+      href.includes("show_") ||
+      href.includes("list_") ||
+      href.includes("detail_") ||
       href.startsWith("#") ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:") ||

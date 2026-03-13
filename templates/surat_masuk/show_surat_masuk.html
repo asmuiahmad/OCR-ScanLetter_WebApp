@@ -22,9 +22,6 @@
             <a href="{{ url_for('surat_masuk.input_surat_masuk') }}" class="create-button">
                 <i class="fas fa-plus mr-2"></i>Tambah Surat Masuk
             </a>
-            <a href="{{ url_for('surat_masuk.test_ocr_enhancement_page') }}" class="create-button" style="background: #10b981; margin-left: 8px;">
-                <i class="fas fa-cogs mr-2"></i>Test OCR Enhancement
-            </a>
             <form method="GET" action="{{ url_for('surat_masuk.show_surat_masuk') }}" class="search-form">
                 <input type="text" name="search" placeholder="Cari surat masuk..."
                        value="{{ request.args.get('search', '') }}" class="search-input">
