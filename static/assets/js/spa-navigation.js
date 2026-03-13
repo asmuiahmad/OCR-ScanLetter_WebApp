@@ -54,6 +54,8 @@ class SPANavigation {
       href.includes("show_") ||
       href.includes("list_") ||
       href.includes("detail_") ||
+      href.includes("pegawai") ||
+      href.includes("user") ||
       href.startsWith("#") ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:") ||
