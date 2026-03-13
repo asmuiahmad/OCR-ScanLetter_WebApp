@@ -14,21 +14,20 @@ Pegawai Negeri Sipil
 
 I. DATA PEGAWAI
 
-Nama Lengkap Ahmad Asmui
-Nomor Induk Pegawai 1 test
+Nama Lengkap Gusti
 
+Nomor Induk Pegawai 1 210290413920
 (NIP)
 
-Jabatan test
-Golongan/Ruang test
+Jabatan Panglima
+Golongan/Ruang Illa
 
-Unit Kerja test
+Unit Kerja Pemakaman
 
-Masa Kerja test
+Masa Kerja 13
 
-Alamat Lengkap
-
-Nomor Telepon
+Alamat Lengkap Rumah apa saja
+Nomor Telepon 1321231231231221
 
 UI. DETAIL PERMOHONAN CUTI
 
@@ -41,21 +40,14 @@ Tanggal Selesai Cuti
 
 Nomor Surat Masuk
 
-II. JENIS CUTI YANG DIMOHON
+1312312312321313
+0 hari
 
-M
+11 Maret 2026
 
-Komp. Sa'adah 2 Gg. Tomat No. 37
+10 Maret 2026
 
-1421241412
-
-21412321312231
-8 hari
-
-14 Januari 2026
-21 Januari 2026
-
-124
+21313231212
 
 Mengetahui
 
@@ -71,6 +63,10 @@ O Ditangguhkan
 
 Catatan:
 
+II. JENIS CUTI YANG DIMOHON
+
+M
+
 Pejabat yang Berwenang
 
 Cuti Tahunan
@@ -85,16 +81,21 @@ O) Cuti Melahirkan
 
 U) Cuti Luar Negara
 
-13 Januari 2026
+11 Maret 2026
+
 Pemohon
+
 Yang Mengajukan Cuti
-Ahmad Asmui
-NIP: 21212
-Verifikasi Digital
 
 NIP:
 
 Tanggal:
+
+Ahmad Asmui
+
+NIP: 21212
+
+Verifikasi Digital
 
 
 ======================================================================

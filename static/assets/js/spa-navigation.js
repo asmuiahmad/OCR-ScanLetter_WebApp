@@ -117,16 +117,52 @@ class SPANavigation {
 
   async fetchPageContent(url) {
     const response = await fetch(url, {
+      // Include credentials so cookies (session / csrf cookies) are sent with SPA requests
+      credentials: "same-origin",
       headers: {
+        // Ensure server can detect this as an AJAX request
         "X-Requested-With": "XMLHttpRequest",
         Accept: "application/json, text/html",
       },
     });
 
+    // If server returned non-OK, try to surface a helpful message from the response.
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      // Attempt to read response body (may be JSON or plain text)
+      let bodyText = "";
+      try {
+        bodyText = await response.text();
+      } catch (readErr) {
+        console.error("Failed to read error response body:", readErr);
+      }
+
+      // Try to parse a JSON error payload to show a meaningful message to users
+      try {
+        const parsed = bodyText ? JSON.parse(bodyText) : null;
+        const message =
+          parsed && (parsed.message || parsed.error || parsed.detail)
+            ? parsed.message || parsed.error || parsed.detail
+            : null;
+
+        console.error(
+          `Fetch error ${response.status} ${response.statusText}:`,
+          parsed || bodyText,
+        );
+
+        throw new Error(
+          message || `HTTP ${response.status} - ${response.statusText}`,
+        );
+      } catch (parseErr) {
+        // If parsing failed, log the raw body and raise a generic error
+        console.error(
+          `Fetch error ${response.status} ${response.statusText}. Raw body:`,
+          bodyText,
+        );
+        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      }
     }
 
+    // Successful response - return parsed HTML content
     const html = await response.text();
     return this.parsePageContent(html);
   }
@@ -310,7 +346,7 @@ class SPANavigation {
             .content {
                 transition: opacity 0.15s ease-out;
             }
-            
+
             .spa-loading {
                 position: fixed;
                 top: 0;
@@ -324,7 +360,7 @@ class SPANavigation {
                 z-index: 9999;
                 backdrop-filter: blur(1px);
             }
-            
+
             .spa-loading-spinner {
                 background: white;
                 padding: 1.5rem 2rem;
@@ -336,18 +372,18 @@ class SPANavigation {
                 font-weight: 500;
                 color: #374151;
             }
-            
+
             .spa-loading-spinner i {
                 color: #3b82f6;
                 font-size: 1.25rem;
             }
-            
+
             .nav-links a.active {
                 background-color: rgba(59, 130, 246, 0.1);
                 color: #3b82f6;
                 border-right: 3px solid #3b82f6;
             }
-            
+
             .nav-links a {
                 transition: all 0.2s ease;
             }

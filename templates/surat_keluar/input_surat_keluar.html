@@ -140,16 +140,17 @@
         </div>
           </div>
           <div class="column is-full">
-            <div class="field is-floating-label">
+            <div class="field">
+              <label class="label" style="font-size:0.9rem;color:#2563eb;font-weight:600;margin-bottom:0.5rem;">Lampiran Surat (Opsional)</label>
               <div class="control">
-                <div id="drop-area-keluar" style="border:2px dashed #3b82f6;border-radius:0.75rem;padding:2rem;text-align:center;cursor:pointer;transition:background 0.2s;position:relative;background:#f8fafc;">
-                  <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:#3b82f6;"></i>
-                  <div style="font-weight:600;color:#1e40af;margin-top:0.5rem;">Drag & Drop atau Klik untuk Upload Gambar Surat</div>
-                  <div id="file-selected-name-keluar" style="margin-top:0.5rem;color:#2563eb;font-size:0.95em;font-weight:500;"></div>
-                  {{ form.image(class="custom-file-input", style="display:none;") }}
-                </div>
+                {{ form.image(id="image", style="display:none;") }}
+                <label for="image" id="drop-area-keluar" style="border:2px dashed #3b82f6;border-radius:0.75rem;padding:2.5rem 2rem;text-align:center;cursor:pointer;transition:all 0.2s;background:#f8fafc;display:block;user-select:none;">
+                  <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#3b82f6;display:block;margin-bottom:1rem;pointer-events:none;"></i>
+                  <div style="font-weight:600;color:#1e40af;font-size:1.1rem;pointer-events:none;">Klik di sini atau Drag & Drop File</div>
+                  <div style="color:#64748b;font-size:0.9rem;margin-top:0.5rem;pointer-events:none;">Format: JPG, PNG, JPEG (Max 16MB)</div>
+                  <div id="file-selected-name-keluar" style="margin-top:1rem;color:#059669;font-size:1rem;font-weight:600;pointer-events:none;"></div>
+                </label>
               </div>
-              <label class="label is-floating-label" for="image">Lampiran Surat</label>
             </div>
           </div>
         </div>
@@ -166,40 +167,114 @@
 <script src="{{ url_for('static', filename='assets/js/forms/input-surat.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Drag & drop untuk Gambar Surat (Surat Keluar)
+  console.log('Initializing file upload for Surat Keluar...');
+
   const dropAreaKeluar = document.getElementById('drop-area-keluar');
-  const fileInputKeluar = document.querySelector('.custom-file-input');
+  const fileInputKeluar = document.querySelector('input[name="image"]');
   const fileSelectedNameKeluar = document.getElementById('file-selected-name-keluar');
-  if (dropAreaKeluar && fileInputKeluar && fileSelectedNameKeluar) {
-    dropAreaKeluar.addEventListener('click', function() {
-      fileInputKeluar.click();
-    });
-    dropAreaKeluar.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      dropAreaKeluar.style.background = '#e0e7ff';
-      dropAreaKeluar.style.borderColor = '#1e40af';
-    });
-    dropAreaKeluar.addEventListener('dragleave', function(e) {
-      e.preventDefault();
+
+  if (!dropAreaKeluar) {
+    console.error('Drop area not found');
+    return;
+  }
+
+  if (!fileInputKeluar) {
+    console.error('File input not found');
+    return;
+  }
+
+  console.log('Drop area found:', dropAreaKeluar);
+  console.log('File input found:', fileInputKeluar);
+
+  // Prevent default drag behaviors on the entire document
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    document.body.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  // Test click functionality
+  dropAreaKeluar.addEventListener('click', function(e) {
+    console.log('✅ Drop area clicked! File dialog should open.');
+  });
+
+  // Ensure label is clickable
+  dropAreaKeluar.style.webkitUserSelect = 'none';
+  dropAreaKeluar.style.mozUserSelect = 'none';
+  dropAreaKeluar.style.msUserSelect = 'none';
+
+  // Highlight drop area when item is dragged over it
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropAreaKeluar.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropAreaKeluar.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropAreaKeluar.style.background = '#dbeafe';
+    dropAreaKeluar.style.borderColor = '#1e40af';
+    dropAreaKeluar.style.borderWidth = '3px';
+    dropAreaKeluar.style.transform = 'scale(1.02)';
+  }
+
+  function unhighlight(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropAreaKeluar.style.background = '#f8fafc';
+    dropAreaKeluar.style.borderColor = '#3b82f6';
+    dropAreaKeluar.style.borderWidth = '2px';
+    dropAreaKeluar.style.transform = 'scale(1)';
+  }
+
+  // Handle dropped files
+  dropAreaKeluar.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files && files.length > 0) {
+      // Create a new FileList-like object
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(files[0]);
+      fileInputKeluar.files = dataTransfer.files;
+
+      updateFileNameKeluar();
+      console.log('File dropped:', files[0].name);
+    }
+  });
+
+  // File input change event
+  fileInputKeluar.addEventListener('change', function(e) {
+    console.log('File input changed!');
+    updateFileNameKeluar();
+    if (fileInputKeluar.files[0]) {
+      console.log('File selected via input:', fileInputKeluar.files[0].name);
+    }
+  });
+
+  function updateFileNameKeluar() {
+    if (fileInputKeluar.files && fileInputKeluar.files.length > 0) {
+      const fileName = fileInputKeluar.files[0].name;
+      const fileSize = (fileInputKeluar.files[0].size / 1024).toFixed(2);
+      fileSelectedNameKeluar.innerHTML = `<i class="fas fa-check-circle"></i> ${fileName} <strong>(${fileSize} KB)</strong>`;
+
+      // Change drop area appearance
+      dropAreaKeluar.style.background = '#ecfdf5';
+      dropAreaKeluar.style.borderColor = '#059669';
+      console.log('✅ File selected:', fileName);
+    } else {
+      fileSelectedNameKeluar.textContent = '';
       dropAreaKeluar.style.background = '#f8fafc';
       dropAreaKeluar.style.borderColor = '#3b82f6';
-    });
-    dropAreaKeluar.addEventListener('drop', function(e) {
-      e.preventDefault();
-      dropAreaKeluar.style.background = '#f8fafc';
-      dropAreaKeluar.style.borderColor = '#3b82f6';
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        fileInputKeluar.files = e.dataTransfer.files;
-        updateFileNameKeluar();
-      }
-    });
-    fileInputKeluar.addEventListener('change', updateFileNameKeluar);
-    function updateFileNameKeluar() {
-      if (fileInputKeluar.files && fileInputKeluar.files.length > 0) {
-        fileSelectedNameKeluar.textContent = fileInputKeluar.files[0].name;
-      } else {
-        fileSelectedNameKeluar.textContent = '';
-      }
     }
   }
 });

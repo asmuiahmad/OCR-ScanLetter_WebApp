@@ -1,0 +1,43 @@
+================================================================================
+                    CARA MENGAKSES DAFTAR PERMOHONAN CUTI
+================================================================================
+
+STATUS: ✅ DIPERBAIKI DAN SIAP DIGUNAKAN
+
+LANGKAH-LANGKAH:
+
+1. Login ke Aplikasi
+   • Buka browser
+   • Akses: http://localhost:5000
+   • Login dengan akun:
+     - admin@admin.com / admin123
+     - pimpinan@suratapp.com / pimpinan123
+
+2. Akses Halaman Daftar Cuti
+   Pilih salah satu cara:
+   
+   [Cara 1] Melalui Menu:
+     • Klik menu "Cuti" di navigation bar
+     • Pilih "Daftar Permohonan Cuti"
+   
+   [Cara 2] URL Langsung:
+     • http://localhost:5000/cuti-v2/list
+
+3. Jika Masih Tidak Bisa Akses:
+   
+   a) Logout dan login ulang
+   b) Clear browser cache (Ctrl+Shift+Del)
+   c) Restart Flask server:
+      - Tekan Ctrl+C
+      - Jalankan: python app.py
+   d) Jalankan diagnosis:
+      - python diagnose_list_cuti.py
+
+DOKUMENTASI LENGKAP:
+• PERBAIKAN_AKSES_DAFTAR_CUTI.md - Panduan lengkap dalam Bahasa Indonesia
+• TROUBLESHOOTING_LIST_CUTI.md - Troubleshooting detail (English)
+
+BANTUAN:
+Jika masih bermasalah, jalankan: python diagnose_list_cuti.py
+
+================================================================================

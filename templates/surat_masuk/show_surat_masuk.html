@@ -15,7 +15,7 @@
         </h2>
       </div>
     </div>
-    
+
     <!-- Sticky Search Container -->
     <div class="sticky-search-container">
         <div class="search-controls">
@@ -26,7 +26,7 @@
                 <i class="fas fa-cogs mr-2"></i>Test OCR Enhancement
             </a>
             <form method="GET" action="{{ url_for('surat_masuk.show_surat_masuk') }}" class="search-form">
-                <input type="text" name="search" placeholder="Cari surat masuk..." 
+                <input type="text" name="search" placeholder="Cari surat masuk..."
                        value="{{ request.args.get('search', '') }}" class="search-input">
                 <button type="submit" class="search-button">
                     <i class="fas fa-search"></i>
@@ -167,7 +167,7 @@
             <form id="editForm" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" id="edit_id" name="id">
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left Column -->
                     <div class="space-y-4">
@@ -175,10 +175,10 @@
                             <label for="edit_tanggal_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                 Tanggal Surat Masuk <span class="text-red-500">*</span>
                             </label>
-                            <input type="date" 
-                                   name="tanggal_suratMasuk" 
+                            <input type="date"
+                                   name="tanggal_suratMasuk"
                                    id="edit_tanggal_suratMasuk"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                    required>
                         </div>
 
@@ -186,10 +186,10 @@
                             <label for="edit_pengirim_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                 Pengirim <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" 
-                                   name="pengirim_suratMasuk" 
+                            <input type="text"
+                                   name="pengirim_suratMasuk"
                                    id="edit_pengirim_suratMasuk"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                    required>
                         </div>
 
@@ -197,10 +197,10 @@
                             <label for="edit_penerima_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                 Penerima <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" 
-                                   name="penerima_suratMasuk" 
+                            <input type="text"
+                                   name="penerima_suratMasuk"
                                    id="edit_penerima_suratMasuk"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                    required>
                         </div>
 
@@ -208,10 +208,10 @@
                             <label for="edit_nomor_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                 Nomor Surat <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" 
-                                   name="nomor_suratMasuk" 
+                            <input type="text"
+                                   name="nomor_suratMasuk"
                                    id="edit_nomor_suratMasuk"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                    required>
                         </div>
                     </div>
@@ -222,10 +222,10 @@
                             <label for="edit_isi_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                 Isi Surat <span class="text-red-500">*</span>
                             </label>
-                            <textarea name="isi_suratMasuk" 
+                            <textarea name="isi_suratMasuk"
                                       id="edit_isi_suratMasuk"
                                       rows="4"
-                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                       required></textarea>
                         </div>
 
@@ -233,8 +233,8 @@
                             <label for="edit_acara_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                 Acara (Opsional)
                             </label>
-                            <input type="text" 
-                                   name="acara_suratMasuk" 
+                            <input type="text"
+                                   name="acara_suratMasuk"
                                    id="edit_acara_suratMasuk"
                                    placeholder="Nama acara jika ada"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
@@ -244,8 +244,8 @@
                             <label for="edit_tempat_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                 Tempat (Opsional)
                             </label>
-                            <input type="text" 
-                                   name="tempat_suratMasuk" 
+                            <input type="text"
+                                   name="tempat_suratMasuk"
                                    id="edit_tempat_suratMasuk"
                                    placeholder="Tempat acara jika ada"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
@@ -256,8 +256,8 @@
                                 <label for="edit_tanggal_acara_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                     Tanggal Acara (Opsional)
                                 </label>
-                                <input type="date" 
-                                       name="tanggal_acara_suratMasuk" 
+                                <input type="date"
+                                       name="tanggal_acara_suratMasuk"
                                        id="edit_tanggal_acara_suratMasuk"
                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                             </div>
@@ -266,8 +266,8 @@
                                 <label for="edit_jam_suratMasuk" class="block text-sm font-medium text-gray-700 mb-2">
                                     Jam Acara (Opsional)
                                 </label>
-                                <input type="time" 
-                                       name="jam_suratMasuk" 
+                                <input type="time"
+                                       name="jam_suratMasuk"
                                        id="edit_jam_suratMasuk"
                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                             </div>
@@ -275,15 +275,28 @@
                     </div>
                 </div>
 
+                <!-- Lampiran (Attachment) -->
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Lampiran</label>
+                    <div id="edit_attachment_area" class="p-3 border border-gray-200 rounded bg-gray-50 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-paperclip text-gray-500"></i>
+                            <span id="edit_attachment_text" class="text-sm text-gray-700">Tidak ada lampiran</span>
+                        </div>
+                        <div id="edit_attachment_actions" class="flex items-center gap-2"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Jika ada lampiran tersimpan, Anda bisa mengunduhnya dari tombol di sebelah kanan.</p>
+                </div>
+
                 <!-- Modal Footer -->
                 <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-                    <button type="button" 
+                    <button type="button"
                             onclick="closeEditModal()"
                             class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
                         <i class="fas fa-times mr-2"></i>
                         Batal
                     </button>
-                    <button type="submit" 
+                    <button type="submit"
                             id="saveBtn"
                             class="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">
                         <i class="fas fa-save mr-2"></i>
@@ -335,20 +348,77 @@ function populateEditForm(data) {
     document.getElementById('edit_tempat_suratMasuk').value = data.tempat_suratMasuk || '';
     document.getElementById('edit_tanggal_acara_suratMasuk').value = data.tanggal_acara_suratMasuk || '';
     document.getElementById('edit_jam_suratMasuk').value = data.jam_suratMasuk || '';
+
+    // Attachment handling: show download link / info if file exists
+    try {
+        const attachmentText = document.getElementById('edit_attachment_text');
+        const attachmentActions = document.getElementById('edit_attachment_actions');
+
+        if (!attachmentText || !attachmentActions) {
+            return;
+        }
+
+        // Clear previous state
+        attachmentActions.innerHTML = '';
+        attachmentText.textContent = 'Tidak ada lampiran';
+
+        if (data.has_file) {
+            // Show file info and download/preview buttons using new API keys
+            const sizeText = data.file_size ? ` (${data.file_size} bytes)` : '';
+            attachmentText.innerHTML = `Lampiran tersedia${sizeText}`;
+
+            // If backend provided a preview URL (e.g. inline PDF), show preview button first
+            if (data.file_preview_url) {
+                const p = document.createElement('a');
+                p.href = data.file_preview_url;
+                p.target = '_blank';
+                p.rel = 'noopener';
+                p.className = 'px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 mr-2';
+                // Prefer a descriptive label for PDFs
+                p.innerText = data.file_is_pdf ? 'Pratinjau PDF' : 'Pratinjau';
+                attachmentActions.appendChild(p);
+            } else if (data.has_image) {
+                // Fallback: if it's an image but no preview URL was provided, open image route
+                const imgBtn = document.createElement('button');
+                imgBtn.type = 'button';
+                imgBtn.className = 'px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 mr-2';
+                imgBtn.innerText = 'Lihat Gambar';
+                imgBtn.onclick = function() {
+                    window.open(`/surat-masuk/image/${data.id_suratMasuk}`, '_blank');
+                };
+                attachmentActions.appendChild(imgBtn);
+            }
+
+            // Download link (if provided)
+            if (data.file_download_url) {
+                const a = document.createElement('a');
+                a.href = data.file_download_url;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.className = 'px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600';
+                a.innerText = 'Unduh';
+                attachmentActions.appendChild(a);
+            }
+        } else {
+            attachmentText.textContent = 'Tidak ada lampiran';
+        }
+    } catch (err) {
+        console.error('Error populating attachment info:', err);
+    }
 }
 
 // Form submission
 document.getElementById('editForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     const saveBtn = document.getElementById('saveBtn');
     const originalText = saveBtn.innerHTML;
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
-    
+
     const formData = new FormData(this);
     const id = document.getElementById('edit_id').value;
-    
+
     fetch(`/edit_surat_masuk/${id}`, {
         method: 'POST',
         headers: {

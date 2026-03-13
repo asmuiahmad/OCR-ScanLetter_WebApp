@@ -1,221 +1,493 @@
-{% extends "layouts/base.html" %}
-
-{% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
-  .input-field {
-    transition: all 0.2s ease;
-  }
-  .input-field:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  }
-  .btn-submit {
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, #1e40af, #3b82f6);
-  }
-  .btn-submit:hover {
-    background: linear-gradient(135deg, #1e3a8a, #2563eb);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  .floating-label {
-    position: absolute;
-    top: 0;
-    left: 0.75rem;
-    transform: translateY(-50%);
-    padding: 0 0.2rem;
-    background: white;
-    font-size: 0.7rem;
-    color: #2563eb;
-    font-weight: 600;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.25rem;
-    line-height: 1;
-    pointer-events: none;
-    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
-  }
-</style>
-<head>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
-</head>
-<div id="toast-container" class="fixed bottom-6 left-1/2 z-50 flex flex-col items-center space-y-2" style="transform:translateX(-50%);"></div>
-<div class="container mx-auto py-8 px-4">
-  <div class="max-w-4xl mx-auto">
-    <div class="form-card">
-      <div class="page-header">
-        <h2>
-          <i class="fas fa-user-plus text-green-400"></i>
-          Formulir Data Pegawai
-        </h2>
-      </div>
-      <form method="POST" action="{{ url_for('pegawai.pegawai') }}" id="pegawaiForm" class="p-6">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="columns is-multiline">
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                <input class="input" name="nama" id="nama" required placeholder=" " />
-                <label class="label is-floating-label" for="nama">Nama</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                <input class="input" name="tanggal_lahir" id="tanggal_lahir" type="date" required placeholder=" " />
-                <label class="label is-floating-label" for="tanggal_lahir">Tanggal Lahir</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                <input class="input" name="nip" id="nip" required placeholder=" " />
-                <label class="label is-floating-label" for="nip">NIP</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                <input class="input" name="golongan" id="golongan" required placeholder=" " />
-                <label class="label is-floating-label" for="golongan">Golongan / Pangkat</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                <input class="input" name="jabatan" id="jabatan" required placeholder=" " />
-                <label class="label is-floating-label" for="jabatan">Jabatan</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                <select class="input" name="agama" id="agama" required>
-                <option value="" disabled selected>Pilih Agama</option>
-                <option value="Islam">Islam</option>
-                <option value="Kristen">Kristen</option>
-                <option value="Katolik">Katolik</option>
-                <option value="Hindu">Hindu</option>
-                <option value="Budha">Budha</option>
-                <option value="Konghucu">Konghucu</option>
-              </select>
-                <label class="label is-floating-label" for="agama">Agama</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-              <div class="border rounded p-3 bg-gray-50 flex gap-6 mt-2">
-                <label class="inline-flex items-center">
-                  <input class="form-radio accent-blue-600" type="radio" name="jenis_kelamin" value="Laki-laki" id="laki" required checked>
-                  <span class="ml-2 text-gray-700">Laki-laki</span>
-                </label>
-                <label class="inline-flex items-center">
-                  <input class="form-radio accent-blue-600" type="radio" name="jenis_kelamin" value="Perempuan" id="perempuan" required>
-                  <span class="ml-2 text-gray-700">Perempuan</span>
-                </label>
-                </div>
-                <label class="label is-floating-label" for="jenis_kelamin">Jenis Kelamin</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-full">
-            <div class="field is-floating-label">
-              <div class="control">
-                <textarea class="input" name="riwayat_pendidikan" id="riwayat_pendidikan" rows="4" required placeholder=" "></textarea>
-                <label class="label is-floating-label" for="riwayat_pendidikan">Riwayat Pendidikan</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-full">
-            <div class="field is-floating-label">
-              <div class="control">
-                <textarea class="input" name="riwayat_pekerjaan" id="riwayat_pekerjaan" rows="4" required placeholder=" "></textarea>
-                <label class="label is-floating-label" for="riwayat_pekerjaan">Riwayat Pekerjaan</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                <input class="input" name="nomor_telpon" id="nomor_telpon" required placeholder=" " />
-                <label class="label is-floating-label" for="nomor_telpon">Nomor Telepon</label>
-            </div>
-            </div>
-          </div>
-        </div>
-        <div class="field mt-5 has-text-right">
-          <button type="submit" class="button is-primary is-medium" id="submitBtn">
-            <span class="icon"><i class="fas fa-save"></i></span>
-            <span>Simpan Data Pegawai</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `px-6 py-3 rounded-lg shadow-lg text-white font-semibold flex items-center gap-2 animate-fade-in-up ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-      toast.innerHTML = type === 'success'
-        ? `<i class='fas fa-check-circle'></i> ${message}`
-        : `<i class='fas fa-exclamation-triangle'></i> ${message}`;
-      const container = document.getElementById('toast-container');
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('opacity-0');
-        setTimeout(() => toast.remove(), 400);
-      }, 5000);
+{% extends "layouts/base.html" %} {% block content %}
+<style>
+    .input-field {
+        transition: all 0.2s ease;
     }
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('pegawaiForm');
-        const submitBtn = document.getElementById('submitBtn');
-        form.addEventListener('submit', function(e) {
+    .input-field:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .btn-submit {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+    }
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        transform: translateY(-2px);
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .floating-label {
+        position: absolute;
+        top: 0;
+        left: 0.75rem;
+        transform: translateY(-50%);
+        padding: 0 0.2rem;
+        background: white;
+        font-size: 0.7rem;
+        color: #2563eb;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.25rem;
+        line-height: 1;
+        pointer-events: none;
+        box-shadow: 0 1px 4px rgba(59, 130, 246, 0.07);
+    }
+    @keyframes fade-in-up {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fade-in-up 0.4s;
+        transition: opacity 0.4s;
+    }
+</style>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+/>
+<link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css" />
+
+<div
+    id="toast-container"
+    class="fixed bottom-6 left-1/2 z-50 flex flex-col items-center space-y-2"
+    style="transform: translateX(-50%)"
+></div>
+
+<div class="container mx-auto py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="form-card">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-user-plus text-green-400"></i>
+                    Formulir Data Pegawai
+                </h2>
+            </div>
+
+            <form
+                method="POST"
+                action="{{ url_for('pegawai.pegawai') }}"
+                id="pegawaiForm"
+                class="p-6"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                />
+                <div class="columns is-multiline">
+                    <!-- Nama -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="nama"
+                                >Nama Lengkap
+                                <span class="has-text-danger">*</span></label
+                            >
+                            <div class="control">
+                                <input
+                                    class="input"
+                                    name="nama"
+                                    id="nama"
+                                    type="text"
+                                    required
+                                    placeholder="Masukkan nama lengkap"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tanggal Lahir -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="tanggal_lahir"
+                                >Tanggal Lahir
+                                <span class="has-text-danger">*</span></label
+                            >
+                            <div class="control">
+                                <input
+                                    class="input"
+                                    name="tanggal_lahir"
+                                    id="tanggal_lahir"
+                                    type="date"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NIP -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="nip"
+                                >NIP
+                                <span class="has-text-danger">*</span></label
+                            >
+                            <div class="control">
+                                <input
+                                    class="input"
+                                    name="nip"
+                                    id="nip"
+                                    type="text"
+                                    required
+                                    placeholder="Masukkan NIP"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Golongan -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="golongan"
+                                >Golongan / Pangkat</label
+                            >
+                            <div class="control">
+                                <input
+                                    class="input"
+                                    name="golongan"
+                                    id="golongan"
+                                    type="text"
+                                    placeholder="Contoh: III/b"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Jabatan -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="jabatan">Jabatan</label>
+                            <div class="control">
+                                <input
+                                    class="input"
+                                    name="jabatan"
+                                    id="jabatan"
+                                    type="text"
+                                    placeholder="Contoh: Staff Administrasi"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agama -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="agama">Agama</label>
+                            <div class="control">
+                                <div class="select is-fullwidth">
+                                    <select name="agama" id="agama">
+                                        <option value="">Pilih Agama</option>
+                                        <option value="Islam">Islam</option>
+                                        <option value="Kristen">Kristen</option>
+                                        <option value="Katolik">Katolik</option>
+                                        <option value="Hindu">Hindu</option>
+                                        <option value="Budha">Budha</option>
+                                        <option value="Konghucu">
+                                            Konghucu
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Jenis Kelamin -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label"
+                                >Jenis Kelamin
+                                <span class="has-text-danger">*</span></label
+                            >
+                            <div class="control">
+                                <div
+                                    class="border rounded p-3 bg-gray-50 flex gap-6"
+                                >
+                                    <label
+                                        class="inline-flex items-center cursor-pointer"
+                                    >
+                                        <input
+                                            class="form-radio accent-blue-600"
+                                            type="radio"
+                                            name="jenis_kelamin"
+                                            value="Laki-laki"
+                                            id="laki"
+                                            required
+                                            checked
+                                        />
+                                        <span class="ml-2 text-gray-700"
+                                            >Laki-laki</span
+                                        >
+                                    </label>
+                                    <label
+                                        class="inline-flex items-center cursor-pointer"
+                                    >
+                                        <input
+                                            class="form-radio accent-blue-600"
+                                            type="radio"
+                                            name="jenis_kelamin"
+                                            value="Perempuan"
+                                            id="perempuan"
+                                            required
+                                        />
+                                        <span class="ml-2 text-gray-700"
+                                            >Perempuan</span
+                                        >
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nomor Telepon -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="nomor_telpon"
+                                >Nomor Telepon</label
+                            >
+                            <div class="control">
+                                <input
+                                    class="input"
+                                    name="nomor_telpon"
+                                    id="nomor_telpon"
+                                    type="tel"
+                                    placeholder="Contoh: 081234567890"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Riwayat Pendidikan -->
+                    <div class="column is-full">
+                        <div class="field">
+                            <label class="label" for="riwayat_pendidikan"
+                                >Riwayat Pendidikan</label
+                            >
+                            <div class="control">
+                                <textarea
+                                    class="textarea"
+                                    name="riwayat_pendidikan"
+                                    id="riwayat_pendidikan"
+                                    rows="4"
+                                    placeholder="Contoh: S1 Hukum - Universitas Indonesia (2015)"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Riwayat Pekerjaan -->
+                    <div class="column is-full">
+                        <div class="field">
+                            <label class="label" for="riwayat_pekerjaan"
+                                >Riwayat Pekerjaan</label
+                            >
+                            <div class="control">
+                                <textarea
+                                    class="textarea"
+                                    name="riwayat_pekerjaan"
+                                    id="riwayat_pekerjaan"
+                                    rows="4"
+                                    placeholder="Contoh: Staff Administrasi - PT ABC (2015-2018)"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="field mt-5 has-text-right">
+                    <button
+                        type="submit"
+                        class="button is-primary is-medium btn-submit"
+                        id="submitBtn"
+                    >
+                        <span class="icon"><i class="fas fa-save"></i></span>
+                        <span>Simpan Data Pegawai</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+    function showToast(message, type = "success") {
+        const toast = document.createElement("div");
+        toast.className = `px-6 py-3 rounded-lg shadow-lg text-white font-semibold flex items-center gap-2 animate-fade-in-up ${type === "success" ? "bg-green-600" : "bg-red-600"}`;
+        toast.innerHTML =
+            type === "success"
+                ? `<i class='fas fa-check-circle'></i> ${message}`
+                : `<i class='fas fa-exclamation-triangle'></i> ${message}`;
+
+        const container = document.getElementById("toast-container");
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add("opacity-0");
+            setTimeout(() => toast.remove(), 400);
+        }, 5000);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("pegawaiForm");
+        const submitBtn = document.getElementById("submitBtn");
+
+        form.addEventListener("submit", function (e) {
             e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Menyimpan...';
-            const formData = new FormData(this);
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            formData.append('csrf_token', csrfToken);
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    form.reset();
-                } else {
-                    showToast(data.message || 'Gagal menyimpan data', 'danger');
-                }
-            })
-            .catch(error => {
-                showToast('Terjadi kesalahan saat menyimpan data', 'danger');
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Simpan Data Pegawai';
+
+            console.log("Form submit triggered");
+
+            // Validate required fields
+            const nama = document.getElementById("nama").value.trim();
+            const nip = document.getElementById("nip").value.trim();
+            const tanggal_lahir =
+                document.getElementById("tanggal_lahir").value;
+            const jenis_kelamin = document.querySelector(
+                'input[name="jenis_kelamin"]:checked',
+            )?.value;
+
+            console.log("Form data:", {
+                nama,
+                nip,
+                tanggal_lahir,
+                jenis_kelamin,
             });
+
+            if (!nama || !nip || !tanggal_lahir || !jenis_kelamin) {
+                showToast(
+                    "Mohon lengkapi semua field yang wajib diisi",
+                    "error",
+                );
+                return;
+            }
+
+            // Disable button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.innerHTML =
+                '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Menyimpan...</span>';
+
+            // Get form data
+            const formData = new FormData(this);
+
+            // Get CSRF token from meta tag or cookie
+            let csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute("content");
+
+            // Fallback: try to get from cookie
+            if (!csrfToken) {
+                const cookieValue = document.cookie
+                    .split("; ")
+                    .find((row) => row.startsWith("csrf_token="))
+                    ?.split("=")[1];
+                csrfToken = cookieValue;
+            }
+
+            console.log("CSRF Token:", csrfToken ? "Found" : "Not found");
+
+            // Send POST request
+            fetch(this.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                credentials: "same-origin",
+            })
+                .then((response) => {
+                    console.log("Response status:", response.status);
+                    console.log("Response statusText:", response.statusText);
+                    console.log("Response ok:", response.ok);
+                    console.log("Response type:", response.type);
+
+                    // Clone response to read it twice
+                    const clonedResponse = response.clone();
+
+                    // First, try to get response as text for debugging
+                    return clonedResponse.text().then((text) => {
+                        console.log("Response text:", text);
+
+                        // Try to parse as JSON
+                        try {
+                            const data = JSON.parse(text);
+                            console.log("Parsed JSON:", data);
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    data.message ||
+                                        `Server error: ${response.status} ${response.statusText}`,
+                                );
+                            }
+
+                            return data;
+                        } catch (jsonError) {
+                            console.error("JSON parse error:", jsonError);
+                            console.error("Response was:", text);
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    `Server error (${response.status}): ${text.substring(0, 100)}`,
+                                );
+                            }
+
+                            throw new Error(
+                                `Invalid JSON response: ${jsonError.message}`,
+                            );
+                        }
+                    });
+                })
+                .then((data) => {
+                    console.log("Success response:", data);
+                    if (data.success) {
+                        showToast(
+                            data.message || "Data pegawai berhasil ditambahkan",
+                            "success",
+                        );
+                        form.reset();
+                        // Reset radio button to default
+                        document.getElementById("laki").checked = true;
+                    } else {
+                        showToast(
+                            data.message || "Gagal menyimpan data",
+                            "error",
+                        );
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error details:", error);
+                    console.error("Error message:", error.message);
+                    console.error("Error stack:", error.stack);
+
+                    let errorMessage = "Terjadi kesalahan saat menyimpan data";
+
+                    if (error.message.includes("CSRF")) {
+                        errorMessage =
+                            "Sesi keamanan tidak valid. Silakan refresh halaman dan coba lagi.";
+                    } else if (error.message.includes("400")) {
+                        errorMessage =
+                            "Data tidak valid. Periksa kembali form Anda.";
+                    } else if (error.message.includes("500")) {
+                        errorMessage =
+                            "Terjadi kesalahan di server. Silakan coba lagi.";
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+
+                    showToast(errorMessage, "error");
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML =
+                        '<span class="icon"><i class="fas fa-save"></i></span><span>Simpan Data Pegawai</span>';
+                });
         });
     });
 </script>
-<style>
-@keyframes fade-in-up {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up { animation: fade-in-up 0.4s; transition: opacity 0.4s; }
-</style>
 {% endblock %}

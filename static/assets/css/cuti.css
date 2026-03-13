@@ -32,8 +32,10 @@
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
+    vertical-align: middle;
 }
 
+/* Generic states */
 .status-badge.pending {
     background-color: #fef3c7;
     color: #92400e;
@@ -44,6 +46,46 @@
     color: #065f46;
 }
 
+/* Approver-specific variations for approved state
+   - Use an additional class on the badge element (e.g. .status-badge.approved.pimpinan)
+   - This lets templates render the same badge element but include the approver role class */
+.status-badge.approved.pimpinan {
+    /* subtle blue-tinted approved badge for approvals done by Pimpinan */
+    background-color: #e6f0ff;
+    color: #1e40af; /* Pimpinan primary color */
+    border: 1px solid rgba(30, 64, 175, 0.08);
+    box-shadow: 0 1px 0 rgba(30, 64, 175, 0.03) inset;
+}
+
+.status-badge.approved.admin {
+    /* slightly warm/stronger outline for approvals done by Admin to distinguish from Pimpinan */
+    background-color: #fff1f2;
+    color: #991b1b; /* Admin primary color */
+    border: 1px solid rgba(153, 27, 27, 0.06);
+    box-shadow: 0 1px 0 rgba(153, 27, 27, 0.02) inset;
+}
+
+/* Small inline role label inside a badge, e.g. <span class="status-badge approved"><span class="label-text">Disetujui</span><small class="approver-role">Pimpinan</small></span> */
+.status-badge .approver-role {
+    display: inline-block;
+    margin-left: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: none;
+    padding: 0.05rem 0.25rem;
+    border-radius: 0.25rem;
+    vertical-align: middle;
+    opacity: 0.92;
+    line-height: 1;
+}
+
+/* Ensure approver-role contrasts on different backgrounds */
+.status-badge.approved .approver-role {
+    background: rgba(255, 255, 255, 0.18);
+    color: inherit;
+}
+
+/* Rejection state remains distinct */
 .status-badge.rejected {
     background-color: #fee2e2;
     color: #991b1b;
@@ -201,7 +243,9 @@
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
     font-size: 0.875rem;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition:
+        border-color 0.2s ease-in-out,
+        box-shadow 0.2s ease-in-out;
 }
 
 .form-control:focus {
@@ -228,16 +272,16 @@
     .btn-group {
         flex-direction: column;
     }
-    
+
     .modal-content {
         margin: 1rem;
         max-width: calc(100vw - 2rem);
     }
-    
+
     .cuti-table {
         font-size: 0.875rem;
     }
-    
+
     .cuti-table th,
     .cuti-table td {
         padding: 0.5rem;

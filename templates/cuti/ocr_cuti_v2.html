@@ -630,6 +630,34 @@ endblock %} {% block content %}
         }
     }
 
+    // Write back edits in modal into window.extractedData at given index
+    function writeBackModalEdits(index) {
+        // If index invalid or no data, nothing to write back
+        if (index == null || !window.extractedData || !window.extractedData[index]) return;
+        try {
+            const names = [
+                'nama','nip','jabatan','gol_ruang','unit_kerja','masa_kerja',
+                'jenis_cuti','tanggal_mulai_cuti','tanggal_selesai_cuti',
+                'lama_cuti','no_suratmasuk','alasan_cuti','telp','alamat','nomor_surat'
+            ];
+            for (const name of names) {
+                const el = document.querySelector(`[name="${name}"]`);
+                if (el) {
+                    window.extractedData[index][name] = el.value;
+                }
+            }
+
+            // Ensure filename/file_path are preserved if missing
+            if (!window.extractedData[index].filename && window.extractedData[index].file_path) {
+                window.extractedData[index].filename = window.extractedData[index].file_path.split('/').pop();
+            }
+
+            console.log('writeBackModalEdits: data updated for index', index);
+        } catch (err) {
+            console.error('writeBackModalEdits error:', err);
+        }
+    }
+
     // Update file preview
     function updateFilePreview(data) {
         const imagePreview = document.getElementById('imagePreview');
@@ -701,8 +729,16 @@ endblock %} {% block content %}
         }
     }
 
-    // Navigate previous
+    // Navigate previous (writes back current edits before moving)
     function navigatePrevious() {
+        try {
+            if (typeof writeBackModalEdits === 'function') {
+                writeBackModalEdits(currentDataIndex);
+            }
+        } catch (e) {
+            console.error('Error writing back before navigatePrevious:', e);
+        }
+
         if (currentDataIndex > 0) {
             currentDataIndex--;
             fillModalForm(currentDataIndex);
@@ -710,8 +746,16 @@ endblock %} {% block content %}
         }
     }
 
-    // Navigate next
+    // Navigate next (writes back current edits before moving)
     function navigateNext() {
+        try {
+            if (typeof writeBackModalEdits === 'function') {
+                writeBackModalEdits(currentDataIndex);
+            }
+        } catch (e) {
+            console.error('Error writing back before navigateNext:', e);
+        }
+
         if (currentDataIndex < extractedData.length - 1) {
             currentDataIndex++;
             fillModalForm(currentDataIndex);
@@ -845,29 +889,62 @@ endblock %} {% block content %}
             return;
         }
 
-        if (confirm(`Apakah Anda yakin ingin menyimpan ${window.extractedData.length} data cuti ke database?`)) {
-            fetch('/cuti-v2/save_extracted_data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
-                },
-                body: JSON.stringify(window.extractedData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Berhasil menyimpan ${window.extractedData.length} data cuti ke database!`);
-                    setTimeout(() => window.location.href = '/cuti-v2/list', 2000);
-                } else {
-                    alert('Error: ' + (data.error || 'Gagal menyimpan data'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat menyimpan data.');
-            });
+        // Ensure any edits in modal are written back to the dataset
+        try {
+            if (typeof writeBackModalEdits === 'function') {
+                writeBackModalEdits(currentDataIndex);
+            }
+        } catch (e) {
+            console.error('Error writing back modal edits before save:', e);
         }
+
+        if (!confirm(`Apakah Anda yakin ingin menyimpan ${window.extractedData.length} data cuti ke database?`)) {
+            return;
+        }
+
+        // Disable button(s) optionally (if you have references) - simple visual feedback
+        const saveBtn = document.querySelector('button[onclick="saveAllData()"]');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerText = 'Menyimpan...';
+        }
+
+        fetch('/cuti-v2/save_extracted_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify(window.extractedData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Provide a clearer summary from server response when available
+                const saved = data.saved_ids ? data.saved_ids.length : 0;
+                const skipped = data.skipped_files ? data.skipped_files.length : 0;
+                const failed = data.failed ? data.failed.length : 0;
+                let message = `Proses selesai:\\nDisimpan: ${saved}\\nDi-skip (duplikat): ${skipped}\\nGagal: ${failed}`;
+                if (failed > 0 && Array.isArray(data.failed)) {
+                    message += `\\n\\nDetail gagal:\\n` + data.failed.map(f => `${f.file}: ${f.error}`).join('\\n');
+                }
+                alert(message);
+                // Redirect to list view to see saved items
+                setTimeout(() => window.location.href = '/cuti-v2/list', 1200);
+            } else {
+                alert('Error: ' + (data.error || 'Gagal menyimpan data'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menyimpan data.');
+        })
+        .finally(() => {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerText = 'Simpan ke Database';
+            }
+        });
     }
 
     // Reset form function

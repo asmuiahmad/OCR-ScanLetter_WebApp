@@ -1,288 +1,234 @@
-{% extends "layouts/base.html" %} {% block title %}Daftar Permohonan Cuti{%
-endblock %} {% block extra_css %}
-<link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='assets/css/cuti.css') }}"
-/>
-{% endblock %} {% block content %}
-<div class="container-fluid">
-    <div class="max-w-5xl mx-auto">
-        <div class="form-card">
-            <div class="page-header">
-                <h2>
-                    <i class="fas fa-list text-green-400"></i>
-                    Daftar Permohonan Cuti
-                </h2>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Daftar Permohonan Cuti</h3>
-                    <div class="card-tools">
-                        <a
-                            href="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}"
-                            class="btn btn-primary btn-sm"
-                        >
-                            <i class="fas fa-plus"></i> Tambah Cuti Baru
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {% if cuti_list %}
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama</th>
-                                    <th>NIP</th>
-                                    <th>Jenis Cuti</th>
-                                    <th>Tanggal Cuti</th>
-                                    <th>Lama Cuti</th>
-                                    <th>Status</th>
-                                    <th>Tanggal Pengajuan</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for cuti in cuti_list %}
-                                <tr>
-                                    <td>{{ loop.index }}</td>
-                                    <td>{{ cuti.nama }}</td>
-                                    <td>{{ cuti.nip }}</td>
-                                    <td>{{ cuti.jenis_cuti }}</td>
-                                    <td>
-                                        {{
-                                        cuti.tanggal_cuti.strftime('%d/%m/%Y')
-                                        }} - {{
-                                        cuti.sampai_cuti.strftime('%d/%m/%Y') }}
-                                    </td>
-                                    <td>{{ cuti.lama_cuti }}</td>
-                                    <td>
-                                        {% if cuti.status_cuti == 'pending' %}
-                                        <span class="badge badge-warning"
-                                            >Menunggu Persetujuan</span
-                                        >
-                                        {% elif cuti.status_cuti == 'approved'
-                                        %}
-                                        <span class="badge badge-success"
-                                            >Disetujui</span
-                                        >
-                                        {% elif cuti.status_cuti == 'rejected'
-                                        %}
-                                        <span class="badge badge-danger"
-                                            >Ditolak</span
-                                        >
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {{
-                                        cuti.tgl_ajuan_cuti.strftime('%d/%m/%Y')
-                                        }}
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <button
-                                                type="button"
-                                                class="btn btn-info btn-sm"
-                                                onclick="viewDetail({{ cuti.id_cuti }})"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                                Detail
-                                            </button>
+{% extends "layouts/base.html" %}
 
-                                            {% if current_user.role in
-                                            ['pimpinan', 'admin'] and
-                                            cuti.status_cuti == 'pending' %}
-                                            <button
-                                                type="button"
-                                                class="btn btn-success btn-sm"
-                                                onclick="approveCuti({{ cuti.id_cuti }})"
-                                            >
-                                                <i class="fas fa-check"></i>
-                                                Setujui
-                                            </button>
-                                            <button
-                                                type="button"
-                                                class="btn btn-danger btn-sm"
-                                                onclick="rejectCuti({{ cuti.id_cuti }})"
-                                            >
-                                                <i class="fas fa-times"></i>
-                                                Tolak
-                                            </button>
-                                            {% endif %} {% if cuti.status_cuti
-                                            == 'approved' %}
-                                            <a
-                                                href="{{ url_for('cuti.preview_cuti_html', cuti_id=cuti.id_cuti) }}"
-                                                class="btn btn-info btn-sm"
-                                                target="_blank"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                                Preview HTML
-                                            </a>
-                                            <a
-                                                href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}"
-                                                class="btn btn-primary btn-sm"
-                                            >
-                                                <i class="fas fa-download"></i>
-                                                PDF
-                                            </a>
-                                            {% endif %} {% if cuti.qr_code %}
-                                            <button
-                                                type="button"
-                                                class="btn btn-secondary btn-sm"
-                                                onclick="showQRCode('{{ cuti.qr_code }}')"
-                                            >
-                                                <i class="fas fa-qrcode"></i> QR
-                                            </button>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+{% block title %}Daftar Permohonan Cuti{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/cuti.css') }}">
+<style></style>
+  .summary { display:flex; gap:.6rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+  .summary .badge { padding:.35rem .6rem; border-radius:.375rem; font-weight:600; }
+  .needs-approval { background-color: rgba(255, 249, 196, 0.35); }
+  .muted { color:#6c757d; font-size:.9rem; }
+  .action-btn { margin-right:.35rem; }
+  .table-small { font-size:.95rem; }
+  .table td, .table th { vertical-align: middle; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div></div>
+      <h2 class="mb-0">Daftar Permohonan Cuti</h2>
+      <small class="text-muted">Lihat dan kelola permohonan cuti</small>
+    </div>
+    <div>
+      <a href</div>="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}" class="btn btn-primary btn-sm">Tambah Cuti</a>
+    </div>
+  </div>
+
+  {# Source rows: support paginated `entries` or plain `cuti_list` #}
+  {% set is_paginated = entries is defined and entries is not none and entries.items is defined %}
+  {% set rows = entries.items if is_paginated else (cuti_list or []) %}
+
+  <div class="summary">
+    <span class="badge bg-light text-dark">Total: {{ rows|length }}</span>
+    <span class="badge bg-warning text-dark">Pending: {{ rows|selectattr('status_cuti', 'equalto', 'pending')|list|length }}</span>
+    <span class="badge bg-success text-white">Approved: {{ rows|selectattr('status_cuti', 'equalto', 'approved')|list|length }}</span>
+    <span class="badge bg-danger text-white">Rejected: {{ rows|selectattr('status_cuti', 'equalto', 'rejected')|list|length }}</span>
+    {% if current_user.is_authenticated %}
+      <small class="muted ms-3">Anda: <strong>{{ current_user.role|default('')|capitalize }}</strong></small>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-small mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width:60</tr>px">No</th>
+              <th>Nama</th>
+              <th>N</th>IP</th>
+              <th></th>Jenis</th>
+              <th>Tgl Mulai</th>
+              <th>Tgl Selesai</th>
+              <th>Lama</th>
+              <th>Status</th>
+              <th></th>Perlu Persetujuan?</th>
+              <th class="text-center" style="width:220px">Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% if rows and rows</tbody>|length > 0 %}
+              {% for cuti in rows %}
+                {% set status = (cuti.status_cuti or '') | lower %}
+                {% set needs_approval = (status == 'pending') %}
+                <tr class="{% if needs_approval %}needs-approval{% endif %}" data-cuti-id="{{ cuti.id_cuti }}">
+                  <td>
+                    {% if is_paginated</td> %}
+                      {{ (entries.page - 1) * entries.per_page + loop.index }}
                     {% else %}
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Belum ada data
-                        permohonan cuti.
-                    </div>
+                      {{ loop.index }}
                     {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                  </td>
 
-<!-- Modal Detail Cuti -->
-<div class="modal fade" id="detailModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-xl" role="document" style="max-width: 95%">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Permohonan Cuti</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="detailContent">
-                <!-- Content will be loaded here -->
-            </div>
-        </div>
-    </div>
-</div>
+                  <td>{{ cuti.nama or '-' }}</td>
+                  <td>{{ cuti.nip or '-' }}</td>
+                  <td>{{ cuti.jenis_cuti or '-' }}</td>
 
-<!-- Modal Approval -->
-<div class="modal fade" id="approvalModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Persetujuan Cuti</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="approvalForm">
-                    <div class="form-group">
-                        <label for="notes">Catatan (Opsional):</label>
-                        <textarea
-                            class="form-control"
-                            id="notes"
-                            name="notes"
-                            rows="3"
-                            placeholder="Masukkan catatan persetujuan..."
-                        ></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-dismiss="modal"
-                >
-                    Batal
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-success"
-                    id="confirmApprove"
-                >
-                    Setujui Cuti
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+                  <td></td>
+                    {% if cuti.tanggal_cuti %}
+                      {% if cuti.tanggal_cuti.strftime is defined %}
+                        {{ cuti.tanggal_cuti.strftime('%d/%m/%Y') }}
+                      {% else %}
+                        {{ cuti.tanggal_cuti }}
+                      {% endif %}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
 
-<!-- Modal Rejection -->
-<div class="modal fade" id="rejectionModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Penolakan Cuti</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="rejectionForm">
-                    <div class="form-group">
-                        <label for="rejectNotes">Alasan Penolakan:</label>
-                        <textarea
-                            class="form-control"
-                            id="rejectNotes"
-                            name="notes"
-                            rows="3"
-                            placeholder="Masukkan alasan penolakan..."
-                            required
-                        ></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-dismiss="modal"
-                >
-                    Batal
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmReject">
-                    Tolak Cuti
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+                  <td>
+                    {%</td> if cuti.sampai_cuti %}
+                      {% if cuti.sampai_cuti.strftime is defined %}
+                        {{ cuti.sampai_cuti.strftime('%d/%m/%Y') }}
+                      {% else %}
+                        {{ cuti.sampai_cuti }}
+                      {% endif %}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
 
-<!-- Modal QR Code -->
-<div class="modal fade" id="qrModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">QR Code Digital Signature</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body text-center">
-                <div id="qrCodeContainer"></div>
-                <p class="mt-3">
-                    Scan QR code untuk verifikasi digital signature
-                </p>
-                <p>
-                    <small>Hash: <span id="qrHash"></span></small>
-                </p>
-            </div>
-        </div>
+                  <td>{{ cuti.lama_cuti or '-' }}</td>
+
+                  <td>
+                    {% if status</td> == 'pending' %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif status == 'approved' %}
+                      <span class="badge bg-success text-white">Disetujui{% if cuti.approved_role %} ({{ cuti.approved_role|capitalize }}){% endif %}</span>
+                    {% elif status == 'rejected' %}
+                      <span class="badge bg-danger text-white">Ditolak</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ (cuti.status_cuti or '-')|capitalize }}</span>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if status == 'pending' %}
+                      {% if current_user.is_authenticated and current_user</td>.role in ['pimpinan', 'admin'] %}
+                        <span class="text-success">Perlu Persetujuan Anda</span>
+                      {% else %}
+                        <span class="text-warning">Menunggu Persetujuan</span>
+                      {% endif %}
+                    {% elif status == 'approved' %}
+                      {% if cuti.approved_by %}
+                        <span class="muted">Disetujui oleh {{ cuti.approved_by }}</span>
+                      {% else %}
+                        <span class="muted">Sudah disetujui</span>
+                      {% endif %}
+                    {% elif status == 'rejected' %}
+                      <span class="text-danger">Ditolak</span>
+                    {% else %}
+                      <span class="muted">{{ (cuti.status_cuti or '-')|capitalize }}</span>
+                    {% endif %}
+                  </td>
+
+                  <td class="text-center">
+                    <a href="{{ url_for('cuti.preview_cuti_html', cuti_id=cuti.id_cuti) }}" class="btn btn-sm btn-secondary action-btn" title="Preview" target="_blank"><i class="fas fa-eye"></i></a>
+
+                    {% if status == 'approved' %}
+                      <a href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}" class="btn btn-sm btn-primary action-btn" title="Unduh PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
+                    {% endif %}
+
+                    {# Approve/reject - show only to authorized roles when pending #}
+                    {% if current_user.is_authenticated and current_user.role in ['pimpinan', 'admin'] and status == 'pending' %}
+                      <form method="post" action="{{ url_for('cuti.approve_cuti', cuti_id=cuti.id_cuti) }}" class="d-inline action-btn" style="display:inline-block;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-success" title="Setujui"><i class="fas fa-check"></i></button>
+                      </form>
+
+                      <form method="post" action="{{ url_for('cuti.reject_cuti', cuti_id=cuti.id_cuti) }}" class="d-inline reject-form" style="display:inline-block;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="reason" value="">
+                        <button type="button" class="btn btn-sm btn-danger btn-reject" title="Tolak"><i class="fas fa-times"></i></button>
+                      </form>
+                    {% endif %}
+
+                    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                      <form method="post" action="{{ url_for('cuti.delete_cuti', cuti_id=cuti.id_cuti) }}" class="d-inline ms-1" onsubmit="return confirm('Yakin ingin menghapus data cuti ini?');" style="display:inline-block;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus"><i class="fas fa-trash"></i></button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="10" class="text-center py-3">Belum ada permohonan cuti.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
+
+  {# Pagination controls #}
+  {% if is_paginated and entries.pages > 1 %}
+    <nav aria-label="Pagination" class="mt-3">
+      <ul class="pagination justify-content-center mb-0">
+        {% if entries.has_prev %}
+          <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, page=entries.prev_num, **request.view_args) }}">Previous</a></li>
+        {% endif %}
+
+        {% for p in entries.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <li class="page-item {% if p == entries.page %}active{% endif %}"><a class="page-link" href="{{ url_for(request.endpoint, page=p, **request.view_args) }}">{{ p }}</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if entries.has_next %}
+          <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, page=entries.next_num, **request.view_args) }}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
 </div>
+{% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='assets/js/cuti/list-cuti.js') }}"></script>
-{% endblock %} {% endblock %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Reject button handler: prompt for reason, set hidden input and submit the reject form
+  document.querySelectorAll('.btn-reject').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var form = this.closest('.reject-form');
+      if (!form) return;
+      var reason = prompt('Masukkan alasan penolakan (wajib):');
+      if (!reason) {
+        alert('Alasan penolakan diperlukan.');
+        return;
+      }
+      var reasonInput = form.querySelector('input[name="reason"]');
+      if (reasonInput) {
+        reasonInput.value = reason;
+      } else {
+        var inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'reason';
+        inp.value = reason;
+        form.appendChild(inp);
+      }
+      form.submit();
+    });
+  });
+});
+</script>
+{% endblock %}
+</tr></script>

@@ -1,203 +1,372 @@
-{% extends "layouts/base.html" %}
-
-{% block title %}Input Surat Masuk - PA Banjarbaru{% endblock %}
-
-{% block content %}
+{% extends "layouts/base.html" %} {% block title %}Input Surat Masuk - PA
+Banjarbaru{% endblock %} {% block content %}
 <head>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
-  <style>
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      margin: 0;
-      filter: none;
-      opacity: 1;
-      cursor: pointer;
-    }
-    input[type="date"] {
-      padding-right: 2.5rem !important;
-    }
-    /* For Firefox */
-    input[type="date"]::-moz-calendar-picker-indicator {
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      margin: 0;
-      filter: none;
-      opacity: 1;
-      cursor: pointer;
-    }
-  </style>
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css" />
+    <style>
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            filter: none;
+            opacity: 1;
+            cursor: pointer;
+        }
+        input[type="date"] {
+            padding-right: 2.5rem !important;
+        }
+        /* For Firefox */
+        input[type="date"]::-moz-calendar-picker-indicator {
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            filter: none;
+            opacity: 1;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
-  .form-card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-  .input-field {
-    transition: all 0.2s ease;
-  }
-  .input-field:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  }
-  .btn-submit {
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, #1e40af, #3b82f6);
-  }
-  .btn-submit:hover {
-    background: linear-gradient(135deg, #1e3a8a, #2563eb);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  .floating-label {
-    position: absolute;
-    top: 0;
-    left: 0.75rem;
-    transform: translateY(-50%);
-    padding: 0 0.2rem;
-    background: white;
-    font-size: 0.7rem;
-    color: #2563eb;
-    font-weight: 600;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.25rem;
-    line-height: 1;
-    pointer-events: none;
-    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
-  }
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='assets/css/form-card.css') }}"
+/>
+
+<style>
+    .form-card:hover {
+        box-shadow:
+            0 20px 25px -5px rgba(0, 0, 0, 0.1),
+            0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .input-field {
+        transition: all 0.2s ease;
+    }
+    .input-field:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .btn-submit {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+    }
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        transform: translateY(-2px);
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .floating-label {
+        position: absolute;
+        top: 0;
+        left: 0.75rem;
+        transform: translateY(-50%);
+        padding: 0 0.2rem;
+        background: white;
+        font-size: 0.7rem;
+        color: #2563eb;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.25rem;
+        line-height: 1;
+        pointer-events: none;
+        box-shadow: 0 1px 4px rgba(59, 130, 246, 0.07);
+    }
 </style>
 <div class="container mx-auto py-8 px-4">
-  <div class="max-w-4xl mx-auto">
-    <div class="form-card">
-      <div class="page-header">
-        <h2>
-          <i class="fas fa-file-import text-green-400"></i>
-          Input Surat Masuk
-        </h2>
-      </div>
-    </div>
-    <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
-      <form method="POST" enctype="multipart/form-data" class="p-6">
-        {{ form.csrf_token()|safe }}
-        <div class="columns is-multiline">
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.pengirim_suratMasuk(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="pengirim_suratMasuk">Pengirim</label>
-              </div>
+    <div class="max-w-4xl mx-auto">
+        <div class="form-card">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-file-import text-green-400"></i>
+                    Input Surat Masuk
+                </h2>
             </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.nomor_suratMasuk(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="nomor_suratMasuk">Nomor Surat</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.tanggal_suratMasuk(class="input", type="date", placeholder=" ") }}
-              </div>
-              <label class="label is-floating-label" for="tanggal_suratMasuk">Tanggal Surat</label>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.penerima_suratMasuk(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="penerima_suratMasuk">Penerima</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-full">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.isi_suratMasuk(class="input", placeholder=" ", style="min-height:120px;") }}
-                <label class="label is-floating-label" for="isi_suratMasuk">Isi Surat</label>
-              </div>
         </div>
-          </div>
-          <div class="column is-full">
-            <div class="field is-floating-label">
-              <div class="control">
-                <div id="drop-area" style="border:2px dashed #3b82f6;border-radius:0.75rem;padding:2rem;text-align:center;cursor:pointer;transition:background 0.2s;position:relative;background:#f8fafc;">
-                  <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;color:#3b82f6;"></i>
-                  <div style="font-weight:600;color:#1e40af;margin-top:0.5rem;">Drag & Drop atau Klik untuk Upload Lampiran Surat</div>
-                  <div id="file-selected-name" style="margin-top:0.5rem;color:#2563eb;font-size:0.95em;font-weight:500;"></div>
-                  {{ form.lampiran_suratMasuk(class="custom-file-input", style="display:none;") }}
+        <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
+            <form method="POST" enctype="multipart/form-data" class="p-6">
+                {{ form.csrf_token()|safe }}
+                <div class="columns is-multiline">
+                    <div class="column is-half">
+                        <div class="field is-floating-label">
+                            <div class="control">
+                                {{ form.pengirim_suratMasuk(class="input",
+                                placeholder=" ") }}
+                                <label
+                                    class="label is-floating-label"
+                                    for="pengirim_suratMasuk"
+                                    >Pengirim</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-half">
+                        <div class="field is-floating-label">
+                            <div class="control">
+                                {{ form.nomor_suratMasuk(class="input",
+                                placeholder=" ") }}
+                                <label
+                                    class="label is-floating-label"
+                                    for="nomor_suratMasuk"
+                                    >Nomor Surat</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-half">
+                        <div class="field is-floating-label">
+                            <div class="control">
+                                {{ form.tanggal_suratMasuk(class="input",
+                                type="date", placeholder=" ") }}
+                            </div>
+                            <label
+                                class="label is-floating-label"
+                                for="tanggal_suratMasuk"
+                                >Tanggal Surat</label
+                            >
+                        </div>
+                    </div>
+                    <div class="column is-half">
+                        <div class="field is-floating-label">
+                            <div class="control">
+                                {{ form.penerima_suratMasuk(class="input",
+                                placeholder=" ") }}
+                                <label
+                                    class="label is-floating-label"
+                                    for="penerima_suratMasuk"
+                                    >Penerima</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-full">
+                        <div class="field is-floating-label">
+                            <div class="control">
+                                {{ form.isi_suratMasuk(class="input",
+                                placeholder=" ", style="min-height:120px;") }}
+                                <label
+                                    class="label is-floating-label"
+                                    for="isi_suratMasuk"
+                                    >Isi Surat</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column is-full">
+                        <div class="field">
+                            <label
+                                class="label"
+                                style="
+                                    font-size: 0.9rem;
+                                    color: #2563eb;
+                                    font-weight: 600;
+                                    margin-bottom: 0.5rem;
+                                "
+                                >Lampiran Surat (Opsional)</label
+                            >
+                            <div class="control">
+                                {{
+                                form.lampiran_suratMasuk(id="lampiran_suratMasuk",
+                                style="display:none;") }}
+                                <label
+                                    for="lampiran_suratMasuk"
+                                    id="drop-area"
+                                    style="
+                                        border: 2px dashed #3b82f6;
+                                        border-radius: 0.75rem;
+                                        padding: 2.5rem 2rem;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s;
+                                        background: #f8fafc;
+                                        display: block;
+                                        user-select: none;
+                                    "
+                                >
+                                    <i
+                                        class="fas fa-cloud-upload-alt"
+                                        style="
+                                            font-size: 3rem;
+                                            color: #3b82f6;
+                                            display: block;
+                                            margin-bottom: 1rem;
+                                            pointer-events: none;
+                                        "
+                                    ></i>
+                                    <div
+                                        style="
+                                            font-weight: 600;
+                                            color: #1e40af;
+                                            font-size: 1.1rem;
+                                            pointer-events: none;
+                                        "
+                                    >
+                                        Klik di sini atau Drag & Drop File
+                                    </div>
+                                    <div
+                                        style="
+                                            color: #64748b;
+                                            font-size: 0.9rem;
+                                            margin-top: 0.5rem;
+                                            pointer-events: none;
+                                        "
+                                    >
+                                        Format: PDF, JPG, PNG (Max 16MB)
+                                    </div>
+                                    <div
+                                        id="file-selected-name"
+                                        style="
+                                            margin-top: 1rem;
+                                            color: #059669;
+                                            font-size: 1rem;
+                                            font-weight: 600;
+                                            pointer-events: none;
+                                        "
+                                    ></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <label class="label is-floating-label" for="lampiran_suratMasuk">Lampiran Surat</label>
-            </div>
-          </div>
+                <div class="field mt-5 has-text-right">
+                    <button type="submit" class="button is-primary is-medium">
+                        <span class="icon"><i class="fas fa-save"></i></span>
+                        <span>Simpan Surat Masuk</span>
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="field mt-5 has-text-right">
-          <button type="submit" class="button is-primary is-medium">
-            <span class="icon"><i class="fas fa-save"></i></span>
-            <span>Simpan Surat Masuk</span>
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 <script src="{{ url_for('static', filename='assets/js/forms/input-surat.js') }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const dropArea = document.getElementById('drop-area');
-  const fileInput = document.querySelector('.custom-file-input');
-  const fileSelectedName = document.getElementById('file-selected-name');
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("Initializing file upload...");
 
-  // Click area to open file dialog
-  dropArea.addEventListener('click', function() {
-    fileInput.click();
-  });
+        const dropArea = document.getElementById("drop-area");
+        const fileInput = document.querySelector(
+            'input[name="lampiran_suratMasuk"]',
+        );
+        const fileSelectedName = document.getElementById("file-selected-name");
 
-  // Drag over styling
-  dropArea.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    dropArea.style.background = '#e0e7ff';
-    dropArea.style.borderColor = '#1e40af';
-  });
-  dropArea.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    dropArea.style.background = '#f8fafc';
-    dropArea.style.borderColor = '#3b82f6';
-  });
-  dropArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    dropArea.style.background = '#f8fafc';
-    dropArea.style.borderColor = '#3b82f6';
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      fileInput.files = e.dataTransfer.files;
-      updateFileName();
-    }
-  });
+        if (!dropArea) {
+            console.error("Drop area not found");
+            return;
+        }
 
-  // File input change
-  fileInput.addEventListener('change', updateFileName);
+        if (!fileInput) {
+            console.error("File input not found");
+            return;
+        }
 
-  function updateFileName() {
-    if (fileInput.files && fileInput.files.length > 0) {
-      fileSelectedName.textContent = fileInput.files[0].name;
-    } else {
-      fileSelectedName.textContent = '';
-    }
-  }
-});
+        console.log("Drop area found:", dropArea);
+        console.log("File input found:", fileInput);
+
+        // Prevent default drag behaviors on the entire document
+        ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Test click functionality
+        dropArea.addEventListener("click", function (e) {
+            console.log("✅ Drop area clicked! File dialog should open.");
+        });
+
+        // Ensure label is clickable
+        dropArea.style.webkitUserSelect = "none";
+        dropArea.style.mozUserSelect = "none";
+        dropArea.style.msUserSelect = "none";
+
+        // Highlight drop area when item is dragged over it
+        ["dragenter", "dragover"].forEach((eventName) => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ["dragleave", "drop"].forEach((eventName) => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.style.background = "#dbeafe";
+            dropArea.style.borderColor = "#1e40af";
+            dropArea.style.borderWidth = "3px";
+            dropArea.style.transform = "scale(1.02)";
+        }
+
+        function unhighlight(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.style.background = "#f8fafc";
+            dropArea.style.borderColor = "#3b82f6";
+            dropArea.style.borderWidth = "2px";
+            dropArea.style.transform = "scale(1)";
+        }
+
+        // Handle dropped files
+        dropArea.addEventListener("drop", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files && files.length > 0) {
+                // Create a new FileList-like object
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(files[0]);
+                fileInput.files = dataTransfer.files;
+
+                updateFileName();
+                console.log("File dropped:", files[0].name);
+            }
+        });
+
+        // File input change event
+        fileInput.addEventListener("change", function (e) {
+            console.log("File input changed!");
+            updateFileName();
+            if (fileInput.files[0]) {
+                console.log(
+                    "File selected via input:",
+                    fileInput.files[0].name,
+                );
+            }
+        });
+
+        function updateFileName() {
+            if (fileInput.files && fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                const fileSize = (fileInput.files[0].size / 1024).toFixed(2);
+                fileSelectedName.innerHTML = `<i class="fas fa-check-circle"></i> ${fileName} <strong>(${fileSize} KB)</strong>`;
+
+                // Change drop area appearance
+                dropArea.style.background = "#ecfdf5";
+                dropArea.style.borderColor = "#059669";
+                console.log("✅ File selected:", fileName);
+            } else {
+                fileSelectedName.textContent = "";
+                dropArea.style.background = "#f8fafc";
+                dropArea.style.borderColor = "#3b82f6";
+            }
+        }
+    });
 </script>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
-window.addEventListener('DOMContentLoaded', function() {
-{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category, message in messages %}showToast({message: "{{ message|e }}", type: "{{ category }}", duration: 4000});{% endfor %}{% endif %}{% endwith %}
-});
+    window.addEventListener('DOMContentLoaded', function() {
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category, message in messages %}showToast({message: "{{ message|e }}", type: "{{ category }}", duration: 4000});{% endfor %}{% endif %}{% endwith %}
+    });
 </script>
 {% endblock %}

@@ -1,6 +1,9 @@
 /**
  * Cuti List Management JavaScript
  * Handles cuti approval, rejection, and detail viewing
+ *
+ * Updated: add event delegation to support buttons rendered with data-attributes,
+ * and wire approve/reject AJAX to the correct endpoints.
  */
 
 let currentCutiId = null;
@@ -134,7 +137,7 @@ function generateDetailContent(cuti) {
                     <tr><td>Tanggal Mulai</td><td>: ${escapeHtml(cuti.tanggal_cuti || "-")}</td></tr>
                     <tr><td>Tanggal Selesai</td><td>: ${escapeHtml(cuti.sampai_cuti || "-")}</td></tr>
                     <tr><td>Status</td><td>: <span class="badge ${statusBadgeClass}">${getStatusText(cuti.status_cuti)}</span></td></tr>
-                    ${cuti.approved_by ? `<tr><td>Disetujui oleh</td><td>: ${escapeHtml(cuti.approved_by)}</td></tr>` : ""}
+                    ${cuti.approved_by ? `<tr><td>Disetujui oleh</td><td>: ${escapeHtml(cuti.approved_by)}${cuti.approved_role ? ` <small>(${escapeHtml(cuti.approved_role)})</small>` : ""}</td></tr>` : ""}
                     ${cuti.approved_at ? `<tr><td>Tanggal Persetujuan</td><td>: ${escapeHtml(cuti.approved_at)}</td></tr>` : ""}
                     ${cuti.notes ? `<tr><td>Catatan</td><td>: ${escapeHtml(cuti.notes)}</td></tr>` : ""}
                 </table>
@@ -256,11 +259,14 @@ function handleApprovalConfirmation() {
       '<i class="fas fa-spinner fa-spin"></i> Memproses...';
   }
 
-  fetch(`/cuti/approve/${currentCutiId}`, {
+  // Use correct endpoint: /cuti/approve-cuti/:id
+  fetch(`/cuti/approve-cuti/${currentCutiId}`, {
     method: "POST",
+    credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": getCsrfToken(),
+      "X-Requested-With": "XMLHttpRequest",
     },
     body: JSON.stringify({ notes: notes }),
   })
@@ -276,7 +282,7 @@ function handleApprovalConfirmation() {
           "Cuti berhasil disetujui dengan tanda tangan digital!",
           "success",
         );
-        setTimeout(() => location.reload(), 1500);
+        setTimeout(() => location.reload(), 1200);
       } else {
         throw new Error(data.message || "Gagal menyetujui cuti");
       }
@@ -293,6 +299,7 @@ function handleApprovalConfirmation() {
       }
     });
 
+  // Hide modal
   $("#approvalModal").modal("hide");
 }
 
@@ -321,11 +328,14 @@ function handleRejectionConfirmation() {
       '<i class="fas fa-spinner fa-spin"></i> Memproses...';
   }
 
-  fetch(`/cuti/reject/${currentCutiId}`, {
+  // Use correct endpoint: /cuti/reject-cuti/:id
+  fetch(`/cuti/reject-cuti/${currentCutiId}`, {
     method: "POST",
+    credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": getCsrfToken(),
+      "X-Requested-With": "XMLHttpRequest",
     },
     body: JSON.stringify({ notes: notes }),
   })
@@ -338,7 +348,7 @@ function handleRejectionConfirmation() {
     .then((data) => {
       if (data.success) {
         showAlert("Cuti berhasil ditolak", "success");
-        setTimeout(() => location.reload(), 1500);
+        setTimeout(() => location.reload(), 1200);
       } else {
         throw new Error(data.message || "Gagal menolak cuti");
       }
@@ -355,6 +365,7 @@ function handleRejectionConfirmation() {
       }
     });
 
+  // Hide modal
   $("#rejectionModal").modal("hide");
 }
 
@@ -411,6 +422,61 @@ function initializeCutiList() {
   if (confirmRejectBtn) {
     confirmRejectBtn.addEventListener("click", handleRejectionConfirmation);
   }
+
+  // Event delegation for action buttons, links, and clickable rows
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest("button, a");
+    const tr = event.target.closest("tr[data-cuti-id]");
+
+    // If the user clicked a table row (and not a button/link), open detail
+    if (!btn && tr) {
+      const id =
+        tr.dataset.id || tr.dataset.cutiId || tr.getAttribute("data-cuti-id");
+      if (id) {
+        viewDetail(id);
+      }
+      return;
+    }
+
+    // If not a button/link and not a row, ignore
+    if (!btn) return;
+
+    // View detail via dedicated button/link
+    if (btn.classList.contains("js-view-detail")) {
+      const id = btn.dataset.id;
+      if (id) {
+        viewDetail(id);
+      }
+      return;
+    }
+
+    // Approve action -> open approval modal
+    if (btn.classList.contains("js-approve")) {
+      const id = btn.dataset.id;
+      if (id) {
+        approveCuti(id);
+      }
+      return;
+    }
+
+    // Reject action -> open rejection modal
+    if (btn.classList.contains("js-reject")) {
+      const id = btn.dataset.id;
+      if (id) {
+        rejectCuti(id);
+      }
+      return;
+    }
+
+    // Show QR
+    if (btn.classList.contains("js-show-qr")) {
+      const qr = btn.dataset.qr;
+      if (qr) {
+        showQRCode(qr);
+      }
+      return;
+    }
+  });
 
   console.log("Cuti list functionality initialized");
 }

@@ -1,369 +1,521 @@
-{% extends "layouts/base.html" %}
-
-{% block content %}
+{% extends "layouts/base.html" %} {% block content %}
 <div class="container mx-auto py-8 px-4">
-  <div class="max-w-5xl mx-auto">
-    <div class="form-card">
-      <div class="page-header">
-        <h2>
-          <i class="fas fa-chart-bar"></i>
-          Laporan Statistik
-        </h2>
-      </div>
-    </div>
-    <div class="form-card">
-      <div class="page-header">
-        <h3>
-          <i class="fas fa-chart-line"></i>
-          Grafik Harian Surat Masuk & Keluar
-        </h3>
-      </div>
-      <div class="p-6">
-        <div class="relative">
-          <canvas id="suratChart" height="90"></canvas>
-          <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
-            <div class="text-center">
-              <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
-              <p class="text-gray-500">Memuat grafik...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row: Persentase dan Akurasi OCR -->
-    <div class="flex flex-col md:flex-row gap-4 mt-4">
-        <!-- Card 1: Persentase -->
-        <div class="card h-100 border-primary flex-1">
-            <div class="card-body">
-                <h5 class="card-title text-primary flex items-center font-semibold text-lg mb-2"><i class="fas fa-percentage mr-2 text-primary"></i>Persentase Keberhasilan Ekstraksi</h5>
-                <div class="card-text text-gray-700 text-base">
-                    <p>
-                        <span class="font-medium">Surat Masuk:</span> <span class="font-bold">{{ persentase_berhasil_masuk }}%</span><br>
-                        <span class="font-medium">Surat Keluar:</span> <span class="font-bold">{{ persentase_berhasil_keluar }}%</span>
-                    </p>
-                </div>
+    <div class="max-w-5xl mx-auto">
+        <div class="form-card">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-chart-bar"></i>
+                    Laporan Statistik
+                </h2>
             </div>
         </div>
-        <!-- Card 2: Akurasi -->
-        <div class="card h-100 border-success flex-1">
-            <div class="card-body">
-                <h5 class="card-title text-success flex items-center font-semibold text-lg mb-2"><i class="fas fa-chart-line mr-2 text-success"></i>Rata-Rata Akurasi OCR</h5>
-                <div class="card-text text-gray-700 text-base">
-                    <p>
-                        <span class="font-medium">Surat Masuk:</span> <span class="font-bold">{{ rata2_akurasi_masuk }}%</span><br>
-                        <span class="font-medium">Surat Keluar:</span> <span class="font-bold">{{ rata2_akurasi_keluar }}%</span>
-                    </p>
-                </div>
+        <div class="form-card">
+            <div class="page-header">
+                <h3>
+                    <i class="fas fa-chart-line"></i>
+                    Grafik Harian Surat Masuk & Keluar
+                </h3>
             </div>
-        </div>
-    </div>
-
-    <!-- Surat Masuk Gagal Ekstraksi -->
-    <div class="card mb-4 border-danger bg-gray-50 rounded-lg shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title text-danger flex items-center font-semibold text-base mb-3">Surat Masuk OCR Fails</h5>
-            <div style="max-height: 220px; overflow-y: auto;">
-            {% if gagal_ekstraksi_suratKeluar %}
-            <div class="text-gray-800 text-xs">
-                <div class="grid grid-cols-3 font-semibold border-b border-gray-200 pb-1 mb-1">
-                    <div>Nomor Surat</div>
-                    <div>Pengirim</div>
-                    <div class="text-right">Tanggal</div>
-                </div>
-                {% for surat in gagal_ekstraksi_suratKeluar %}
-                <div class="grid grid-cols-3 items-center border-b border-gray-100 py-1 mb-1">
-                    <div class="truncate" title="{{ surat.nomor_suratKeluar or 'N/A' }}">{{ surat.nomor_suratKeluar or 'Not found' }}</div>
-                    <div class="truncate" title="{{ surat.pengirim_suratKeluar or 'Tidak diketahui' }}">{{ surat.pengirim_suratKeluar or 'Tidak diketahui' }}</div>
-                    <div class="text-right text-gray-500">{{ surat.tanggal_suratKeluar.strftime('%Y-%m-%d') }}</div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-green-600 font-semibold text-sm">Semua surat masuk berhasil diekstraksi.</p>
-            {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Surat Keluar Gagal Ekstraksi -->
-    <div class="card mb-4 border-danger bg-gray-50 rounded-lg shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title text-danger flex items-center font-semibold text-base mb-3">Surat Keluar OCR Fails</h5>
-            <div style="max-height: 220px; overflow-y: auto;">
-            {% if gagal_ekstraksi_suratMasuk %}
-            <div class="text-gray-800 text-xs">
-                <div class="grid grid-cols-3 font-semibold border-b border-gray-200 pb-1 mb-1">
-                    <div>Nomor Surat</div>
-                    <div>Pengirim</div>
-                    <div class="text-right">Tanggal</div>
-                </div>
-                {% for surat in gagal_ekstraksi_suratMasuk %}
-                <div class="grid grid-cols-3 items-center border-b border-gray-100 py-1 mb-1">
-                    <div class="truncate" title="{{ surat.nomor_suratMasuk or 'N/A' }}">{{ surat.nomor_suratMasuk or 'Not found' }}</div>
-                    <div class="truncate" title="{{ surat.pengirim_suratMasuk or 'Tidak diketahui' }}">{{ surat.pengirim_suratMasuk or 'Tidak diketahui' }}</div>
-                    <div class="text-right text-gray-500">{{ surat.tanggal_suratMasuk.strftime('%Y-%m-%d') }}</div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-green-600 font-semibold text-sm">Semua surat keluar berhasil diekstraksi.</p>
-            {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Field Not Found Summary -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h3 class="mb-4 text-primary">Field "Not Found" Statistics</h3>
-
-            <div class="row">
-                <!-- Surat Masuk -->
-                <div class="col-md-6">
-                    <h5 class="text-info">Surat Masuk</h5>
-                    <ul class="text-dark">
-                        <li><strong>Total Surat Masuk:</strong> {{ total_masuk or 0 }}</li>
-                        <li><strong>Nomor Surat:</strong> {{ field_stats_masuk.nomor_suratKeluar or 0 }}</li>
-                        <li><strong>Pengirim:</strong> {{ field_stats_masuk.pengirim_suratKeluar or 0 }}</li>
-                        <li><strong>Penerima:</strong> {{ field_stats_masuk.penerima_suratKeluar or 0 }}</li>
-                        <li><strong>Isi Surat:</strong> {{ field_stats_masuk.isi_suratKeluar or 0 }}</li>
-                    </ul>
-                </div>
-
-                <!-- Surat Keluar -->
-                <div class="col-md-6">
-                    <h5 class="text-info">Surat Keluar</h5>
-                    <ul class="text-dark">
-                        <li><strong>Total Surat Keluar:</strong> {{ total_keluar or 0 }}</li>
-                        <li><strong>Nomor Surat:</strong> {{ field_stats_keluar.nomor_suratMasuk or 0 }}</li>
-                        <li><strong>Pengirim:</strong> {{ field_stats_keluar.pengirim_suratMasuk or 0 }}</li>
-                        <li><strong>Penerima:</strong> {{ field_stats_keluar.penerima_suratMasuk or 0 }}</li>
-                        <li><strong>Isi Surat:</strong> {{ field_stats_keluar.isi_suratMasuk or 0 }}</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- OCR Accuracy Details -->
-    <div class="card mb-4 border-warning rounded-lg">
-        <div class="card-body">
-            <h3 class="mb-4 text-warning">Detail Akurasi OCR</h3>
-            <div class="row">
-                <!-- Surat Masuk Accuracy -->
-                <div class="col-md-6">
-                    <h5 class="text-info">Akurasi Surat Masuk</h5>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ rata2_akurasi_masuk }}%" 
-                             aria-valuenow="{{ rata2_akurasi_masuk }}" 
-                             aria-valuemin="0" aria-valuemax="100">
-                            {{ rata2_akurasi_masuk }}%
+            <div class="p-6">
+                <div class="relative">
+                    <canvas id="suratChart" height="90"></canvas>
+                    <div
+                        id="chart-loading"
+                        class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
+                    >
+                        <div class="text-center">
+                            <i
+                                class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"
+                            ></i>
+                            <p class="text-gray-500">Memuat grafik...</p>
                         </div>
                     </div>
-                    <p class="text-muted">
-                        <small>
-                            Akurasi tinggi (90-100%): {{ akurasi_tinggi_masuk or 0 }} dokumen<br>
-                            Akurasi sedang (70-89%): {{ akurasi_sedang_masuk or 0 }} dokumen<br>
-                            Akurasi rendah (0-69%): {{ akurasi_rendah_masuk or 0 }} dokumen
-                        </small>
-                    </p>
-                </div>
-                <!-- Surat Keluar Accuracy -->
-                <div class="col-md-6">
-                    <h5 class="text-info">Akurasi Surat Keluar</h5>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ rata2_akurasi_keluar }}%" 
-                             aria-valuenow="{{ rata2_akurasi_keluar }}" 
-                             aria-valuemin="0" aria-valuemax="100">
-                            {{ rata2_akurasi_keluar }}%
-                        </div>
-                    </div>
-                    <p class="text-muted">
-                        <small>
-                            Akurasi tinggi (90-100%): {{ akurasi_tinggi_keluar or 0 }} dokumen<br>
-                            Akurasi sedang (70-89%): {{ akurasi_sedang_keluar or 0 }} dokumen<br>
-                            Akurasi rendah (0-69%): {{ akurasi_rendah_keluar or 0 }} dokumen
-                        </small>
-                    </p>
                 </div>
             </div>
-            <!-- Accuracy Improvement Tips -->
-            <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h6 class="text-primary font-semibold mb-3 flex items-center"><i class="fas fa-info-circle mr-2"></i>Tips Meningkatkan Akurasi OCR:</h6>
-                <ul class="text-blue-900 text-sm space-y-2">
-                    <li class="flex items-start gap-2"><i class="fas fa-info-circle mt-1 text-blue-400"></i> Pastikan gambar dokumen memiliki resolusi tinggi (minimal 300 DPI)</li>
-                    <li class="flex items-start gap-2"><i class="fas fa-info-circle mt-1 text-blue-400"></i> Gunakan pencahayaan yang baik saat scanning</li>
-                    <li class="flex items-start gap-2"><i class="fas fa-info-circle mt-1 text-blue-400"></i> Hindari bayangan dan distorsi pada gambar</li>
-                    <li class="flex items-start gap-2"><i class="fas fa-info-circle mt-1 text-blue-400"></i> Pastikan teks dalam dokumen jelas dan tidak blur</li>
-                    <li class="flex items-start gap-2"><i class="fas fa-info-circle mt-1 text-blue-400"></i> Gunakan format file yang didukung (JPG, PNG, TIFF)</li>
-                </ul>
+        </div>
+
+        <!-- Row: Persentase dan Akurasi OCR -->
+        <div class="flex flex-col md:flex-row gap-4 mt-4">
+            <!-- Card 1: Persentase -->
+            <div class="card h-100 border-primary flex-1">
+                <div class="card-body">
+                    <h5
+                        class="card-title text-primary flex items-center font-semibold text-lg mb-2"
+                    >
+                        <i class="fas fa-percentage mr-2 text-primary"></i
+                        >Persentase Keberhasilan Ekstraksi
+                    </h5>
+                    <div class="card-text text-gray-700 text-base">
+                        <p>
+                            <span class="font-medium">Surat Masuk:</span>
+                            <span class="font-bold"
+                                >{{ persentase_berhasil_masuk }}%</span
+                            ><br />
+                            <span class="font-medium">Surat Keluar:</span>
+                            <span class="font-bold"
+                                >{{ persentase_berhasil_keluar }}%</span
+                            >
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 2: Akurasi -->
+            <div class="card h-100 border-success flex-1">
+                <div class="card-body">
+                    <h5
+                        class="card-title text-success flex items-center font-semibold text-lg mb-2"
+                    >
+                        <i class="fas fa-chart-line mr-2 text-success"></i
+                        >Rata-Rata Akurasi OCR
+                    </h5>
+                    <div class="card-text text-gray-700 text-base">
+                        <p>
+                            <span class="font-medium">Surat Masuk:</span>
+                            <span class="font-bold"
+                                >{{ rata2_akurasi_masuk }}%</span
+                            ><br />
+                            <span class="font-medium">Surat Keluar:</span>
+                            <span class="font-bold"
+                                >{{ rata2_akurasi_keluar }}%</span
+                            >
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Surat Masuk Gagal Ekstraksi -->
+        <div class="card mb-4 border-danger bg-gray-50 rounded-lg shadow-sm">
+            <div class="card-body">
+                <h5
+                    class="card-title text-danger flex items-center font-semibold text-base mb-3"
+                >
+                    Surat Masuk OCR Fails
+                </h5>
+                <div style="max-height: 220px; overflow-y: auto">
+                    {% if gagal_ekstraksi_suratMasuk %}
+                    <div class="text-gray-800 text-xs">
+                        <div
+                            class="grid grid-cols-3 font-semibold border-b border-gray-200 pb-1 mb-1"
+                        >
+                            <div>Nomor Surat</div>
+                            <div>Pengirim</div>
+                            <div class="text-right">Tanggal</div>
+                        </div>
+                        {% for surat in gagal_ekstraksi_suratMasuk %}
+                        <div
+                            class="grid grid-cols-3 items-center border-b border-gray-100 py-1 mb-1"
+                        >
+                            <div
+                                class="truncate"
+                                title="{{ surat.nomor_suratMasuk or 'N/A' }}"
+                            >
+                                {{ surat.nomor_suratMasuk or 'Not found' }}
+                            </div>
+                            <div
+                                class="truncate"
+                                title="{{ surat.pengirim_suratMasuk or 'Tidak diketahui' }}"
+                            >
+                                {{ surat.pengirim_suratMasuk or 'Tidak
+                                diketahui' }}
+                            </div>
+                            <div class="text-right text-gray-500">
+                                {{ surat.tanggal_suratMasuk.strftime('%Y-%m-%d')
+                                }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-green-600 font-semibold text-sm">
+                        Semua surat masuk berhasil diekstraksi.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Surat Keluar Gagal Ekstraksi -->
+        <div class="card mb-4 border-danger bg-gray-50 rounded-lg shadow-sm">
+            <div class="card-body">
+                <h5
+                    class="card-title text-danger flex items-center font-semibold text-base mb-3"
+                >
+                    Surat Keluar OCR Fails
+                </h5>
+                <div style="max-height: 220px; overflow-y: auto">
+                    {% if gagal_ekstraksi_suratKeluar %}
+                    <div class="text-gray-800 text-xs">
+                        <div
+                            class="grid grid-cols-3 font-semibold border-b border-gray-200 pb-1 mb-1"
+                        >
+                            <div>Nomor Surat</div>
+                            <div>Pengirim</div>
+                            <div class="text-right">Tanggal</div>
+                        </div>
+                        {% for surat in gagal_ekstraksi_suratKeluar %}
+                        <div
+                            class="grid grid-cols-3 items-center border-b border-gray-100 py-1 mb-1"
+                        >
+                            <div
+                                class="truncate"
+                                title="{{ surat.nomor_suratKeluar or 'N/A' }}"
+                            >
+                                {{ surat.nomor_suratKeluar or 'Not found' }}
+                            </div>
+                            <div
+                                class="truncate"
+                                title="{{ surat.pengirim_suratKeluar or 'Tidak diketahui' }}"
+                            >
+                                {{ surat.pengirim_suratKeluar or 'Tidak
+                                diketahui' }}
+                            </div>
+                            <div class="text-right text-gray-500">
+                                {{
+                                surat.tanggal_suratKeluar.strftime('%Y-%m-%d')
+                                }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-green-600 font-semibold text-sm">
+                        Semua surat keluar berhasil diekstraksi.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Field Not Found Summary -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="mb-4 text-primary">Field "Not Found" Statistics</h3>
+
+                <div class="row">
+                    <!-- Surat Masuk -->
+                    <div class="col-md-6">
+                        <h5 class="text-info">Surat Masuk</h5>
+                        <ul class="text-dark">
+                            <li>
+                                <strong>Total Surat Masuk:</strong> {{
+                                total_masuk or 0 }}
+                            </li>
+                            <li>
+                                <strong>Nomor Surat:</strong> {{
+                                field_stats_masuk.nomor_suratMasuk or 0 }}
+                            </li>
+                            <li>
+                                <strong>Pengirim:</strong> {{
+                                field_stats_masuk.pengirim_suratMasuk or 0 }}
+                            </li>
+                            <li>
+                                <strong>Penerima:</strong> {{
+                                field_stats_masuk.penerima_suratMasuk or 0 }}
+                            </li>
+                            <li>
+                                <strong>Isi Surat:</strong> {{
+                                field_stats_masuk.isi_suratMasuk or 0 }}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Surat Keluar -->
+                    <div class="col-md-6">
+                        <h5 class="text-info">Surat Keluar</h5>
+                        <ul class="text-dark">
+                            <li>
+                                <strong>Total Surat Keluar:</strong> {{
+                                total_keluar or 0 }}
+                            </li>
+                            <li>
+                                <strong>Nomor Surat:</strong> {{
+                                field_stats_keluar.nomor_suratKeluar or 0 }}
+                            </li>
+                            <li>
+                                <strong>Pengirim:</strong> {{
+                                field_stats_keluar.pengirim_suratKeluar or 0 }}
+                            </li>
+                            <li>
+                                <strong>Penerima:</strong> {{
+                                field_stats_keluar.penerima_suratKeluar or 0 }}
+                            </li>
+                            <li>
+                                <strong>Isi Surat:</strong> {{
+                                field_stats_keluar.isi_suratKeluar or 0 }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OCR Accuracy Details -->
+        <div class="card mb-4 border-warning rounded-lg">
+            <div class="card-body">
+                <h3 class="mb-4 text-warning">Detail Akurasi OCR</h3>
+                <div class="row">
+                    <!-- Surat Masuk Accuracy -->
+                    <div class="col-md-6">
+                        <h5 class="text-info">Akurasi Surat Masuk</h5>
+                        <div class="progress mb-3">
+                            <div
+                                class="progress-bar bg-success"
+                                role="progressbar"
+                                style="width: {{ rata2_akurasi_masuk }}%"
+                                aria-valuenow="{{ rata2_akurasi_masuk }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            >
+                                {{ rata2_akurasi_masuk }}%
+                            </div>
+                        </div>
+                        <p class="text-muted">
+                            <small>
+                                Akurasi tinggi (90-100%): {{
+                                akurasi_tinggi_masuk or 0 }} dokumen<br />
+                                Akurasi sedang (70-89%): {{ akurasi_sedang_masuk
+                                or 0 }} dokumen<br />
+                                Akurasi rendah (0-69%): {{ akurasi_rendah_masuk
+                                or 0 }} dokumen
+                            </small>
+                        </p>
+                    </div>
+                    <!-- Surat Keluar Accuracy -->
+                    <div class="col-md-6">
+                        <h5 class="text-info">Akurasi Surat Keluar</h5>
+                        <div class="progress mb-3">
+                            <div
+                                class="progress-bar bg-success"
+                                role="progressbar"
+                                style="width: {{ rata2_akurasi_keluar }}%"
+                                aria-valuenow="{{ rata2_akurasi_keluar }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            >
+                                {{ rata2_akurasi_keluar }}%
+                            </div>
+                        </div>
+                        <p class="text-muted">
+                            <small>
+                                Akurasi tinggi (90-100%): {{
+                                akurasi_tinggi_keluar or 0 }} dokumen<br />
+                                Akurasi sedang (70-89%): {{
+                                akurasi_sedang_keluar or 0 }} dokumen<br />
+                                Akurasi rendah (0-69%): {{ akurasi_rendah_keluar
+                                or 0 }} dokumen
+                            </small>
+                        </p>
+                    </div>
+                </div>
+                <!-- Accuracy Improvement Tips -->
+                <div
+                    class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+                >
+                    <h6
+                        class="text-primary font-semibold mb-3 flex items-center"
+                    >
+                        <i class="fas fa-info-circle mr-2"></i>Tips Meningkatkan
+                        Akurasi OCR:
+                    </h6>
+                    <ul class="text-blue-900 text-sm space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i
+                                class="fas fa-info-circle mt-1 text-blue-400"
+                            ></i>
+                            Pastikan gambar dokumen memiliki resolusi tinggi
+                            (minimal 300 DPI)
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i
+                                class="fas fa-info-circle mt-1 text-blue-400"
+                            ></i>
+                            Gunakan pencahayaan yang baik saat scanning
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i
+                                class="fas fa-info-circle mt-1 text-blue-400"
+                            ></i>
+                            Hindari bayangan dan distorsi pada gambar
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i
+                                class="fas fa-info-circle mt-1 text-blue-400"
+                            ></i>
+                            Pastikan teks dalam dokumen jelas dan tidak blur
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i
+                                class="fas fa-info-circle mt-1 text-blue-400"
+                            ></i>
+                            Gunakan format file yang didukung (JPG, PNG, TIFF)
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 
-</div>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        console.log("Script loaded");
 
-<script>
-console.log('Script loaded');
+        function loadChartData() {
+            console.log("loadChartData called");
 
-function loadChartData() {
-    console.log('loadChartData called');
-    
-    const loadingElement = document.getElementById('chart-loading');
-    const chartElement = document.getElementById('suratChart');
-    
-    if (!chartElement) {
-        console.error('Chart element not found');
-        return;
-    }
-    
-    console.log('Elements found');
-    
-    // First, let's try to create chart with dummy data to test if Chart.js works
-    console.log('Creating chart with dummy data...');
-    
-    try {
-        // Hide loading
-        if (loadingElement) {
-            loadingElement.style.display = 'none';
-        }
-        
-        // Create chart with dummy data
-        const ctx = chartElement.getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['20/01', '21/01', '22/01', '23/01', '24/01', '25/01', '26/01'],
-                datasets: [{
-                    label: '📥 Surat Masuk',
-                    data: [3, 5, 2, 7, 4, 6, 8],
-                    borderColor: 'rgb(59, 130, 246)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    borderWidth: 2,
-                    fill: true
-                }, {
-                    label: '📤 Surat Keluar',
-                    data: [2, 4, 1, 5, 3, 4, 6],
-                    borderColor: 'rgb(239, 68, 68)',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    borderWidth: 2,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Grafik Harian Surat Masuk & Keluar (Data Dummy)'
-                    },
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Jumlah Surat'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Tanggal'
-                        }
-                    }
-                }
+            const loadingElement = document.getElementById("chart-loading");
+            const chartElement = document.getElementById("suratChart");
+
+            if (!chartElement) {
+                console.error("Chart element not found");
+                return;
             }
-        });
-        
-        console.log('Chart created successfully with dummy data');
-        
-        // Now try to load real data and update the chart
-        setTimeout(() => {
-            console.log('Attempting to load real data...');
-            loadRealData(chart);
-        }, 1000);
-        
-    } catch (error) {
-        console.error('Error creating chart:', error);
-        
-        // Hide loading
-        if (loadingElement) {
-            loadingElement.style.display = 'none';
+
+            console.log("Elements found");
+
+            // First, let's try to create chart with dummy data to test if Chart.js works
+            console.log("Creating chart with dummy data...");
+
+            try {
+                // Hide loading
+                if (loadingElement) {
+                    loadingElement.style.display = "none";
+                }
+
+                // Create chart with dummy data
+                const ctx = chartElement.getContext("2d");
+                const chart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: [
+                            "20/01",
+                            "21/01",
+                            "22/01",
+                            "23/01",
+                            "24/01",
+                            "25/01",
+                            "26/01",
+                        ],
+                        datasets: [
+                            {
+                                label: "📥 Surat Masuk",
+                                data: [3, 5, 2, 7, 4, 6, 8],
+                                borderColor: "rgb(59, 130, 246)",
+                                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                                borderWidth: 2,
+                                fill: true,
+                            },
+                            {
+                                label: "📤 Surat Keluar",
+                                data: [2, 4, 1, 5, 3, 4, 6],
+                                borderColor: "rgb(239, 68, 68)",
+                                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                                borderWidth: 2,
+                                fill: true,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "Grafik Harian Surat Masuk & Keluar (7 Hari Terakhir)",
+                            },
+                            legend: {
+                                display: true,
+                                position: "top",
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: "Jumlah Surat",
+                                },
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: "Tanggal",
+                                },
+                            },
+                        },
+                    },
+                });
+
+                console.log("Chart created successfully with dummy data");
+
+                // Immediately try to load real data and update the chart
+                console.log("Attempting to load real data...");
+                loadRealData(chart);
+            } catch (error) {
+                console.error("Error creating chart:", error);
+
+                // Hide loading
+                if (loadingElement) {
+                    loadingElement.style.display = "none";
+                }
+
+                // Show error
+                const container = chartElement.parentElement;
+                container.innerHTML =
+                    '<div class="text-center p-8"><p class="text-red-500">Gagal membuat grafik: ' +
+                    error.message +
+                    '</p><button onclick="loadChartData()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded">Coba Lagi</button></div>';
+            }
         }
-        
-        // Show error
-        const container = chartElement.parentElement;
-        container.innerHTML = '<div class="text-center p-8"><p class="text-red-500">Gagal membuat grafik: ' + error.message + '</p><button onclick="loadChartData()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded">Coba Lagi</button></div>';
-    }
-}
 
-function loadRealData(chart) {
-    const urls = [
-        '/chart-data',
-        '/laporan/chart-data',
-        '{{ url_for("laporan.chart_data") }}'
-    ];
-    
-    let urlIndex = 0;
-    
-    function tryFetch() {
-        const url = urls[urlIndex];
-        console.log('Trying to load real data from URL:', url);
-        
-        fetch(url)
-            .then(response => {
-                console.log('Response received from', url, ':', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Real data received:', data);
-                
-                // Update chart with real data
-                chart.data.labels = data.labels;
-                chart.data.datasets[0].data = data.surat_masuk;
-                chart.data.datasets[1].data = data.surat_keluar;
-                chart.options.plugins.title.text = 'Grafik Harian Surat Masuk & Keluar (Data Real)';
-                chart.update();
-                
-                console.log('Chart updated with real data');
-            })
-            .catch(error => {
-                console.error('Error loading real data from', url, ':', error);
-                
-                // Try next URL
-                urlIndex++;
-                if (urlIndex < urls.length) {
-                    console.log('Trying next URL for real data...');
-                    tryFetch();
-                } else {
-                    console.log('All URLs failed, keeping dummy data');
-                    // Chart will continue showing dummy data
-                }
-            });
-    }
-    
-    tryFetch();
-}
+        function loadRealData(chart) {
+            const url = '{{ url_for("laporan.chart_data") }}';
 
-// Load chart when page is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, calling loadChartData');
-    loadChartData();
-});
-</script>
-{% endblock %}
+            console.log("Loading real data from URL:", url);
+
+            fetch(url)
+                .then((response) => {
+                    console.log("Response received:", response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Real data received:", data);
+
+                    if (data.status === "success") {
+                        // Update chart with real data
+                        chart.data.labels = data.labels;
+                        chart.data.datasets[0].data = data.surat_masuk;
+                        chart.data.datasets[1].data = data.surat_keluar;
+                        chart.options.plugins.title.text =
+                            "Grafik Harian Surat Masuk & Keluar (7 Hari Terakhir)";
+                        chart.update();
+
+                        console.log(
+                            "Chart updated with real data successfully",
+                        );
+                    } else {
+                        console.warn(
+                            "Data loaded but with error status:",
+                            data.message,
+                        );
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error loading real data:", error);
+                    console.log("Keeping initial data displayed on chart");
+                });
+        }
+
+        // Load chart when page is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("DOM loaded, calling loadChartData");
+            loadChartData();
+        });
+    </script>
+    {% endblock %}
+</div>

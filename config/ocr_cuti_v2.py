@@ -6,12 +6,23 @@ import string
 import tempfile
 from datetime import datetime
 
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import current_user, login_required
+from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 
 from config.extensions import db
-from config.models import Cuti, SuratKeluar
+from config.models import AuditLog, Cuti, SuratKeluar, User
+from config.route_utils import role_required
 
 # Configure logging
 logging.basicConfig(
@@ -556,11 +567,191 @@ def ocr_cuti_v2():
 def list_cuti_v2():
     """Menampilkan daftar data cuti yang tersimpan di database"""
     try:
-        cuti_list = Cuti.query.order_by(Cuti.created_at.desc()).all()
-        return render_template("cuti/list_cuti.html", cuti_list=cuti_list)
+        # Log access attempt for debugging
+        current_app.logger.info(
+            f"list_cuti_v2 accessed by user: {getattr(current_user, 'email', 'unknown')} "
+            f"(role: {getattr(current_user, 'role', 'unknown')})"
+        )
+
+        # Base query
+        query = Cuti.query
+
+        # Apply filters from request args
+        search = request.args.get("search", "").strip()
+        status = request.args.get("status", "").strip()
+        jenis_cuti = request.args.get("jenis_cuti", "").strip()
+
+        if search:
+            search_filter = f"%{search}%"
+            query = query.filter(
+                or_(
+                    Cuti.nama.ilike(search_filter),
+                    Cuti.nip.ilike(search_filter),
+                    Cuti.jenis_cuti.ilike(search_filter),
+                )
+            )
+            current_app.logger.debug(f"Applied search filter: {search}")
+
+        if status:
+            query = query.filter(Cuti.status_cuti == status)
+            current_app.logger.debug(f"Applied status filter: {status}")
+
+        if jenis_cuti:
+            query = query.filter(Cuti.jenis_cuti == jenis_cuti)
+            current_app.logger.debug(f"Applied jenis_cuti filter: {jenis_cuti}")
+
+        # Order by created_at descending
+        cuti_list = query.order_by(Cuti.created_at.desc()).all()
+        current_app.logger.info(f"Retrieved {len(cuti_list)} cuti records")
+
+        # Annotate each cuti with an `approved_role` attribute
+        for c in cuti_list:
+            c.approved_role = None
+            if c.approved_by:
+                try:
+                    approver = User.query.filter_by(email=c.approved_by).first()
+                    if approver and getattr(approver, "role", None):
+                        c.approved_role = approver.role
+                except Exception as e:
+                    current_app.logger.warning(
+                        f"Error getting approver role for cuti {c.id_cuti}: {e}"
+                    )
+                    c.approved_role = None
+
+        # Get viewer role
+        viewer_role = (
+            getattr(current_user, "role", "").lower()
+            if current_user.is_authenticated
+            else ""
+        )
+        current_app.logger.debug(f"Viewer role: {viewer_role}")
+
+        # Render template
+        current_app.logger.info("Rendering list_cuti.html template")
+        return render_template(
+            "cuti/list_cuti.html", cuti_list=cuti_list, viewer_role=viewer_role
+        )
+
     except Exception as e:
-        flash(f"Error saat mengambil data cuti: {str(e)}", "error")
-        return render_template("cuti/list_cuti.html", cuti_list=[])
+        current_app.logger.error(f"Error in list_cuti_v2: {str(e)}", exc_info=True)
+
+        # Detect AJAX/SPA/JSON requests and return JSON error so the SPA can surface it
+        accept = request.headers.get("Accept", "") or ""
+        xreq = request.headers.get("X-Requested-With", "") or ""
+        wants_json = (
+            xreq == "XMLHttpRequest"
+            or "application/json" in accept.lower()
+            or request.is_json
+        )
+
+        if wants_json:
+            return jsonify(
+                {
+                    "success": False,
+                    "message": "Gagal memuat daftar cuti",
+                    "error": str(e),
+                }
+            ), 500
+
+        # Fallback for normal browser navigation: flash message and render page with empty list
+        flash(
+            "Terjadi kesalahan saat memuat daftar cuti. Silakan coba lagi atau hubungi administrator.",
+            "error",
+        )
+        current_app.logger.error(
+            f"Rendering error page with empty list due to: {str(e)}"
+        )
+
+        # Try to get viewer role even in error case
+        try:
+            viewer_role = (
+                getattr(current_user, "role", "").lower()
+                if current_user.is_authenticated
+                else ""
+            )
+        except Exception:
+            viewer_role = ""
+
+        return render_template(
+            "cuti/list_cuti.html", cuti_list=[], viewer_role=viewer_role
+        ), 500
+
+
+# Debug endpoint added to help troubleshooting remote failures when SPA fails to render
+@ocr_cuti_v2_bp.route("/debug_status", methods=["GET"])
+@login_required
+@role_required("admin", "pimpinan")
+def debug_cuti_status():
+    """
+    Debug endpoint for cuti troubleshooting.
+    Returns counts by status and a small sample of rows.
+    Intended for admin/pimpinan debugging only.
+    """
+    try:
+        total = Cuti.query.count()
+        pending = Cuti.query.filter_by(status_cuti="pending").count()
+        approved = Cuti.query.filter_by(status_cuti="approved").count()
+        rejected = Cuti.query.filter_by(status_cuti="rejected").count()
+
+        # Fetch small sample (most recent 10) for inspection
+        samples = (
+            Cuti.query.order_by(Cuti.created_at.desc())
+            .limit(10)
+            .with_entities(
+                Cuti.id_cuti,
+                Cuti.nama,
+                Cuti.nip,
+                Cuti.status_cuti,
+                Cuti.tgl_ajuan_cuti,
+                Cuti.tanggal_cuti,
+                Cuti.sampai_cuti,
+                Cuti.pdf_path,
+            )
+            .all()
+        )
+
+        # Convert sample rows to serializable dicts
+        sample_list = []
+        for s in samples:
+            sample_list.append(
+                {
+                    "id_cuti": s.id_cuti,
+                    "nama": s.nama,
+                    "nip": s.nip,
+                    "status_cuti": s.status_cuti,
+                    "tgl_ajuan_cuti": s.tgl_ajuan_cuti.isoformat()
+                    if s.tgl_ajuan_cuti
+                    else None,
+                    "tanggal_cuti": s.tanggal_cuti.isoformat()
+                    if s.tanggal_cuti
+                    else None,
+                    "sampai_cuti": s.sampai_cuti.isoformat() if s.sampai_cuti else None,
+                    "pdf_path": s.pdf_path,
+                }
+            )
+
+        return jsonify(
+            {
+                "success": True,
+                "counts": {
+                    "total": total,
+                    "pending": pending,
+                    "approved": approved,
+                    "rejected": rejected,
+                },
+                "samples": sample_list,
+            }
+        ), 200
+
+    except Exception as ex:
+        current_app.logger.exception(f"Debug status error: {ex}")
+        return jsonify(
+            {
+                "success": False,
+                "message": "Error fetching debug status",
+                "error": str(ex),
+            }
+        ), 500
 
 
 @ocr_cuti_v2_bp.route("/check_dependencies", methods=["GET"])
@@ -664,40 +855,84 @@ def check_dependencies():
 
 @ocr_cuti_v2_bp.route("/save_extracted_data", methods=["POST"])
 @login_required
+@role_required("admin", "pimpinan")
 def save_extracted_data_v2():
+    """
+    Save a batch of extracted OCR results to the database.
+    Restricted to users with role 'admin' or 'pimpinan'.
+    Returns per-item results (saved / skipped / failed) to the client.
+    """
     try:
         data = request.get_json()
 
         if not data:
             return jsonify({"success": False, "error": "No data provided"}), 400
 
-        saved_count = 0
+        saved_ids = []
+        skipped_files = []
+        failed = []
 
         for item in data:
             try:
                 if item.get("jenis_surat") == "Cuti":
-                    save_cuti_data(item)
-                    saved_count += 1
+                    # save_cuti_data now returns the saved Cuti object or None if skipped (duplicate)
+                    cuti = save_cuti_data(item)
+                    if cuti is None:
+                        # duplicate or intentionally skipped
+                        skipped_files.append(item.get("filename") or "unknown")
+                    else:
+                        saved_ids.append(cuti.id_cuti)
+
+                        # Create audit entry for imported record
+                        try:
+                            audit = AuditLog(
+                                entity_type="cuti",
+                                entity_id=cuti.id_cuti,
+                                action="create_via_ocr",
+                                performed_by=getattr(current_user, "email", None),
+                                notes=f"Imported from OCR: {item.get('filename') or 'unknown'}",
+                            )
+                            db.session.add(audit)
+                            db.session.commit()
+                        except Exception:
+                            db.session.rollback()
+                            current_app.logger.exception(
+                                "Failed to write audit log for OCR import"
+                            )
+
             except Exception as e:
-                print(f"Error saving item: {str(e)}")
-                return jsonify(
-                    {"success": False, "error": f"Error saving item: {str(e)}"}
-                ), 500
+                # Don't abort whole batch on single-item failure; record it and continue
+                current_app.logger.error(
+                    f"Error saving item {item.get('filename')}: {e}", exc_info=True
+                )
+                failed.append(
+                    {"file": item.get("filename") or "unknown", "error": str(e)}
+                )
+                continue
 
         return jsonify(
             {
                 "success": True,
-                "message": f"Data saved successfully. {saved_count} items saved.",
+                "message": f"Data processed. Saved: {len(saved_ids)}; Skipped (duplicates): {len(skipped_files)}; Failed: {len(failed)}",
+                "saved_ids": saved_ids,
+                "skipped_files": skipped_files,
+                "failed": failed,
             }
         ), 200
 
     except Exception as e:
-        print(f"Server error: {str(e)}")
+        current_app.logger.error(
+            f"Server error in save_extracted_data_v2: {e}", exc_info=True
+        )
         return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
 def save_cuti_data(item):
-    """Save cuti data to database"""
+    """
+    Save cuti data to database.
+    Returns the saved Cuti instance, or None if the item was skipped (e.g. duplicate).
+    Raises exception for unexpected errors.
+    """
     try:
         # Parse tanggal
         tgl_mulai = tgl_selesai = None
@@ -732,7 +967,7 @@ def save_cuti_data(item):
                     year = int(parts[2])
                     tgl_mulai = datetime(year, month, day).date()
             except Exception as e:
-                print(f"Error parsing tanggal_mulai_cuti: {str(e)}")
+                current_app.logger.warning(f"Error parsing tanggal_mulai_cuti: {e}")
                 tgl_mulai = datetime.utcnow().date()
 
         # Parse Tanggal Selesai Cuti
@@ -763,22 +998,77 @@ def save_cuti_data(item):
                     year = int(parts[2])
                     tgl_selesai = datetime(year, month, day).date()
             except Exception as e:
-                print(f"Error parsing tanggal_selesai_cuti: {str(e)}")
+                current_app.logger.warning(f"Error parsing tanggal_selesai_cuti: {e}")
                 tgl_selesai = tgl_mulai if tgl_mulai else datetime.utcnow().date()
+
+        # Basic validation: require a name
+        nama_val = item.get("nama", "Tidak terbaca")
+        nip_val = item.get("nip", "Tidak terbaca")
+
+        if not nama_val or nama_val == "Tidak terbaca":
+            # Skip saving if essential data missing; caller will be informed
+            current_app.logger.warning(
+                f"Skipping save: missing nama for file {item.get('filename')}"
+            )
+            return None
+
+        # Prepare searchable/clean fields for duplicate detection
+        no_surat = item.get("no_suratmasuk", None)
+        no_surat_clean = no_surat if no_surat and no_surat != "Tidak terbaca" else None
+
+        # Duplicate detection:
+        existing = None
+        if no_surat_clean:
+            existing = Cuti.query.filter_by(
+                no_suratmasuk=no_surat_clean, nama=nama_val
+            ).first()
+        if not existing:
+            # Fallback duplicate check by nama + tanggal_cuti (if date parsed)
+            if tgl_mulai:
+                existing = (
+                    Cuti.query.filter_by(nama=nama_val)
+                    .filter(Cuti.tanggal_cuti == tgl_mulai)
+                    .first()
+                )
+
+        if existing:
+            # Record an audit entry that we detected a duplicate and skipped creation
+            try:
+                audit = AuditLog(
+                    entity_type="cuti",
+                    entity_id=existing.id_cuti,
+                    action="duplicate_skipped",
+                    performed_by=getattr(current_user, "email", None),
+                    notes=f"Duplicate detected during OCR import (file: {item.get('filename') or 'unknown'})",
+                )
+                db.session.add(audit)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                current_app.logger.exception(
+                    "Failed to write audit log for duplicate skip"
+                )
+
+            current_app.logger.info(
+                f"Duplicate cuti skipped for {nama_val} (file: {item.get('filename')})"
+            )
+            return None
 
         # Create Cuti object
         cuti = Cuti(
-            nama=item.get("nama", "Tidak terbaca"),
-            nip=item.get("nip", "Tidak terbaca"),
+            nama=nama_val,
+            nip=nip_val,
             jabatan=item.get("jabatan", "Tidak terbaca"),
             gol_ruang=item.get("gol_ruang", "Tidak terbaca"),
             unit_kerja=item.get("unit_kerja", "Tidak terbaca"),
             masa_kerja=item.get("masa_kerja", "Tidak terbaca"),
             alamat=item.get("alamat", "Tidak terbaca"),
-            no_suratmasuk=item.get("no_suratmasuk", "Tidak terbaca"),
+            no_suratmasuk=no_surat_clean or item.get("no_suratmasuk", "Tidak terbaca"),
             tgl_ajuan_cuti=datetime.utcnow().date(),
             tanggal_cuti=tgl_mulai if tgl_mulai else datetime.utcnow().date(),
-            sampai_cuti=tgl_selesai if tgl_selesai else datetime.utcnow().date(),
+            sampai_cuti=tgl_selesai
+            if tgl_selesai
+            else (tgl_mulai if tgl_mulai else datetime.utcnow().date()),
             telp=item.get("telp", "Tidak terbaca"),
             jenis_cuti=item.get("jenis_cuti", "Tidak terbaca"),
             alasan_cuti=item.get("alasan_cuti", "Tidak terbaca"),
@@ -789,9 +1079,12 @@ def save_cuti_data(item):
 
         db.session.add(cuti)
         db.session.commit()
-        print(f"✓ Cuti data saved successfully for {cuti.nama}")
+        current_app.logger.info(
+            f"✓ Cuti data saved successfully for {cuti.nama} (ID: {cuti.id_cuti})"
+        )
+        return cuti
 
     except Exception as e:
-        print(f"✗ Error in save_cuti_data: {str(e)}")
+        current_app.logger.error(f"✗ Error in save_cuti_data: {str(e)}", exc_info=True)
         db.session.rollback()
         raise e
