@@ -251,22 +251,6 @@ def surat_keluar():
     return render_template("surat_keluar/surat_keluar.html", daftar_surat=daftar_surat)
 
 
-@surat_keluar_bp.route("/test_surat_keluar", methods=["GET"])
-def test_surat_keluar():
-    """Test surat keluar"""
-    try:
-        surat_keluar_entries = SuratKeluar.query.paginate(page=1, per_page=20)
-        return render_template(
-            "surat_keluar/show_surat_keluar.html",
-            entries=surat_keluar_entries,
-            sort="tanggal_suratKeluar",
-            order="asc",
-            search="",
-        )
-    except Exception as e:
-        return f"Error: {str(e)}", 500
-
-
 # Tambahan chart-data dari routes_old.py
 @surat_keluar_bp.route("/chart-data")
 @login_required

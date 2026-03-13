@@ -52,22 +52,6 @@ def surat_keluar():
     return render_template("surat_keluar/surat_keluar.html", daftar_surat=daftar_surat)
 
 
-@remaining_bp.route("/test_surat_keluar", methods=["GET"])
-def test_surat_keluar():
-    """Test surat keluar"""
-    try:
-        surat_keluar_entries = SuratKeluar.query.paginate(page=1, per_page=20)
-        return render_template(
-            "surat_keluar/show_surat_keluar.html",
-            entries=surat_keluar_entries,
-            sort="tanggal_suratKeluar",
-            order="asc",
-            search="",
-        )
-    except Exception as e:
-        return f"Error: {str(e)}", 500
-
-
 @remaining_bp.route("/surat-keluar/list", methods=["GET"])
 @login_required
 @role_required("pimpinan", "admin")

@@ -157,55 +157,6 @@ def get_recent_notifications():
         ), 500
 
 
-@api_bp.route("/test", methods=["GET"])
-@login_required
-def test_api():
-    """Test API endpoint"""
-    return jsonify(
-        {
-            "success": True,
-            "message": "API berfungsi dengan baik",
-            "user": current_user.email,
-            "role": current_user.role,
-        }
-    )
-
-
-@api_bp.route("/debug/current_user", methods=["GET"])
-@login_required
-def debug_current_user():
-    """Debug endpoint: return current_user info for troubleshooting.
-
-    NOTE: This endpoint requires authentication. It is intended for temporary
-    troubleshooting to verify the logged-in user's email, role, and whether the
-    role is considered allowed for approval actions (pimpinan/admin).
-    """
-    try:
-        role = getattr(current_user, "role", None)
-        allowed = False
-        if role:
-            try:
-                allowed = role.lower() in ("pimpinan", "admin")
-            except Exception:
-                allowed = False
-
-        payload = {
-            "success": True,
-            "email": getattr(current_user, "email", None),
-            "role": role,
-            "is_admin": getattr(current_user, "is_admin", False),
-            "allowed_for_approval": allowed,
-        }
-
-        # Helpful debug log in server output
-        current_app.logger.debug(f"debug_current_user payload: {payload}")
-
-        return jsonify(payload), 200
-    except Exception as e:
-        current_app.logger.error(f"Error in debug_current_user: {e}", exc_info=True)
-        return jsonify({"success": False, "error": str(e)}), 500
-
-
 @api_bp.route("/surat-keluar/detail/<int:surat_id>", methods=["GET"])
 @login_required
 @role_required("pimpinan")
@@ -330,33 +281,6 @@ def chart_data():
     except Exception as e:
         current_app.logger.error(f"Error getting chart data: {str(e)}")
         return jsonify({"error": "Failed to load chart data"}), 500
-
-
-@api_bp.route("/debug/surat/<int:surat_id>", methods=["GET"])
-@login_required
-@role_required("pimpinan")
-def debug_surat(surat_id):
-    """Debug surat information"""
-    try:
-        surat = SuratMasuk.query.get(surat_id)
-        if not surat:
-            return jsonify({"error": "Surat not found"}), 404
-
-        debug_info = {
-            "id": surat.id_suratMasuk,
-            "nomor": surat.nomor_suratMasuk,
-            "pengirim": surat.pengirim_suratMasuk,
-            "penerima": surat.penerima_suratMasuk,
-            "isi": surat.isi_suratMasuk,
-            "status": surat.status_suratMasuk,
-            "created_at": surat.created_at.isoformat() if surat.created_at else None,
-            "has_file": bool(surat.file_suratMasuk),
-            "has_image": bool(surat.gambar_suratMasuk),
-        }
-
-        return jsonify(debug_info)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 @api_bp.route("/user-login-logs")

@@ -165,11 +165,6 @@ def create_app():
 
         register_breadcrumbs(app)
 
-        # Register error test routes in development
-        from config.error_test_routes import register_error_test_routes
-
-        register_error_test_routes(app)
-
     return app
 
 
