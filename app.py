@@ -50,6 +50,7 @@ def create_app():
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Silakan login untuk mengakses halaman ini."
     login_manager.login_message_category = "info"
+    from config.approval_routes import approval_bp
     from config.ocr import ocr_bp
     from config.ocr_cuti_v2 import ocr_cuti_v2_bp
     from config.ocr_surat_keluar import ocr_surat_keluar_bp
@@ -57,15 +58,16 @@ def create_app():
     from config.routes_main import register_blueprints
     from config.routes_user_login_logs import user_login_logs_bp
 
+    # Register all main blueprints (routes_main)
+    register_blueprints(app)
+
     # Register OCR blueprints
     app.register_blueprint(ocr_bp, url_prefix="/ocr")
     app.register_blueprint(ocr_cuti_v2_bp, url_prefix="/cuti-v2")
     app.register_blueprint(ocr_surat_masuk_bp, url_prefix="/surat-masuk")
     app.register_blueprint(ocr_surat_keluar_bp, url_prefix="/surat-keluar")
+    app.register_blueprint(approval_bp)
     app.register_blueprint(user_login_logs_bp)
-
-    # Register all other blueprints
-    register_blueprints(app)
 
     @login_manager.user_loader
     def load_user(user_id):

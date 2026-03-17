@@ -1,0 +1,718 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Detail Surat Masuk - PA Banjarbaru{% endblock %}
+
+{% block styles %}
+<style>
+    .detail-container {
+        background-color: white;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .detail-title {
+        font-size: 1.875rem;
+        font-weight: bold;
+        color: #1f2937;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-approved {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-rejected {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .detail-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #d1d5db;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .detail-value {
+        color: #6b7280;
+        word-break: break-word;
+    }
+
+    .image-container {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #f9fafb;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 600px;
+        margin: 1rem 0;
+        border-radius: 0.375rem;
+    }
+
+    .approval-info {
+        background-color: #f0fdf4;
+        border-left: 4px solid #10b981;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+    }
+
+    .rejection-info {
+        background-color: #fef2f2;
+        border-left: 4px solid #ef4444;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #059669;
+    }
+
+    .btn-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #dc2626;
+    }
+
+    .btn-secondary {
+        background-color: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #4b5563;
+    }
+
+    .ocr-accuracy {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background-color: #dbeafe;
+        color: #1e40af;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .comparison-table th {
+        background-color: #f3f4f6;
+        font-weight: 600;
+    }
+
+    .comparison-table tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .changed {
+        background-color: #fef3c7;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-box {
+        background: white;
+        border-radius: 1rem;
+        width: 100%;
+        max-width: 460px;
+        margin: 1rem;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        transform: translateY(20px) scale(0.97);
+        transition: transform 0.25s ease;
+        overflow: hidden;
+    }
+    .modal-overlay.active .modal-box {
+        transform: translateY(0) scale(1);
+    }
+    .modal-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .modal-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .modal-icon.reject { background: #fee2e2; color: #dc2626; }
+    .modal-icon.approve { background: #d1fae5; color: #059669; }
+    .modal-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #111827;
+    }
+    .modal-subtitle {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-top: 1px;
+    }
+    .modal-close {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: #9ca3af;
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0.25rem;
+        border-radius: 0.375rem;
+        transition: color 0.15s, background 0.15s;
+    }
+    .modal-close:hover { color: #374151; background: #f3f4f6; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        background: #f9fafb;
+        border-top: 1px solid #f3f4f6;
+    }
+    .modal-btn {
+        flex: 1;
+        padding: 0.65rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.15s;
+    }
+    .modal-btn-cancel {
+        background: white;
+        color: #374151;
+        border: 1.5px solid #d1d5db;
+    }
+    .modal-btn-cancel:hover { background: #f3f4f6; }
+    .modal-btn-reject {
+        background: #ef4444;
+        color: white;
+    }
+    .modal-btn-reject:hover { background: #dc2626; }
+    .modal-btn-approve {
+        background: #10b981;
+        color: white;
+    }
+    .modal-btn-approve:hover { background: #059669; }
+    .form-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    .form-textarea {
+        width: 100%;
+        padding: 0.65rem 0.85rem;
+        border: 1.5px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        color: #111827;
+        resize: vertical;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    .form-textarea:focus {
+        outline: none;
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+    }
+    .form-textarea.approve:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+    }
+    .char-counter {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        text-align: right;
+        margin-top: 0.35rem;
+    }
+    .char-counter.warn { color: #f59e0b; }
+    .char-counter.over { color: #ef4444; }
+    .warning-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        font-size: 0.82rem;
+        color: #92400e;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="detail-header">
+        <div>
+            <h1 class="detail-title">Detail Surat Masuk</h1>
+            <p class="text-gray-600 mt-1">Nomor: {{ surat.nomor_suratMasuk or '-' }}</p>
+        </div>
+        <span class="status-badge status-{{ surat.status_suratMasuk }}">
+            {% if surat.status_suratMasuk == 'pending' %}
+                Menunggu Persetujuan
+            {% elif surat.status_suratMasuk == 'approved' %}
+                Disetujui
+            {% elif surat.status_suratMasuk == 'rejected' %}
+                Ditolak
+            {% endif %}
+        </span>
+    </div>
+
+    <!-- Approval Info (jika sudah disetujui) -->
+    {% if surat.status_suratMasuk == 'approved' and surat.approved_by %}
+    <div class="approval-info">
+        <h3 class="font-bold text-green-800 mb-2">✓ Surat Telah Disetujui</h3>
+        <p class="text-sm text-green-700"><strong>Disetujui oleh:</strong> {{ surat.approved_by }}</p>
+        <p class="text-sm text-green-700"><strong>Tanggal:</strong>
+            {% if surat.approved_at %}
+                {{ surat.approved_at.strftime('%d %B %Y %H:%M') }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
+        {% if surat.approval_notes %}
+        <p class="text-sm text-green-700 mt-2"><strong>Catatan:</strong> {{ surat.approval_notes }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Rejection Info (jika ditolak) -->
+    {% if surat.status_suratMasuk == 'rejected' and surat.approved_by %}
+    <div class="rejection-info">
+        <h3 class="font-bold text-red-800 mb-2">✗ Surat Telah Ditolak</h3>
+        <p class="text-sm text-red-700"><strong>Ditolak oleh:</strong> {{ surat.approved_by }}</p>
+        <p class="text-sm text-red-700"><strong>Tanggal:</strong>
+            {% if surat.approved_at %}
+                {{ surat.approved_at.strftime('%d %B %Y %H:%M') }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
+        {% if surat.rejected_reason %}
+        <p class="text-sm text-red-700 mt-2"><strong>Alasan:</strong> {{ surat.rejected_reason }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="detail-container">
+        <!-- Informasi Dasar -->
+        <div class="detail-section">
+            <h2 class="section-title">Informasi Dasar</h2>
+
+            <div class="detail-row">
+                <div class="detail-label">Nomor Surat:</div>
+                <div class="detail-value">{{ surat.nomor_suratMasuk or '-' }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Nomor Lengkap:</div>
+                <div class="detail-value">{{ surat.full_letter_number or '-' }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Surat:</div>
+                <div class="detail-value">
+                    {% if surat.tanggal_suratMasuk %}
+                        {{ surat.tanggal_suratMasuk.strftime('%d %B %Y') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Pengirim:</div>
+                <div class="detail-value">{{ surat.pengirim_suratMasuk or '-' }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Penerima:</div>
+                <div class="detail-value">{{ surat.penerima_suratMasuk or '-' }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Kode Surat:</div>
+                <div class="detail-value">{{ surat.kode_suratMasuk or '-' }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Jenis Surat:</div>
+                <div class="detail-value">{{ surat.jenis_suratMasuk or '-' }}</div>
+            </div>
+        </div>
+
+        <!-- Isi Surat -->
+        <div class="detail-section">
+            <h2 class="section-title">Isi Surat</h2>
+            <div class="detail-value" style="padding: 1rem; background-color: #f9fafb; border-radius: 0.375rem; border: 1px solid #e5e7eb; min-height: 100px;">
+                {{ surat.isi_suratMasuk or '-' }}
+            </div>
+        </div>
+
+        <!-- Informasi Acara (jika ada) -->
+        {% if surat.acara_suratMasuk or surat.tempat_suratMasuk or surat.tanggal_acara_suratMasuk %}
+        <div class="detail-section">
+            <h2 class="section-title">Informasi Acara</h2>
+
+            {% if surat.acara_suratMasuk %}
+            <div class="detail-row">
+                <div class="detail-label">Nama Acara:</div>
+                <div class="detail-value">{{ surat.acara_suratMasuk }}</div>
+            </div>
+            {% endif %}
+
+            {% if surat.tempat_suratMasuk %}
+            <div class="detail-row">
+                <div class="detail-label">Tempat:</div>
+                <div class="detail-value">{{ surat.tempat_suratMasuk }}</div>
+            </div>
+            {% endif %}
+
+            {% if surat.tanggal_acara_suratMasuk %}
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Acara:</div>
+                <div class="detail-value">{{ surat.tanggal_acara_suratMasuk.strftime('%d %B %Y') }}</div>
+            </div>
+            {% endif %}
+
+            {% if surat.jam_suratMasuk %}
+            <div class="detail-row">
+                <div class="detail-label">Jam:</div>
+                <div class="detail-value">{{ surat.jam_suratMasuk }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- OCR Information -->
+        <div class="detail-section">
+            <h2 class="section-title">Informasi OCR</h2>
+
+            <div class="detail-row">
+                <div class="detail-label">Akurasi OCR:</div>
+                <div class="detail-value">
+                    {% if surat.ocr_accuracy_suratMasuk %}
+                        <span class="ocr-accuracy">{{ "%.2f"|format(surat.ocr_accuracy_suratMasuk * 100) }}%</span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Dibuat:</div>
+                <div class="detail-value">
+                    {% if surat.created_at %}
+                        {{ surat.created_at.strftime('%d %B %Y %H:%M') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Awal (dari OCR) -->
+        {% if surat.initial_nomor_suratMasuk or surat.initial_pengirim_suratMasuk or surat.initial_penerima_suratMasuk or surat.initial_isi_suratMasuk %}
+        <div class="detail-section">
+            <h2 class="section-title">Data Awal dari OCR (Perbandingan)</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Data Awal (OCR)</th>
+                        <th>Data Saat Ini</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if surat.initial_nomor_suratMasuk %}
+                    <tr {% if surat.initial_nomor_suratMasuk != surat.nomor_suratMasuk %}class="changed"{% endif %}>
+                        <td><strong>Nomor Surat</strong></td>
+                        <td>{{ surat.initial_nomor_suratMasuk }}</td>
+                        <td>{{ surat.nomor_suratMasuk or '-' }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if surat.initial_pengirim_suratMasuk %}
+                    <tr {% if surat.initial_pengirim_suratMasuk != surat.pengirim_suratMasuk %}class="changed"{% endif %}>
+                        <td><strong>Pengirim</strong></td>
+                        <td>{{ surat.initial_pengirim_suratMasuk }}</td>
+                        <td>{{ surat.pengirim_suratMasuk or '-' }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if surat.initial_penerima_suratMasuk %}
+                    <tr {% if surat.initial_penerima_suratMasuk != surat.penerima_suratMasuk %}class="changed"{% endif %}>
+                        <td><strong>Penerima</strong></td>
+                        <td>{{ surat.initial_penerima_suratMasuk }}</td>
+                        <td>{{ surat.penerima_suratMasuk or '-' }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if surat.initial_isi_suratMasuk %}
+                    <tr {% if surat.initial_isi_suratMasuk != surat.isi_suratMasuk %}class="changed"{% endif %}>
+                        <td><strong>Isi Surat</strong></td>
+                        <td>{{ surat.initial_isi_suratMasuk[:50] }}...</td>
+                        <td>{{ surat.isi_suratMasuk[:50] or '-' }}...</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Gambar Surat -->
+        {% if surat.gambar_suratMasuk %}
+        <div class="detail-section">
+            <h2 class="section-title">Gambar Surat</h2>
+            <div class="image-container">
+                <img src="data:image/png;base64,{{ surat.gambar_suratMasuk | b64encode }}" alt="Gambar Surat Masuk" class="image-preview">
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        {% if surat.status_suratMasuk == 'pending' %}
+        <div class="action-buttons">
+            <button onclick="openApproveModal()" class="btn btn-success">
+                <i class="fas fa-check"></i> Setujui Surat
+            </button>
+            <button onclick="openRejectModal()" class="btn btn-danger">
+                <i class="fas fa-times"></i> Tolak Surat
+            </button>
+            <a href="{{ url_for('approval.list_pending_surat_masuk') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+        {% else %}
+        <div class="action-buttons">
+            <a href="{{ url_for('approval.list_pending_surat_masuk') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div id="approveModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="approveModalTitle">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-icon approve"><i class="fas fa-check"></i></div>
+            <div>
+                <div class="modal-title" id="approveModalTitle">Setujui Surat Masuk</div>
+                <div class="modal-subtitle">Nomor: {{ surat.nomor_suratMasuk or '-' }}</div>
+            </div>
+            <button class="modal-close" onclick="closeApproveModal()" aria-label="Tutup"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST" action="{{ url_for('approval.approve_surat_masuk', surat_id=surat.id_suratMasuk) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="modal-body">
+                <label class="form-label" for="approval_notes_masuk">Catatan <span class="text-gray-400 font-normal">(opsional)</span></label>
+                <textarea id="approval_notes_masuk" name="approval_notes" rows="4"
+                    class="form-textarea approve"
+                    placeholder="Tambahkan catatan persetujuan..."
+                    maxlength="500"
+                    oninput="updateCounter('approval_notes_masuk','counter_approve_masuk',500)"></textarea>
+                <div class="char-counter" id="counter_approve_masuk">0 / 500</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeApproveModal()" class="modal-btn modal-btn-cancel">Batal</button>
+                <button type="submit" class="modal-btn modal-btn-approve"><i class="fas fa-check mr-1"></i> Setujui</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rejectModalTitle">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-icon reject"><i class="fas fa-times"></i></div>
+            <div>
+                <div class="modal-title" id="rejectModalTitle">Tolak Surat Masuk</div>
+                <div class="modal-subtitle">Nomor: {{ surat.nomor_suratMasuk or '-' }}</div>
+            </div>
+            <button class="modal-close" onclick="closeRejectModal()" aria-label="Tutup"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST" action="{{ url_for('approval.reject_surat_masuk', surat_id=surat.id_suratMasuk) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="modal-body">
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                    <span>Tindakan ini tidak dapat dibatalkan. Surat akan ditandai sebagai <strong>ditolak</strong>.</span>
+                </div>
+                <label class="form-label" for="rejection_reason_masuk">Alasan Penolakan <span class="text-red-500">*</span></label>
+                <textarea id="rejection_reason_masuk" name="rejection_reason" rows="4"
+                    class="form-textarea"
+                    placeholder="Jelaskan alasan penolakan secara jelas..."
+                    maxlength="500"
+                    required
+                    oninput="updateCounter('rejection_reason_masuk','counter_reject_masuk',500)"></textarea>
+                <div class="char-counter" id="counter_reject_masuk">0 / 500</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeRejectModal()" class="modal-btn modal-btn-cancel">Batal</button>
+                <button type="submit" class="modal-btn modal-btn-reject"><i class="fas fa-times mr-1"></i> Tolak Surat</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openApproveModal() {
+    document.getElementById('approveModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('approval_notes_masuk').focus(), 100);
+}
+function closeApproveModal() {
+    document.getElementById('approveModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function openRejectModal() {
+    document.getElementById('rejectModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('rejection_reason_masuk').focus(), 100);
+}
+function closeRejectModal() {
+    document.getElementById('rejectModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function updateCounter(textareaId, counterId, max) {
+    const len = document.getElementById(textareaId).value.length;
+    const el = document.getElementById(counterId);
+    el.textContent = len + ' / ' + max;
+    el.className = 'char-counter' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeApproveModal(); closeRejectModal(); }
+});
+document.getElementById('approveModal').addEventListener('click', function(e) {
+    if (e.target === this) closeApproveModal();
+});
+document.getElementById('rejectModal').addEventListener('click', function(e) {
+    if (e.target === this) closeRejectModal();
+});
+</script>
+{% endblock %}

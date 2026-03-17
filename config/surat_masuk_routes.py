@@ -131,7 +131,7 @@ def show_surat_masuk():
 
 @surat_masuk_bp.route("/input_surat_masuk", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def input_surat_masuk():
     """Input new surat masuk"""
     form = SuratMasukForm()
@@ -252,11 +252,9 @@ def input_surat_masuk():
 
 @surat_masuk_bp.route("/edit_surat_masuk/<int:id>", methods=["GET", "POST"])
 @login_required
+@role_required("admin")
 def edit_surat_masuk(id):
     """Edit surat masuk"""
-    if not current_user.is_admin:
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for("main.index"))
 
     entry = SuratMasuk.query.get_or_404(id)
 
@@ -348,6 +346,7 @@ def edit_surat_masuk(id):
 
 @surat_masuk_bp.route("/delete_surat_masuk/<int:id>", methods=["POST"])
 @login_required
+@role_required("admin")
 def delete_surat_masuk(id):
     """Delete surat masuk"""
     entry = SuratMasuk.query.get_or_404(id)
@@ -359,7 +358,7 @@ def delete_surat_masuk(id):
 
 @surat_masuk_bp.route("/list-pending-surat-masuk")
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def list_pending_surat_masuk():
     """List pending surat masuk"""
     try:
@@ -472,7 +471,7 @@ def reject_surat(surat_id):
 
 @surat_masuk_bp.route("/api/surat-masuk/detail/<int:surat_id>", methods=["GET"])
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def get_surat_masuk_detail(surat_id):
     try:
         surat = SuratMasuk.query.get(surat_id)
@@ -520,7 +519,7 @@ def get_surat_masuk_detail(surat_id):
 
 @surat_masuk_bp.route("/surat-masuk/download/<int:id>")
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def download_surat_masuk(id):
     surat_masuk = SuratMasuk.query.get_or_404(id)
     if not surat_masuk.file_suratMasuk:
@@ -550,7 +549,7 @@ def download_surat_masuk(id):
 
 @surat_masuk_bp.route("/surat-masuk/preview/<int:id>")
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def preview_surat_masuk(id):
     """
     Inline preview for PDF attachments. This will return the PDF with the proper
@@ -589,7 +588,7 @@ def preview_surat_masuk(id):
 
 @surat_masuk_bp.route("/surat-masuk/image/<int:id>")
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def view_surat_masuk_image(id):
     try:
         surat = SuratMasuk.query.get_or_404(id)
@@ -646,7 +645,7 @@ def update_ocr_accuracy(id):
 
 @surat_masuk_bp.route("/api/debug/surat/<int:surat_id>", methods=["GET"])
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def debug_surat_detail(surat_id):
     try:
         surat = SuratMasuk.query.get(surat_id)
@@ -758,7 +757,7 @@ def get_surat_masuk_api(id):
 
 @surat_masuk_bp.route("/surat_masuk/detail/<int:id>")
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def detail_surat_masuk(id):
     surat_masuk = SuratMasuk.query.get_or_404(id)
     return render_template("surat_masuk/detail_surat_masuk.html", surat=surat_masuk)

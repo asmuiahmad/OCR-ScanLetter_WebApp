@@ -76,7 +76,7 @@ def show_surat_keluar():
 
 @surat_keluar_bp.route("/input_surat_keluar", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def input_surat_keluar():
     """Input new surat keluar"""
     form = SuratKeluarForm()
@@ -184,6 +184,7 @@ def input_surat_keluar():
     "/edit_surat_keluar/<int:id_suratKeluar>", methods=["GET", "POST"]
 )
 @login_required
+@role_required("admin")
 def edit_surat_keluar(id_suratKeluar):
     """Edit surat keluar"""
     surat_keluar = SuratKeluar.query.get_or_404(id_suratKeluar)
@@ -228,6 +229,7 @@ def edit_surat_keluar(id_suratKeluar):
 
 @surat_keluar_bp.route("/delete_surat_keluar/<int:id_suratKeluar>", methods=["POST"])
 @login_required
+@role_required("admin")
 def delete_surat_keluar(id_suratKeluar):
     """Delete surat keluar"""
     surat_keluar = SuratKeluar.query.get_or_404(id_suratKeluar)
@@ -289,9 +291,9 @@ def chart_data():
 
 @surat_keluar_bp.route("/approve-surat/<int:surat_id>", methods=["POST"])
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def approve_surat_keluar(surat_id):
-    """Approve surat keluar - hanya pimpinan yang dapat menyetujui"""
+    """Approve surat keluar - pimpinan atau admin yang dapat menyetujui"""
     try:
         surat = SuratKeluar.query.get(surat_id)
         if not surat:
@@ -336,9 +338,9 @@ def approve_surat_keluar(surat_id):
 
 @surat_keluar_bp.route("/reject-surat/<int:surat_id>", methods=["POST"])
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def reject_surat_keluar(surat_id):
-    """Reject surat keluar - hanya pimpinan yang dapat menolak"""
+    """Reject surat keluar - pimpinan atau admin yang dapat menolak"""
     try:
         surat = SuratKeluar.query.get(surat_id)
         if not surat:

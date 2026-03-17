@@ -85,6 +85,10 @@ def get_recent_notifications():
             .all()
         )
 
+        # Hitung total pending (query terpisah agar akurat meski limit=10)
+        pending_masuk = SuratMasuk.query.filter_by(status_suratMasuk="pending").count()
+        pending_keluar = SuratKeluar.query.filter_by(status_suratKeluar="pending").count()
+
         surat_list = []
 
         # Tambahkan surat masuk
@@ -159,7 +163,7 @@ def get_recent_notifications():
 
 @api_bp.route("/surat-keluar/detail/<int:surat_id>", methods=["GET"])
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def get_surat_masuk_detail(surat_id):
     """Get surat masuk detail"""
     try:

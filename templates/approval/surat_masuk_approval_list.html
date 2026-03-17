@@ -1,0 +1,1006 @@
+{% extends "layouts/base.html" %} {% block title %}Persetujuan Surat Masuk - PA
+Banjarbaru{% endblock %} {% block styles %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='assets/css/table-search.css') }}"
+/>
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='assets/css/form-card.css') }}"
+/>
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='assets/css/consistent-headers.css') }}"
+/>
+<style>
+    /* ── Two-column layout ───────────────────────────── */
+    .approval-layout {
+        display: grid;
+        grid-template-columns: 1fr 272px;
+        gap: 1.25rem;
+        align-items: start;
+        margin-top: 0.75rem;
+    }
+
+    /* ── Table: selected row highlight ──────────────── */
+    .approval-table tbody tr {
+        cursor: pointer;
+    }
+    .approval-table tbody tr.row-selected {
+        background-color: #eff6ff !important;
+        border-left: 3px solid #2563eb;
+    }
+
+    /* ── Truncate long cell text ─────────────────────── */
+    .truncate-cell {
+        max-width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+    /* ── Modal slide-up animation ────────────────────── */
+    @keyframes mdUp {
+        from {
+            transform: translateY(18px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 1100px) {
+        .approval-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="container mx-auto">
+    <div class="max-w-7xl mx-auto">
+        {# ── Page Header (matches show_surat_masuk exactly) ── #}
+        <div class="form-card mb-4">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-inbox"></i>
+                    Persetujuan Surat Masuk
+                </h2>
+            </div>
+        </div>
+
+        {# ── Stat Pills (pure Tailwind — always renders correctly) ── #}
+        <div class="grid grid-cols-4 gap-3 mb-4">
+            {# Menunggu #}
+            <div
+                class="bg-white rounded-xl shadow-sm flex items-center gap-3 px-4 py-3"
+                style="border-left: 4px solid #f59e0b"
+            >
+                <div
+                    class="flex-shrink-0 w-11 h-11 rounded-lg flex items-center justify-center text-xl"
+                    style="background: #fef3c7; color: #d97706"
+                >
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-black text-gray-900 leading-none">
+                        {{ pending_count }}
+                    </div>
+                    <div class="text-xs font-medium text-gray-500 mt-1">
+                        Menunggu Persetujuan
+                    </div>
+                </div>
+            </div>
+
+            {# Disetujui #}
+            <div
+                class="bg-white rounded-xl shadow-sm flex items-center gap-3 px-4 py-3"
+                style="border-left: 4px solid #10b981"
+            >
+                <div
+                    class="flex-shrink-0 w-11 h-11 rounded-lg flex items-center justify-center text-xl"
+                    style="background: #d1fae5; color: #059669"
+                >
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-black text-gray-900 leading-none">
+                        {{ approved_count }}
+                    </div>
+                    <div class="text-xs font-medium text-gray-500 mt-1">
+                        Telah Disetujui
+                    </div>
+                </div>
+            </div>
+
+            {# Ditolak #}
+            <div
+                class="bg-white rounded-xl shadow-sm flex items-center gap-3 px-4 py-3"
+                style="border-left: 4px solid #ef4444"
+            >
+                <div
+                    class="flex-shrink-0 w-11 h-11 rounded-lg flex items-center justify-center text-xl"
+                    style="background: #fee2e2; color: #dc2626"
+                >
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-black text-gray-900 leading-none">
+                        {{ rejected_count }}
+                    </div>
+                    <div class="text-xs font-medium text-gray-500 mt-1">
+                        Ditolak
+                    </div>
+                </div>
+            </div>
+
+            {# Total #}
+            <div
+                class="bg-white rounded-xl shadow-sm flex items-center gap-3 px-4 py-3"
+                style="border-left: 4px solid #3b82f6"
+            >
+                <div
+                    class="flex-shrink-0 w-11 h-11 rounded-lg flex items-center justify-center text-xl"
+                    style="background: #dbeafe; color: #2563eb"
+                >
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-black text-gray-900 leading-none">
+                        {{ pending_count + approved_count + rejected_count }}
+                    </div>
+                    <div class="text-xs font-medium text-gray-500 mt-1">
+                        Total Surat Masuk
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Search / Filter (matches show_surat_masuk style) ── #}
+        <div class="sticky-search-container">
+            <div class="search-controls">
+                {# Left side: status filter + label #}
+                <div
+                    style="
+                        display: flex;
+                        align-items: center;
+                        gap: 0.6rem;
+                        flex-wrap: wrap;
+                    "
+                >
+                    <label
+                        style="
+                            font-size: 0.85rem;
+                            font-weight: 600;
+                            color: #4b5563;
+                            white-space: nowrap;
+                        "
+                    >
+                        <i
+                            class="fas fa-filter"
+                            style="color: #3b82f6; margin-right: 0.25rem"
+                        ></i>
+                        Status:
+                    </label>
+                    <select
+                        id="statusFilter"
+                        data-selected="{{ status }}"
+                        form="filterForm"
+                        name="status"
+                        style="
+                            border: 1.5px solid #d1d5db;
+                            border-radius: 0.4rem;
+                            padding: 0.42rem 0.65rem;
+                            font-size: 0.85rem;
+                            background: white;
+                            color: #374151;
+                            cursor: pointer;
+                        "
+                    >
+                        <option value="pending">⏳ Menunggu</option>
+                        <option value="approved">✅ Disetujui</option>
+                        <option value="rejected">❌ Ditolak</option>
+                        <option value="all">📋 Semua</option>
+                    </select>
+                </div>
+                {# Right side: search input + buttons #}
+                <form
+                    id="filterForm"
+                    method="GET"
+                    action="{{ url_for('approval.list_pending_surat_masuk') }}"
+                    class="search-form"
+                >
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Cari nomor surat, pengirim, penerima..."
+                        value="{{ search }}"
+                        class="search-input"
+                    />
+                    <button type="submit" class="search-button" title="Cari">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <a
+                        href="{{ url_for('approval.list_pending_surat_masuk') }}"
+                        class="search-button"
+                        style="
+                            background: #6b7280;
+                            display: inline-flex;
+                            align-items: center;
+                            text-decoration: none;
+                        "
+                        title="Reset filter"
+                    >
+                        <i class="fas fa-redo"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        {# ── Hint ── #}
+        <p
+            style="
+                font-size: 0.78rem;
+                color: #9ca3af;
+                margin: 0.25rem 0 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            "
+        >
+            <i class="fas fa-hand-pointer"></i>
+            Klik baris surat untuk memilih dan melihat aksi di panel kanan.
+        </p>
+
+        {# ── Two-column: Table + Sidebar ── #}
+        <div class="approval-layout">
+            {# ── LEFT: Table ── #}
+            <div>
+                <div
+                    class="overflow-x-auto rounded-xl shadow-lg bg-white approval-table"
+                >
+                    {% if surat_list %}
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100 sticky top-0 z-10">
+                            <tr>
+                                <th class="py-3 px-4 text-left">#</th>
+                                <th class="py-3 px-4 text-left">No. Surat</th>
+                                <th class="py-3 px-4 text-left">Pengirim</th>
+                                <th class="py-3 px-4 text-left">Penerima</th>
+                                <th class="py-3 px-4 text-left">Tanggal</th>
+                                <th class="py-3 px-4 text-left">Isi Surat</th>
+                                <th class="py-3 px-4 text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for surat in surat_list %}
+                            <tr
+                                class="transition hover:bg-blue-50 clickable-row {% if loop.index % 2 == 0 %}bg-gray-50{% else %}bg-white{% endif %}"
+                                data-id="{{ surat.id_suratMasuk }}"
+                                data-nomor="{{ surat.nomor_suratMasuk or '-' }}"
+                                data-pengirim="{{ surat.pengirim_suratMasuk or '-' }}"
+                                data-penerima="{{ surat.penerima_suratMasuk or '-' }}"
+                                data-tanggal="{% if surat.tanggal_suratMasuk %}{{ surat.tanggal_suratMasuk.strftime('%d %b %Y') }}{% else %}-{% endif %}"
+                                data-isi="{{ (surat.isi_suratMasuk or '-') | truncate(200, True, '...') }}"
+                                data-status="{{ surat.status_suratMasuk }}"
+                                onclick="selectSurat(this)"
+                            >
+                                <td class="py-2 px-4 text-xs text-gray-400">
+                                    {{ loop.index + (pagination.page - 1) *
+                                    pagination.per_page }}
+                                </td>
+                                <td
+                                    class="py-2 px-4 font-semibold text-blue-900 text-sm"
+                                >
+                                    {{ surat.nomor_suratMasuk or '-' }}
+                                </td>
+                                <td class="py-2 px-4 text-gray-700 text-sm">
+                                    {{ surat.pengirim_suratMasuk or '-' }}
+                                </td>
+                                <td class="py-2 px-4 text-gray-700 text-sm">
+                                    <span
+                                        class="truncate-cell"
+                                        title="{{ surat.penerima_suratMasuk or '' }}"
+                                        >{{ surat.penerima_suratMasuk or '-'
+                                        }}</span
+                                    >
+                                </td>
+                                <td
+                                    class="py-2 px-4 text-gray-500 text-sm whitespace-nowrap"
+                                >
+                                    {% if surat.tanggal_suratMasuk %} {{
+                                    surat.tanggal_suratMasuk.strftime('%d %b
+                                    %Y') }} {% else %}-{% endif %}
+                                </td>
+                                <td class="py-2 px-4 text-gray-600 text-sm">
+                                    <span
+                                        class="truncate-cell"
+                                        title="{{ surat.isi_suratMasuk or '' }}"
+                                        >{{ surat.isi_suratMasuk or '-' }}</span
+                                    >
+                                </td>
+                                <td class="py-2 px-4">
+                                    {% if surat.status_suratMasuk == 'pending'
+                                    %}
+                                    <span
+                                        class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold"
+                                    >
+                                        <i
+                                            class="fas fa-hourglass-half mr-1"
+                                        ></i
+                                        >Pending
+                                    </span>
+                                    {% elif surat.status_suratMasuk ==
+                                    'approved' %}
+                                    <span
+                                        class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold"
+                                    >
+                                        <i class="fas fa-check mr-1"></i
+                                        >Disetujui
+                                    </span>
+                                    {% elif surat.status_suratMasuk ==
+                                    'rejected' %}
+                                    <span
+                                        class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold"
+                                    >
+                                        <i class="fas fa-times mr-1"></i>Ditolak
+                                    </span>
+                                    {% else %}
+                                    <span
+                                        class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs"
+                                    >
+                                        {{ surat.status_suratMasuk or 'N/A' }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {% else %} {# Empty state #}
+                    <div class="py-16 text-center">
+                        <i
+                            class="fas fa-inbox text-5xl text-blue-100 mb-4 block"
+                        ></i>
+                        <h3 class="text-base font-semibold text-gray-400 mb-1">
+                            Tidak Ada Surat Masuk
+                        </h3>
+                        <p class="text-sm text-gray-300">
+                            Tidak ada surat yang sesuai filter. Coba ubah
+                            kriteria pencarian.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {# ── Pagination ── #} {% if pagination.pages > 1 %}
+                <div
+                    class="mt-4 flex items-center justify-between flex-wrap gap-2"
+                >
+                    <p class="text-sm text-gray-500">
+                        Halaman
+                        <span class="font-semibold">{{ pagination.page }}</span>
+                        dari
+                        <span class="font-semibold"
+                            >{{ pagination.pages }}</span
+                        >
+                    </p>
+                    <div class="flex items-center gap-1">
+                        {% if pagination.has_prev %}
+                        <a
+                            href="{{ url_for('approval.list_pending_surat_masuk', page=1, status=status, search=search) }}"
+                            class="rounded-l-lg px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition text-sm"
+                            ><i class="fas fa-angle-double-left"></i
+                        ></a>
+                        <a
+                            href="{{ url_for('approval.list_pending_surat_masuk', page=pagination.prev_num, status=status, search=search) }}"
+                            class="px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition text-sm"
+                            ><i class="fas fa-angle-left"></i
+                        ></a>
+                        {% endif %} {% for page_num in pagination.iter_pages()
+                        %} {% if page_num %}
+                        <a
+                            href="{{ url_for('approval.list_pending_surat_masuk', page=page_num, status=status, search=search) }}"
+                            class="px-3 py-2 rounded-lg font-semibold transition text-sm {% if page_num == pagination.page %}bg-blue-600 text-white hover:bg-blue-700 {% else %}bg-gray-100 text-gray-700 hover:bg-blue-100{% endif %}"
+                            >{{ page_num }}</a
+                        >
+                        {% else %}
+                        <span class="px-2 py-2 text-gray-400 text-sm">…</span>
+                        {% endif %} {% endfor %} {% if pagination.has_next %}
+                        <a
+                            href="{{ url_for('approval.list_pending_surat_masuk', page=pagination.next_num, status=status, search=search) }}"
+                            class="px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition text-sm"
+                            ><i class="fas fa-angle-right"></i
+                        ></a>
+                        <a
+                            href="{{ url_for('approval.list_pending_surat_masuk', page=pagination.pages, status=status, search=search) }}"
+                            class="rounded-r-lg px-3 py-2 bg-gray-100 text-gray-500 hover:bg-blue-100 transition text-sm"
+                            ><i class="fas fa-angle-double-right"></i
+                        ></a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {# /LEFT #} {# ── RIGHT: Action Sidebar (pure Tailwind) ── #}
+            <div
+                id="actionSidebar"
+                class="bg-white rounded-xl overflow-hidden"
+                style="
+                    position: sticky;
+                    top: 1rem;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                "
+            >
+                {# Header #}
+                <div
+                    class="flex items-center justify-between px-4 py-3"
+                    style="
+                        background: linear-gradient(135deg, #1e40af, #3b82f6);
+                    "
+                >
+                    <h3
+                        class="text-white text-sm font-semibold m-0 flex items-center gap-2"
+                    >
+                        <i class="fas fa-tasks"></i> Panel Aksi
+                    </h3>
+                    <button
+                        id="sidebarCloseBtn"
+                        onclick="clearSelection()"
+                        title="Tutup"
+                        style="
+                            display: none;
+                            background: rgba(255, 255, 255, 0.2);
+                            border: none;
+                            color: white;
+                            width: 26px;
+                            height: 26px;
+                            border-radius: 50%;
+                            cursor: pointer;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 0.75rem;
+                            flex-shrink: 0;
+                        "
+                    >
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                {# Empty prompt #}
+                <div id="sidebarEmpty" class="px-6 py-10 text-center bg-white">
+                    <i
+                        class="fas fa-hand-pointer block text-4xl text-blue-100 mb-3"
+                    ></i>
+                    <h4 class="text-sm font-semibold text-gray-700 mb-1">
+                        Pilih Surat
+                    </h4>
+                    <p class="text-xs text-gray-400 leading-relaxed m-0">
+                        Klik salah satu baris pada tabel untuk melihat detail
+                        dan melakukan aksi persetujuan.
+                    </p>
+                </div>
+
+                {# Filled state — shown after row is clicked #}
+                <div id="sidebarContent" class="bg-white" style="display: none">
+                    {# Status bar #}
+                    <div
+                        class="flex items-center justify-between px-4 py-2 border-b"
+                        style="background: #f8faff; border-color: #dbeafe"
+                    >
+                        <span
+                            class="text-xs font-bold uppercase tracking-widest"
+                            style="color: #9ca3af; letter-spacing: 0.07em"
+                            >Status Surat</span
+                        >
+                        <span id="sidebarStatusBadge"></span>
+                    </div>
+
+                    {# Info rows — 2-column grid: label kiri, nilai kanan #}
+                    <div
+                        class="px-4 py-3"
+                        style="
+                            display: grid;
+                            grid-template-columns: max-content 1fr;
+                            column-gap: 0.75rem;
+                            row-gap: 0.6rem;
+                            align-items: start;
+                        "
+                    >
+                        {# No. Surat #}
+                        <span
+                            class="text-xs font-bold uppercase text-gray-400 whitespace-nowrap"
+                            style="letter-spacing: 0.06em; padding-top: 1px"
+                            >No. Surat</span
+                        >
+                        <span
+                            id="infoNomor"
+                            class="text-sm font-semibold text-gray-900"
+                            style="word-break: break-word"
+                            >-</span
+                        >
+
+                        {# Pengirim #}
+                        <span
+                            class="text-xs font-bold uppercase text-gray-400 whitespace-nowrap"
+                            style="letter-spacing: 0.06em; padding-top: 1px"
+                            >Pengirim</span
+                        >
+                        <span
+                            id="infoPengirim"
+                            class="text-sm font-medium text-gray-800"
+                            style="word-break: break-word"
+                            >-</span
+                        >
+
+                        {# Penerima #}
+                        <span
+                            class="text-xs font-bold uppercase text-gray-400 whitespace-nowrap"
+                            style="letter-spacing: 0.06em; padding-top: 1px"
+                            >Penerima</span
+                        >
+                        <span
+                            id="infoPenerima"
+                            class="text-sm font-medium text-gray-800"
+                            style="word-break: break-word"
+                            >-</span
+                        >
+
+                        {# Tanggal #}
+                        <span
+                            class="text-xs font-bold uppercase text-gray-400 whitespace-nowrap"
+                            style="letter-spacing: 0.06em; padding-top: 1px"
+                            >Tanggal</span
+                        >
+                        <span
+                            id="infoTanggal"
+                            class="text-sm font-medium text-gray-800"
+                            >-</span
+                        >
+
+                        {# Isi Surat #}
+                        <span
+                            class="text-xs font-bold uppercase text-gray-400 whitespace-nowrap"
+                            style="letter-spacing: 0.06em; padding-top: 1px"
+                            >Isi Surat</span
+                        >
+                        <span
+                            id="infoIsi"
+                            class="text-sm text-gray-600"
+                            style="
+                                display: -webkit-box;
+                                -webkit-line-clamp: 3;
+                                -webkit-box-orient: vertical;
+                                overflow: hidden;
+                                word-break: break-word;
+                            "
+                            >-</span
+                        >
+                    </div>
+
+                    {# Divider #}
+                    <div class="h-px bg-gray-100 mx-4"></div>
+
+                    {# Action buttons #}
+                    <div class="px-4 py-3 flex flex-col gap-2">
+                        <div
+                            class="text-xs font-bold uppercase tracking-widest mb-1"
+                            style="color: #9ca3af; letter-spacing: 0.07em"
+                        >
+                            Aksi Tersedia
+                        </div>
+
+                        <div
+                            id="pendingActions"
+                            style="
+                                display: flex;
+                                flex-direction: column;
+                                gap: 0.45rem;
+                            "
+                        >
+                            <button
+                                onclick="openApproveModal()"
+                                class="flex items-center justify-center gap-2 text-white text-sm font-semibold py-2 px-4 rounded-lg border-none cursor-pointer transition-all duration-150"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #059669,
+                                        #10b981
+                                    );
+                                "
+                                onmouseover="this.style.opacity = '0.9'"
+                                onmouseout="this.style.opacity = '1'"
+                            >
+                                <i class="fas fa-check-circle"></i> Setujui
+                                Surat Ini
+                            </button>
+                            <button
+                                onclick="openRejectModal()"
+                                class="flex items-center justify-center gap-2 text-white text-sm font-semibold py-2 px-4 rounded-lg border-none cursor-pointer transition-all duration-150"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #dc2626,
+                                        #ef4444
+                                    );
+                                "
+                                onmouseover="this.style.opacity = '0.9'"
+                                onmouseout="this.style.opacity = '1'"
+                            >
+                                <i class="fas fa-times-circle"></i> Tolak Surat
+                                Ini
+                            </button>
+                        </div>
+
+                        <div id="finalActions" style="display: none">
+                            <div
+                                class="flex items-center justify-center gap-2 text-sm rounded-lg px-3 py-3 text-center"
+                                style="
+                                    background: #eff6ff;
+                                    border: 1.5px dashed #bfdbfe;
+                                    color: #1d4ed8;
+                                "
+                            >
+                                <i class="fas fa-lock"></i>
+                                <span
+                                    >Surat sudah
+                                    <strong id="finalStatusText"></strong> dan
+                                    tidak dapat diubah lagi.</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {# /sidebarContent #}
+            </div>
+            {# /action-sidebar #}
+        </div>
+        {# /approval-layout #}
+    </div>
+</div>
+{# /container #} {# ── Approve Modal (pure Tailwind) ── #}
+<div
+    id="approveModal"
+    style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1060;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        align-items: center;
+        justify-content: center;
+    "
+>
+    <div
+        class="bg-white rounded-xl w-full mx-4"
+        style="
+            max-width: 460px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+            animation: mdUp 0.2s ease;
+        "
+    >
+        {# Header #}
+        <div
+            class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-gray-100"
+        >
+            <i class="fas fa-check-circle text-3xl" style="color: #10b981"></i>
+            <h2 class="text-lg font-bold text-gray-900 m-0">
+                Setujui Surat Masuk
+            </h2>
+        </div>
+        {# Body #}
+        <form method="POST" id="approveForm" class="px-6 py-5">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Catatan Persetujuan
+                    <span class="text-gray-400 font-normal">(Opsional)</span>
+                </label>
+                <textarea
+                    name="approval_notes"
+                    id="approveNotes"
+                    rows="4"
+                    placeholder="Tambahkan catatan untuk persetujuan ini..."
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 resize-y"
+                    style="
+                        transition:
+                            border-color 0.2s,
+                            box-shadow 0.2s;
+                    "
+                    onfocus="
+                        this.style.borderColor = '#3b82f6';
+                        this.style.boxShadow =
+                            '0 0 0 3px rgba(59,130,246,0.12)';
+                    "
+                    onblur="
+                        this.style.borderColor = '#e5e7eb';
+                        this.style.boxShadow = 'none';
+                    "
+                ></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button
+                    type="button"
+                    onclick="closeApproveModal()"
+                    class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-lg border-none cursor-pointer transition"
+                >
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button
+                    type="submit"
+                    class="flex items-center justify-center gap-2 text-white text-sm font-semibold py-2.5 rounded-lg border-none cursor-pointer"
+                    style="
+                        background: linear-gradient(135deg, #059669, #10b981);
+                    "
+                    onmouseover="this.style.opacity = '0.9'"
+                    onmouseout="this.style.opacity = '1'"
+                >
+                    <i class="fas fa-check"></i> Setujui
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ── Reject Modal (pure Tailwind) ── #}
+<div
+    id="rejectModal"
+    style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1060;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        align-items: center;
+        justify-content: center;
+    "
+>
+    <div
+        class="bg-white rounded-xl w-full mx-4"
+        style="
+            max-width: 460px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+            animation: mdUp 0.2s ease;
+        "
+    >
+        {# Header #}
+        <div
+            class="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-gray-100"
+        >
+            <i class="fas fa-times-circle text-3xl" style="color: #ef4444"></i>
+            <h2 class="text-lg font-bold text-gray-900 m-0">
+                Tolak Surat Masuk
+            </h2>
+        </div>
+        {# Body #}
+        <form method="POST" id="rejectForm" class="px-6 py-5">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    Alasan Penolakan
+                    <span class="text-red-500 font-bold">*</span>
+                </label>
+                <textarea
+                    name="rejection_reason"
+                    id="rejectReason"
+                    rows="4"
+                    placeholder="Jelaskan alasan penolakan surat ini..."
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 resize-y"
+                    style="
+                        transition:
+                            border-color 0.2s,
+                            box-shadow 0.2s;
+                    "
+                    onfocus="
+                        this.style.borderColor = '#ef4444';
+                        this.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)';
+                    "
+                    onblur="
+                        this.style.borderColor = '#e5e7eb';
+                        this.style.boxShadow = 'none';
+                    "
+                    required
+                ></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button
+                    type="button"
+                    onclick="closeRejectModal()"
+                    class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-lg border-none cursor-pointer transition"
+                >
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button
+                    type="submit"
+                    class="flex items-center justify-center gap-2 text-white text-sm font-semibold py-2.5 rounded-lg border-none cursor-pointer"
+                    style="
+                        background: linear-gradient(135deg, #dc2626, #ef4444);
+                    "
+                    onmouseover="this.style.opacity = '0.9'"
+                    onmouseout="this.style.opacity = '1'"
+                >
+                    <i class="fas fa-times"></i> Tolak
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %} {% block scripts %}
+<script>
+    let currentSuratId = null;
+
+    /* ── Row click → populate sidebar ── */
+    function selectSurat(row) {
+        const id = row.dataset.id;
+        const nomor = row.dataset.nomor;
+        const pengirim = row.dataset.pengirim;
+        const penerima = row.dataset.penerima;
+        const tanggal = row.dataset.tanggal;
+        const isi = row.dataset.isi;
+        const status = row.dataset.status;
+        const detailUrl = row.dataset.detailUrl;
+
+        currentSuratId = id;
+
+        /* highlight row */
+        document
+            .querySelectorAll(".clickable-row")
+            .forEach((r) => r.classList.remove("row-selected"));
+        row.classList.add("row-selected");
+
+        /* show sidebar */
+        document.getElementById("sidebarEmpty").style.display = "none";
+        document.getElementById("sidebarContent").style.display = "block";
+        const closeBtn = document.getElementById("sidebarCloseBtn");
+        closeBtn.style.display = "flex";
+        closeBtn.style.alignItems = "center";
+        closeBtn.style.justifyContent = "center";
+
+        /* fill info */
+        document.getElementById("infoNomor").textContent = nomor;
+        document.getElementById("infoPengirim").textContent = pengirim;
+        document.getElementById("infoPenerima").textContent = penerima;
+        document.getElementById("infoTanggal").textContent = tanggal;
+        document.getElementById("infoIsi").textContent = isi;
+
+        /* status badge — same pill style as the table */
+        const badge = document.getElementById("sidebarStatusBadge");
+        const map = {
+            pending: {
+                cls: "px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold",
+                icon: "fa-hourglass-half",
+                label: "Pending",
+            },
+            approved: {
+                cls: "px-2 py-1 bg-green-100  text-green-800  rounded-full text-xs font-semibold",
+                icon: "fa-check",
+                label: "Disetujui",
+            },
+            rejected: {
+                cls: "px-2 py-1 bg-red-100    text-red-800    rounded-full text-xs font-semibold",
+                icon: "fa-times",
+                label: "Ditolak",
+            },
+        };
+        const b = map[status] || {
+            cls: "px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs",
+            icon: "fa-circle",
+            label: status,
+        };
+        badge.className = b.cls;
+        badge.innerHTML = `<i class="fas ${b.icon} mr-1"></i>${b.label}`;
+
+        /* show/hide action buttons */
+        if (status === "pending") {
+            document.getElementById("pendingActions").style.display = "flex";
+            document.getElementById("finalActions").style.display = "none";
+        } else {
+            document.getElementById("pendingActions").style.display = "none";
+            document.getElementById("finalActions").style.display = "block";
+            document.getElementById("finalStatusText").textContent =
+                status === "approved" ? "disetujui" : "ditolak";
+        }
+
+        /* scroll sidebar into view on narrow screens */
+        if (window.innerWidth < 1100) {
+            document
+                .getElementById("actionSidebar")
+                .scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }
+
+    /* ── Clear selection ── */
+    function clearSelection() {
+        currentSuratId = null;
+        document
+            .querySelectorAll(".clickable-row")
+            .forEach((r) => r.classList.remove("row-selected"));
+        document.getElementById("sidebarEmpty").style.display = "block";
+        document.getElementById("sidebarContent").style.display = "none";
+        document.getElementById("sidebarCloseBtn").style.display = "none";
+    }
+
+    /* ── Approve modal ── */
+    function openApproveModal() {
+        if (!currentSuratId) return;
+        document.getElementById("approveForm").action =
+            `/approval/surat-masuk/${currentSuratId}/approve`;
+        const m = document.getElementById("approveModal");
+        m.style.display = "flex";
+        document.getElementById("approveNotes").focus();
+    }
+    function closeApproveModal() {
+        document.getElementById("approveModal").style.display = "none";
+        document.getElementById("approveForm").reset();
+    }
+
+    /* ── Reject modal ── */
+    function openRejectModal() {
+        if (!currentSuratId) return;
+        document.getElementById("rejectForm").action =
+            `/approval/surat-masuk/${currentSuratId}/reject`;
+        const m = document.getElementById("rejectModal");
+        m.style.display = "flex";
+        document.getElementById("rejectReason").focus();
+    }
+    function closeRejectModal() {
+        document.getElementById("rejectModal").style.display = "none";
+        document.getElementById("rejectForm").reset();
+    }
+
+    /* ── Keyboard & outside-click to close modals ── */
+    /* ── Close modals on Escape key / outside click ── */
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeApproveModal();
+            closeRejectModal();
+        }
+    });
+    window.addEventListener("click", (e) => {
+        const am = document.getElementById("approveModal");
+        const rm = document.getElementById("rejectModal");
+        if (e.target === am) closeApproveModal();
+        if (e.target === rm) closeRejectModal();
+    });
+
+    /* ── Loading state on submit ── */
+    document.querySelectorAll("form").forEach((form) => {
+        form.addEventListener("submit", function () {
+            const btn = this.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML =
+                    '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            }
+        });
+    });
+
+    /* ── Restore status filter value on page load ── */
+    (function () {
+        const sel = document.getElementById("statusFilter");
+        if (!sel) return;
+        if (sel.dataset.selected) {
+            for (const opt of sel.options) {
+                if (opt.value === sel.dataset.selected) {
+                    opt.selected = true;
+                    break;
+                }
+            }
+        }
+        sel.addEventListener("change", function () {
+            this.form.submit();
+        });
+    })();
+</script>
+{% endblock %}

@@ -511,7 +511,7 @@ def generate_cuti():
 
 @cuti_bp.route("/input-cuti", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def input_cuti():
     """Input cuti form"""
     form = InputCutiForm()

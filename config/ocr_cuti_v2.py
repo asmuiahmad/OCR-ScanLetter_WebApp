@@ -778,7 +778,7 @@ def check_dependencies():
 
 @ocr_cuti_v2_bp.route("/save_extracted_data", methods=["POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def save_extracted_data_v2():
     """
     Save a batch of extracted OCR results to the database.

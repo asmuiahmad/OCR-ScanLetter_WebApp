@@ -76,7 +76,7 @@ def list_surat_keluar():
 
 @remaining_bp.route("/surat-keluar/approve/<int:surat_id>", methods=["POST"])
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def approve_surat(surat_id):
     """Approve surat"""
     try:
@@ -94,7 +94,7 @@ def approve_surat(surat_id):
 
 @remaining_bp.route("/surat-keluar/reject/<int:surat_id>", methods=["POST"])
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def reject_surat(surat_id):
     """Reject surat"""
     try:
@@ -112,7 +112,7 @@ def reject_surat(surat_id):
 
 @remaining_bp.route("/list-pending-surat-masuk")
 @login_required
-@role_required("pimpinan")
+@role_required("pimpinan", "admin")
 def list_pending_surat_masuk():
     """List pending surat masuk"""
     try:

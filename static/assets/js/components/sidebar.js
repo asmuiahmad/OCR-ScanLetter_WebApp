@@ -172,24 +172,8 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('resize', handleResize);
   handleResize(); // Check on initial load
 
-  // Notification bell toggle
-  const notificationBell = document.querySelector('.notification-bell-btn');
-  const notificationDropdown = document.querySelector('.notification-dropdown');
-
-  if (notificationBell && notificationDropdown) {
-    notificationBell.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      notificationDropdown.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-      if (!notificationBell.contains(event.target) && !notificationDropdown.contains(event.target)) {
-        notificationDropdown.classList.add('hidden');
-      }
-    });
-  }
+  // Notification bell — handled by notifications.js via event delegation
+  // (no duplicate listener here)
 
   // Mobile menu toggle
   const mobileMenuButton = document.querySelector('.mobile-menu-button');

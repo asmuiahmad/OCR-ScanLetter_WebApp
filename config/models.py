@@ -48,6 +48,10 @@ class SuratMasuk(db.Model):
     tempat_suratMasuk = db.Column(db.Text, nullable=True)
     tanggal_acara_suratMasuk = db.Column(db.Date, nullable=True)
     jam_suratMasuk = db.Column(db.String(10), nullable=True)
+    approved_by = db.Column(db.String(100), nullable=True)
+    approved_at = db.Column(db.DateTime, nullable=True)
+    approval_notes = db.Column(db.Text, nullable=True)
+    rejected_reason = db.Column(db.Text, nullable=True)
 
 
 class SuratKeluar(db.Model):
@@ -74,6 +78,10 @@ class SuratKeluar(db.Model):
     status_suratKeluar = db.Column(db.String(20), default="pending", nullable=False)
     kode_suratKeluar = db.Column(db.String(100), nullable=False)
     jenis_suratKeluar = db.Column(db.String(100), nullable=False)
+    approved_by = db.Column(db.String(100), nullable=True)
+    approved_at = db.Column(db.DateTime, nullable=True)
+    approval_notes = db.Column(db.Text, nullable=True)
+    rejected_reason = db.Column(db.Text, nullable=True)
 
 
 class Cuti(db.Model):

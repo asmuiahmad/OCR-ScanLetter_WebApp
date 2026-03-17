@@ -606,7 +606,7 @@ def save_batch_results_to_db_surat_masuk(results):
 
 @ocr_surat_masuk_bp.route("/ocr_surat_masuk", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def ocr_surat_masuk():
     try:
         extracted_data_list = []
@@ -713,7 +713,7 @@ def surat_masuk_image(id):
 
 @ocr_surat_masuk_bp.route("/save_extracted_data", methods=["POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def save_extracted_data():
     try:
         logger.info("Save extracted data endpoint called")

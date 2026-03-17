@@ -19,15 +19,21 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def set_pending_surat_counts():
     """Set pending surat counts for navigation"""
     g.pending_surat_masuk_count = 0
-    
+    g.pending_masuk_count = 0
+    g.pending_keluar_count = 0
+
     try:
         if current_user.is_authenticated:
             if current_user.role in ['pimpinan', 'admin']:
-                g.pending_surat_masuk_count = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
-                current_app.logger.debug(f"Pending count for {current_user.email}: {g.pending_surat_masuk_count}")
+                g.pending_masuk_count = SuratMasuk.query.filter_by(status_suratMasuk='pending').count()
+                g.pending_keluar_count = SuratKeluar.query.filter_by(status_suratKeluar='pending').count()
+                g.pending_surat_masuk_count = g.pending_masuk_count
+                current_app.logger.debug(f"Pending counts for {current_user.email}: masuk={g.pending_masuk_count}, keluar={g.pending_keluar_count}")
     except Exception as e:
         current_app.logger.warning(f"Error in set_pending_surat_counts: {str(e)}")
         g.pending_surat_masuk_count = 0
+        g.pending_masuk_count = 0
+        g.pending_keluar_count = 0
 
 
 @dashboard_bp.route('/dashboard')

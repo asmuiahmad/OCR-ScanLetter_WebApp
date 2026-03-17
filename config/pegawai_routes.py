@@ -17,7 +17,7 @@ pegawai_bp = Blueprint("pegawai", __name__)
 
 @pegawai_bp.route("/pegawai", methods=["GET", "POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def pegawai():
     """Add new pegawai"""
     if request.method == "POST":
@@ -137,7 +137,7 @@ def pegawai_list():
 
 @pegawai_bp.route("/pegawai/edit/<int:id>", methods=["POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def edit_pegawai(id):
     """Edit pegawai"""
     try:
@@ -223,7 +223,7 @@ def edit_pegawai(id):
 
 @pegawai_bp.route("/add", methods=["POST"])
 @login_required
-@role_required("admin", "pimpinan")
+@role_required("admin")
 def add_pegawai():
     """Add new pegawai via JSON API"""
     try:
