@@ -2,22 +2,22 @@
 HASIL EKSTRAKSI OCR CUTI (V2)
 ======================================================================
 ✗ nomor_surat              : Tidak terbaca
-✗ nama                     : Tidak terbaca
+✓ nama                     : Amat
 ✗ nip                      : Tidak terbaca
-✗ jabatan                  : Tidak terbaca
-✗ gol_ruang                : Tidak terbaca
-✗ unit_kerja               : Tidak terbaca
-✗ masa_kerja               : Tidak terbaca
+✓ jabatan                  : terserah
+✓ gol_ruang                : 113
+✓ unit_kerja               : terserah
+✓ masa_kerja               : terserah
 ✗ alamat                   : Tidak terbaca
-✗ telp                     : Tidak terbaca
-✗ jenis_cuti               : Tidak terbaca
-✗ alasan_cuti              : Tidak terbaca
+✓ telp                     : 13221312321
+✓ jenis_cuti               : Cuti Tahunan
+✓ alasan_cuti              : 3 hari
 ✗ lama_cuti                : Tidak terbaca
-✗ tanggal_mulai_cuti       : Tidak terbaca
+✓ tanggal_mulai_cuti       : 4 April 2026
 ✗ tanggal_selesai_cuti     : Tidak terbaca
 ✗ no_suratmasuk            : Tidak terbaca
 ✓ jenis_surat              : Cuti
-✓ pengirim                 : N/A
+✓ pengirim                 : Amat
 ✓ penerima                 : Ketua Pengadilan Agama
-✓ isi                      : Surat Permintaan Cuti oleh Tidak terbaca (NIP: Tidak terbaca) - Tidak terbaca
+✓ isi                      : Surat Permintaan Cuti oleh Amat (NIP: Tidak terbaca) - Cuti Tahunan
 ======================================================================

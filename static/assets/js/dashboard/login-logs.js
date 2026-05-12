@@ -12,6 +12,8 @@ async function loadLoginLogs(page = 1) {
     try {
         currentPage = page;
         
+        console.log('Loading login logs, page:', page);
+        
         // Show loading
         document.getElementById('login-logs-content').innerHTML = `
             <div class="p-8 text-center text-gray-500">
@@ -20,22 +22,29 @@ async function loadLoginLogs(page = 1) {
         `;
 
         // Get current filters
-        const dateFilter = document.getElementById('date-filter').value;
-        const userFilter = document.getElementById('user-filter').value;
+        const dateFilter = document.getElementById('date-filter')?.value || '';
+        const userFilter = document.getElementById('user-filter')?.value || '';
         
         // Build query parameters
         let queryParams = `page=${page}&per_page=${logsPerPage}`;
         if (dateFilter) queryParams += `&date=${dateFilter}`;
         if (userFilter) queryParams += `&user=${encodeURIComponent(userFilter)}`;
 
+        console.log('Fetching from URL:', `/api/user-login-logs?${queryParams}`);
+
         // Fetch from backend
-        const response = await fetch(`/user-login-logs?${queryParams}`);
+        const response = await fetch(`/api/user-login-logs?${queryParams}`);
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('Response data:', data);
+        
         if (data.success) {
             displayLoginLogs(data.logs);
             updatePagination(data.pagination);
@@ -77,18 +86,18 @@ function displayLoginLogs(logs) {
         const statusIcon = log.status === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle';
         
         return `
-            <div class="grid grid-cols-4 gap-4 px-4 py-3 border-b border-gray-100 hover:bg-gray-50 text-sm">
+            <div class="grid grid-cols-4 gap-4 px-4 py-1.5 border-b border-gray-100 hover:bg-gray-50 text-sm">
                 <div class="text-gray-900">
-                    <div class="font-medium">${formatDateTime(log.login_time)}</div>
+                    <div class="font-medium text-xs">${formatDateTime(log.login_time)}</div>
                 </div>
                 <div class="text-gray-900">
-                    <div class="font-medium truncate">${log.user_email}</div>
+                    <div class="font-medium text-xs truncate">${log.user_email}</div>
                 </div>
                 <div class="text-gray-600">
                     <div class="font-mono text-xs">${log.ip_address}</div>
                 </div>
                 <div>
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusClass}">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
                         <i class="${statusIcon} mr-1"></i>
                         ${log.status === 'success' ? 'Berhasil' : 'Gagal'}
                     </span>
@@ -168,19 +177,45 @@ function formatDateTime(dateString) {
 
 // Add event listeners for filters
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Login logs script loaded');
+    
     // Load login logs on page load
     loadLoginLogs(1);
     
     // Add filter event listeners
-    document.getElementById('date-filter').addEventListener('change', function() {
-        loadLoginLogs(1);
-    });
+    const dateFilter = document.getElementById('date-filter');
+    const userFilter = document.getElementById('user-filter');
     
-    document.getElementById('user-filter').addEventListener('input', function() {
-        // Debounce the input
-        clearTimeout(this.searchTimeout);
-        this.searchTimeout = setTimeout(() => {
+    if (dateFilter) {
+        dateFilter.addEventListener('change', function() {
             loadLoginLogs(1);
-        }, 500);
-    });
+        });
+    }
+    
+    if (userFilter) {
+        userFilter.addEventListener('input', function() {
+            // Debounce the input
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                loadLoginLogs(1);
+            }, 500);
+        });
+    }
+    
+    // Add test function to window for debugging
+    window.testLoginLogs = async function() {
+        console.log('=== TESTING LOGIN LOGS ===');
+        try {
+            const response = await fetch('/api/user-login-logs?page=1&per_page=5');
+            console.log('Test response status:', response.status);
+            const data = await response.json();
+            console.log('Test response data:', data);
+            return data;
+        } catch (error) {
+            console.error('Test error:', error);
+            return error;
+        }
+    };
+    
+    console.log('You can run testLoginLogs() from console to debug');
 });

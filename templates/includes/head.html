@@ -3,12 +3,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}{% endblock %}</title>
 
-    <!-- Favicon -->
-    <link
-        rel="icon"
-        href="{{ url_for('static', filename='assets/images/favicon.svg') }}"
-        type="image/x-icon"
-    />
+    <!-- Favicon and PWA manifest -->
+    <link rel="icon" href="{{ url_for('static', filename='assets/favicon.svg') }}" type="image/svg+xml" sizes="any">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" sizes="any">
+    <link rel="icon" href="{{ url_for('static', filename='favicon-simple.svg') }}" type="image/svg+xml" sizes="16x16 32x32">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicon.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='assets/favicon.svg') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Theme and PWA settings -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+    <meta name="application-name" content="Surat Masuk & Keluar OCR">
+    <meta name="apple-mobile-web-app-title" content="Surat OCR">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
     <link
@@ -26,6 +35,31 @@
     />
 
     <!-- Custom CSS Files -->
+    <!-- Design System - Load first for CSS variables -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='assets/css/design-system.css') }}"
+    />
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='assets/css/buttons.css') }}"
+    />
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='assets/css/badges.css') }}"
+    />
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='assets/css/cards.css') }}"
+    />
+    
+    <!-- Unified Button System -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='assets/css/unified-buttons.css') }}"
+    />
+    
+    <!-- Legacy CSS Files -->
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='assets/css/styles.css') }}"
@@ -49,6 +83,18 @@
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='assets/css/pagination.css') }}"
+    />
+    
+    <!-- No Animations CSS - Disable all animations for better performance -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='assets/css/no-animations.css') }}"
+    />
+    
+    <!-- Form Labels Top - All labels above inputs for better UX -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='assets/css/form-labels-top.css') }}"
     />
 
     <!-- Icon Fonts -->
@@ -81,6 +127,35 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+
+    <!-- Global Print CSS — sembunyikan sidebar & navbar saat print di semua halaman -->
+    <style>
+    @media print {
+        /* Sembunyikan elemen UI navigasi */
+        .modern-sidebar,
+        nav,
+        .spa-progress,
+        .breadcrumb,
+        nav ol,
+        .no-print { display: none !important; }
+
+        /* Hapus margin kiri dari main-content (biasanya untuk sidebar) */
+        .main-content {
+            margin-left: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Konten mengisi penuh halaman */
+        body, .content {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Ukuran kertas default A4 portrait untuk halaman biasa */
+        @page { margin: 1.5cm; }
+    }
+    </style>
 
     <!-- Per-page styles injected by child templates -->
     {% block styles %}{% endblock %}

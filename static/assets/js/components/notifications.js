@@ -152,8 +152,7 @@ function updateNotificationCount() {
 
 /* ── Approve / Reject ───────────────────────────────────── */
 function approveSurat(suratId, btn, suratType) {
-  // Stop the click from bubbling to the document (which would close dropdown)
-  if (window.event) window.event.stopPropagation();
+  // Stop the click from bubbling to the document (which would close dropdown)  if (window.event) window.event.stopPropagation();
 
   btn.disabled = true;
   const originalHtml = btn.innerHTML;
@@ -232,6 +231,7 @@ function openGlobalRejectModal(suratId, suratType, nomor, btn) {
 
   modal.style.opacity    = '1';
   modal.style.visibility = 'visible';
+  modal.style.pointerEvents = 'auto';
   box.style.transform    = 'translateY(0) scale(1)';
   document.body.style.overflow = 'hidden';
 
@@ -244,6 +244,7 @@ function closeGlobalRejectModal() {
 
   modal.style.opacity    = '0';
   modal.style.visibility = 'hidden';
+  modal.style.pointerEvents = 'none';
   box.style.transform    = 'translateY(20px) scale(0.97)';
   document.body.style.overflow = '';
 
@@ -303,6 +304,7 @@ function submitGlobalReject() {
       const box   = document.getElementById('globalRejectBox');
       modal.style.opacity    = '0';
       modal.style.visibility = 'hidden';
+      modal.style.pointerEvents = 'none';
       box.style.transform    = 'translateY(20px) scale(0.97)';
       document.body.style.overflow = '';
       _rejectContext = null;
@@ -349,31 +351,8 @@ function initializeNotifications() {
     if (e.target === this) closeGlobalRejectModal();
   });
 
-  // Use event delegation on document — works even if bell is re-rendered
-  document.addEventListener('click', function(e) {
-    const bell     = document.querySelector('.notification-bell-btn');
-    const dropdown = document.querySelector('.notification-dropdown');
-    if (!bell || !dropdown) return;
-
-    // Bell clicked
-    if (bell.contains(e.target) || e.target === bell) {
-      e.preventDefault();
-      e.stopPropagation();
-      const isOpen = dropdown.style.display === 'flex';
-      if (isOpen) {
-        dropdown.style.display = 'none';
-      } else {
-        dropdown.style.display = 'flex';
-        refreshNotificationDropdown();
-      }
-      return;
-    }
-
-    // Click outside — close dropdown
-    if (!dropdown.contains(e.target)) {
-      dropdown.style.display = 'none';
-    }
-  });
+  // CATATAN: Toggle bell dropdown ditangani oleh toggleNotifDropdown() di base.html
+  // agar tidak bergantung pada event delegation yang bisa diblokir SPA navigation.
 
   // Refresh count every 30s; refresh dropdown content every 60s if open
   setInterval(updateNotificationCount, 30000);

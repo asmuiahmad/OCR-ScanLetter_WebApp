@@ -50,6 +50,7 @@ from config.ocr_utils import (
     extract_text_with_multiple_configs,
     normalize_ocr_text,
 )
+from config.route_utils import role_required  # Import from route_utils
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -57,31 +58,15 @@ logger = logging.getLogger(__name__)
 
 ocr_surat_masuk_bp = Blueprint("ocr_surat_masuk", __name__)
 
-
-# Role required decorator for blueprints
-def role_required(*roles):
-    def wrapper(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if current_user.role not in roles:
-                flash("You do not have permission to access this page.", "error")
-                return redirect(url_for("index"))
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-    return wrapper
-
-
 METADATA_PATH = "metadata.json"
 
 
-# Perbaiki UPLOAD_FOLDER
+# Fix UPLOAD_FOLDER
 def get_upload_folder():
     return os.path.join(current_app.root_path, "static", "ocr", "surat_masuk")
 
 
-# Fungsi validasi file
+# File validation function
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in {
         "png",
@@ -93,7 +78,7 @@ def allowed_file(filename):
     }
 
 
-# Pastikan direktori upload ada
+# Ensure upload directory exists
 def ensure_upload_folder():
     upload_folder = get_upload_folder()
     os.makedirs(upload_folder, exist_ok=True)
@@ -359,7 +344,7 @@ def extract_ocr_data_surat_masuk(file_path):
         else:
             tanggal_final = datetime.now().strftime(
                 "%Y-%m-%d"
-            )  # Default jika tidak valid
+            )  # Default if not valid
             logger.warning(f"Using current date as fallback: {tanggal_final}")
 
         pengirim = extract_pengirim(raw_text)
@@ -375,8 +360,8 @@ def extract_ocr_data_surat_masuk(file_path):
         tanggal_acara = parse_date_to_ddmmyyyy(tanggal_acara) or tanggal_acara
         jam = extract_jam(raw_text)
 
-        # === PERBAIKAN OCR TEXT PROCESSING ===
-        # Buat dictionary data untuk diproses
+        # === ADVANCED OCR TEXT PROCESSING ===
+        # Create data dictionary to be processed
         extracted_data = {
             "pengirim_suratMasuk": pengirim,
             "penerima_suratMasuk": penerima,
@@ -385,7 +370,7 @@ def extract_ocr_data_surat_masuk(file_path):
             "tempat_suratMasuk": tempat,
         }
 
-        # Proses dengan OCR text processor untuk memperbaiki teks terpotong
+        # Process with OCR text processor to fix truncated text
         logger.info("Processing OCR text with advanced text processor...")
         processed_data = ocr_processor.process_surat_masuk_fields(extracted_data)
 
@@ -396,10 +381,10 @@ def extract_ocr_data_surat_masuk(file_path):
         acara = processed_data.get("acara_suratMasuk", acara)
         tempat = processed_data.get("tempat_suratMasuk", tempat)
 
-        # === ENHANCEMENT KHUSUS SURAT MASUK ===
+        # === SURAT MASUK SPECIFIC ENHANCEMENTS ===
         logger.info("Applying surat masuk specific enhancements...")
 
-        # Enhance setiap field dengan konteks yang sesuai
+        # Enhance each field with appropriate context
         pengirim = surat_masuk_enhancer.enhance_surat_masuk_text(pengirim, "pengirim")
         penerima = surat_masuk_enhancer.enhance_surat_masuk_text(penerima, "penerima")
         isi_surat = surat_masuk_enhancer.enhance_surat_masuk_text(
@@ -408,11 +393,11 @@ def extract_ocr_data_surat_masuk(file_path):
         acara = surat_masuk_enhancer.enhance_surat_masuk_text(acara, "acara")
         tempat = surat_masuk_enhancer.enhance_surat_masuk_text(tempat, "tempat")
 
-        # Deteksi jenis surat untuk logging
+        # Detect document type for logging
         surat_type = surat_masuk_enhancer.detect_surat_type(isi_surat)
         logger.info(f"Detected surat type: {surat_type}")
 
-        # Hitung skor kualitas teks
+        # Calculate text quality score
         text_quality_score = ocr_processor.get_text_quality_score(isi_surat)
         logger.info(f"Text quality score: {text_quality_score:.2f}")
 
@@ -421,7 +406,7 @@ def extract_ocr_data_surat_masuk(file_path):
             logger.info("OCR Enhancement Results:")
             logger.info(f"  Original: {isi_surat_raw[:100]}...")
             logger.info(f"  Enhanced: {isi_surat[:100]}...")
-        # === END ENHANCEMENT KHUSUS SURAT MASUK ===
+        # === END SURAT MASUK SPECIFIC ENHANCEMENTS ===
 
         # Calculate hash for file identification
         file_hash = calculate_file_hash(file_path)
@@ -522,11 +507,11 @@ def save_batch_results_to_db_surat_masuk(results):
 
                 if tgl:
                     try:
-                        # Coba parsing format YYYY-MM-DD
+                        # Try parsing YYYY-MM-DD format
                         tanggal_suratMasuk = datetime.strptime(tgl, "%Y-%m-%d")
                     except ValueError:
                         try:
-                            # Coba parsing format lain
+                            # Try other formats
                             for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%d %B %Y", "%d %b %Y"):
                                 try:
                                     tanggal_suratMasuk = datetime.strptime(tgl, fmt)
@@ -534,7 +519,7 @@ def save_batch_results_to_db_surat_masuk(results):
                                 except ValueError:
                                     continue
                         except Exception:
-                            # Gunakan tanggal sekarang jika parsing gagal
+                            # Use current date if parsing fails
                             tanggal_suratMasuk = datetime.utcnow()
 
                 # Handle tanggal acara
@@ -543,7 +528,7 @@ def save_batch_results_to_db_surat_masuk(results):
 
                 if tgl_acara:
                     try:
-                        # Coba parsing format yang mungkin
+                        # Try parsing possible formats
                         for fmt in ("%d/%m/%Y", "%d-%m-%Y", "%d %B %Y", "%d %b %Y"):
                             try:
                                 dt = datetime.strptime(tgl_acara, fmt)
@@ -554,7 +539,7 @@ def save_batch_results_to_db_surat_masuk(results):
                     except Exception:
                         tanggal_acara_suratMasuk = None
 
-                # Buat dictionary untuk parameter SuratMasuk
+                # Create parameter dictionary for SuratMasuk
                 kode_surat = item.get("kode_suratMasuk") or "Not found"
                 jenis_surat = item.get("jenis_suratMasuk") or "Not found"
                 surat_masuk_data = {
@@ -575,7 +560,6 @@ def save_batch_results_to_db_surat_masuk(results):
                     "initial_penerima_suratMasuk": item.get("penerima", "Not found"),
                     "initial_isi_suratMasuk": item.get("isi", "Not found"),
                 }
-                # Fallback jika masih None
                 if not surat_masuk_data["kode_suratMasuk"]:
                     surat_masuk_data["kode_suratMasuk"] = "Not found"
                 if not surat_masuk_data["jenis_suratMasuk"]:
@@ -614,10 +598,10 @@ def ocr_surat_masuk():
         processed_files = 0
 
         if request.method == "POST":
-            # Pastikan direktori upload ada
+            # Ensure upload directory exists
             UPLOAD_FOLDER = ensure_upload_folder()
 
-            # Tangani kasus tidak ada file yang dipilih
+            # Handle case where no file is selected
             files = request.files.getlist("image")
 
             if not files or all(file.filename == "" for file in files):
@@ -647,7 +631,7 @@ def ocr_surat_masuk():
                     file_path = os.path.join(UPLOAD_FOLDER, filename)
                     file.save(file_path)
 
-                    # Proses OCR
+                    # Process OCR
                     extracted_data = extract_ocr_data_surat_masuk(file_path)
 
                     if extracted_data:
@@ -657,26 +641,28 @@ def ocr_surat_masuk():
                         processed_files += 1
                     else:
                         flash(
-                            f"Tidak ada data yang diekstrak dari file: {filename}",
+                            f"Tidak ada data yang diekstrak dari file: {filename}. Pastikan Tesseract OCR sudah terinstall di sistem.",
                             "warning",
                         )
 
                 except Exception as e:
                     logger.error(f"Error processing file {filename}: {str(e)}")
-                    flash(f"Terjadi kesalahan saat memproses file {filename}", "error")
+                    flash(f"Terjadi kesalahan saat memproses file {filename}: {str(e)}", "error")
 
-            # Simpan batch results ke database
+            # Save batch results to database
             if extracted_data_list:
                 saved_count = save_batch_results_to_db_surat_masuk(extracted_data_list)
                 if saved_count > 0:
                     flash(f"Berhasil memproses {saved_count} dokumen", "success")
-                # Jangan redirect, render_template agar tombol extracted data muncul
+                # Don't redirect, render_template so extracted data buttons appear
                 return render_template(
                     "ocr/ocr_surat_masuk.html",
                     extracted_data_list=extracted_data_list,
                     image_paths=image_paths,
                     currentIndex=0,
                 )
+            else:
+                flash("Tidak ada dokumen yang berhasil diproses. Periksa instalasi Tesseract OCR.", "error")
 
             return render_template(
                 "ocr/ocr_surat_masuk.html",
@@ -695,7 +681,7 @@ def ocr_surat_masuk():
 
     except Exception as e:
         logger.error(f"Error in ocr_surat_masuk: {str(e)}")
-        flash("Terjadi kesalahan sistem", "error")
+        flash(f"Terjadi kesalahan sistem: {str(e)}", "error")
         return render_template(
             "ocr/ocr_surat_masuk.html",
             extracted_data_list=[],
@@ -730,14 +716,14 @@ def save_extracted_data():
         # Load existing metadata
         metadata = load_metadata()
 
-        # Inisialisasi kunci jika belum ada
+        # Initialize key if not present
         if "surat_masuk" not in metadata:
             metadata["surat_masuk"] = {}
 
-        # Proses setiap item data
+        # Process each data item
         for item in data:
             try:
-                # Ambil tanggal, bisa string atau list
+                # Get tanggal, can be string or list
                 tgl = item.get("tanggal")
                 if isinstance(tgl, list):
                     tgl = tgl[0] if tgl and len(tgl) > 0 else ""
@@ -746,14 +732,14 @@ def save_extracted_data():
                         tanggal_obj = datetime.strptime(tgl, "%Y-%m-%d")
                     except Exception:
                         try:
-                            # Coba format lain (dd/mm/yyyy)
+                            # Try other format (dd/mm/yyyy)
                             tanggal_obj = datetime.strptime(tgl, "%d/%m/%Y")
                         except Exception:
                             tanggal_obj = datetime.utcnow()
                 else:
                     tanggal_obj = datetime.utcnow()
 
-                # Tanggal acara (opsional)
+                # Event date (optional)
                 tgl_acara = item.get("tanggal_acara_suratMasuk")
                 if tgl_acara:
                     try:
@@ -805,7 +791,7 @@ def save_extracted_data():
                 db.session.add(surat_masuk)
                 db.session.commit()
 
-                # Update metadata untuk file yang berhasil disimpan
+                # Update metadata for successfully saved files
                 if item.get("filename"):
                     metadata["surat_masuk"][item["filename"]] = {
                         "id": surat_masuk.id_suratMasuk,

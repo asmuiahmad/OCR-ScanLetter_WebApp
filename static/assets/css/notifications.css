@@ -34,13 +34,40 @@
   transform: rotate(-15deg);
 }
 
+/* Notification Dropdown - No Inline Styles */
 .notification-dropdown {
-  transform-origin: top right;
-  animation: dropdownSlide 0.2s ease-out;
+  display: none;
+  position: fixed;
+  right: 1rem;
+  top: 4.5rem;
+  width: 26rem;
+  max-width: calc(100vw - 2rem);
+  max-height: 32rem;
+  background: white;
+  border: 1px solid var(--color-gray-200, #e5e7eb);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  z-index: 99998;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notification-dropdown.show {
+  display: flex !important;
 }
 
 .notification-dropdown.hidden {
   display: none !important;
+}
+
+@media (max-width: 640px) {
+  .notification-dropdown {
+    position: fixed;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+    top: 4rem;
+  }
 }
 
 @keyframes dropdownSlide {

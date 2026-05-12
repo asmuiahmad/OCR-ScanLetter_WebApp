@@ -1,0 +1,391 @@
+{% extends "layouts/base.html" %}
+{% block title %}Laporan Cetak — PA Banjarbaru{% endblock %}
+{% block content %}
+<div class="container mx-auto py-4 px-4">
+<div class="max-w-7xl mx-auto">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:1rem;padding:1.5rem 2rem;margin-bottom:1.25rem;box-shadow:0 4px 20px rgba(37,99,235,0.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <h1 style="font-size:1.4rem;font-weight:800;color:white;margin:0 0 0.25rem;display:flex;align-items:center;gap:0.5rem;">
+          <i class="fas fa-print"></i> Laporan Cetak
+        </h1>
+        <p style="font-size:0.78rem;color:rgba(255,255,255,0.75);margin:0;">
+          Pengadilan Agama Banjarbaru &nbsp;·&nbsp; {{ tanggal_cetak }}
+        </p>
+      </div>
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+        {% for num,lbl in [(semua_surat_masuk|length + semua_surat_keluar|length,'Total Surat'),(semua_cuti|length,'Cuti'),(semua_pegawai|length,'Pegawai'),(semua_disposisi|length,'Disposisi')] %}
+        <div style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:0.5rem;padding:0.5rem 1rem;text-align:center;">
+          <div style="font-size:1.6rem;font-weight:900;color:white;line-height:1;">{{ num }}</div>
+          <div style="font-size:0.65rem;color:rgba(255,255,255,0.7);margin-top:2px;">{{ lbl }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.65rem;margin-bottom:1.25rem;">
+    {% set sc = [('#3b82f6','#dbeafe','fas fa-inbox'),('#10b981','#d1fae5','fas fa-paper-plane'),('#f59e0b','#fef3c7','fas fa-calendar-alt'),('#8b5cf6','#ede9fe','fas fa-users'),('#06b6d4','#cffafe','fas fa-share-alt'),('#ef4444','#fee2e2','fas fa-clipboard-check'),('#64748b','#f1f5f9','fas fa-sign-in-alt')] %}
+    {% for r in ringkasan %}
+    {% set c = sc[loop.index0 % sc|length] %}
+    <div style="background:white;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:0.85rem 1rem;display:flex;align-items:center;gap:0.75rem;border-left:4px solid {{ c[0] }};">
+      <div style="width:2.5rem;height:2.5rem;border-radius:0.6rem;background:{{ c[1] }};color:{{ c[0] }};display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">
+        <i class="{{ c[2] }}"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.65rem;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;">{{ r.label }}</div>
+        <div style="font-size:1.5rem;font-weight:900;color:{{ c[0] }};line-height:1.1;margin:0.1rem 0;">{{ r.total }}</div>
+        <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
+          {% if r.pending != '-' %}
+          <span style="font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:9999px;background:#fef3c7;color:#92400e;">⏳ {{ r.pending }}</span>
+          <span style="font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:9999px;background:#d1fae5;color:#065f46;">✓ {{ r.approved }}</span>
+          <span style="font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:9999px;background:#fee2e2;color:#991b1b;">✕ {{ r.rejected }}</span>
+          {% else %}
+          <span style="font-size:0.6rem;color:#9ca3af;">—</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Selector panel -->
+  <div style="background:white;border-radius:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:1rem;">
+    <div style="background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-bottom:1px solid #e5e7eb;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+      <div>
+        <h3 style="font-size:0.88rem;font-weight:700;color:#1e293b;margin:0;display:flex;align-items:center;gap:0.4rem;">
+          <i class="fas fa-layer-group" style="color:#3b82f6;"></i> Pilih Laporan yang Ingin Dicetak
+        </h3>
+        <p style="font-size:0.7rem;color:#9ca3af;margin:0.15rem 0 0;">Klik kartu untuk memilih atau membatalkan. Kartu biru = terpilih.</p>
+      </div>
+      <div style="display:flex;gap:0.35rem;">
+        <button onclick="piliSemua(true)"  class="ubtn ubtn-secondary ubtn-sm"><i class="fas fa-check-square"></i> Pilih Semua</button>
+        <button onclick="piliSemua(false)" class="ubtn ubtn-secondary ubtn-sm"><i class="fas fa-square"></i> Kosongkan</button>
+      </div>
+    </div>
+    <div style="padding:1rem 1.25rem;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.65rem;">
+        {% set cards = [
+          ('r1','fas fa-chart-bar',    '#dbeafe','#2563eb','Ringkasan Umum',      'Semua kategori',                     '—'),
+          ('r2','fas fa-inbox',         '#d1fae5','#059669','Surat Masuk',         semua_surat_masuk|length  ~ ' surat', semua_surat_masuk|length),
+          ('r3','fas fa-paper-plane',   '#fef3c7','#d97706','Surat Keluar',        semua_surat_keluar|length ~ ' surat', semua_surat_keluar|length),
+          ('r4','fas fa-calendar-alt',  '#ede9fe','#7c3aed','Permohonan Cuti',     semua_cuti|length         ~ ' data',  semua_cuti|length),
+          ('r5','fas fa-users',         '#cffafe','#0891b2','Daftar Pegawai',      semua_pegawai|length      ~ ' orang', semua_pegawai|length),
+          ('r6','fas fa-share-alt',     '#fce7f3','#be185d','Disposisi',           semua_disposisi|length    ~ ' data',  semua_disposisi|length),
+          ('r7','fas fa-clipboard-check','#d1fae5','#059669','Riwayat Persetujuan',semua_audit|length        ~ ' entri', semua_audit|length),
+          ('r8','fas fa-sign-in-alt',   '#fee2e2','#dc2626','Log Login User',      semua_login|length        ~ ' log',   semua_login|length),
+        ] %}
+        {% for rid,icon,bg,ic,title,sub,num in cards %}
+        <div class="lc-rc active" onclick="toggleCard(this)" data-id="{{ rid }}"
+             style="background:#f8fafc;border:2px solid #e5e7eb;border-radius:0.75rem;padding:0.85rem 1rem;cursor:pointer;display:flex;align-items:center;gap:0.65rem;user-select:none;position:relative;overflow:hidden;">
+          <div style="width:2.4rem;height:2.4rem;border-radius:0.55rem;background:{{ bg }};display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">
+            <i class="{{ icon }}" style="color:{{ ic }};"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.78rem;font-weight:700;color:#1e293b;">{{ title }}</div>
+            <div style="font-size:0.67rem;color:#6b7280;margin-top:1px;">{{ sub }}</div>
+          </div>
+          <div style="font-size:1.15rem;font-weight:900;color:#3b82f6;line-height:1;flex-shrink:0;">{{ num }}</div>
+          <div class="lc-chk" style="position:absolute;top:0.4rem;right:0.4rem;width:1rem;height:1rem;border:2px solid #d1d5db;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.5rem;color:transparent;background:white;">
+            <i class="fas fa-check"></i>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Grafik ringkasan -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+    <!-- Bar chart status surat -->
+    <div style="background:white;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:1rem 1.25rem;">
+      <h3 style="font-size:0.82rem;font-weight:700;color:#1e293b;margin:0 0 0.75rem;display:flex;align-items:center;gap:0.4rem;">
+        <i class="fas fa-chart-bar" style="color:#3b82f6;"></i> Status Surat Masuk &amp; Keluar
+      </h3>
+      <div style="position:relative;height:180px;">
+        <canvas id="chartStatus"></canvas>
+      </div>
+    </div>
+    <!-- Donut chart distribusi -->
+    <div style="background:white;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:1rem 1.25rem;">
+      <h3 style="font-size:0.82rem;font-weight:700;color:#1e293b;margin:0 0 0.75rem;display:flex;align-items:center;gap:0.4rem;">
+        <i class="fas fa-chart-pie" style="color:#8b5cf6;"></i> Distribusi Data Sistem
+      </h3>
+      <div style="position:relative;height:180px;">
+        <canvas id="chartDist"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div style="background:white;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:0.85rem 1.25rem;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+    <button onclick="cetakTerpilih()" class="ubtn ubtn-primary"><i class="fas fa-print"></i> Cetak Terpilih</button>
+    <button onclick="cetakSemua()"    class="ubtn ubtn-success"><i class="fas fa-print"></i> Cetak Semua (8 Laporan)</button>
+    <div style="width:1px;height:1.5rem;background:#e5e7eb;"></div>
+    <span style="font-size:0.72rem;color:#6b7280;display:flex;align-items:center;gap:0.3rem;">
+      <i class="fas fa-file-alt" style="color:#93c5fd;"></i> Format A4 Landscape
+    </span>
+    <span style="font-size:0.72rem;color:#6b7280;display:flex;align-items:center;gap:0.3rem;">
+      <i class="fas fa-clock" style="color:#93c5fd;"></i> {{ tanggal_cetak }}
+    </span>
+    <span id="lc-count" style="margin-left:auto;font-size:0.75rem;font-weight:700;color:#3b82f6;">8 laporan terpilih</span>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══ AREA CETAK — di luar container agar tidak ikut tersembunyi saat print ═══ -->
+<div id="print-area" style="display:none;">
+
+  <div class="p-kop">
+    <div class="p-kop-inst">PENGADILAN AGAMA BANJARBARU</div>
+    <div class="p-kop-sub">Laporan Sistem Surat &amp; Kepegawaian</div>
+    <div class="p-kop-meta">Dicetak oleh: <strong>{{ current_user.email }}</strong> &nbsp;|&nbsp; {{ tanggal_cetak }}</div>
+  </div>
+
+  <div class="p-sec" id="r1">
+    <h2 class="p-sec-title">Laporan 1 — Ringkasan Umum</h2>
+    <table class="pt"><thead><tr><th>Kategori</th><th class="tc">Total</th><th class="tc">Pending</th><th class="tc">Disetujui</th><th class="tc">Ditolak</th></tr></thead>
+    <tbody>{% for r in ringkasan %}<tr><td><strong>{{ r.label }}</strong></td><td class="tc">{{ r.total }}</td><td class="tc">{{ r.pending }}</td><td class="tc">{{ r.approved }}</td><td class="tc">{{ r.rejected }}</td></tr>{% endfor %}</tbody></table>
+  </div>
+
+  <div class="p-sec" id="r2">
+    <h2 class="p-sec-title">Laporan 2 — Daftar Surat Masuk</h2>
+    <table class="pt"><thead><tr><th style="width:26px;">No</th><th>Nomor Surat</th><th>Pengirim</th><th>Penerima</th><th class="tc">Tanggal</th><th>Jenis</th><th class="tc">Status</th><th>Disetujui Oleh</th></tr></thead>
+    <tbody>{% for s in semua_surat_masuk %}<tr><td class="tc">{{ loop.index }}</td><td>{{ s.nomor_suratMasuk or '-' }}</td><td>{{ s.pengirim_suratMasuk or '-' }}</td><td>{{ (s.penerima_suratMasuk or '-')[:35] }}</td><td class="tc">{{ s.tanggal_suratMasuk.strftime('%d/%m/%Y') if s.tanggal_suratMasuk else '-' }}</td><td>{{ s.jenis_suratMasuk or '-' }}</td><td class="tc">{{ s.status_suratMasuk or '-' }}</td><td>{{ s.approved_by or '-' }}</td></tr>{% else %}<tr><td colspan="8" class="tc">Tidak ada data</td></tr>{% endfor %}</tbody></table>
+    <p class="p-note">Total: {{ semua_surat_masuk|length }} | Disetujui: {{ masuk_approved }} | Pending: {{ masuk_pending }} | Ditolak: {{ masuk_rejected }}</p>
+  </div>
+
+  <div class="p-sec" id="r3">
+    <h2 class="p-sec-title">Laporan 3 — Daftar Surat Keluar</h2>
+    <table class="pt"><thead><tr><th style="width:26px;">No</th><th>Nomor Surat</th><th>Pengirim</th><th>Tujuan</th><th class="tc">Tanggal</th><th>Jenis</th><th class="tc">Status</th><th>Disetujui Oleh</th></tr></thead>
+    <tbody>{% for s in semua_surat_keluar %}<tr><td class="tc">{{ loop.index }}</td><td>{{ s.nomor_suratKeluar or '-' }}</td><td>{{ s.pengirim_suratKeluar or '-' }}</td><td>{{ (s.penerima_suratKeluar or '-')[:35] }}</td><td class="tc">{{ s.tanggal_suratKeluar.strftime('%d/%m/%Y') if s.tanggal_suratKeluar else '-' }}</td><td>{{ s.jenis_suratKeluar or '-' }}</td><td class="tc">{{ s.status_suratKeluar or '-' }}</td><td>{{ s.approved_by or '-' }}</td></tr>{% else %}<tr><td colspan="8" class="tc">Tidak ada data</td></tr>{% endfor %}</tbody></table>
+    <p class="p-note">Total: {{ semua_surat_keluar|length }} | Disetujui: {{ keluar_approved }} | Pending: {{ keluar_pending }} | Ditolak: {{ keluar_rejected }}</p>
+  </div>
+
+  <div class="p-sec" id="r4">
+    <h2 class="p-sec-title">Laporan 4 — Daftar Permohonan Cuti</h2>
+    <table class="pt"><thead><tr><th style="width:26px;">No</th><th>Nama</th><th>NIP</th><th>Jabatan</th><th>Jenis Cuti</th><th class="tc">Tgl Mulai</th><th class="tc">Tgl Selesai</th><th class="tc">Lama</th><th class="tc">Status</th><th>Disetujui Oleh</th></tr></thead>
+    <tbody>{% for c in semua_cuti %}<tr><td class="tc">{{ loop.index }}</td><td>{{ c.nama }}</td><td>{{ c.nip }}</td><td>{{ c.jabatan }}</td><td>{{ c.jenis_cuti }}</td><td class="tc">{{ c.tanggal_cuti.strftime('%d/%m/%Y') if c.tanggal_cuti else '-' }}</td><td class="tc">{{ c.sampai_cuti.strftime('%d/%m/%Y') if c.sampai_cuti else '-' }}</td><td class="tc">{{ c.lama_cuti }}</td><td class="tc">{{ c.status_cuti }}</td><td>{{ c.approved_by or '-' }}</td></tr>{% else %}<tr><td colspan="10" class="tc">Tidak ada data</td></tr>{% endfor %}</tbody></table>
+    <p class="p-note">Total: {{ semua_cuti|length }} | Disetujui: {{ cuti_approved }} | Pending: {{ cuti_pending }} | Ditolak: {{ cuti_rejected }}</p>
+  </div>
+
+  <div class="p-sec" id="r5">
+    <h2 class="p-sec-title">Laporan 5 — Daftar Pegawai</h2>
+    <table class="pt"><thead><tr><th style="width:26px;">No</th><th>Nama</th><th>NIP</th><th>Jabatan</th><th class="tc">Gol.</th><th>Unit Kerja</th><th>Masa Kerja</th><th class="tc">Sisa Cuti</th></tr></thead>
+    <tbody>{% for p in semua_pegawai %}<tr><td class="tc">{{ loop.index }}</td><td>{{ p.nama }}</td><td>{{ p.nip }}</td><td>{{ p.jabatan or '-' }}</td><td class="tc">{{ p.golongan or '-' }}</td><td>{{ p.unit_kerja or '-' }}</td><td>{{ p.masa_kerja or '-' }}</td><td class="tc">{{ p.batas_cuti }} hr</td></tr>{% else %}<tr><td colspan="8" class="tc">Tidak ada data</td></tr>{% endfor %}</tbody></table>
+    <p class="p-note">Total pegawai: {{ semua_pegawai|length }}</p>
+  </div>
+
+  <div class="p-sec" id="r6">
+    <h2 class="p-sec-title">Laporan 6 — Daftar Disposisi</h2>
+    <table class="pt"><thead><tr><th style="width:26px;">No</th><th>Nomor Surat</th><th class="tc">Tipe</th><th>Dari</th><th>Kepada</th><th>Perihal</th><th class="tc">Prioritas</th><th class="tc">Status</th><th class="tc">Tanggal</th></tr></thead>
+    <tbody>{% for d in semua_disposisi %}<tr><td class="tc">{{ loop.index }}</td><td>{{ d.get_nomor_surat() or '-' }}</td><td class="tc">{{ d.surat_tipe }}</td><td>{{ d.dari_user.email.split('@')[0] if d.dari_user else '-' }}</td><td>{{ d.kepada_user.email.split('@')[0] if d.kepada_user else '-' }}</td><td>{{ (d.perihal or '-')[:40] }}</td><td class="tc">{{ d.prioritas }}</td><td class="tc">{{ d.status }}</td><td class="tc">{{ d.tanggal_disposisi.strftime('%d/%m/%Y') if d.tanggal_disposisi else '-' }}</td></tr>{% else %}<tr><td colspan="9" class="tc">Tidak ada data</td></tr>{% endfor %}</tbody></table>
+    <p class="p-note">Total: {{ semua_disposisi|length }} | Draft: {{ disposisi_draft }} | Dikirim: {{ disposisi_dikirim }} | Selesai: {{ disposisi_selesai }}</p>
+  </div>
+
+  <div class="p-sec" id="r7">
+    <h2 class="p-sec-title">Laporan 7 — Riwayat Persetujuan</h2>
+    <table class="pt"><thead><tr><th style="width:26px;">No</th><th>Jenis Dokumen</th><th class="tc">ID</th><th class="tc">Aksi</th><th>Dilakukan Oleh</th><th>Catatan</th><th class="tc">Tanggal</th></tr></thead>
+    <tbody>{% for a in semua_audit %}<tr><td class="tc">{{ loop.index }}</td><td>{{ a.entity_type }}</td><td class="tc">{{ a.entity_id }}</td><td class="tc">{{ a.action }}</td><td>{{ a.performed_by or '-' }}</td><td>{{ (a.notes or '-')[:60] }}</td><td class="tc">{{ a.created_at.strftime('%d/%m/%Y %H:%M') if a.created_at else '-' }}</td></tr>{% else %}<tr><td colspan="7" class="tc">Tidak ada data</td></tr>{% endfor %}</tbody></table>
+    <p class="p-note">Total: {{ semua_audit|length }} | Disetujui: {{ audit_approved }} | Ditolak: {{ audit_rejected }}</p>
+  </div>
+
+  <div class="p-sec" id="r8">
+    <h2 class="p-sec-title">Laporan 8 — Log Login User</h2>
+    <table class="pt"><thead><tr><th style="width:26px;">No</th><th>Email User</th><th class="tc">Waktu Login</th><th class="tc">Waktu Logout</th><th>IP Address</th><th>Browser</th><th class="tc">Perangkat</th><th class="tc">Status</th></tr></thead>
+    <tbody>{% for l in semua_login %}<tr><td class="tc">{{ loop.index }}</td><td>{{ l.user_email }}</td><td class="tc">{{ l.login_time.strftime('%d/%m/%Y %H:%M') if l.login_time else '-' }}</td><td class="tc">{{ l.logout_time.strftime('%d/%m/%Y %H:%M') if l.logout_time else '-' }}</td><td>{{ l.ip_address or '-' }}</td><td>{{ (l.browser_info or '-')[:30] }}</td><td class="tc">{{ l.device_type or '-' }}</td><td class="tc">{{ l.status }}</td></tr>{% else %}<tr><td colspan="8" class="tc">Tidak ada data</td></tr>{% endfor %}</tbody></table>
+    <p class="p-note">Total: {{ semua_login|length }} | Berhasil: {{ login_success }} | Gagal: {{ login_failed }}</p>
+  </div>
+
+  <div class="p-ttd">
+    <p style="margin:0;">Banjarbaru, {{ tanggal_cetak }}</p>
+    <p style="margin:0.2rem 0 0;">Pejabat yang berwenang,</p>
+    <div class="p-ttd-line">(................................)</div>
+  </div>
+
+</div>
+
+<style>
+/* Kartu selector */
+.lc-rc { transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; }
+.lc-rc:hover:not(.active) { border-color: #93c5fd !important; background: #f0f7ff !important; box-shadow: 0 2px 8px rgba(59,130,246,0.1); }
+.lc-rc.active { border-color:#3b82f6 !important; background:#eff6ff !important; box-shadow: 0 2px 8px rgba(59,130,246,0.15); }
+.lc-rc.active .lc-chk { background:#3b82f6 !important; border-color:#3b82f6 !important; color:white !important; }
+
+@media print {
+  /* Sembunyikan konten layar — sidebar/nav sudah ditangani global di head.html */
+  .container { display:none !important; }
+
+  /* Pastikan wrapper tidak menghalangi */
+  body, .main-content, .content {
+    display: block !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Tampilkan HANYA area cetak */
+  #print-area {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  @page { size:A4 landscape; margin:1.2cm 1.5cm 1.8cm 1.5cm; }
+  body { font-family:'Times New Roman',serif !important; font-size:9.5pt !important; color:#000 !important; background:white !important; margin:0 !important; padding:0 !important; }
+  .p-kop { text-align:center; border-bottom:3px double #1e3a8a; padding-bottom:0.5rem; margin-bottom:0.75rem; }
+  .p-kop-inst { font-size:13pt; font-weight:800; color:#1e3a8a; letter-spacing:0.5px; }
+  .p-kop-sub  { font-size:9pt; color:#374151; margin-top:2px; }
+  .p-kop-meta { font-size:8pt; color:#6b7280; margin-top:2px; }
+  .p-sec { page-break-inside:avoid; }
+  .p-sec+.p-sec { page-break-before:always; }
+  .p-sec-title { font-size:11pt; font-weight:700; color:#1e3a8a; border-bottom:2px solid #1e3a8a; padding-bottom:3px; margin:0 0 0.5rem; }
+  .pt { width:100%; border-collapse:collapse; font-size:8.5pt; margin-bottom:0.35rem; }
+  .pt th { background:#1e3a8a !important; color:white !important; padding:4px 5px; text-align:left; font-weight:700; border:1px solid #1e3a8a; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .pt td { padding:3px 5px; border:1px solid #d1d5db; vertical-align:top; }
+  .pt tr:nth-child(even) td { background:#f8fafc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .tc { text-align:center !important; }
+  .p-note { font-size:8pt; color:#374151; font-style:italic; margin:2px 0 0; }
+  .p-ttd { margin-top:2rem; text-align:right; font-size:9pt; }
+  .p-ttd-line { display:inline-block; border-top:1px solid #374151; min-width:200px; padding-top:3px; font-weight:700; margin-top:2.5rem; }
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+(function(){
+  var ALL=['r1','r2','r3','r4','r5','r6','r7','r8'];
+
+  /* ── Grafik Status Surat ── */
+  var ctxStatus = document.getElementById('chartStatus');
+  if(ctxStatus){
+    new Chart(ctxStatus, {
+      type: 'bar',
+      data: {
+        labels: ['Surat Masuk', 'Surat Keluar', 'Cuti'],
+        datasets: [
+          {
+            label: 'Pending',
+            data: [{{ masuk_pending }}, {{ keluar_pending }}, {{ cuti_pending }}],
+            backgroundColor: '#fbbf24',
+            borderRadius: 4,
+          },
+          {
+            label: 'Disetujui',
+            data: [{{ masuk_approved }}, {{ keluar_approved }}, {{ cuti_approved }}],
+            backgroundColor: '#10b981',
+            borderRadius: 4,
+          },
+          {
+            label: 'Ditolak',
+            data: [{{ masuk_rejected }}, {{ keluar_rejected }}, {{ cuti_rejected }}],
+            backgroundColor: '#ef4444',
+            borderRadius: 4,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10, usePointStyle: true } }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+  }
+
+  /* ── Grafik Distribusi ── */
+  var ctxDist = document.getElementById('chartDist');
+  if(ctxDist){
+    new Chart(ctxDist, {
+      type: 'doughnut',
+      data: {
+        labels: ['Surat Masuk', 'Surat Keluar', 'Cuti', 'Pegawai', 'Disposisi', 'Audit Log', 'Login Log'],
+        datasets: [{
+          data: [
+            {{ semua_surat_masuk|length }},
+            {{ semua_surat_keluar|length }},
+            {{ semua_cuti|length }},
+            {{ semua_pegawai|length }},
+            {{ semua_disposisi|length }},
+            {{ semua_audit|length }},
+            {{ semua_login|length }}
+          ],
+          backgroundColor: ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#06b6d4','#ef4444','#64748b'],
+          borderWidth: 2,
+          borderColor: '#fff',
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+          legend: { position: 'right', labels: { font: { size: 10 }, padding: 8, usePointStyle: true, boxWidth: 10 } }
+        }
+      }
+    });
+  }
+  var area=document.getElementById('print-area');
+  var countEl=document.getElementById('lc-count');
+
+  function upd(){
+    var n=document.querySelectorAll('.lc-rc.active').length;
+    if(countEl) countEl.textContent=n+' laporan terpilih';
+  }
+
+  window.toggleCard=function(card){
+    card.classList.toggle('active');
+    upd();
+  };
+
+  window.piliSemua=function(a){
+    document.querySelectorAll('.lc-rc').forEach(function(c){
+      a?c.classList.add('active'):c.classList.remove('active');
+    });
+    upd();
+  };
+
+  window.cetakTerpilih=function(){
+    var ids=[].slice.call(document.querySelectorAll('.lc-rc.active')).map(function(c){return c.dataset.id;});
+    if(!ids.length){alert('Pilih minimal satu laporan.');return;}
+    doPrint(ids);
+  };
+
+  window.cetakSemua=function(){doPrint(ALL);};
+
+  function doPrint(ids){
+    ALL.forEach(function(id){
+      var el=document.getElementById(id);
+      if(el) el.style.display=ids.indexOf(id)>=0?'block':'none';
+    });
+    area.style.display='block';
+    window.print();
+    setTimeout(function(){
+      area.style.display='none';
+      ALL.forEach(function(id){
+        var el=document.getElementById(id);
+        if(el) el.style.display='';
+      });
+    },1000);
+  }
+
+  upd();
+})();
+</script>
+{% endblock %}

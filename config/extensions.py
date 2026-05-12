@@ -15,7 +15,7 @@ def load_metadata():
     """
     metadata_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'metadata.json')
     
-    # Jika file tidak ada, kembalikan dictionary kosong
+    # If file does not exist, return an empty dictionary
     if not os.path.exists(metadata_path):
         return {}
     
@@ -23,7 +23,7 @@ def load_metadata():
         with open(metadata_path, 'r') as f:
             return json.load(f)
     except (json.JSONDecodeError, IOError):
-        # Jika ada kesalahan membaca file, kembalikan dictionary kosong
+        # If there is an error reading the file, return an empty dictionary
         return {}
 
 def save_metadata(metadata):

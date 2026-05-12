@@ -1,0 +1,515 @@
+{% extends "layouts/base.html" %}
+{% block title %}Daftar Disposisi{% endblock %}
+
+{% block content %}
+<style>
+  /* Styling untuk daftar disposisi - Simple & Clean */
+  .disposisi-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  .page-title {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .page-title h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .page-title p {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+  
+  /* Stats Cards */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 1024px) {
+    .stats-container {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .stats-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  .stat-box {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3b82f6;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  
+  /* Filter Section */
+  .filter-section {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .filter-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+  }
+  
+  @media (max-width: 768px) {
+    .filter-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .form-input,
+  .form-select {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    width: 100%;
+  }
+  
+  .form-input:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .btn {
+    padding: 0.625rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  
+  .btn-blue {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .btn-blue:hover {
+    background: #2563eb;
+  }
+  
+  .btn-gray {
+    background: #e2e8f0;
+    color: #475569;
+  }
+  
+  .btn-gray:hover {
+    background: #cbd5e1;
+  }
+  
+  .btn-green {
+    background: #10b981;
+    color: white;
+  }
+  
+  .btn-green:hover {
+    background: #059669;
+  }
+  
+  /* Table */
+  .table-box {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  
+  .table-scroll {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table thead {
+    background: #f8fafc;
+  }
+  
+  .data-table th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+  }
+  
+  .data-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .data-table tbody tr:hover {
+    background: #f8fafc;
+  }
+  
+  .data-table td {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    color: #334155;
+  }
+  
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .badge-masuk {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .badge-keluar {
+    background: #fce7f3;
+    color: #9f1239;
+  }
+  
+  .badge-draft {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+  
+  .badge-dikirim {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .badge-diproses {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .badge-selesai {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .badge-ditolak {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  .btn-detail {
+    padding: 0.375rem 0.75rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .btn-detail:hover {
+    background: #2563eb;
+  }
+  
+  .empty-box {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #94a3b8;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  /* Pagination */
+  .pagination-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .pagination-box a,
+  .pagination-box span {
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    text-decoration: none;
+    color: #475569;
+  }
+  
+  .pagination-box a:hover {
+    background: #f8fafc;
+  }
+  
+  .pagination-box .current {
+    background: #f1f5f9;
+    font-weight: 600;
+  }
+</style>
+
+<div class="disposisi-container">
+  <!-- Page Title -->
+  <div class="page-title">
+    <h2>
+      <i class="fas fa-share-alt" style="color: #3b82f6;"></i>
+      Daftar Disposisi
+    </h2>
+    <p>Kelola dan pantau disposisi surat masuk dan keluar</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-container">
+    <div class="stat-box">
+      <div class="stat-number">{{ stats.total }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number">{{ stats.dikirim }}</div>
+      <div class="stat-label">Dikirim</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number">{{ stats.diproses }}</div>
+      <div class="stat-label">Diproses</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number">{{ stats.selesai }}</div>
+      <div class="stat-label">Selesai</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number">{{ stats.ditolak }}</div>
+      <div class="stat-label">Ditolak</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number">{{ stats.draft }}</div>
+      <div class="stat-label">Draft</div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-section">
+    <form method="get">
+      <div class="filter-row">
+        <div class="form-group">
+          <label class="form-label">Cari</label>
+          <input 
+            type="text" 
+            name="q" 
+            value="{{ q }}" 
+            placeholder="Nomor surat, perihal, instruksi..." 
+            class="form-input"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Tipe</label>
+          <select name="tipe" class="form-select">
+            <option value="">Semua</option>
+            <option value="masuk" {% if tipe == "masuk" %}selected{% endif %}>Masuk</option>
+            <option value="keluar" {% if tipe == "keluar" %}selected{% endif %}>Keluar</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="">Semua</option>
+            <option value="draft" {% if status == "draft" %}selected{% endif %}>Draft</option>
+            <option value="dikirim" {% if status == "dikirim" %}selected{% endif %}>Dikirim</option>
+            <option value="diproses" {% if status == "diproses" %}selected{% endif %}>Diproses</option>
+            <option value="selesai" {% if status == "selesai" %}selected{% endif %}>Selesai</option>
+            <option value="ditolak" {% if status == "ditolak" %}selected{% endif %}>Ditolak</option>
+          </select>
+        </div>
+        
+        <div class="button-group">
+          <button type="submit" class="ubtn ubtn-primary">
+            <i class="fas fa-filter"></i> Filter
+          </button>
+          <a href="{{ url_for('disposisi.list_disposisi') }}" class="ubtn ubtn-secondary">
+            <i class="fas fa-redo"></i> Reset
+          </a>
+          {% if current_user.role in ['admin', 'pimpinan'] %}
+          <a href="{{ url_for('disposisi.buat_disposisi') }}" class="ubtn ubtn-success">
+            <i class="fas fa-plus"></i> Buat
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="table-box">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;">No</th>
+            <th style="width: 100px;">Tipe</th>
+            <th style="min-width: 150px;">Nomor Surat</th>
+            <th style="min-width: 200px;">Perihal</th>
+            <th style="min-width: 150px;">Dari</th>
+            <th style="min-width: 150px;">Kepada</th>
+            <th style="width: 120px;">Status</th>
+            <th style="width: 120px;">Tanggal</th>
+            <th style="width: 100px; text-align: center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if disposisi_list %}
+            {% for d in disposisi_list %}
+            <tr>
+              <td>{{ (pagination.page - 1) * pagination.per_page + loop.index }}</td>
+              <td>
+                <span class="badge badge-{{ d.surat_tipe }}">
+                  {{ d.surat_tipe }}
+                </span>
+              </td>
+              <td style="font-family: monospace; font-size: 0.8125rem;">
+                {{ d.get_nomor_surat() or "-" }}
+              </td>
+              <td>
+                <div style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ d.perihal or '-' }}">
+                  {{ d.perihal or "-" }}
+                </div>
+              </td>
+              <td>{{ d.dari_user.email.split('@')[0] if d.dari_user else '-' }}</td>
+              <td>{{ d.kepada_user.email.split('@')[0] if d.kepada_user else '-' }}</td>
+              <td>
+                <span class="badge badge-{{ d.status }}">
+                  {{ d.status }}
+                </span>
+              </td>
+              <td style="font-size: 0.8125rem;">
+                {{ d.tanggal_disposisi.strftime('%d/%m/%Y') if d.tanggal_disposisi else '-' }}
+              </td>
+              <td style="text-align: center;">
+                <a href="{{ url_for('disposisi.detail_disposisi', disposisi_id=d.id) }}" class="ubtn ubtn-info ubtn-sm">
+                  <i class="fas fa-eye"></i> Detail
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="9" class="empty-box">
+                <div class="empty-icon">
+                  <i class="fas fa-inbox"></i>
+                </div>
+                <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">
+                  Belum Ada Data Disposisi
+                </div>
+                <div style="font-size: 0.875rem;">
+                  {% if q or tipe or status %}
+                    Tidak ada disposisi yang sesuai dengan filter.
+                  {% else %}
+                    Belum ada disposisi yang dibuat.
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination and pagination.pages > 1 %}
+  <div class="pagination-box">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('disposisi.list_disposisi', page=pagination.prev_num, q=q, tipe=tipe, status=status) }}">
+      <i class="fas fa-chevron-left"></i> Prev
+    </a>
+    {% endif %}
+    
+    <span class="current">
+      Hal {{ pagination.page }} / {{ pagination.pages }}
+    </span>
+    
+    {% if pagination.has_next %}
+    <a href="{{ url_for('disposisi.list_disposisi', page=pagination.next_num, q=q, tipe=tipe, status=status) }}">
+      Next <i class="fas fa-chevron-right"></i>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

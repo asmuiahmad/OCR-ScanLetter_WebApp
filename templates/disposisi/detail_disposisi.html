@@ -1,0 +1,523 @@
+{% extends "layouts/base.html" %}
+{% block title %}Detail Disposisi{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-6 px-4">
+  <div class="max-w-4xl mx-auto space-y-4">
+    
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg shadow-md p-4 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <i class="fas fa-file-signature"></i>
+            Detail Disposisi
+          </h2>
+          <p class="text-indigo-100 text-sm mt-1">Informasi lengkap disposisi surat</p>
+        </div>
+        <a href="{{ url_for('disposisi.list_disposisi') }}"
+           class="px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 text-white bg-black/20 border border-white/30 hover:bg-black/35 hover:text-white focus:text-white active:text-white">
+          <i class="fas fa-arrow-left"></i>
+          Kembali
+        </a>
+      </div>
+    </div>
+
+    <!-- Detail Information -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+        <i class="fas fa-info-circle text-blue-600"></i>
+        Informasi Disposisi
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-file-alt text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Tipe Surat:</span>
+            <div class="text-gray-900">{{ disposisi.surat_tipe|capitalize }}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-2">
+          <i class="fas fa-hashtag text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Nomor Surat:</span>
+            <div class="text-gray-900 font-mono">{{ disposisi.get_nomor_surat() or "-" }}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-2">
+          <i class="fas fa-user text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Dari:</span>
+            <div class="text-gray-900">{{ disposisi.dari_user.email }}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-2">
+          <i class="fas fa-user-check text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Kepada:</span>
+            <div class="text-gray-900">{{ disposisi.kepada_user.email }}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-2">
+          <i class="fas fa-calendar text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Tanggal Disposisi:</span>
+            <div class="text-gray-900">{{ disposisi.tanggal_disposisi.strftime('%d/%m/%Y %H:%M') }}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-2">
+          <i class="fas fa-clock text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Batas Waktu:</span>
+            <div class="text-gray-900">{{ disposisi.batas_waktu.strftime('%d/%m/%Y') if disposisi.batas_waktu else '-' }}</div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-2">
+          <i class="fas fa-exclamation-circle text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Prioritas:</span>
+            <div>
+              {% if disposisi.prioritas == 'urgent' %}
+              <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-semibold">🔴 Urgent</span>
+              {% elif disposisi.prioritas == 'tinggi' %}
+              <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs font-semibold">🟡 Tinggi</span>
+              {% elif disposisi.prioritas == 'normal' %}
+              <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">🔵 Normal</span>
+              {% else %}
+              <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">🟢 Rendah</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-2">
+          <i class="fas fa-tasks text-gray-400 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-gray-600">Status:</span>
+            <div>
+              {% if disposisi.status == 'selesai' %}
+              <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">✅ Selesai</span>
+              {% elif disposisi.status == 'diproses' %}
+              <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">⏳ Diproses</span>
+              {% elif disposisi.status == 'dikirim' %}
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-semibold">📤 Dikirim</span>
+              {% elif disposisi.status == 'ditolak' %}
+              <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-semibold">❌ Ditolak</span>
+              {% else %}
+              <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-semibold">📝 {{ disposisi.status|capitalize }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <i class="fas fa-tag text-green-600"></i>
+          Perihal
+        </div>
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+          {{ disposisi.perihal or "-" }}
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <div class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <i class="fas fa-clipboard-list text-blue-600"></i>
+          Instruksi
+        </div>
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200 whitespace-pre-line">
+          {{ disposisi.instruksi }}
+        </div>
+      </div>
+
+      {% if disposisi.catatan_tindak_lanjut %}
+      <div class="mt-4">
+        <div class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <i class="fas fa-comment-dots text-purple-600"></i>
+          Catatan Tindak Lanjut
+        </div>
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200 whitespace-pre-line">
+          {{ disposisi.catatan_tindak_lanjut }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Update Status Form -->
+    {% if current_user.id == disposisi.kepada_user_id or current_user.role in ['admin', 'pimpinan'] %}
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+        <i class="fas fa-edit text-orange-600"></i>
+        Update Status Disposisi
+      </h3>
+      
+      <!-- Flash Messages in Form -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="space-y-2 mb-4">
+            {% for category, message in messages %}
+              <div class="notification {% if category == 'error' %}bg-red-50 border-red-200 text-red-800{% elif category == 'success' %}bg-green-50 border-green-200 text-green-800{% elif category == 'warning' %}bg-yellow-50 border-yellow-200 text-yellow-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %} border rounded-lg p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm">{{ message }}</span>
+                  <button type="button" class="text-gray-400 hover:text-gray-600" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      
+      <form method="post" 
+            action="{{ url_for('disposisi.update_status_disposisi', disposisi_id=disposisi.id) }}" 
+            class="space-y-4"
+            id="updateStatusForm"
+            data-no-ajax>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-tasks text-blue-500 mr-1"></i>
+            Status Baru
+            <span class="text-red-500">*</span>
+          </label>
+          <select name="status" 
+                  id="statusSelect"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                  required>
+            {% for st in ["draft","dikirim","diproses","selesai","ditolak"] %}
+            <option value="{{ st }}" {% if disposisi.status == st %}selected{% endif %}>
+              {% if st == 'selesai' %}✅ Selesai
+              {% elif st == 'diproses' %}⏳ Diproses
+              {% elif st == 'dikirim' %}📤 Dikirim
+              {% elif st == 'ditolak' %}❌ Ditolak
+              {% else %}📝 {{ st|capitalize }}
+              {% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-comment-dots text-purple-500 mr-1"></i>
+            Catatan Tindak Lanjut
+            <span id="catatanRequired" class="text-red-500" style="display: none;">*</span>
+          </label>
+          <textarea name="catatan_tindak_lanjut" 
+                    id="catatanTextarea"
+                    rows="4" 
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y" 
+                    placeholder="Tambahkan progres penanganan atau catatan penting...">{{ disposisi.catatan_tindak_lanjut or '' }}</textarea>
+          <p class="text-xs text-gray-500 mt-1" id="catatanHelp">Opsional - Tambahkan catatan untuk melacak progres</p>
+        </div>
+        
+        <!-- Alasan Penolakan (hidden by default) -->
+        <div id="alasanPenolakanDiv" style="display: none;">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
+            Alasan Penolakan
+            <span class="text-red-500">*</span>
+          </label>
+          <textarea name="alasan_penolakan" 
+                    id="alasanPenolakanTextarea"
+                    rows="3" 
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition resize-y" 
+                    placeholder="Jelaskan alasan penolakan disposisi ini...">{{ disposisi.alasan_penolakan or '' }}</textarea>
+          <p class="text-xs text-red-500 mt-1">Wajib diisi saat menolak disposisi</p>
+        </div>
+        
+        <div class="flex gap-2 justify-end pt-4 border-t border-gray-200">
+          <button type="button" 
+                  id="debugBtn"
+                  class="px-3 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold hover:bg-gray-600 transition flex items-center gap-2">
+            <i class="fas fa-bug"></i>
+            Debug
+          </button>
+          <a href="{{ url_for('disposisi.list_disposisi') }}" 
+             class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center gap-2">
+            <i class="fas fa-times"></i>
+            Batal
+          </a>
+          <button type="submit" 
+                  id="submitBtn"
+                  class="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg font-semibold hover:from-orange-700 hover:to-red-700 transition shadow-lg hover:shadow-xl flex items-center gap-2">
+            <i class="fas fa-save"></i>
+            <span id="submitText">Simpan Update</span>
+          </button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  'use strict';
+  
+  console.log('🚀 Detail disposisi script loaded');
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('updateStatusForm');
+    
+    if (!form) {
+      console.log('ℹ️ No update form found (user may not have permission)');
+      return;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const debugBtn = document.getElementById('debugBtn');
+    const statusSelect = document.getElementById('statusSelect');
+    const catatanTextarea = document.getElementById('catatanTextarea');
+    const catatanRequired = document.getElementById('catatanRequired');
+    const catatanHelp = document.getElementById('catatanHelp');
+    const alasanPenolakanDiv = document.getElementById('alasanPenolakanDiv');
+    const alasanPenolakanTextarea = document.getElementById('alasanPenolakanTextarea');
+    
+    // Debug button functionality
+    if (debugBtn) {
+      debugBtn.addEventListener('click', async function() {
+        console.log('🐛 Debug button clicked');
+        
+        try {
+          const debugUrl = `{{ url_for('disposisi.debug_disposisi', disposisi_id=disposisi.id) }}`;
+          console.log(`🐛 Fetching debug info from: ${debugUrl}`);
+          
+          const response = await fetch(debugUrl);
+          const data = await response.json();
+          
+          console.log('🐛 Debug response:', data);
+          
+          if (data.success) {
+            // Show debug info in a modal or alert
+            const debugInfo = JSON.stringify(data.debug_info, null, 2);
+            
+            // Create debug modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+              <div class="bg-white rounded-lg p-6 max-w-4xl max-h-96 overflow-auto">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="text-lg font-bold">Debug Information</h3>
+                  <button class="text-gray-500 hover:text-gray-700" onclick="this.parentElement.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <pre class="bg-gray-100 p-4 rounded text-sm overflow-auto">${debugInfo}</pre>
+                <div class="mt-4 text-sm text-gray-600">
+                  <p><strong>Cara menggunakan:</strong></p>
+                  <ul class="list-disc list-inside mt-2">
+                    <li>Periksa 'can_update' - harus true untuk bisa update</li>
+                    <li>Periksa 'current_status' dan 'valid_status_list'</li>
+                    <li>Periksa 'form_action_url' untuk URL yang benar</li>
+                    <li>Periksa 'model_fields' untuk field yang hilang</li>
+                  </ul>
+                </div>
+              </div>
+            `;
+            
+            document.body.appendChild(modal);
+          } else {
+            alert(`Debug error: ${data.error}`);
+          }
+        } catch (error) {
+          console.error('🐛 Debug fetch error:', error);
+          alert(`Debug fetch error: ${error.message}`);
+        }
+      });
+    }
+    
+    console.log('✅ Update form found');
+    
+    // CSRF Token refresh function
+    function refreshCSRFToken() {
+      fetch('/api/csrf-token', {
+        method: 'GET',
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.csrf_token) {
+          const csrfInput = form.querySelector('input[name="csrf_token"]');
+          if (csrfInput) {
+            csrfInput.value = data.csrf_token;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error refreshing CSRF token:', error);
+      });
+    }
+
+    // Refresh CSRF token every 10 minutes
+    setInterval(refreshCSRFToken, 10 * 60 * 1000);
+    
+    // Handle status change
+    function handleStatusChange() {
+      const selectedStatus = statusSelect.value;
+      
+      if (selectedStatus === 'ditolak') {
+        // Show alasan penolakan field
+        alasanPenolakanDiv.style.display = 'block';
+        alasanPenolakanTextarea.required = true;
+        
+        // Make catatan required for rejection
+        catatanRequired.style.display = 'inline';
+        catatanHelp.textContent = 'Wajib diisi saat menolak disposisi';
+        catatanTextarea.required = true;
+      } else {
+        // Hide alasan penolakan field
+        alasanPenolakanDiv.style.display = 'none';
+        alasanPenolakanTextarea.required = false;
+        
+        // Make catatan optional for other statuses
+        catatanRequired.style.display = 'none';
+        catatanHelp.textContent = 'Opsional - Tambahkan catatan untuk melacak progres';
+        catatanTextarea.required = false;
+      }
+    }
+    
+    // Initialize status change handler
+    statusSelect.addEventListener('change', handleStatusChange);
+    handleStatusChange(); // Run on page load
+    
+    // Form validation and submission
+    form.addEventListener('submit', function(e) {
+      console.log('📤 Form submitting...');
+      
+      // Prevent double submission
+      if (submitBtn.disabled) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Validate form
+      const selectedStatus = statusSelect.value;
+      const catatan = catatanTextarea.value.trim();
+      const alasanPenolakan = alasanPenolakanTextarea.value.trim();
+      
+      let hasError = false;
+      let errorMessages = [];
+      
+      // Remove existing error styling
+      statusSelect.classList.remove('border-red-500');
+      catatanTextarea.classList.remove('border-red-500');
+      alasanPenolakanTextarea.classList.remove('border-red-500');
+      
+      // Validate status
+      if (!selectedStatus) {
+        hasError = true;
+        errorMessages.push('Status baru harus dipilih');
+        statusSelect.classList.add('border-red-500');
+      }
+      
+      // Validate rejection fields
+      if (selectedStatus === 'ditolak') {
+        if (!catatan && !alasanPenolakan) {
+          hasError = true;
+          errorMessages.push('Catatan tindak lanjut atau alasan penolakan harus diisi saat menolak disposisi');
+          catatanTextarea.classList.add('border-red-500');
+          alasanPenolakanTextarea.classList.add('border-red-500');
+        }
+      }
+      
+      // Show validation errors
+      if (hasError) {
+        e.preventDefault();
+        
+        // Remove existing error notifications
+        const existingErrors = document.querySelectorAll('.validation-error-notification');
+        existingErrors.forEach(error => error.remove());
+        
+        // Create error notification
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'validation-error-notification bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 mb-4';
+        errorDiv.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div>
+              <strong class="font-semibold">Terjadi kesalahan validasi:</strong>
+              <ul class="mt-1 text-sm list-disc list-inside">
+                ${errorMessages.map(msg => `<li>${msg}</li>`).join('')}
+              </ul>
+            </div>
+            <button type="button" class="text-red-400 hover:text-red-600 ml-4" onclick="this.parentElement.parentElement.remove()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        
+        // Insert error at top of form
+        form.insertBefore(errorDiv, form.firstChild);
+        
+        // Scroll to error
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        return false;
+      }
+      
+      console.log('📋 Form action:', form.action);
+      console.log('📋 Form method:', form.method);
+      
+      const formData = new FormData(form);
+      console.log('📋 Form data:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+      }
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-75');
+      if (submitText) {
+        submitText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+      }
+      
+      // Set timeout to re-enable button if something goes wrong
+      setTimeout(function() {
+        if (submitBtn.disabled) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-75');
+          if (submitText) {
+            submitText.innerHTML = '<i class="fas fa-save mr-2"></i>Simpan Update';
+          }
+          
+          // Show timeout warning
+          const warningDiv = document.createElement('div');
+          warningDiv.className = 'bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-3 mb-4';
+          warningDiv.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div>
+                <strong class="font-semibold">Proses memakan waktu lebih lama dari biasanya.</strong>
+                <p class="text-sm mt-1">Silakan tunggu atau refresh halaman jika tidak ada respon.</p>
+              </div>
+              <button type="button" class="text-yellow-400 hover:text-yellow-600 ml-4" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          `;
+          form.insertBefore(warningDiv, form.firstChild);
+        }
+      }, 15000);
+      
+      console.log('✅ Form will submit normally');
+      // Allow normal form submission
+      return true;
+    });
+    
+    console.log('🎉 Form initialization complete!');
+  });
+})();
+</script>
+{% endblock %}

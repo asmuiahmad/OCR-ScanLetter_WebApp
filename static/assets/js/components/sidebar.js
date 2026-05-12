@@ -9,9 +9,10 @@ function toggleMenu(e, id) {
   const chevron = e.currentTarget.querySelector('.fa-chevron-down');
   const sidebar = document.querySelector('.modern-sidebar');
   
-  // Don't open dropdown if sidebar is collapsed
+  // If sidebar is collapsed, expand it first so submenu can be clicked.
   if (sidebar && sidebar.classList.contains('sidebar-collapsed')) {
-    return;
+    sidebar.classList.remove('sidebar-collapsed');
+    localStorage.setItem('sidebarCollapsed', 'false');
   }
   
   // Close all other dropdowns first

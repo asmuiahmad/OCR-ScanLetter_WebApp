@@ -66,6 +66,18 @@ def check_database():
         else:
             print("UserLoginLog table exists with columns:", user_login_logs_columns)
         
+        # Check Pegawai table for batas_cuti column
+        cursor.execute("PRAGMA table_info(pegawai)")
+        pegawai_columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'batas_cuti' not in pegawai_columns:
+            print("Adding batas_cuti column to pegawai table...")
+            cursor.execute("ALTER TABLE pegawai ADD COLUMN batas_cuti INTEGER DEFAULT 12")
+            conn.commit()
+            print("batas_cuti column added successfully!")
+        else:
+            print("batas_cuti column already exists in pegawai table.")
+        
         print("Database check completed successfully!")
         return True
         

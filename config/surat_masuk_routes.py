@@ -242,7 +242,7 @@ def input_surat_masuk():
             flash(f"Gagal menambahkan Surat Masuk: {str(e)}", "danger")
             return render_template("surat_masuk/input_surat_masuk.html", form=form)
     elif request.method == "POST":
-        # Jika form tidak valid, tampilkan error detail
+        # If form is invalid, show detailed errors
         current_app.logger.error(f"Form validation errors: {form.errors}")
         for field, errors in form.errors.items():
             for error in errors:
@@ -379,7 +379,7 @@ def list_pending_surat_masuk():
 @login_required
 @role_required("admin", "pimpinan")
 def approve_surat(surat_id):
-    """Approve surat - hanya pimpinan atau admin yang dapat menyetujui"""
+    """Approve surat - only pimpinan or admin can approve"""
     try:
         surat = SuratMasuk.query.get(surat_id)
         if not surat:
@@ -426,7 +426,7 @@ def approve_surat(surat_id):
 @login_required
 @role_required("admin", "pimpinan")
 def reject_surat(surat_id):
-    """Reject surat - hanya pimpinan atau admin yang dapat menolak"""
+    """Reject surat - only pimpinan or admin can reject"""
     try:
         surat = SuratMasuk.query.get(surat_id)
         if not surat:
@@ -643,43 +643,6 @@ def update_ocr_accuracy(id):
         return jsonify({"success": False, "error": str(e)})
 
 
-@surat_masuk_bp.route("/api/debug/surat/<int:surat_id>", methods=["GET"])
-@login_required
-@role_required("pimpinan", "admin")
-def debug_surat_detail(surat_id):
-    try:
-        surat = SuratMasuk.query.get(surat_id)
-        if not surat:
-            return jsonify(
-                {
-                    "success": False,
-                    "message": f"Surat dengan ID {surat_id} tidak ditemukan",
-                }
-            ), 404
-        return jsonify(
-            {
-                "success": True,
-                "surat_id": surat_id,
-                "raw_data": {
-                    "id_suratMasuk": surat.id_suratMasuk,
-                    "nomor_suratMasuk": surat.nomor_suratMasuk,
-                    "tanggal_suratMasuk": str(surat.tanggal_suratMasuk)
-                    if surat.tanggal_suratMasuk
-                    else None,
-                    "pengirim_suratMasuk": surat.pengirim_suratMasuk,
-                    "penerima_suratMasuk": surat.penerima_suratMasuk,
-                    "perihal_suratMasuk": getattr(surat, "perihal_suratMasuk", None),
-                    "isi_suratMasuk": surat.isi_suratMasuk,
-                    "status_suratMasuk": surat.status_suratMasuk,
-                    "file_suratMasuk": str(surat.file_suratMasuk),
-                    "created_at": str(surat.created_at) if surat.created_at else None,
-                },
-            }
-        )
-    except Exception as e:
-        return jsonify(
-            {"success": False, "error": str(e), "error_type": type(e).__name__}
-        ), 500
 
 
 @surat_masuk_bp.route("/api/surat-masuk/<int:id>")

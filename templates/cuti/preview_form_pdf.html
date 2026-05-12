@@ -94,29 +94,29 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Tahunan' %}checked{% endif %} disabled>
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'c_tahun' %}checked{% endif %} disabled>
                             <label class="form-check-label">1. CUTI TAHUNAN</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Sakit' %}checked{% endif %} disabled>
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'c_sakit' %}checked{% endif %} disabled>
                             <label class="form-check-label">3. CUTI SAKIT</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Karena Alasan Penting' %}checked{% endif %} disabled>
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'c_penting' %}checked{% endif %} disabled>
                             <label class="form-check-label">5. CUTI KARENA ALASAN PENTING</label>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Besar' %}checked{% endif %} disabled>
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'c_besar' %}checked{% endif %} disabled>
                             <label class="form-check-label">2. CUTI BESAR</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Melahirkan' %}checked{% endif %} disabled>
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'c_lahir' %}checked{% endif %} disabled>
                             <label class="form-check-label">4. CUTI MELAHIRKAN</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'Cuti Di Luar Tanggungan Negara' %}checked{% endif %} disabled>
+                            <input class="form-check-input" type="checkbox" {% if cuti.jenis_cuti == 'c_luarnegara' %}checked{% endif %} disabled>
                             <label class="form-check-label">6. CUTI DI LUAR TANGGUNGAN NEGARA</label>
                         </div>
                     </div>
