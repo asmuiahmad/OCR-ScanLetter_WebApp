@@ -36,13 +36,31 @@ function setupAjaxForms() {
         
         try {
             const formData = new FormData(form);
-            const response = await fetch(form.action || window.location.pathname, {
-                method: form.method || 'POST',
-                body: formData,
+            const method = (form.method || 'POST').toUpperCase();
+            
+            // For GET requests, convert FormData to URL parameters
+            let url = form.action || window.location.pathname;
+            let fetchOptions = {
+                method: method,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
-            });
+            };
+            
+            if (method === 'GET') {
+                // Convert FormData to URL search params for GET requests
+                const params = new URLSearchParams();
+                for (const [key, value] of formData.entries()) {
+                    params.append(key, value);
+                }
+                url = `${url}?${params.toString()}`;
+                // Don't include body for GET requests
+            } else {
+                // Include body for POST, PUT, DELETE, etc.
+                fetchOptions.body = formData;
+            }
+            
+            const response = await fetch(url, fetchOptions);
             
             if (response.ok) {
                 const result = await response.text();
@@ -80,7 +98,7 @@ function setupNotificationPolling() {
     
     setInterval(async () => {
         try {
-            const response = await fetch('/api/notifications', {
+            const response = await fetch('/api/notifications/count', {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -88,8 +106,7 @@ function setupNotificationPolling() {
             
             if (response.ok) {
                 const data = await response.json();
-                updateNotificationBadge(data.count);
-                updateNotificationDropdown(data.notifications);
+                updateNotificationBadge(data.pending_count);
             }
         } catch (error) {
             console.error('Notification polling error:', error);

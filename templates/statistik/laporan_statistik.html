@@ -1,521 +1,969 @@
-{% extends "layouts/base.html" %} {% block content %}
-<div class="container mx-auto py-8 px-4">
-    <div class="max-w-5xl mx-auto">
-        <div class="form-card">
-            <div class="page-header">
-                <h2>
-                    <i class="fas fa-chart-bar"></i>
-                    Laporan Statistik
+{% extends "layouts/base.html" %}
+
+{% block title %}Laporan Statistik{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-3 px-3">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Page Header - Compact -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-md p-3 mb-3 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-bold flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-lg"></i>
+                        Laporan Statistik
+                    </h1>
+                    <p class="text-blue-100 text-xs mt-0.5">Dashboard analitik surat</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards Row - Compact -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
+            <!-- Total Surat Masuk -->
+            <div class="bg-white rounded-lg shadow-sm p-3 border-l-4 border-blue-500 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-gray-500 text-xs font-medium truncate">Surat Masuk</p>
+                        <h3 class="text-2xl font-bold text-gray-800">{{ total_masuk or 0 }}</h3>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-2 ml-2">
+                        <i class="fas fa-inbox text-blue-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Surat Keluar -->
+            <div class="bg-white rounded-lg shadow-sm p-3 border-l-4 border-red-500 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-gray-500 text-xs font-medium truncate">Surat Keluar</p>
+                        <h3 class="text-2xl font-bold text-gray-800">{{ total_keluar or 0 }}</h3>
+                    </div>
+                    <div class="bg-red-100 rounded-full p-2 ml-2">
+                        <i class="fas fa-paper-plane text-red-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Rate Masuk -->
+            <div class="bg-white rounded-lg shadow-sm p-3 border-l-4 border-green-500 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-gray-500 text-xs font-medium truncate">Ekstraksi Masuk</p>
+                        <h3 class="text-2xl font-bold text-gray-800">{{ persentase_berhasil_masuk }}%</h3>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-2 ml-2">
+                        <i class="fas fa-check-circle text-green-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Rate Keluar -->
+            <div class="bg-white rounded-lg shadow-sm p-3 border-l-4 border-purple-500 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-gray-500 text-xs font-medium truncate">Ekstraksi Keluar</p>
+                        <h3 class="text-2xl font-bold text-gray-800">{{ persentase_berhasil_keluar }}%</h3>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-2 ml-2">
+                        <i class="fas fa-check-circle text-purple-600 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section - Compact -->
+        <div class="bg-white rounded-lg shadow-sm p-3 mb-3">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+                    <i class="fas fa-chart-line text-blue-600 text-sm"></i>
+                    Grafik 7 Hari Terakhir
                 </h2>
+                <button onclick="loadChartData()" class="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+            <div class="relative" style="height: 250px;">
+                <canvas id="suratChart"></canvas>
+                <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-gray-600 text-xs font-medium">Memuat...</p>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="form-card">
-            <div class="page-header">
-                <h3>
-                    <i class="fas fa-chart-line"></i>
-                    Grafik Harian Surat Masuk & Keluar
+
+        <!-- OCR Accuracy Section - Compact -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+            <!-- Akurasi Surat Masuk -->
+            <div class="bg-white rounded-lg shadow-sm p-3">
+                <h3 class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-1.5">
+                    <i class="fas fa-chart-pie text-blue-600 text-sm"></i>
+                    Akurasi OCR Masuk
                 </h3>
+                
+                <!-- Progress Bar -->
+                <div class="mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-medium text-gray-700">Rata-rata</span>
+                        <span class="text-base font-bold text-blue-600">{{ rata2_akurasi_masuk }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500" 
+                             style="width: {{ rata2_akurasi_masuk }}%"></div>
+                    </div>
+                </div>
+
+                <!-- Breakdown -->
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between p-2 bg-green-50 rounded text-xs">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-star text-green-600 text-xs"></i>
+                            <span class="font-medium text-gray-700">Tinggi (90-100%)</span>
+                        </div>
+                        <span class="font-bold text-green-600">{{ akurasi_tinggi_masuk or 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-yellow-50 rounded text-xs">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-star-half-alt text-yellow-600 text-xs"></i>
+                            <span class="font-medium text-gray-700">Sedang (70-89%)</span>
+                        </div>
+                        <span class="font-bold text-yellow-600">{{ akurasi_sedang_masuk or 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-red-50 rounded text-xs">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-xs"></i>
+                            <span class="font-medium text-gray-700">Rendah (0-69%)</span>
+                        </div>
+                        <span class="font-bold text-red-600">{{ akurasi_rendah_masuk or 0 }}</span>
+                    </div>
+                </div>
             </div>
-            <div class="p-6">
-                <div class="relative">
-                    <canvas id="suratChart" height="90"></canvas>
-                    <div
-                        id="chart-loading"
-                        class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75"
-                    >
-                        <div class="text-center">
-                            <i
-                                class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"
-                            ></i>
-                            <p class="text-gray-500">Memuat grafik...</p>
+
+            <!-- Akurasi Surat Keluar -->
+            <div class="bg-white rounded-lg shadow-sm p-3">
+                <h3 class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-1.5">
+                    <i class="fas fa-chart-pie text-red-600 text-sm"></i>
+                    Akurasi OCR Keluar
+                </h3>
+                
+                <!-- Progress Bar -->
+                <div class="mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-medium text-gray-700">Rata-rata</span>
+                        <span class="text-base font-bold text-red-600">{{ rata2_akurasi_keluar }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div class="bg-gradient-to-r from-red-500 to-red-600 h-2 rounded-full transition-all duration-500" 
+                             style="width: {{ rata2_akurasi_keluar }}%"></div>
+                    </div>
+                </div>
+
+                <!-- Breakdown -->
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between p-2 bg-green-50 rounded text-xs">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-star text-green-600 text-xs"></i>
+                            <span class="font-medium text-gray-700">Tinggi (90-100%)</span>
+                        </div>
+                        <span class="font-bold text-green-600">{{ akurasi_tinggi_keluar or 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-yellow-50 rounded text-xs">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-star-half-alt text-yellow-600 text-xs"></i>
+                            <span class="font-medium text-gray-700">Sedang (70-89%)</span>
+                        </div>
+                        <span class="font-bold text-yellow-600">{{ akurasi_sedang_keluar or 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-red-50 rounded text-xs">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-xs"></i>
+                            <span class="font-medium text-gray-700">Rendah (0-69%)</span>
+                        </div>
+                        <span class="font-bold text-red-600">{{ akurasi_rendah_keluar or 0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Failed Extraction Section - Compact -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+            <!-- Surat Masuk Gagal -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="bg-red-50 border-b border-red-100 p-2">
+                    <h3 class="text-sm font-bold text-red-800 flex items-center gap-1.5">
+                        <i class="fas fa-exclamation-circle text-xs"></i>
+                        OCR Fails - Masuk
+                    </h3>
+                </div>
+                <div class="p-2">
+                    <div style="max-height: 180px; overflow-y: auto;">
+                        {% if gagal_ekstraksi_suratMasuk %}
+                        <div class="space-y-1">
+                            {% for surat in gagal_ekstraksi_suratMasuk %}
+                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition">
+                                <div class="flex-1 min-w-0 mr-2">
+                                    <p class="font-medium text-gray-900 truncate">
+                                        {{ surat.nomor_suratMasuk or 'N/A' }}
+                                    </p>
+                                    <p class="text-gray-500 truncate text-xs">
+                                        {{ surat.pengirim_suratMasuk or 'Unknown' }}
+                                    </p>
+                                </div>
+                                <span class="text-xs text-gray-400 whitespace-nowrap">
+                                    {{ surat.tanggal_suratMasuk.strftime('%d/%m') }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-3xl text-green-500 mb-1"></i>
+                            <p class="text-green-600 font-semibold text-xs">Semua berhasil!</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Surat Keluar Gagal -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="bg-red-50 border-b border-red-100 p-2">
+                    <h3 class="text-sm font-bold text-red-800 flex items-center gap-1.5">
+                        <i class="fas fa-exclamation-circle text-xs"></i>
+                        OCR Fails - Keluar
+                    </h3>
+                </div>
+                <div class="p-2">
+                    <div style="max-height: 180px; overflow-y: auto;">
+                        {% if gagal_ekstraksi_suratKeluar %}
+                        <div class="space-y-1">
+                            {% for surat in gagal_ekstraksi_suratKeluar %}
+                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition">
+                                <div class="flex-1 min-w-0 mr-2">
+                                    <p class="font-medium text-gray-900 truncate">
+                                        {{ surat.nomor_suratKeluar or 'N/A' }}
+                                    </p>
+                                    <p class="text-gray-500 truncate text-xs">
+                                        {{ surat.pengirim_suratKeluar or 'Unknown' }}
+                                    </p>
+                                </div>
+                                <span class="text-xs text-gray-400 whitespace-nowrap">
+                                    {{ surat.tanggal_suratKeluar.strftime('%d/%m') }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-3xl text-green-500 mb-1"></i>
+                            <p class="text-green-600 font-semibold text-xs">Semua berhasil!</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Field Statistics - Compact -->
+        <div class="bg-white rounded-lg shadow-sm p-3 mb-3">
+            <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-1.5">
+                <i class="fas fa-database text-indigo-600 text-sm"></i>
+                Statistik Field "Not Found"
+            </h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <!-- Surat Masuk Stats -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3">
+                    <h4 class="text-xs font-bold text-blue-800 mb-2 flex items-center gap-1.5">
+                        <i class="fas fa-inbox text-xs"></i>
+                        Surat Masuk
+                    </h4>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Total</span>
+                            <span class="font-bold text-blue-600">{{ total_masuk or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Nomor</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_masuk.nomor_suratMasuk or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Pengirim</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_masuk.pengirim_suratMasuk or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Penerima</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_masuk.penerima_suratMasuk or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Isi</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_masuk.isi_suratMasuk or 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Surat Keluar Stats -->
+                <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg p-3">
+                    <h4 class="text-xs font-bold text-red-800 mb-2 flex items-center gap-1.5">
+                        <i class="fas fa-paper-plane text-xs"></i>
+                        Surat Keluar
+                    </h4>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Total</span>
+                            <span class="font-bold text-red-600">{{ total_keluar or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Nomor</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_keluar.nomor_suratKeluar or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Pengirim</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_keluar.pengirim_suratKeluar or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Penerima</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_keluar.penerima_suratKeluar or 0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-white rounded shadow-sm text-xs">
+                            <span class="font-medium text-gray-700">Isi</span>
+                            <span class="font-bold text-gray-800">{{ field_stats_keluar.isi_suratKeluar or 0 }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Row: Persentase dan Akurasi OCR -->
-        <div class="flex flex-col md:flex-row gap-4 mt-4">
-            <!-- Card 1: Persentase -->
-            <div class="card h-100 border-primary flex-1">
-                <div class="card-body">
-                    <h5
-                        class="card-title text-primary flex items-center font-semibold text-lg mb-2"
-                    >
-                        <i class="fas fa-percentage mr-2 text-primary"></i
-                        >Persentase Keberhasilan Ekstraksi
-                    </h5>
-                    <div class="card-text text-gray-700 text-base">
-                        <p>
-                            <span class="font-medium">Surat Masuk:</span>
-                            <span class="font-bold"
-                                >{{ persentase_berhasil_masuk }}%</span
-                            ><br />
-                            <span class="font-medium">Surat Keluar:</span>
-                            <span class="font-bold"
-                                >{{ persentase_berhasil_keluar }}%</span
-                            >
-                        </p>
+        <!-- Tips Section - Compact -->
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md p-3 text-white">
+            <h3 class="text-sm font-bold mb-2 flex items-center gap-1.5">
+                <i class="fas fa-lightbulb text-sm"></i>
+                Tips Meningkatkan Akurasi OCR
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div class="flex items-start gap-2 bg-white bg-opacity-10 rounded p-2 text-xs">
+                    <i class="fas fa-check-circle text-green-300 mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold">Resolusi Tinggi</p>
+                        <p class="text-blue-100 text-xs">Min. 300 DPI</p>
                     </div>
                 </div>
-            </div>
-            <!-- Card 2: Akurasi -->
-            <div class="card h-100 border-success flex-1">
-                <div class="card-body">
-                    <h5
-                        class="card-title text-success flex items-center font-semibold text-lg mb-2"
-                    >
-                        <i class="fas fa-chart-line mr-2 text-success"></i
-                        >Rata-Rata Akurasi OCR
-                    </h5>
-                    <div class="card-text text-gray-700 text-base">
-                        <p>
-                            <span class="font-medium">Surat Masuk:</span>
-                            <span class="font-bold"
-                                >{{ rata2_akurasi_masuk }}%</span
-                            ><br />
-                            <span class="font-medium">Surat Keluar:</span>
-                            <span class="font-bold"
-                                >{{ rata2_akurasi_keluar }}%</span
-                            >
-                        </p>
+                <div class="flex items-start gap-2 bg-white bg-opacity-10 rounded p-2 text-xs">
+                    <i class="fas fa-check-circle text-green-300 mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold">Pencahayaan Baik</p>
+                        <p class="text-blue-100 text-xs">Cahaya merata</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2 bg-white bg-opacity-10 rounded p-2 text-xs">
+                    <i class="fas fa-check-circle text-green-300 mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold">Hindari Distorsi</p>
+                        <p class="text-blue-100 text-xs">Posisi lurus</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2 bg-white bg-opacity-10 rounded p-2 text-xs">
+                    <i class="fas fa-check-circle text-green-300 mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold">Format Didukung</p>
+                        <p class="text-blue-100 text-xs">JPG, PNG, TIFF</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Surat Masuk Gagal Ekstraksi -->
-        <div class="card mb-4 border-danger bg-gray-50 rounded-lg shadow-sm">
-            <div class="card-body">
-                <h5
-                    class="card-title text-danger flex items-center font-semibold text-base mb-3"
-                >
-                    Surat Masuk OCR Fails
-                </h5>
-                <div style="max-height: 220px; overflow-y: auto">
-                    {% if gagal_ekstraksi_suratMasuk %}
-                    <div class="text-gray-800 text-xs">
-                        <div
-                            class="grid grid-cols-3 font-semibold border-b border-gray-200 pb-1 mb-1"
-                        >
-                            <div>Nomor Surat</div>
-                            <div>Pengirim</div>
-                            <div class="text-right">Tanggal</div>
-                        </div>
-                        {% for surat in gagal_ekstraksi_suratMasuk %}
-                        <div
-                            class="grid grid-cols-3 items-center border-b border-gray-100 py-1 mb-1"
-                        >
-                            <div
-                                class="truncate"
-                                title="{{ surat.nomor_suratMasuk or 'N/A' }}"
-                            >
-                                {{ surat.nomor_suratMasuk or 'Not found' }}
-                            </div>
-                            <div
-                                class="truncate"
-                                title="{{ surat.pengirim_suratMasuk or 'Tidak diketahui' }}"
-                            >
-                                {{ surat.pengirim_suratMasuk or 'Tidak
-                                diketahui' }}
-                            </div>
-                            <div class="text-right text-gray-500">
-                                {{ surat.tanggal_suratMasuk.strftime('%Y-%m-%d')
-                                }}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-green-600 font-semibold text-sm">
-                        Semua surat masuk berhasil diekstraksi.
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTION LAPORAN CETAK
+     Tersembunyi di layar, muncul saat print / klik tombol cetak
+     ═══════════════════════════════════════════════════════════════ -->
+
+<!-- Tombol Cetak (hanya tampil di layar, hilang saat print) -->
+<div class="no-print" style="margin:1.5rem 0 0.5rem;">
+    <div style="background:white; border-radius:0.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
+        <div>
+            <h3 style="font-size:0.95rem; font-weight:700; color:#1e293b; margin:0 0 0.2rem;">
+                <i class="fas fa-print" style="color:#3b82f6; margin-right:0.4rem;"></i>
+                Laporan Siap Cetak
+            </h3>
+            <p style="font-size:0.78rem; color:#64748b; margin:0;">Pilih laporan yang ingin dicetak, lalu klik tombolnya.</p>
         </div>
-
-        <!-- Surat Keluar Gagal Ekstraksi -->
-        <div class="card mb-4 border-danger bg-gray-50 rounded-lg shadow-sm">
-            <div class="card-body">
-                <h5
-                    class="card-title text-danger flex items-center font-semibold text-base mb-3"
-                >
-                    Surat Keluar OCR Fails
-                </h5>
-                <div style="max-height: 220px; overflow-y: auto">
-                    {% if gagal_ekstraksi_suratKeluar %}
-                    <div class="text-gray-800 text-xs">
-                        <div
-                            class="grid grid-cols-3 font-semibold border-b border-gray-200 pb-1 mb-1"
-                        >
-                            <div>Nomor Surat</div>
-                            <div>Pengirim</div>
-                            <div class="text-right">Tanggal</div>
-                        </div>
-                        {% for surat in gagal_ekstraksi_suratKeluar %}
-                        <div
-                            class="grid grid-cols-3 items-center border-b border-gray-100 py-1 mb-1"
-                        >
-                            <div
-                                class="truncate"
-                                title="{{ surat.nomor_suratKeluar or 'N/A' }}"
-                            >
-                                {{ surat.nomor_suratKeluar or 'Not found' }}
-                            </div>
-                            <div
-                                class="truncate"
-                                title="{{ surat.pengirim_suratKeluar or 'Tidak diketahui' }}"
-                            >
-                                {{ surat.pengirim_suratKeluar or 'Tidak
-                                diketahui' }}
-                            </div>
-                            <div class="text-right text-gray-500">
-                                {{
-                                surat.tanggal_suratKeluar.strftime('%Y-%m-%d')
-                                }}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-green-600 font-semibold text-sm">
-                        Semua surat keluar berhasil diekstraksi.
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button onclick="cetakLaporan('semua')"    class="ubtn ubtn-primary ubtn-sm"><i class="fas fa-print"></i> Cetak Semua</button>
+            <button onclick="cetakLaporan('masuk')"    class="ubtn ubtn-info ubtn-sm"><i class="fas fa-inbox"></i> Surat Masuk</button>
+            <button onclick="cetakLaporan('keluar')"   class="ubtn ubtn-warning ubtn-sm"><i class="fas fa-paper-plane"></i> Surat Keluar</button>
+            <button onclick="cetakLaporan('cuti')"     class="ubtn ubtn-success ubtn-sm"><i class="fas fa-calendar-alt"></i> Cuti</button>
+            <button onclick="cetakLaporan('pegawai')"  class="ubtn ubtn-purple ubtn-sm"><i class="fas fa-users"></i> Pegawai</button>
+            <button onclick="cetakLaporan('disposisi')" class="ubtn ubtn-secondary ubtn-sm"><i class="fas fa-share-alt"></i> Disposisi</button>
         </div>
+    </div>
+</div>
 
-        <!-- Field Not Found Summary -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h3 class="mb-4 text-primary">Field "Not Found" Statistics</h3>
+<!-- ── AREA CETAK ─────────────────────────────────────────────── -->
+<div id="print-area" style="display:none;">
 
-                <div class="row">
-                    <!-- Surat Masuk -->
-                    <div class="col-md-6">
-                        <h5 class="text-info">Surat Masuk</h5>
-                        <ul class="text-dark">
-                            <li>
-                                <strong>Total Surat Masuk:</strong> {{
-                                total_masuk or 0 }}
-                            </li>
-                            <li>
-                                <strong>Nomor Surat:</strong> {{
-                                field_stats_masuk.nomor_suratMasuk or 0 }}
-                            </li>
-                            <li>
-                                <strong>Pengirim:</strong> {{
-                                field_stats_masuk.pengirim_suratMasuk or 0 }}
-                            </li>
-                            <li>
-                                <strong>Penerima:</strong> {{
-                                field_stats_masuk.penerima_suratMasuk or 0 }}
-                            </li>
-                            <li>
-                                <strong>Isi Surat:</strong> {{
-                                field_stats_masuk.isi_suratMasuk or 0 }}
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Surat Keluar -->
-                    <div class="col-md-6">
-                        <h5 class="text-info">Surat Keluar</h5>
-                        <ul class="text-dark">
-                            <li>
-                                <strong>Total Surat Keluar:</strong> {{
-                                total_keluar or 0 }}
-                            </li>
-                            <li>
-                                <strong>Nomor Surat:</strong> {{
-                                field_stats_keluar.nomor_suratKeluar or 0 }}
-                            </li>
-                            <li>
-                                <strong>Pengirim:</strong> {{
-                                field_stats_keluar.pengirim_suratKeluar or 0 }}
-                            </li>
-                            <li>
-                                <strong>Penerima:</strong> {{
-                                field_stats_keluar.penerima_suratKeluar or 0 }}
-                            </li>
-                            <li>
-                                <strong>Isi Surat:</strong> {{
-                                field_stats_keluar.isi_suratKeluar or 0 }}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+    <!-- KOP CETAK -->
+    <div class="print-kop">
+        <div style="text-align:center; border-bottom:3px double #1e3a8a; padding-bottom:0.75rem; margin-bottom:1rem;">
+            <div style="font-size:1.1rem; font-weight:800; color:#1e3a8a; letter-spacing:0.5px;">
+                PENGADILAN AGAMA BANJARBARU
             </div>
-        </div>
-
-        <!-- OCR Accuracy Details -->
-        <div class="card mb-4 border-warning rounded-lg">
-            <div class="card-body">
-                <h3 class="mb-4 text-warning">Detail Akurasi OCR</h3>
-                <div class="row">
-                    <!-- Surat Masuk Accuracy -->
-                    <div class="col-md-6">
-                        <h5 class="text-info">Akurasi Surat Masuk</h5>
-                        <div class="progress mb-3">
-                            <div
-                                class="progress-bar bg-success"
-                                role="progressbar"
-                                style="width: {{ rata2_akurasi_masuk }}%"
-                                aria-valuenow="{{ rata2_akurasi_masuk }}"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                            >
-                                {{ rata2_akurasi_masuk }}%
-                            </div>
-                        </div>
-                        <p class="text-muted">
-                            <small>
-                                Akurasi tinggi (90-100%): {{
-                                akurasi_tinggi_masuk or 0 }} dokumen<br />
-                                Akurasi sedang (70-89%): {{ akurasi_sedang_masuk
-                                or 0 }} dokumen<br />
-                                Akurasi rendah (0-69%): {{ akurasi_rendah_masuk
-                                or 0 }} dokumen
-                            </small>
-                        </p>
-                    </div>
-                    <!-- Surat Keluar Accuracy -->
-                    <div class="col-md-6">
-                        <h5 class="text-info">Akurasi Surat Keluar</h5>
-                        <div class="progress mb-3">
-                            <div
-                                class="progress-bar bg-success"
-                                role="progressbar"
-                                style="width: {{ rata2_akurasi_keluar }}%"
-                                aria-valuenow="{{ rata2_akurasi_keluar }}"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                            >
-                                {{ rata2_akurasi_keluar }}%
-                            </div>
-                        </div>
-                        <p class="text-muted">
-                            <small>
-                                Akurasi tinggi (90-100%): {{
-                                akurasi_tinggi_keluar or 0 }} dokumen<br />
-                                Akurasi sedang (70-89%): {{
-                                akurasi_sedang_keluar or 0 }} dokumen<br />
-                                Akurasi rendah (0-69%): {{ akurasi_rendah_keluar
-                                or 0 }} dokumen
-                            </small>
-                        </p>
-                    </div>
-                </div>
-                <!-- Accuracy Improvement Tips -->
-                <div
-                    class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg"
-                >
-                    <h6
-                        class="text-primary font-semibold mb-3 flex items-center"
-                    >
-                        <i class="fas fa-info-circle mr-2"></i>Tips Meningkatkan
-                        Akurasi OCR:
-                    </h6>
-                    <ul class="text-blue-900 text-sm space-y-2">
-                        <li class="flex items-start gap-2">
-                            <i
-                                class="fas fa-info-circle mt-1 text-blue-400"
-                            ></i>
-                            Pastikan gambar dokumen memiliki resolusi tinggi
-                            (minimal 300 DPI)
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i
-                                class="fas fa-info-circle mt-1 text-blue-400"
-                            ></i>
-                            Gunakan pencahayaan yang baik saat scanning
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i
-                                class="fas fa-info-circle mt-1 text-blue-400"
-                            ></i>
-                            Hindari bayangan dan distorsi pada gambar
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i
-                                class="fas fa-info-circle mt-1 text-blue-400"
-                            ></i>
-                            Pastikan teks dalam dokumen jelas dan tidak blur
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i
-                                class="fas fa-info-circle mt-1 text-blue-400"
-                            ></i>
-                            Gunakan format file yang didukung (JPG, PNG, TIFF)
-                        </li>
-                    </ul>
-                </div>
+            <div style="font-size:0.8rem; color:#374151; margin-top:0.2rem;">
+                Laporan Statistik Sistem Surat &amp; Kepegawaian
+            </div>
+            <div style="font-size:0.75rem; color:#6b7280; margin-top:0.15rem;">
+                Dicetak oleh: <strong>{{ current_user.email }}</strong> &nbsp;|&nbsp; {{ tanggal_cetak }}
             </div>
         </div>
     </div>
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ── LAPORAN 1: RINGKASAN UMUM ── -->
+    <div class="print-section" id="print-semua">
+        <h2 class="print-section-title"><i class="fas fa-chart-bar"></i> Ringkasan Umum</h2>
+        <table class="print-table">
+            <thead><tr><th>Kategori</th><th>Total</th><th>Pending</th><th>Disetujui</th><th>Ditolak</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Surat Masuk</strong></td>
+                    <td class="text-center">{{ total_masuk }}</td>
+                    <td class="text-center">{{ masuk_pending }}</td>
+                    <td class="text-center">{{ masuk_approved }}</td>
+                    <td class="text-center">{{ masuk_rejected }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Surat Keluar</strong></td>
+                    <td class="text-center">{{ total_keluar }}</td>
+                    <td class="text-center">{{ keluar_pending }}</td>
+                    <td class="text-center">{{ keluar_approved }}</td>
+                    <td class="text-center">{{ keluar_rejected }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Permohonan Cuti</strong></td>
+                    <td class="text-center">{{ total_cuti }}</td>
+                    <td class="text-center">{{ cuti_pending }}</td>
+                    <td class="text-center">{{ cuti_approved }}</td>
+                    <td class="text-center">{{ cuti_rejected }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Disposisi</strong></td>
+                    <td class="text-center">{{ total_disposisi }}</td>
+                    <td class="text-center">{{ disposisi_draft }}</td>
+                    <td class="text-center">{{ disposisi_dikirim }}</td>
+                    <td class="text-center">{{ disposisi_selesai }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Pegawai Terdaftar</strong></td>
+                    <td class="text-center">{{ total_pegawai }}</td>
+                    <td class="text-center">—</td>
+                    <td class="text-center">—</td>
+                    <td class="text-center">—</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <script>
-        console.log("Script loaded");
+    <!-- ── LAPORAN 2: DAFTAR SURAT MASUK ── -->
+    <div class="print-section" id="print-masuk">
+        <h2 class="print-section-title"><i class="fas fa-inbox"></i> Daftar Surat Masuk</h2>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width:30px;">No</th>
+                    <th>Nomor Surat</th>
+                    <th>Pengirim</th>
+                    <th>Penerima</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in semua_surat_masuk %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ s.nomor_suratMasuk or '-' }}</td>
+                    <td>{{ s.pengirim_suratMasuk or '-' }}</td>
+                    <td>{{ s.penerima_suratMasuk or '-' }}</td>
+                    <td class="text-center">{{ s.tanggal_suratMasuk.strftime('%d/%m/%Y') if s.tanggal_suratMasuk else '-' }}</td>
+                    <td class="text-center">{{ s.status_suratMasuk or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center">Tidak ada data</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="print-footer-note">Total: {{ total_masuk }} surat &nbsp;|&nbsp; Disetujui: {{ masuk_approved }} &nbsp;|&nbsp; Pending: {{ masuk_pending }} &nbsp;|&nbsp; Ditolak: {{ masuk_rejected }}</p>
+    </div>
 
-        function loadChartData() {
-            console.log("loadChartData called");
+    <!-- ── LAPORAN 3: DAFTAR SURAT KELUAR ── -->
+    <div class="print-section" id="print-keluar">
+        <h2 class="print-section-title"><i class="fas fa-paper-plane"></i> Daftar Surat Keluar</h2>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width:30px;">No</th>
+                    <th>Nomor Surat</th>
+                    <th>Pengirim</th>
+                    <th>Penerima / Tujuan</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in semua_surat_keluar %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ s.nomor_suratKeluar or '-' }}</td>
+                    <td>{{ s.pengirim_suratKeluar or '-' }}</td>
+                    <td>{{ s.penerima_suratKeluar or '-' }}</td>
+                    <td class="text-center">{{ s.tanggal_suratKeluar.strftime('%d/%m/%Y') if s.tanggal_suratKeluar else '-' }}</td>
+                    <td class="text-center">{{ s.status_suratKeluar or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center">Tidak ada data</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="print-footer-note">Total: {{ total_keluar }} surat &nbsp;|&nbsp; Disetujui: {{ keluar_approved }} &nbsp;|&nbsp; Pending: {{ keluar_pending }} &nbsp;|&nbsp; Ditolak: {{ keluar_rejected }}</p>
+    </div>
 
-            const loadingElement = document.getElementById("chart-loading");
-            const chartElement = document.getElementById("suratChart");
+    <!-- ── LAPORAN 4: DAFTAR PERMOHONAN CUTI ── -->
+    <div class="print-section" id="print-cuti">
+        <h2 class="print-section-title"><i class="fas fa-calendar-alt"></i> Daftar Permohonan Cuti</h2>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width:30px;">No</th>
+                    <th>Nama</th>
+                    <th>NIP</th>
+                    <th>Jabatan</th>
+                    <th>Jenis Cuti</th>
+                    <th>Tgl Mulai</th>
+                    <th>Tgl Selesai</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in semua_cuti %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ c.nama }}</td>
+                    <td>{{ c.nip }}</td>
+                    <td>{{ c.jabatan }}</td>
+                    <td>{{ c.jenis_cuti }}</td>
+                    <td class="text-center">{{ c.tanggal_cuti.strftime('%d/%m/%Y') if c.tanggal_cuti else '-' }}</td>
+                    <td class="text-center">{{ c.sampai_cuti.strftime('%d/%m/%Y') if c.sampai_cuti else '-' }}</td>
+                    <td class="text-center">{{ c.status_cuti }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center">Tidak ada data</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="print-footer-note">Total: {{ total_cuti }} &nbsp;|&nbsp; Disetujui: {{ cuti_approved }} &nbsp;|&nbsp; Pending: {{ cuti_pending }} &nbsp;|&nbsp; Ditolak: {{ cuti_rejected }}</p>
+    </div>
 
-            if (!chartElement) {
-                console.error("Chart element not found");
-                return;
-            }
+    <!-- ── LAPORAN 5: DAFTAR PEGAWAI ── -->
+    <div class="print-section" id="print-pegawai">
+        <h2 class="print-section-title"><i class="fas fa-users"></i> Daftar Pegawai</h2>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width:30px;">No</th>
+                    <th>Nama</th>
+                    <th>NIP</th>
+                    <th>Jabatan</th>
+                    <th>Gol. Ruang</th>
+                    <th>Unit Kerja</th>
+                    <th>Sisa Cuti</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in semua_pegawai %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ p.nama }}</td>
+                    <td>{{ p.nip }}</td>
+                    <td>{{ p.jabatan or '-' }}</td>
+                    <td class="text-center">{{ p.golongan or '-' }}</td>
+                    <td>{{ p.unit_kerja or '-' }}</td>
+                    <td class="text-center">{{ p.batas_cuti }} hari</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center">Tidak ada data</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="print-footer-note">Total pegawai terdaftar: {{ total_pegawai }}</p>
+    </div>
 
-            console.log("Elements found");
+    <!-- ── LAPORAN 6: DAFTAR DISPOSISI ── -->
+    <div class="print-section" id="print-disposisi">
+        <h2 class="print-section-title"><i class="fas fa-share-alt"></i> Daftar Disposisi</h2>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width:30px;">No</th>
+                    <th>Nomor Surat</th>
+                    <th>Tipe</th>
+                    <th>Dari</th>
+                    <th>Kepada</th>
+                    <th>Perihal</th>
+                    <th>Status</th>
+                    <th>Tanggal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in semua_disposisi %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ d.get_nomor_surat() or '-' }}</td>
+                    <td class="text-center">{{ d.surat_tipe }}</td>
+                    <td>{{ d.dari_user.email.split('@')[0] if d.dari_user else '-' }}</td>
+                    <td>{{ d.kepada_user.email.split('@')[0] if d.kepada_user else '-' }}</td>
+                    <td>{{ (d.perihal or '-')[:40] }}</td>
+                    <td class="text-center">{{ d.status }}</td>
+                    <td class="text-center">{{ d.tanggal_disposisi.strftime('%d/%m/%Y') if d.tanggal_disposisi else '-' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center">Tidak ada data</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="print-footer-note">Total: {{ total_disposisi }} &nbsp;|&nbsp; Draft: {{ disposisi_draft }} &nbsp;|&nbsp; Dikirim: {{ disposisi_dikirim }} &nbsp;|&nbsp; Selesai: {{ disposisi_selesai }}</p>
+    </div>
 
-            // First, let's try to create chart with dummy data to test if Chart.js works
-            console.log("Creating chart with dummy data...");
+    <!-- Tanda tangan -->
+    <div class="print-ttd">
+        <div style="text-align:right; margin-top:2rem;">
+            <p style="margin:0; font-size:0.85rem;">Banjarbaru, {{ tanggal_cetak }}</p>
+            <p style="margin:0.25rem 0 3rem; font-size:0.85rem;">Pejabat yang berwenang,</p>
+            <p style="margin:0; font-size:0.85rem; font-weight:700; border-top:1px solid #374151; display:inline-block; padding-top:0.25rem; min-width:200px;">
+                (.................................)
+            </p>
+        </div>
+    </div>
 
-            try {
-                // Hide loading
-                if (loadingElement) {
-                    loadingElement.style.display = "none";
-                }
+</div><!-- /print-area -->
 
-                // Create chart with dummy data
-                const ctx = chartElement.getContext("2d");
-                const chart = new Chart(ctx, {
-                    type: "line",
-                    data: {
-                        labels: [
-                            "20/01",
-                            "21/01",
-                            "22/01",
-                            "23/01",
-                            "24/01",
-                            "25/01",
-                            "26/01",
-                        ],
-                        datasets: [
-                            {
-                                label: "📥 Surat Masuk",
-                                data: [3, 5, 2, 7, 4, 6, 8],
-                                borderColor: "rgb(59, 130, 246)",
-                                backgroundColor: "rgba(59, 130, 246, 0.1)",
-                                borderWidth: 2,
-                                fill: true,
+<!-- CSS Print -->
+<style>
+/* ── Sembunyikan area cetak di layar ── */
+#print-area { display: none !important; }
+
+/* ── Tombol cetak hilang saat print ── */
+@media print {
+    /* Sembunyikan semua kecuali area cetak */
+    body > * { display: none !important; }
+    .main-content > * { display: none !important; }
+    .modern-sidebar { display: none !important; }
+    nav { display: none !important; }
+    #print-area { display: block !important; }
+    .no-print { display: none !important; }
+
+    /* Reset margin/padding untuk kertas */
+    @page {
+        size: A4 landscape;
+        margin: 1.5cm 1.5cm 2cm 1.5cm;
+    }
+
+    body {
+        font-family: 'Times New Roman', serif !important;
+        font-size: 10pt !important;
+        color: #000 !important;
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Kop */
+    .print-kop {
+        margin-bottom: 1rem;
+    }
+
+    /* Section judul */
+    .print-section-title {
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        color: #1e3a8a !important;
+        border-bottom: 2px solid #1e3a8a !important;
+        padding-bottom: 4px !important;
+        margin: 1.5rem 0 0.75rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.4rem !important;
+    }
+
+    /* Tabel */
+    .print-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 9pt !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .print-table th {
+        background: #1e3a8a !important;
+        color: white !important;
+        padding: 5px 6px !important;
+        text-align: left !important;
+        font-weight: 700 !important;
+        border: 1px solid #1e3a8a !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .print-table td {
+        padding: 4px 6px !important;
+        border: 1px solid #d1d5db !important;
+        vertical-align: top !important;
+    }
+
+    .print-table tr:nth-child(even) td {
+        background: #f8fafc !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .text-center { text-align: center !important; }
+
+    .print-footer-note {
+        font-size: 8.5pt !important;
+        color: #374151 !important;
+        margin: 0.25rem 0 0 !important;
+        font-style: italic !important;
+    }
+
+    /* Pisah halaman antar section */
+    .print-section {
+        page-break-inside: avoid;
+    }
+
+    .print-section + .print-section {
+        page-break-before: always;
+    }
+
+    /* Tanda tangan */
+    .print-ttd {
+        margin-top: 2rem;
+    }
+}
+</style>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+<script>
+(function() {
+    'use strict';
+    
+    let chartInstance = null;
+
+    function loadChartData() {
+        console.log('Loading chart...');
+
+        const loadingElement = document.getElementById('chart-loading');
+        const chartElement = document.getElementById('suratChart');
+
+        if (!chartElement) {
+            console.error('Chart element not found');
+            return;
+        }
+
+        try {
+            const ctx = chartElement.getContext('2d');
+            
+            // Create chart with dummy data first
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Loading...'],
+                    datasets: [
+                        {
+                            label: '📥 Surat Masuk',
+                            data: [0],
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                        },
+                        {
+                            label: '📤 Surat Keluar',
+                            data: [0],
+                            borderColor: 'rgb(239, 68, 68)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                },
+                                padding: 15,
+                                usePointStyle: true,
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
                             },
-                            {
-                                label: "📤 Surat Keluar",
-                                data: [2, 4, 1, 5, 3, 4, 6],
-                                borderColor: "rgb(239, 68, 68)",
-                                backgroundColor: "rgba(239, 68, 68, 0.1)",
-                                borderWidth: 2,
-                                fill: true,
+                            bodyFont: {
+                                size: 13
                             },
-                        ],
+                            cornerRadius: 8,
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
                             title: {
                                 display: true,
-                                text: "Grafik Harian Surat Masuk & Keluar (7 Hari Terakhir)",
+                                text: 'Jumlah Surat',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                }
                             },
-                            legend: {
-                                display: true,
-                                position: "top",
-                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                            }
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: "Jumlah Surat",
-                                },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tanggal',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                }
                             },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: "Tanggal",
-                                },
-                            },
+                            grid: {
+                                display: false,
+                            }
                         },
                     },
-                });
+                },
+            });
 
-                console.log("Chart created successfully with dummy data");
+            console.log('Chart created');
 
-                // Immediately try to load real data and update the chart
-                console.log("Attempting to load real data...");
-                loadRealData(chart);
-            } catch (error) {
-                console.error("Error creating chart:", error);
-
-                // Hide loading
-                if (loadingElement) {
-                    loadingElement.style.display = "none";
-                }
-
-                // Show error
-                const container = chartElement.parentElement;
-                container.innerHTML =
-                    '<div class="text-center p-8"><p class="text-red-500">Gagal membuat grafik: ' +
-                    error.message +
-                    '</p><button onclick="loadChartData()" class="mt-2 px-3 py-1 bg-blue-500 text-white rounded">Coba Lagi</button></div>';
+            // Load real data
+            loadRealData();
+        } catch (error) {
+            console.error('Error creating chart:', error);
+            if (loadingElement) {
+                loadingElement.innerHTML = '<div class="text-center"><p class="text-red-500">Gagal membuat grafik</p></div>';
             }
         }
+    }
 
-        function loadRealData(chart) {
-            const url = '{{ url_for("laporan.chart_data") }}';
+    function loadRealData() {
+        const loadingElement = document.getElementById('chart-loading');
+        const url = '{{ url_for("laporan.chart_data") }}';
 
-            console.log("Loading real data from URL:", url);
+        console.log('Loading real data from:', url);
 
-            fetch(url)
-                .then((response) => {
-                    console.log("Response received:", response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log("Real data received:", data);
+        fetch(url)
+            .then(function(response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('Data received:', data);
 
-                    if (data.status === "success") {
-                        // Update chart with real data
-                        chart.data.labels = data.labels;
-                        chart.data.datasets[0].data = data.surat_masuk;
-                        chart.data.datasets[1].data = data.surat_keluar;
-                        chart.options.plugins.title.text =
-                            "Grafik Harian Surat Masuk & Keluar (7 Hari Terakhir)";
-                        chart.update();
+                if (data.status === 'success' && chartInstance) {
+                    chartInstance.data.labels = data.labels;
+                    chartInstance.data.datasets[0].data = data.surat_masuk;
+                    chartInstance.data.datasets[1].data = data.surat_keluar;
+                    chartInstance.update();
+                    console.log('Chart updated');
+                }
 
-                        console.log(
-                            "Chart updated with real data successfully",
-                        );
-                    } else {
-                        console.warn(
-                            "Data loaded but with error status:",
-                            data.message,
-                        );
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error loading real data:", error);
-                    console.log("Keeping initial data displayed on chart");
-                });
-        }
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading data:', error);
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+            });
+    }
 
-        // Load chart when page is ready
-        document.addEventListener("DOMContentLoaded", function () {
-            console.log("DOM loaded, calling loadChartData");
-            loadChartData();
-        });
-    </script>
-    {% endblock %}
-</div>
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadChartData);
+    } else {
+        loadChartData();
+    }
+
+    // Expose function globally for refresh button
+    window.loadChartData = loadChartData;
+})();
+</script>
+
+<script>
+/**
+ * Fungsi cetak laporan
+ * @param {string} jenis - 'semua'|'masuk'|'keluar'|'cuti'|'pegawai'|'disposisi'
+ */
+function cetakLaporan(jenis) {
+    const printArea = document.getElementById('print-area');
+    const sections = {
+        semua:     ['print-semua', 'print-masuk', 'print-keluar', 'print-cuti', 'print-pegawai', 'print-disposisi'],
+        masuk:     ['print-masuk'],
+        keluar:    ['print-keluar'],
+        cuti:      ['print-cuti'],
+        pegawai:   ['print-pegawai'],
+        disposisi: ['print-disposisi'],
+    };
+
+    // Sembunyikan semua section dulu
+    printArea.querySelectorAll('.print-section').forEach(el => el.style.display = 'none');
+
+    // Tampilkan section yang dipilih
+    const toShow = sections[jenis] || sections['semua'];
+    toShow.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'block';
+    });
+
+    // Tampilkan area cetak sementara
+    printArea.style.display = 'block';
+
+    // Cetak
+    window.print();
+
+    // Sembunyikan kembali setelah print dialog ditutup
+    setTimeout(() => {
+        printArea.style.display = 'none';
+        printArea.querySelectorAll('.print-section').forEach(el => el.style.display = 'block');
+    }, 500);
+}
+</script>
+{% endblock %}

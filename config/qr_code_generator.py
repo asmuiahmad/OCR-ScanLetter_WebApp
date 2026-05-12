@@ -34,7 +34,7 @@ class QRCodeGenerator:
     
     def create_verification_url(self, signature_hash):
         """Buat URL verifikasi untuk QR code"""
-        # Ganti dengan domain production Anda
+        # Replace with your production domain
         base_url = "https://your-domain.com"
         return f"{base_url}/verify-cuti/{signature_hash}"
     

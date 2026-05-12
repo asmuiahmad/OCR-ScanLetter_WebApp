@@ -75,19 +75,7 @@ def role_required(*roles):
 
 
 def log_user_login(user_id, user_email, status="success", request_obj=None):
-    """Log user login activity (asynchronous to prevent blocking)"""
-    # Run logging in background thread to avoid blocking login
-    thread = threading.Thread(
-        target=_log_user_login_async,
-        args=(user_id, user_email, status, request_obj)
-    )
-    thread.daemon = True
-    thread.start()
-    return None
-
-
-def _log_user_login_async(user_id, user_email, status="success", request_obj=None):
-    """Async logging function (runs in background thread)"""
+    """Log user login activity (synchronous with error handling)"""
     try:
         log_data = {
             "user_id": user_id,
@@ -121,9 +109,18 @@ def _log_user_login_async(user_id, user_email, status="success", request_obj=Non
         login_log = UserLoginLog(**log_data)
         db.session.add(login_log)
         db.session.commit()
+        return login_log
     except Exception as e:
         print(f"Error logging login: {str(e)}")
         db.session.rollback()
+        # Don't raise exception, just log it
+        return None
+
+
+def _log_user_login_async(user_id, user_email, status="success", request_obj=None):
+    """Async logging function (runs in background thread) - DEPRECATED"""
+    # This function is deprecated and replaced with synchronous logging
+    pass
 
 
 def log_user_logout(user_id):

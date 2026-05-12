@@ -1,0 +1,397 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Preview Surat Keluar - {{ surat.nomor_suratKeluar }}{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}">
+<style>
+    .preview-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .surat-paper {
+        background: white;
+        padding: 3rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+        min-height: 29.7cm; /* A4 height */
+        width: 21cm; /* A4 width */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Kop Surat */
+    .kop-surat {
+        display: flex;
+        align-items: center;
+        border-bottom: 2.5px solid #000;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        gap: 1.5rem;
+    }
+    
+    .kop-logo {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+    }
+    
+    .kop-text {
+        flex: 1;
+        text-align: center;
+    }
+    
+    .kop-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #000;
+        margin: 0 0 0.15rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        line-height: 1.3;
+    }
+    
+    .kop-address {
+        font-size: 0.75rem;
+        color: #000;
+        margin: 0.4rem 0 0 0;
+        line-height: 1.4;
+        font-weight: 400;
+    }
+    
+    /* Nomor Surat */
+    .nomor-surat-section {
+        margin: 2rem 0 1rem 0;
+        text-align: left;
+    }
+    
+    .nomor-surat-label {
+        font-size: 1rem;
+        color: #000;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+    
+    .nomor-surat-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #000;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Isi Surat */
+    .surat-content {
+        margin: 2rem 0;
+        line-height: 2;
+        text-align: justify;
+        font-size: 1rem;
+    }
+    
+    .surat-kepada {
+        margin-bottom: 2rem;
+        line-height: 1.8;
+    }
+    
+    .surat-kepada-label {
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 0.5rem;
+    }
+    
+    .surat-perihal {
+        margin-bottom: 2.5rem;
+        display: grid;
+        grid-template-columns: 100px 20px 1fr;
+        gap: 0;
+        line-height: 1.8;
+    }
+    
+    .surat-perihal-label {
+        font-weight: 700;
+        color: #000;
+    }
+    
+    .surat-body {
+        margin: 1.5rem 0;
+        color: #000;
+        white-space: pre-wrap;
+        line-height: 2;
+        text-align: justify;
+        text-indent: 2.5rem;
+        font-size: 1rem;
+    }
+    
+    .surat-body:first-of-type {
+        text-indent: 0;
+    }
+    
+    /* Tanda Tangan */
+    .ttd-section {
+        margin-top: 4rem;
+        text-align: left;
+        padding-left: 50%;
+    }
+    
+    .ttd-location {
+        margin-bottom: 0.5rem;
+        color: #000;
+        font-weight: 500;
+    }
+    
+    .ttd-jabatan {
+        font-weight: 600;
+        color: #000;
+        margin-bottom: 5rem;
+        line-height: 1.6;
+    }
+    
+    .ttd-nama {
+        font-weight: 700;
+        color: #000;
+        text-decoration: underline;
+        font-size: 1.05rem;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+    }
+    
+    .btn-action {
+        padding: 0.875rem 2rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-print {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-print:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .btn-edit {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .btn-back {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
+    .btn-back:hover {
+        background: #e5e7eb;
+        text-decoration: none;
+        color: #374151;
+    }
+    
+    /* Print Styles */
+    @media print {
+        body {
+            background: white;
+        }
+        
+        .action-buttons,
+        .form-card,
+        nav,
+        .sidebar,
+        header,
+        footer {
+            display: none !important;
+        }
+        
+        .surat-paper {
+            box-shadow: none;
+            padding: 2.5cm 2cm;
+            margin: 0;
+            border-radius: 0;
+            page-break-after: always;
+        }
+        
+        .preview-container {
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        /* Ensure proper text rendering in print */
+        .surat-body {
+            orphans: 3;
+            widows: 3;
+        }
+        
+        /* Prevent page breaks inside important sections */
+        .kop-surat,
+        .ttd-section {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-6">
+    <div class="preview-container">
+        <!-- Page Header -->
+        <div class="form-card mb-6">
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-file-alt"></i>
+                    Preview Surat Keluar
+                </h2>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{{ url_for('surat_keluar.download_pdf_surat', id_suratKeluar=surat.id_suratKeluar) }}" class="btn-action btn-print">
+                <i class="fas fa-download"></i>
+                Download PDF
+            </a>
+            <button onclick="window.print()" class="btn-action" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                <i class="fas fa-print"></i>
+                Cetak
+            </button>
+            <a href="{{ url_for('surat_keluar.edit_surat_keluar', id_suratKeluar=surat.id_suratKeluar) }}" class="btn-action btn-edit">
+                <i class="fas fa-edit"></i>
+                Edit Surat
+            </a>
+            <a href="{{ url_for('surat_keluar.show_surat_keluar') }}" class="btn-action btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Kembali
+            </a>
+        </div>
+
+        <!-- Surat Paper -->
+        <div class="surat-paper" id="surat-content">
+            <!-- Kop Surat -->
+            <div class="kop-surat">
+                <!-- Logo PA -->
+                <div class="kop-logo">
+                    <img src="{{ url_for('static', filename='assets/images/logo_pa_original.png') }}" 
+                         alt="Logo Pengadilan Agama Banjarbaru" 
+                         style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                
+                <!-- Kop Text -->
+                <div class="kop-text">
+                    <div class="kop-title">MAHKAMAH AGUNG REPUBLIK INDONESIA</div>
+                    <div class="kop-title">DIREKTORAT JENDERAL BADAN PERADILAN AGAMA</div>
+                    <div class="kop-title">PENGADILAN TINGGI AGAMA BANJARMASIN</div>
+                    <div class="kop-title">PENGADILAN AGAMA BANJARBARU</div>
+                    <div class="kop-address">
+                        Jalan Trikora Nomor 4, Kelurahan Kemuning, Kecamatan Banjarbaru Selatan<br>
+                        Kota Banjarbaru, Kalimantan Selatan 70714, www.pa-banjarbaru.go.id, <span style="color: blue; text-decoration: underline;">pa.banjarbaru@gmail.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nomor Surat dan Lampiran -->
+            <div style="margin: 2rem 0;">
+                <table style="width: 100%; border: none;">
+                    <tr>
+                        <td style="width: 100px; vertical-align: top; padding: 0.25rem 0; font-weight: 700;">Nomor</td>
+                        <td style="width: 20px; vertical-align: top; padding: 0.25rem 0;">:</td>
+                        <td style="vertical-align: top; padding: 0.25rem 0; font-family: 'Courier New', monospace; font-weight: 700;">{{ surat.nomor_suratKeluar }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top; padding: 0.25rem 0; font-weight: 700;">Lampiran</td>
+                        <td style="vertical-align: top; padding: 0.25rem 0;">:</td>
+                        <td style="vertical-align: top; padding: 0.25rem 0;">-</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top; padding: 0.25rem 0; font-weight: 700;">Perihal</td>
+                        <td style="vertical-align: top; padding: 0.25rem 0;">:</td>
+                        <td style="vertical-align: top; padding: 0.25rem 0; font-weight: 600;">{{ surat.jenis_suratKeluar }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Kepada -->
+            <div class="surat-kepada">
+                <div class="surat-kepada-label">Kepada Yth.</div>
+                <div style="font-weight: 600;">{{ surat.penerima_suratKeluar }}</div>
+                <div>di-</div>
+                <div style="margin-left: 2rem; font-weight: 600;">Tempat</div>
+            </div>
+
+            <!-- Pembuka -->
+            <div class="surat-body" style="text-indent: 0; margin-top: 2rem;">
+Dengan hormat,
+            </div>
+
+            <!-- Isi Surat -->
+            <div class="surat-body" style="text-indent: 2.5rem;">
+{{ surat.isi_suratKeluar }}
+            </div>
+
+            <!-- Penutup -->
+            <div class="surat-body" style="text-indent: 2.5rem;">
+Demikian surat ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.
+            </div>
+
+            <!-- Tanda Tangan -->
+            <div class="ttd-section">
+                <div class="ttd-location">
+                    Banjarbaru, {{ surat.tanggal_suratKeluar.strftime('%d %B %Y') if surat.tanggal_suratKeluar else '' }}
+                </div>
+                <div class="ttd-jabatan">
+                    {{ surat.pengirim_suratKeluar }}
+                </div>
+                <div class="ttd-nama">
+                    {{ surat.pengirim_suratKeluar.split(',')[0] if ',' in surat.pengirim_suratKeluar else surat.pengirim_suratKeluar }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-print functionality (optional)
+    // window.onload = function() {
+    //     if (confirm('Apakah Anda ingin mencetak surat ini sekarang?')) {
+    //         window.print();
+    //     }
+    // };
+</script>
+{% endblock %}

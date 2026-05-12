@@ -1,0 +1,352 @@
+/**
+ * Card Component System
+ * Standardized card styles for consistent UI
+ */
+
+/* ========================================
+   BASE CARD
+   ======================================== */
+.card {
+    background: white;
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--shadow-sm, 0 1px 3px 0 rgba(0, 0, 0, 0.1));
+    overflow: hidden;
+    border: 1px solid var(--color-gray-200, #e5e7eb);
+    transition: box-shadow var(--transition-base, 0.2s) ease;
+}
+
+.card-hover:hover {
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   CARD SECTIONS
+   ======================================== */
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-gray-200, #e5e7eb);
+    background: var(--color-gray-50, #f9fafb);
+}
+
+.card-header h3,
+.card-header h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-gray-700, #374151);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-gray-200, #e5e7eb);
+    background: var(--color-gray-50, #f9fafb);
+}
+
+/* ========================================
+   STAT CARDS (Dashboard)
+   ======================================== */
+
+.stat-card {
+    background: white;
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    overflow: hidden;
+    border: 1px solid var(--color-gray-200, #e5e7eb);
+    transition: all var(--transition-base, 0.2s) ease;
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
+}
+
+.stat-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-card-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.stat-card-body {
+    padding: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+}
+
+.stat-item:not(:last-child) {
+    border-bottom: 1px solid var(--color-gray-100, #f3f4f6);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--color-gray-600, #4b5563);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--color-gray-900, #111827);
+    line-height: 1;
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-full, 9999px);
+    flex-shrink: 0;
+}
+
+/* ========================================
+   GRADIENT CARDS
+   ======================================== */
+
+.card-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary-500, #3b82f6) 0%, var(--color-primary-600, #2563eb) 100%);
+    color: white;
+    border: none;
+}
+
+.card-gradient-success {
+    background: linear-gradient(135deg, var(--color-success-500, #22c55e) 0%, var(--color-success-600, #16a34a) 100%);
+    color: white;
+    border: none;
+}
+
+.card-gradient-error {
+    background: linear-gradient(135deg, var(--color-error-500, #ef4444) 0%, var(--color-error-600, #dc2626) 100%);
+    color: white;
+    border: none;
+}
+
+.card-gradient-warning {
+    background: linear-gradient(135deg, var(--color-warning-500, #f59e0b) 0%, var(--color-warning-600, #d97706) 100%);
+    color: white;
+    border: none;
+}
+
+.card-gradient-info {
+    background: linear-gradient(135deg, var(--color-info-500, #06b6d4) 0%, var(--color-info-600, #0891b2) 100%);
+    color: white;
+    border: none;
+}
+
+/* ========================================
+   COLORED HEADER CARDS
+   ======================================== */
+
+.card-header-primary {
+    background: linear-gradient(135deg, var(--color-primary-500, #3b82f6) 0%, var(--color-primary-600, #2563eb) 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.card-header-success {
+    background: linear-gradient(135deg, var(--color-success-500, #22c55e) 0%, var(--color-success-600, #16a34a) 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.card-header-indigo {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.card-header-pink {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.card-header-emerald {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-bottom: none;
+}
+
+/* ========================================
+   SUMMARY CARDS (Large Stats)
+   ======================================== */
+
+.summary-card {
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    overflow: hidden;
+    transition: all var(--transition-base, 0.2s) ease;
+}
+
+.summary-card:hover {
+    box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+    transform: translateY(-4px);
+}
+
+.summary-card-content {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.summary-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: var(--radius-full, 9999px);
+    background: rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.summary-card-icon i {
+    font-size: 1.75rem;
+}
+
+.summary-card-info {
+    flex: 1;
+}
+
+.summary-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: white;
+}
+
+.summary-card-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: white;
+}
+
+/* ========================================
+   ACTIVITY CARDS
+   ======================================== */
+
+.activity-card {
+    background: white;
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--shadow-sm, 0 1px 3px 0 rgba(0, 0, 0, 0.1));
+    border: 1px solid var(--color-gray-200, #e5e7eb);
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+}
+
+.activity-item:not(:last-child) {
+    border-bottom: 1px solid var(--color-gray-100, #f3f4f6);
+}
+
+.activity-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--radius-full, 9999px);
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-gray-900, #111827);
+    margin: 0 0 0.1rem 0;
+}
+
+.activity-meta {
+    font-size: 0.7rem;
+    color: var(--color-gray-500, #6b7280);
+}
+
+/* ========================================
+   CARD VARIANTS
+   ======================================== */
+
+.card-flat {
+    box-shadow: none;
+    border: 1px solid var(--color-gray-200, #e5e7eb);
+}
+
+.card-elevated {
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.card-bordered {
+    border: 2px solid var(--color-gray-200, #e5e7eb);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 640px) {
+    .card-header,
+    .card-body,
+    .card-footer {
+        padding: 1rem;
+    }
+    
+    .stat-card-body {
+        padding: 1rem;
+    }
+    
+    .summary-card-content {
+        padding: 1rem;
+    }
+    
+    .summary-card-value {
+        font-size: 2rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* ========================================
+   UTILITIES
+   ======================================== */
+
+.card-compact .card-body {
+    padding: 1rem;
+}
+
+.card-spacious .card-body {
+    padding: 2rem;
+}
+
+.card-no-padding .card-body {
+    padding: 0;
+}

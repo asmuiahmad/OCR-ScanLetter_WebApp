@@ -4,6 +4,46 @@
 {% block title %}Daftar Surat Keluar - PA Banjarbaru{% endblock %}
 
 {% block content %}
+<style>
+    /* Fix untuk tombol aksi agar tidak menghilang saat scroll */
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+        position: relative;
+    }
+    
+    .action-buttons {
+        position: relative;
+        z-index: 10;
+        white-space: nowrap;
+    }
+    
+    .action-buttons .btn-group {
+        display: inline-flex;
+        gap: 0.25rem;
+    }
+    
+    /* Pastikan kolom aksi tidak terpotong */
+    .table td:last-child,
+    .table th:last-child {
+        position: sticky;
+        right: 0;
+        background: white;
+        z-index: 5;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+    }
+    
+    .table thead th:last-child {
+        background: #f8f9fa;
+        z-index: 6;
+    }
+    
+    /* Hover effect untuk row */
+    .table tbody tr:hover td:last-child {
+        background: #f8f9fa;
+    }
+</style>
+
 <div class="container mt-4">
     <h2 class="mb-4">Daftar Surat Keluar Pending</h2>
     
@@ -34,31 +74,31 @@
                         </span>
                     </td>
                     <td>
-                        <div class="btn-group" role="group">
-                            <button 
-                                type="button" 
-                                class="btn btn-sm btn-success approve-btn" 
-                                data-id="{{ surat.id_suratMasuk }}"
-                                title="Setujui Surat"
-                            >
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button 
-                                type="button" 
-                                class="btn btn-sm btn-danger reject-btn" 
-                                data-id="{{ surat.id_suratMasuk }}"
-                                title="Tolak Surat"
-                            >
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <button 
-                                type="button" 
-                                class="btn btn-sm btn-info detail-btn" 
-                                data-id="{{ surat.id_suratMasuk }}"
-                                title="Lihat Detail"
-                            >
-                                <i class="fas fa-eye"></i>
-                            </button>
+                        <div style="display:flex; gap:0.3rem; align-items:center;">
+                                <button 
+                                    type="button" 
+                                    class="ubtn ubtn-success ubtn-icon approve-btn" 
+                                    data-id="{{ surat.id_suratMasuk }}"
+                                    title="Setujui Surat"
+                                >
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="ubtn ubtn-danger ubtn-icon reject-btn" 
+                                    data-id="{{ surat.id_suratMasuk }}"
+                                    title="Tolak Surat"
+                                >
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="ubtn ubtn-info ubtn-icon detail-btn" 
+                                    data-id="{{ surat.id_suratMasuk }}"
+                                    title="Lihat Detail"
+                                >
+                                    <i class="fas fa-eye"></i>
+                                </button>
                         </div>
                     </td>
                 </tr>
@@ -89,15 +129,15 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Surat berhasil disetujui');
-                    location.reload();
+                    window.toast.success('Surat berhasil disetujui');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert('Gagal menyetujui surat: ' + data.error);
+                    window.toast.error('Gagal menyetujui surat: ' + data.error);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan');
+                window.toast.error('Terjadi kesalahan saat menyetujui surat');
             });
         });
     });
@@ -117,15 +157,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Surat berhasil ditolak');
-                        location.reload();
+                        window.toast.success('Surat berhasil ditolak');
+                        setTimeout(() => location.reload(), 1000);
                     } else {
-                        alert('Gagal menolak surat: ' + data.error);
+                        window.toast.error('Gagal menolak surat: ' + data.error);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Terjadi kesalahan');
+                    window.toast.error('Terjadi kesalahan saat menolak surat');
                 });
             }
         });

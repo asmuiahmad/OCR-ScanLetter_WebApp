@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surat Keluar - {{ surat.nomor_suratKeluar }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+        }
+        
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.8;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .kop-surat {
+            display: flex;
+            align-items: center;
+            border-bottom: 2.5px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .kop-logo {
+            width: 70px;
+            height: 70px;
+            flex-shrink: 0;
+        }
+        
+        .kop-text {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .kop-title {
+            font-size: 11pt;
+            font-weight: bold;
+            margin: 2px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .kop-address {
+            font-size: 8pt;
+            margin-top: 6px;
+            line-height: 1.3;
+        }
+        
+        .info-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        
+        .info-table td {
+            padding: 3px 0;
+            vertical-align: top;
+        }
+        
+        .info-table td:first-child {
+            width: 100px;
+            font-weight: bold;
+        }
+        
+        .info-table td:nth-child(2) {
+            width: 20px;
+        }
+        
+        .info-table td:last-child {
+            font-family: 'Courier New', monospace;
+        }
+        
+        .kepada {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .kepada-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .surat-body {
+            text-align: justify;
+            margin: 15px 0;
+            line-height: 2;
+        }
+        
+        .surat-body.indent {
+            text-indent: 2.5cm;
+        }
+        
+        .ttd-section {
+            margin-top: 40px;
+            margin-left: 50%;
+        }
+        
+        .ttd-location {
+            margin-bottom: 5px;
+        }
+        
+        .ttd-jabatan {
+            font-weight: bold;
+            margin-bottom: 60px;
+        }
+        
+        .ttd-nama {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Kop Surat -->
+    <div class="kop-surat">
+        <!-- Logo PA (placeholder SVG) -->
+        <div class="kop-logo">
+            <img src="{{ url_for('static', filename='assets/images/logo_pa_original.png', _external=True) }}" 
+                 alt="Logo PA Banjarbaru" 
+                 style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        
+        <!-- Kop Text -->
+        <div class="kop-text">
+            <div class="kop-title">Mahkamah Agung Republik Indonesia</div>
+            <div class="kop-title">Direktorat Jenderal Badan Peradilan Agama</div>
+            <div class="kop-title">Pengadilan Tinggi Agama Banjarmasin</div>
+            <div class="kop-title">Pengadilan Agama Banjarbaru</div>
+            <div class="kop-address">
+                Jalan Trikora Nomor 4, Kelurahan Kemuning, Kecamatan Banjarbaru Selatan<br>
+                Kota Banjarbaru, Kalimantan Selatan 70714, www.pa-banjarbaru.go.id, <span style="color: blue; text-decoration: underline;">pa.banjarbaru@gmail.com</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nomor, Lampiran, Perihal -->
+    <table class="info-table">
+        <tr>
+            <td>Nomor</td>
+            <td>:</td>
+            <td><strong>{{ surat.nomor_suratKeluar }}</strong></td>
+        </tr>
+        <tr>
+            <td>Lampiran</td>
+            <td>:</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>Perihal</td>
+            <td>:</td>
+            <td><strong>{{ surat.jenis_suratKeluar }}</strong></td>
+        </tr>
+    </table>
+
+    <!-- Kepada -->
+    <div class="kepada">
+        <div class="kepada-label">Kepada Yth.</div>
+        <div><strong>{{ surat.penerima_suratKeluar }}</strong></div>
+        <div>di-</div>
+        <div style="margin-left: 2cm;"><strong>Tempat</strong></div>
+    </div>
+
+    <!-- Pembuka -->
+    <div class="surat-body">
+        Dengan hormat,
+    </div>
+
+    <!-- Isi Surat -->
+    <div class="surat-body indent">
+        {{ surat.isi_suratKeluar }}
+    </div>
+
+    <!-- Penutup -->
+    <div class="surat-body indent">
+        Demikian surat ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.
+    </div>
+
+    <!-- Tanda Tangan -->
+    <div class="ttd-section">
+        <div class="ttd-location">
+            Banjarbaru, {{ surat.tanggal_suratKeluar.strftime('%d %B %Y') if surat.tanggal_suratKeluar else '' }}
+        </div>
+        <div class="ttd-jabatan">
+            {{ surat.pengirim_suratKeluar }}
+        </div>
+        <div class="ttd-nama">
+            {{ surat.pengirim_suratKeluar.split(',')[0] if ',' in surat.pengirim_suratKeluar else surat.pengirim_suratKeluar }}
+        </div>
+    </div>
+</body>
+</html>

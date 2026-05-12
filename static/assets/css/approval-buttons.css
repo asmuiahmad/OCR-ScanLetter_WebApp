@@ -1,0 +1,229 @@
+/**
+ * Approval Buttons - Dedicated CSS for Approval Action Buttons
+ * Force override all existing button styles
+ */
+
+/* ========================================
+   RESET ALL EXISTING BUTTON STYLES
+   ======================================== */
+.approval-table .btn,
+.approval-table .btn-sm,
+.approval-table .btn-md,
+.approval-table .btn-lg,
+.approval-table .btn-info,
+.approval-table .btn-success,
+.approval-table .btn-danger,
+.approval-table .btn-primary,
+.approval-table .btn-secondary,
+.approval-table button[class*="btn"] {
+    all: unset !important;
+    box-sizing: border-box !important;
+}
+
+/* ========================================
+   BASE ACTION BUTTON
+   ======================================== */
+.approval-table .action-btn {
+    /* Display & Layout */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    
+    /* Size */
+    padding: 0.75rem 1.5rem !important;
+    min-width: 120px !important;
+    height: auto !important;
+    
+    /* Typography */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    line-height: 1.25rem !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    
+    /* Border & Radius */
+    border: none !important;
+    border-radius: 0.5rem !important;
+    
+    /* Cursor & Interaction */
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    
+    /* Transition */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    /* Box Model */
+    box-sizing: border-box !important;
+    outline: none !important;
+}
+
+.approval-table .action-btn i {
+    font-size: 1rem !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+}
+
+.approval-table .action-btn span {
+    display: inline-block !important;
+    line-height: 1 !important;
+}
+
+/* ========================================
+   DETAIL BUTTON (BLUE)
+   ======================================== */
+.approval-table .btn-detail-action {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3), 
+                0 2px 4px -1px rgba(59, 130, 246, 0.2) !important;
+}
+
+.approval-table .btn-detail-action:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4), 
+                0 4px 6px -2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.approval-table .btn-detail-action:active {
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: 0 2px 4px -1px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* ========================================
+   APPROVE BUTTON (GREEN)
+   ======================================== */
+.approval-table .btn-approve-action {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 
+                0 2px 4px -1px rgba(16, 185, 129, 0.2) !important;
+}
+
+.approval-table .btn-approve-action:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4), 
+                0 4px 6px -2px rgba(16, 185, 129, 0.3) !important;
+}
+
+.approval-table .btn-approve-action:active {
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: 0 2px 4px -1px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* ========================================
+   REJECT BUTTON (RED)
+   ======================================== */
+.approval-table .btn-reject-action {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3), 
+                0 2px 4px -1px rgba(239, 68, 68, 0.2) !important;
+}
+
+.approval-table .btn-reject-action:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4), 
+                0 4px 6px -2px rgba(239, 68, 68, 0.3) !important;
+}
+
+.approval-table .btn-reject-action:active {
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: 0 2px 4px -1px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* ========================================
+   FOCUS STATES
+   ======================================== */
+.approval-table .btn-detail-action:focus {
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+}
+
+.approval-table .btn-approve-action:focus {
+    outline: 2px solid #10b981 !important;
+    outline-offset: 2px !important;
+}
+
+.approval-table .btn-reject-action:focus {
+    outline: 2px solid #ef4444 !important;
+    outline-offset: 2px !important;
+}
+
+/* ========================================
+   DISABLED STATE
+   ======================================== */
+.approval-table .action-btn:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* ========================================
+   ACTION CELL LAYOUT
+   ======================================== */
+.approval-table .action-cell {
+    padding: 0.75rem 1rem !important;
+    vertical-align: middle !important;
+}
+
+.approval-table .action-buttons {
+    display: flex !important;
+    gap: 0.75rem !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .approval-table .action-btn {
+        padding: 0.625rem 1rem !important;
+        min-width: 100px !important;
+        font-size: 0.8125rem !important;
+    }
+    
+    .approval-table .action-btn i {
+        font-size: 0.875rem !important;
+    }
+    
+    .approval-table .action-buttons {
+        gap: 0.5rem !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .approval-table .action-btn span {
+        display: none !important;
+    }
+    
+    .approval-table .action-btn {
+        min-width: auto !important;
+        padding: 0.625rem !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+    }
+    
+    .approval-table .action-btn i {
+        margin: 0 !important;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+    .approval-table .action-cell {
+        display: none !important;
+    }
+}

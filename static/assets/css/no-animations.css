@@ -1,0 +1,208 @@
+/**
+ * No Animations CSS
+ * Menonaktifkan semua animasi dan transisi di aplikasi
+ * Untuk performa lebih baik dan pengalaman yang lebih responsif
+ */
+
+/* Nonaktifkan semua transisi dan animasi */
+*,
+*::before,
+*::after {
+    transition: none !important;
+    animation: none !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+}
+
+/* PENTING: Jangan nonaktifkan pointer events atau user interactions */
+* {
+    pointer-events: auto !important;
+}
+
+/* Kecuali untuk loading spinner yang memang perlu animasi */
+.fa-spin,
+.fa-pulse,
+.spinner,
+.loading-spinner,
+[class*="spinner"],
+[class*="loading"] {
+    animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Pastikan perubahan state langsung tanpa transisi */
+.btn,
+button,
+a,
+input,
+select,
+textarea {
+    transition: none !important;
+}
+
+/* Nonaktifkan smooth scroll */
+html {
+    scroll-behavior: auto !important;
+}
+
+/* Nonaktifkan backdrop blur animations */
+.modal,
+.dropdown,
+.overlay {
+    backdrop-filter: none !important;
+}
+
+/* Nonaktifkan fade effects */
+.fade,
+.fade-in,
+.fade-out,
+[class*="fade"] {
+    opacity: 1 !important;
+    transition: none !important;
+}
+
+/* Nonaktifkan slide effects */
+.slide,
+.slide-in,
+.slide-out,
+[class*="slide"] {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Nonaktifkan scale effects */
+.scale,
+[class*="scale"] {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Nonaktifkan bounce effects */
+.bounce,
+[class*="bounce"] {
+    animation: none !important;
+}
+
+/* Nonaktifkan pulse effects */
+.pulse,
+[class*="pulse"] {
+    animation: none !important;
+}
+
+/* Nonaktifkan semua keyframe animations kecuali spin */
+@keyframes fadeIn { 
+    from, to { opacity: 1; } 
+}
+@keyframes fadeOut { 
+    from, to { opacity: 1; } 
+}
+@keyframes slideIn { 
+    from, to { transform: none; } 
+}
+@keyframes slideOut { 
+    from, to { transform: none; } 
+}
+@keyframes slideUp { 
+    from, to { transform: none; } 
+}
+@keyframes slideDown { 
+    from, to { transform: none; } 
+}
+@keyframes dropdownSlide { 
+    from, to { transform: none; opacity: 1; } 
+}
+@keyframes fadeOutSlideUp { 
+    from, to { transform: none; opacity: 1; } 
+}
+@keyframes fade-in-up { 
+    from, to { transform: none; opacity: 1; } 
+}
+
+/* Pastikan spinner tidak terpengaruh oleh rule global */
+.fa-spin *,
+.fa-pulse *,
+.spinner *,
+.loading-spinner * {
+    animation: inherit !important;
+}
+
+/* Pastikan perubahan warna langsung */
+*:hover,
+*:focus,
+*:active {
+    transition: none !important;
+}
+
+/* Nonaktifkan progress bar animations */
+.progress-bar {
+    transition: none !important;
+}
+
+/* Nonaktifkan notification animations */
+.notification,
+.toast,
+.alert {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Nonaktifkan modal animations */
+.modal-dialog {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Nonaktifkan dropdown animations */
+.dropdown-menu {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Nonaktifkan collapse animations */
+.collapse,
+.collapsing {
+    transition: none !important;
+}
+
+/* Nonaktifkan tab animations */
+.tab-pane {
+    transition: none !important;
+}
+
+/* Nonaktifkan carousel animations */
+.carousel-item {
+    transition: none !important;
+}
+
+/* Performance: Reduce paint/layout thrashing */
+* {
+    will-change: auto !important;
+}
+
+/* Pastikan semua link dan button tetap clickable */
+a,
+button,
+input,
+select,
+textarea,
+[role="button"],
+[onclick],
+[data-toggle],
+[data-dismiss] {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+/* Pastikan event handlers tetap berfungsi */
+[onclick],
+[onsubmit],
+[onchange],
+[oninput] {
+    pointer-events: auto !important;
+}

@@ -23,6 +23,7 @@ from config.ocr_utils import (
     extract_document_code, extract_roman_numeral, normalize_ocr_text, extract_tanggal,
     extract_nomor_surat
 )
+from config.route_utils import role_required  # Import from route_utils instead of defining locally
 import io
 from functools import wraps
 from config.forms import OCRSuratKeluarForm
@@ -35,23 +36,11 @@ logger = logging.getLogger(__name__)
 
 ocr_surat_keluar_bp = Blueprint('ocr_surat_keluar', __name__)
 
-# Role required decorator for blueprints
-def role_required(*roles):
-    def wrapper(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if current_user.role not in roles:
-                flash('You do not have permission to access this page.', 'error')
-                return redirect(url_for('index'))
-            return f(*args, **kwargs)
-        return decorated_function
-    return wrapper
-
 target_code = "W15-A12"
 METADATA_PATH = 'metadata.json'
 UPLOAD_FOLDER = 'static/ocr/surat_keluar'
 
-# Pastikan direktori upload ada
+# Ensure upload directory exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def save_metadata(metadata):
@@ -97,15 +86,15 @@ def extract_ocr_data(file_path):
         logger.debug("===== NORMALIZED TEXT =====")
         logger.debug(normalized_text)
 
-        # Deteksi formulir cuti
+        # Detect cuti form
         if is_formulir_cuti(cleaned_text):
             cuti_data = extract_formulir_cuti_data(cleaned_text)
             nomor_surat_cuti = extract_nomor_surat(cleaned_text)
             kode_dokumen = extract_document_code(cleaned_text)
-            # Ambil tanggal dari hasil ekstraksi tanggal jika ada, jika tidak baru ambil dari cuti_data
+            # Use extracted date if available, otherwise fall back to cuti_data date
             tanggal_ekstrak = extract_tanggal(cleaned_text)
             tanggal_final = tanggal_ekstrak if tanggal_ekstrak and tanggal_ekstrak != 'Not found' else cuti_data.get('tanggal', 'N/A')
-            # Tentukan jenis surat dari kode dokumen
+            # Determine document type from document code
             if kode_dokumen and kode_dokumen.startswith('KP'):
                 jenis_surat = 'Kepegawaian'
             elif kode_dokumen and kode_dokumen.startswith('HM'):
@@ -130,7 +119,7 @@ def extract_ocr_data(file_path):
         # This prevents over-normalization that changes PAN.PA.W15 to 4/KPA.W15
         text_for_nomor = cleaned_text  # Use original cleaned text, not normalized
 
-        # Tambahkan berbagai pola pencarian untuk nomor surat dengan pola yang lebih fleksibel
+        # Add various search patterns for letter numbers with more flexible patterns
         nomor_patterns = [
             # Pattern untuk format: 1931/PAN.PA.W15-A12/HM2.1.4/X/2024 (preserve original structure)
             r'(?:Nomor|No|Nomer|NOMOR)\s*[:.\-]?\s*(\d+)[/\s-]+([A-Za-z.]+)\.?(?:W15-A12|W15[-\s]*A12)[/\s-]+([A-Z0-9.]+)[/\s-]+(\d{0,1}[XIVxvi]+)[/\s-]+(\d{4})',
@@ -298,7 +287,7 @@ def save_batch_results_to_db(results):
                 # Generate a kode_surat from the nomor_surat
                 kode_surat = "SM-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
                 
-                # Buat objek SuratKeluar baru
+                # Create new SuratKeluar object
                 surat_keluar = SuratKeluar(
                     nomor_suratKeluar=item.get('nomor_surat', 'Not found'),
                     tanggal_suratKeluar=datetime.strptime(item.get('tanggal')[0], '%Y-%m-%d') if item.get('tanggal') and item.get('tanggal')[0] else datetime.utcnow(),
@@ -314,11 +303,11 @@ def save_batch_results_to_db(results):
                     status_suratKeluar='pending'
                 )
                 
-                # Simpan file path
+                # Save file path
                 if 'filename' in item:
                     surat_keluar.file_path = item['filename']
                 
-                # Simpan ke database
+                # Save to database
                 db.session.add(surat_keluar)
                 db.session.commit()
                 saved_count += 1
@@ -469,11 +458,11 @@ def save_extracted_data():
         # Load existing metadata
         metadata = load_metadata()
         
-        # Inisialisasi kunci jika belum ada
+        # Initialize key if not present
         if "surat_keluar" not in metadata:
             metadata["surat_keluar"] = {}
 
-        # Proses setiap item data
+        # Process each data item
         for item in data:
             try:
                 # Debug: Log individual field values
@@ -487,21 +476,21 @@ def save_extracted_data():
                 logger.info(f"  jenis_surat: {item.get('jenis_surat')}")
                 logger.info(f"  kodesurat2: {item.get('kodesurat2')}")
 
-                # Tentukan kode surat - perbaiki mapping field
+                # Determine kode surat - fix field mapping
                 kode_surat = (
                     item.get('kodesurat2', 'Not found') if item.get('kodesurat2', 'Not found') != 'Not found'
                     else item.get('kode_suratKeluar', 'Not found')
                 )
 
-                # Perbaiki mapping field dari frontend modal
-                # Frontend mengirim field dengan nama yang berbeda
+                # Fix field mapping from frontend modal
+                # Frontend sends fields with different names
                 nomor_surat = item.get('full_letter_number') or item.get('nomor_surat', 'Not found')
                 pengirim = item.get('pengirim_suratKeluar') or item.get('pengirim', 'Not found')
                 penerima = item.get('penerima_suratKeluar') or item.get('penerima', 'Not found')
                 isi = item.get('isi_suratKeluar') or item.get('isi', 'Not found')
                 jenis_surat = item.get('jenis_surat', 'Umum')
                 
-                # Handle tanggal - bisa dari selected_date atau tanggal_suratKeluar
+                # Handle tanggal - can come from selected_date or tanggal_suratKeluar
                 tanggal_str = item.get('selected_date') or item.get('tanggal_suratKeluar') or item.get('tanggal')
                 if tanggal_str:
                     try:
@@ -514,14 +503,14 @@ def save_extracted_data():
                     logger.warning("No tanggal provided, using current time")
                     tanggal_surat = datetime.utcnow()
 
-                # Ambil nilai initial dari data OCR asli (jika tersedia)
-                # Ini penting untuk perhitungan akurasi OCR
+                # Get initial values from original OCR data (if available)
+                # This is important for OCR accuracy calculation
                 initial_nomor = item.get('initial_nomor_suratKeluar') or item.get('nomor_surat', 'Not found')
                 initial_pengirim = item.get('initial_pengirim_suratKeluar') or item.get('pengirim', 'Not found')
                 initial_penerima = item.get('initial_penerima_suratKeluar') or item.get('penerima', 'Not found')
                 initial_isi = item.get('initial_isi_suratKeluar') or item.get('isi', 'Not found')
 
-                # Debug: Log nilai initial untuk verifikasi
+                # Debug: Log initial values for verification
                 logger.info(f"Initial values for OCR accuracy calculation:")
                 logger.info(f"  initial_nomor: {initial_nomor}")
                 logger.info(f"  initial_pengirim: {initial_pengirim}")
@@ -547,7 +536,7 @@ def save_extracted_data():
                         logger.warning(f"Failed to parse tanggal_acara: {tanggal_acara_str}")
                         tanggal_acara = None
 
-                # Buat objek SuratKeluar baru dengan field yang benar
+                # Create new SuratKeluar object with correct fields
                 surat_keluar = SuratKeluar(
                     nomor_suratKeluar=nomor_surat,
                     tanggal_suratKeluar=tanggal_surat,
@@ -567,11 +556,11 @@ def save_extracted_data():
                     status_suratKeluar='pending'  # Set initial status to pending
                 )
 
-                # Simpan ke database terlebih dahulu
+                # Save to database first
                 db.session.add(surat_keluar)
                 db.session.commit()
 
-                # Hitung akurasi OCR setelah data tersimpan
+                # Calculate OCR accuracy after data is saved
                 try:
                     from config.ocr_utils import calculate_overall_ocr_accuracy
                     ocr_accuracy = calculate_overall_ocr_accuracy(surat_keluar, 'suratKeluar')
@@ -583,7 +572,7 @@ def save_extracted_data():
                     surat_keluar.ocr_accuracy_suratKeluar = 0.0
                 db.session.commit()
 
-                # Update metadata untuk file yang berhasil disimpan
+                # Update metadata for successfully saved files
                 if item.get('filename'):
                     metadata['surat_keluar'][item['filename']] = {
                         'id': surat_keluar.id_suratKeluar,
@@ -599,10 +588,10 @@ def save_extracted_data():
                 logger.error(f"Error saving Surat Keluar: {str(e)}")
                 return jsonify({"success": False, "error": str(e)})
 
-        # Simpan metadata yang diperbarui
+        # Save updated metadata
         save_metadata(metadata)
 
-        # Tambahkan flash message untuk sukses
+        # Add flash message for success
         flash('Data surat keluar berhasil disimpan ke database', 'success')
 
         return jsonify({"success": True, "message": "Data berhasil disimpan ke database"})

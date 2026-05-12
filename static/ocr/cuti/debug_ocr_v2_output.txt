@@ -1,18 +1,96 @@
 ======================================================================
 RAW OCR OUTPUT (V2)
 ======================================================================
-| |
+PENGADILAN AGAMA BANJARBARU
 
-N
-r—N Any
+Mahkamah Agung Republik Indonesia
 
-PENGADILAN AGAMA
+Jl. Trikora No. 10, Kelurahan Guntung Payung, Kecamatan Landasan Ulin, Kota Banjarbaru, Kalimantan Selatan
+Telp: (0511) 4773321, Fax: (0511) 4773322, E-mail: pa.banjarbaru@yahoo.com
 
-7 01-09-2025 08:55:24
+FORMULIR PERMINTAAN CUTI
 
-g
-TI
-| / 1
+Pegawai Negeri Sipil
+
+I. DATA PEGAWAI
+
+Nama Lengkap Amat
+Nomor Induk Pegawai 1 3127123812
+(NIP)
+
+Jabatan terserah
+Golongan/Ruang 113
+
+Unit Kerja terserah
+Masa Kerja terserah
+Alamat Lengkap asdsad
+
+Nomor Telepon
+
+UI. DETAIL PERMOHONAN CUTI
+
+Alasan Cuti
+
+Lama Cuti
+
+Tanggal Mulai Cuti
+Tanggal Selesai Cuti
+
+Nomor Surat Masuk
+
+123-2213-123
+
+13221312321
+3 hari
+
+2 April 2026
+4 April 2026
+
+asdasdsasdsa
+
+Mengetahui
+
+Atasan Langsung
+
+DD
+NIP:
+Keputusan
+0 Disetujui
+CJ) Ditolak
+
+O Ditangguhkan
+
+Catatan:
+
+MENUNGGU PERSETUJUAN
+
+II. JENIS CUTI YANG DIMOHON
+
+M
+
+Pejabat yang Berwenang
+
+Cuti Tahunan
+
+Cuti Sakit
+
+Cuti Alasan Penting
+
+U) Cuti Besar
+
+O) Cuti Melahirkan
+
+U) Cuti Luar Negara
+
+1 April 2026
+Pemohon
+Yang Mengajukan Cuti
+Ahmad Asmui
+NIP: 21212
+Verifikasi Digital
+
+————
+Tanggal:
 
 
 ======================================================================

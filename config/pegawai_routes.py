@@ -7,6 +7,7 @@ from datetime import datetime
 
 from flask import Blueprint, current_app, jsonify, render_template, request
 from flask_login import login_required
+from sqlalchemy import or_
 
 from config.extensions import db
 from config.models import Pegawai
@@ -41,6 +42,7 @@ def pegawai():
             nomor_telpon = request.form.get("nomor_telpon")
             riwayat_pendidikan = request.form.get("riwayat_pendidikan")
             riwayat_pekerjaan = request.form.get("riwayat_pekerjaan")
+            batas_cuti_str = request.form.get("batas_cuti", "12")
 
             current_app.logger.info(
                 f"Received data - nama: {nama}, nip: {nip}, tanggal_lahir: {tanggal_lahir_str}, jenis_kelamin: {jenis_kelamin}"
@@ -79,6 +81,18 @@ def pegawai():
                     {"success": False, "message": "Format tanggal lahir tidak valid"}
                 ), 400
 
+            # Parse batas_cuti
+            try:
+                batas_cuti = int(batas_cuti_str) if batas_cuti_str else 12
+                if batas_cuti < 0 or batas_cuti > 30:
+                    return jsonify(
+                        {"success": False, "message": "Batas cuti harus antara 0-30 hari"}
+                    ), 400
+            except ValueError:
+                return jsonify(
+                    {"success": False, "message": "Batas cuti harus berupa angka"}
+                ), 400
+
             # Create new pegawai
             new_pegawai = Pegawai(
                 nama=nama,
@@ -91,6 +105,7 @@ def pegawai():
                 nomor_telpon=nomor_telpon,
                 riwayat_pendidikan=riwayat_pendidikan,
                 riwayat_pekerjaan=riwayat_pekerjaan,
+                batas_cuti=batas_cuti,
             )
 
             db.session.add(new_pegawai)
@@ -126,13 +141,21 @@ def pegawai_list():
         daftar_pegawai = Pegawai.query.all()
         current_app.logger.info(f"Found {len(daftar_pegawai)} pegawai records")
         return render_template(
-            "pegawai/list_pegawai_simple.html", daftar_pegawai=daftar_pegawai
+            "pegawai/list_pegawai.html", daftar_pegawai=daftar_pegawai
         )
     except Exception as e:
         current_app.logger.error(f"Error in pegawai_list: {str(e)}")
-        return jsonify(
-            {"success": False, "message": f"Terjadi kesalahan: {str(e)}"}
-        ), 500
+        
+        # Check if it's an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify(
+                {"success": False, "message": f"Terjadi kesalahan: {str(e)}"}
+            ), 500
+        else:
+            # For regular browser requests, render error page
+            from flask import flash, redirect, url_for
+            flash(f"Terjadi kesalahan saat memuat daftar pegawai: {str(e)}", "error")
+            return redirect(url_for("dashboard.dashboard"))
 
 
 @pegawai_bp.route("/pegawai/edit/<int:id>", methods=["POST"])
@@ -158,6 +181,7 @@ def edit_pegawai(id):
         nomor_telpon = request.form.get("nomor_telpon")
         riwayat_pendidikan = request.form.get("riwayat_pendidikan")
         riwayat_pekerjaan = request.form.get("riwayat_pekerjaan")
+        batas_cuti_str = request.form.get("batas_cuti", "12")
 
         # Validate required fields
         if not all([nama, nip, tanggal_lahir_str, jenis_kelamin]):
@@ -193,6 +217,18 @@ def edit_pegawai(id):
                 {"success": False, "message": "Format tanggal lahir tidak valid"}
             ), 400
 
+        # Parse batas_cuti
+        try:
+            batas_cuti = int(batas_cuti_str) if batas_cuti_str else 12
+            if batas_cuti < 0 or batas_cuti > 30:
+                return jsonify(
+                    {"success": False, "message": "Batas cuti harus antara 0-30 hari"}
+                ), 400
+        except ValueError:
+            return jsonify(
+                {"success": False, "message": "Batas cuti harus berupa angka"}
+            ), 400
+
         # Update pegawai data
         pegawai.nama = nama
         pegawai.nip = nip
@@ -204,6 +240,7 @@ def edit_pegawai(id):
         pegawai.nomor_telpon = nomor_telpon
         pegawai.riwayat_pendidikan = riwayat_pendidikan
         pegawai.riwayat_pekerjaan = riwayat_pekerjaan
+        pegawai.batas_cuti = batas_cuti
 
         db.session.commit()
 
@@ -225,24 +262,39 @@ def edit_pegawai(id):
 @login_required
 @role_required("admin")
 def add_pegawai():
-    """Add new pegawai via JSON API"""
+    """Add new pegawai via JSON API or Form"""
     try:
-        data = request.get_json()
+        # Check if it's JSON or form data
+        if request.is_json:
+            data = request.get_json()
+        else:
+            # Handle form data
+            data = request.form.to_dict()
 
         # Validate required fields based on actual model
         required_fields = ["nama", "nip", "tanggal_lahir", "jenis_kelamin"]
         for field in required_fields:
             if not data.get(field):
-                return jsonify(
-                    {"success": False, "message": f"Field {field} wajib diisi"}
-                ), 400
+                if request.is_json:
+                    return jsonify(
+                        {"success": False, "message": f"Field {field} wajib diisi"}
+                    ), 400
+                else:
+                    from flask import flash, redirect, url_for
+                    flash(f"Field {field} wajib diisi", "error")
+                    return redirect(url_for("pegawai.pegawai_list"))
 
         # Check if NIP already exists
         existing_pegawai = Pegawai.query.filter_by(nip=data["nip"]).first()
         if existing_pegawai:
-            return jsonify(
-                {"success": False, "message": f"NIP {data['nip']} sudah terdaftar"}
-            ), 400
+            if request.is_json:
+                return jsonify(
+                    {"success": False, "message": f"NIP {data['nip']} sudah terdaftar"}
+                ), 400
+            else:
+                from flask import flash, redirect, url_for
+                flash(f"NIP {data['nip']} sudah terdaftar", "error")
+                return redirect(url_for("pegawai.pegawai_list"))
 
         # Parse date
         try:
@@ -250,16 +302,50 @@ def add_pegawai():
             if tanggal_lahir_str:
                 tanggal_lahir = datetime.strptime(tanggal_lahir_str, "%Y-%m-%d").date()
             else:
-                return jsonify(
-                    {"success": False, "message": "Tanggal lahir wajib diisi"}
-                ), 400
+                if request.is_json:
+                    return jsonify(
+                        {"success": False, "message": "Tanggal lahir wajib diisi"}
+                    ), 400
+                else:
+                    from flask import flash, redirect, url_for
+                    flash("Tanggal lahir wajib diisi", "error")
+                    return redirect(url_for("pegawai.pegawai_list"))
         except ValueError:
-            return jsonify(
-                {
-                    "success": False,
-                    "message": "Format tanggal lahir tidak valid (gunakan YYYY-MM-DD)",
-                }
-            ), 400
+            if request.is_json:
+                return jsonify(
+                    {
+                        "success": False,
+                        "message": "Format tanggal lahir tidak valid (gunakan YYYY-MM-DD)",
+                    }
+                ), 400
+            else:
+                from flask import flash, redirect, url_for
+                flash("Format tanggal lahir tidak valid", "error")
+                return redirect(url_for("pegawai.pegawai_list"))
+
+        # Parse batas_cuti
+        batas_cuti = 12  # Default value
+        if data.get("batas_cuti"):
+            try:
+                batas_cuti = int(data.get("batas_cuti"))
+                if batas_cuti < 0 or batas_cuti > 30:
+                    if request.is_json:
+                        return jsonify(
+                            {"success": False, "message": "Batas cuti harus antara 0-30 hari"}
+                        ), 400
+                    else:
+                        from flask import flash, redirect, url_for
+                        flash("Batas cuti harus antara 0-30 hari", "error")
+                        return redirect(url_for("pegawai.pegawai_list"))
+            except ValueError:
+                if request.is_json:
+                    return jsonify(
+                        {"success": False, "message": "Batas cuti harus berupa angka"}
+                    ), 400
+                else:
+                    from flask import flash, redirect, url_for
+                    flash("Batas cuti harus berupa angka", "error")
+                    return redirect(url_for("pegawai.pegawai_list"))
 
         # Create new pegawai
         pegawai = Pegawai(
@@ -273,41 +359,54 @@ def add_pegawai():
             nomor_telpon=data.get("nomor_telpon"),
             riwayat_pendidikan=data.get("riwayat_pendidikan"),
             riwayat_pekerjaan=data.get("riwayat_pekerjaan"),
+            batas_cuti=batas_cuti,
         )
 
         db.session.add(pegawai)
         db.session.commit()
 
         current_app.logger.info(
-            f"Pegawai baru ditambahkan via API: {pegawai.nama} (NIP: {pegawai.nip})"
+            f"Pegawai baru ditambahkan: {pegawai.nama} (NIP: {pegawai.nip})"
         )
 
-        return jsonify(
-            {
-                "success": True,
-                "message": f"Pegawai {pegawai.nama} berhasil ditambahkan",
-                "data": {
-                    "id": pegawai.id,
-                    "nama": pegawai.nama,
-                    "nip": pegawai.nip,
-                    "tanggal_lahir": pegawai.tanggal_lahir.isoformat(),
-                    "jenis_kelamin": pegawai.jenis_kelamin,
-                    "jabatan": pegawai.jabatan,
-                    "golongan": pegawai.golongan,
-                    "agama": pegawai.agama,
-                    "nomor_telpon": pegawai.nomor_telpon,
-                    "riwayat_pendidikan": pegawai.riwayat_pendidikan,
-                    "riwayat_pekerjaan": pegawai.riwayat_pekerjaan,
-                },
-            }
-        ), 200
+        if request.is_json:
+            return jsonify(
+                {
+                    "success": True,
+                    "message": f"Pegawai {pegawai.nama} berhasil ditambahkan",
+                    "data": {
+                        "id": pegawai.id,
+                        "nama": pegawai.nama,
+                        "nip": pegawai.nip,
+                        "tanggal_lahir": pegawai.tanggal_lahir.isoformat(),
+                        "jenis_kelamin": pegawai.jenis_kelamin,
+                        "jabatan": pegawai.jabatan,
+                        "golongan": pegawai.golongan,
+                        "agama": pegawai.agama,
+                        "nomor_telpon": pegawai.nomor_telpon,
+                        "riwayat_pendidikan": pegawai.riwayat_pendidikan,
+                        "riwayat_pekerjaan": pegawai.riwayat_pekerjaan,
+                        "batas_cuti": pegawai.batas_cuti,
+                    },
+                }
+            ), 200
+        else:
+            from flask import flash, redirect, url_for
+            flash(f"Pegawai {pegawai.nama} berhasil ditambahkan", "success")
+            return redirect(url_for("pegawai.pegawai_list"))
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Error adding pegawai via API: {str(e)}")
-        return jsonify(
-            {"success": False, "message": "Terjadi kesalahan saat menambahkan pegawai"}
-        ), 500
+        current_app.logger.error(f"Error adding pegawai: {str(e)}")
+        
+        if request.is_json:
+            return jsonify(
+                {"success": False, "message": "Terjadi kesalahan saat menambahkan pegawai"}
+            ), 500
+        else:
+            from flask import flash, redirect, url_for
+            flash("Terjadi kesalahan saat menambahkan pegawai", "error")
+            return redirect(url_for("pegawai.pegawai_list"))
 
 
 @pegawai_bp.route("/pegawai/hapus/<int:id>", methods=["POST"])
@@ -458,3 +557,132 @@ def pegawai_debug():
 
     # GET request - show debug form
     return render_template("pegawai/pegawai_debug.html")
+
+
+
+# API Endpoints for Cuti Form
+@pegawai_bp.route("/api/pegawai/search", methods=["GET"])
+@login_required
+def search_pegawai():
+    """Search pegawai by name or NIP for autocomplete"""
+    try:
+        query = request.args.get("q", "").strip()
+        
+        if not query:
+            return jsonify({
+                "success": True,
+                "pegawai": [],
+                "message": "Query kosong"
+            })
+        
+        if len(query) < 2:
+            return jsonify({
+                "success": True,
+                "pegawai": [],
+                "message": "Minimal 2 karakter untuk pencarian"
+            })
+        
+        # Search by name or NIP
+        like_pattern = f"%{query}%"
+        pegawai_list = Pegawai.query.filter(
+            or_(
+                Pegawai.nama.ilike(like_pattern),
+                Pegawai.nip.ilike(like_pattern)
+            )
+        ).limit(10).all()
+        
+        results = []
+        for p in pegawai_list:
+            results.append({
+                "id": p.id,
+                "nama": p.nama,
+                "nip": p.nip,
+                "jabatan": p.jabatan or "-",
+                "golongan": p.golongan or "-",
+                "batas_cuti": p.batas_cuti if p.batas_cuti is not None else 12,
+                "unit_kerja": p.unit_kerja or "-",
+                "masa_kerja": p.masa_kerja or "-",
+                "nomor_telpon": p.nomor_telpon or ""
+            })
+        
+        return jsonify({
+            "success": True,
+            "pegawai": results,
+            "count": len(results),
+            "message": f"Ditemukan {len(results)} pegawai"
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error searching pegawai: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": f"Terjadi kesalahan: {str(e)}"
+        }), 500
+
+
+@pegawai_bp.route("/api/pegawai/<int:pegawai_id>", methods=["GET"])
+@login_required
+def get_pegawai_detail(pegawai_id):
+    """Get pegawai detail by ID"""
+    try:
+        pegawai = Pegawai.query.get(pegawai_id)
+        
+        if not pegawai:
+            return jsonify({
+                "success": False,
+                "message": "Pegawai tidak ditemukan"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "pegawai": {
+                "id": pegawai.id,
+                "nama": pegawai.nama,
+                "nip": pegawai.nip,
+                "jabatan": pegawai.jabatan or "",
+                "golongan": pegawai.golongan or "",
+                "batas_cuti": pegawai.batas_cuti if pegawai.batas_cuti is not None else 12,
+                "unit_kerja": pegawai.unit_kerja or "",
+                "masa_kerja": pegawai.masa_kerja or "",
+                "nomor_telpon": pegawai.nomor_telpon or "",
+                "tanggal_lahir": pegawai.tanggal_lahir.strftime("%Y-%m-%d") if pegawai.tanggal_lahir else "",
+                "jenis_kelamin": pegawai.jenis_kelamin or "",
+                "agama": pegawai.agama or ""
+            }
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error getting pegawai detail: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": f"Terjadi kesalahan: {str(e)}"
+        }), 500
+
+
+@pegawai_bp.route("/api/pegawai/quota/<nip>", methods=["GET"])
+@login_required
+def get_pegawai_quota(nip):
+    """Get pegawai cuti quota by NIP"""
+    try:
+        pegawai = Pegawai.query.filter_by(nip=nip).first()
+        
+        if not pegawai:
+            return jsonify({
+                "success": False,
+                "message": "Pegawai dengan NIP tersebut tidak ditemukan"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "batas_cuti": pegawai.batas_cuti if pegawai.batas_cuti is not None else 12,
+            "nama": pegawai.nama,
+            "nip": pegawai.nip
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Error getting pegawai quota: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": f"Terjadi kesalahan: {str(e)}"
+        }), 500
+

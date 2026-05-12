@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from app import app
 
 with app.app_context():
-    # Buat user admin
+    # Create admin user
     if not User.query.filter_by(email='admin@admin.com').first():
         admin = User(
             email='admin@admin.com',

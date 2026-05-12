@@ -1,0 +1,11 @@
+/* Scoped fix for Disposisi menu links only */
+.modern-sidebar a[href="/disposisi"],
+.modern-sidebar #disposisiMenu a {
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* Keep default sidebar hover colors from main sidebar styles */
+.modern-sidebar #disposisiMenu a:hover {
+    color: inherit;
+}

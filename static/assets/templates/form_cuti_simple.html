@@ -753,16 +753,8 @@
                     >
                         <div
                             class="decision-checkbox"
-                            style="
-                                width: 12px;
-                                height: 12px;
-                                border: 1px solid #000;
-                                margin-right: 5px;
-                                text-align: center;
-                            "
-                        >
-                            ✓
-                        </div>
+                            style="width:12px;height:12px;border:1px solid #000;margin-right:5px;text-align:center;font-weight:bold;background:«disetujui_bg»;"
+                        >«status_disetujui»</div>
                         <span>Disetujui</span>
                     </div>
                     <div
@@ -774,13 +766,8 @@
                     >
                         <div
                             class="decision-checkbox"
-                            style="
-                                width: 12px;
-                                height: 12px;
-                                border: 1px solid #000;
-                                margin-right: 5px;
-                            "
-                        ></div>
+                            style="width:12px;height:12px;border:1px solid #000;margin-right:5px;text-align:center;font-weight:bold;background:«ditolak_bg»;"
+                        >«status_ditolak»</div>
                         <span>Ditolak</span>
                     </div>
                     <div style="display: flex; align-items: center">
@@ -791,28 +778,36 @@
                                 height: 12px;
                                 border: 1px solid #000;
                                 margin-right: 5px;
+                                text-align: center;
                             "
-                        ></div>
+                        >«status_ditangguhkan»</div>
                         <span>Ditangguhkan</span>
                     </div>
                 </div>
                 <div
                     style="
-                        margin-top: 10px;
+                        margin-top: 8px;
                         padding: 5px;
                         border: 1px solid #ccc;
                         border-radius: 3px;
                     "
                 >
                     <strong>Catatan:</strong>
-                    <div
-                        style="
-                            height: 50px;
-                            border: 1px solid #ccc;
-                            margin-top: 5px;
-                        "
-                    ></div>
+                    <div style="margin-top: 4px; min-height: 30px; font-style: italic; color: #444;">«approval_notes»</div>
                 </div>
+                <!-- Status Banner -->
+                <div style="
+                    margin-top: 8px;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 9pt;
+                    letter-spacing: 0.5px;
+                    background: «status_banner_bg»;
+                    color: «status_banner_color»;
+                    border: 1px solid «status_banner_border»;
+                ">«approval_status_label»</div>
             </div>
 
             <!-- Authority Section -->
@@ -835,9 +830,8 @@
                         margin-bottom: 5px;
                     "
                 ></div>
-                <div>(_____________________)</div>
-                <div style="margin-top: 5px">NIP: ________________</div>
-                <div style="margin-top: 10px">Tanggal: _______________</div>
+                <div style="font-weight: bold;">(«approved_by»)</div>
+                <div style="margin-top: 8px; font-size: 7.5pt; color: #555;">Tanggal: «approved_at»</div>
             </div>
 
             <!-- Digital Verification -->

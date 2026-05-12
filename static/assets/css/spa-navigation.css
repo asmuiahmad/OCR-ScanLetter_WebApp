@@ -23,20 +23,24 @@
     pointer-events: none;
 }
 
-/* Loading overlay */
+/* Loading overlay - tanpa backdrop blur untuk menghindari glitch */
 .spa-loading {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 9999;
-    backdrop-filter: blur(2px);
-    animation: fadeIn 0.2s ease-out;
+    pointer-events: none;
+}
+
+.spa-loading.active {
+    display: flex;
+    pointer-events: auto;
 }
 
 .spa-loading-spinner {
@@ -52,21 +56,30 @@
     border: 1px solid #e5e7eb;
 }
 
-.spa-loading-spinner i {
+/* Spinner icon dengan animasi smooth - specificity tinggi untuk override no-animations.css */
+.spa-loading-spinner i.fa-spin,
+.spa-loading-spinner i.fa-spinner {
     color: #3b82f6;
     font-size: 1.25rem;
-    animation: spin 1s linear infinite;
+    animation: spinSmooth 0.8s linear infinite !important;
+    /* Prevent animation glitch */
+    transform-origin: center center;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+/* Smooth spin animation - optimized untuk tidak glitch */
+@keyframes spinSmooth {
+    0% { 
+        transform: rotate(0deg);
+    }
+    100% { 
+        transform: rotate(360deg);
+    }
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+/* Removed fadeIn animation to prevent glitch */
 
 /* Progress bar for page loading */
 .spa-progress {
@@ -218,18 +231,55 @@ form.loading button[type="submit"]::after {
     outline-offset: 2px !important;
 }
 
+/* Prevent white flash/selection on draggable button-like UI elements */
+.modern-sidebar .nav-links a,
+.modern-sidebar .dropdown a,
+button,
+.btn,
+[role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.modern-sidebar .nav-links a::selection,
+.modern-sidebar .dropdown a::selection,
+button::selection,
+.btn::selection,
+[role="button"]::selection {
+    background: transparent;
+}
+
+.modern-sidebar .nav-links a::-moz-selection,
+.modern-sidebar .dropdown a::-moz-selection,
+button::-moz-selection,
+.btn::-moz-selection,
+[role="button"]::-moz-selection {
+    background: transparent;
+}
+
+.modern-sidebar .nav-links a,
+.modern-sidebar .dropdown a,
+button,
+.btn,
+.modern-sidebar .nav-links i,
+.modern-sidebar .dropdown i {
+    -webkit-user-drag: none;
+}
+
 .spa-loading-spinner {
     /* Ensure loading spinner is announced to screen readers */
     role: status;
     aria-live: polite;
 }
 
-/* Performance optimizations */
+/* Performance optimizations — DINONAKTIFKAN karena menyebabkan stacking context
+   yang memblokir klik pada elemen di luar .content (termasuk navbar/bell)
 .content * {
-    /* Enable hardware acceleration for smoother transitions */
     transform: translateZ(0);
     backface-visibility: hidden;
 }
+*/
 
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {

@@ -10,7 +10,7 @@ from config.models import UserLoginLog
 # Create a blueprint for user login logs
 user_login_logs_bp = Blueprint('user_login_logs', __name__)
 
-# Hapus atau ubah route '/' agar tidak menangani root path
+# Remove or change the route so it does not handle the root path
 # @user_login_logs_bp.route('/', methods=['GET'])
 @user_login_logs_bp.route('/user-login-logs', methods=['GET'])
 def get_user_login_logs():

@@ -1,7 +1,7 @@
 """
-OCR Text Post-Processor untuk Surat Masuk
+OCR Text Post-Processor for Surat Masuk
 ==========================================
-Module untuk memperbaiki hasil OCR yang terpotong-potong dan tidak akurat
+Module for fixing OCR output that is fragmented and inaccurate
 """
 
 import re
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class OCRTextProcessor:
     def __init__(self):
-        # Dictionary untuk perbaikan kata-kata umum dalam surat resmi
+        # Dictionary for fixing common words in official letters
         self.word_corrections = {
             # Kata-kata yang sering terpotong dalam OCR
             'permoh onan': 'permohonan',
@@ -87,7 +87,7 @@ class OCRTextProcessor:
             'sala-mu': 'salamu',
         }
         
-        # Pattern untuk kata-kata yang sering salah dalam konteks hukum
+        # Patterns for words that are often wrong in legal context
         self.legal_terms = {
             'peng adilan agama': 'Pengadilan Agama',
             'pen gadilan agama': 'Pengadilan Agama',
@@ -110,7 +110,7 @@ class OCRTextProcessor:
             'jurusita': 'Juru Sita',
         }
         
-        # Pattern untuk nomor surat yang sering salah
+        # Patterns for letter numbers that are often wrong
         self.number_patterns = [
             (r'(\d+)\s*/\s*([A-Z]+)\s*/\s*(\d+)', r'\1/\2/\3'),  # Format nomor surat
             (r'(\d+)\s*\.\s*(\d+)\s*\.\s*(\d+)', r'\1.\2.\3'),  # Format tanggal
@@ -118,7 +118,7 @@ class OCRTextProcessor:
             (r'Hal\s*:\s*(.+)', r'Hal: \1'),  # Format hal
         ]
         
-        # Kata-kata yang harus dikapitalisasi
+        # Words that should be capitalized
         self.capitalize_words = [
             'pengadilan', 'agama', 'mahkamah', 'agung', 'republik', 'indonesia',
             'ketua', 'panitera', 'sekretaris', 'hakim', 'allah', 'swt', 'saw',
@@ -127,47 +127,47 @@ class OCRTextProcessor:
 
     def clean_ocr_text(self, text: str) -> str:
         """
-        Membersihkan dan memperbaiki teks hasil OCR
+        Clean and fix OCR text output
         """
         if not text or not isinstance(text, str):
             return ""
         
-        # Langkah 1: Normalisasi dasar
+        # Step 1: Basic normalization
         cleaned_text = self._normalize_text(text)
         
-        # Langkah 2: Perbaiki kata-kata yang terpotong
+        # Step 2: Fix broken words
         cleaned_text = self._fix_broken_words(cleaned_text)
         
-        # Langkah 3: Perbaiki istilah hukum
+        # Step 3: Fix legal terms
         cleaned_text = self._fix_legal_terms(cleaned_text)
         
-        # Langkah 4: Perbaiki format nomor dan tanggal
+        # Step 4: Fix number and date formats
         cleaned_text = self._fix_number_formats(cleaned_text)
         
-        # Langkah 5: Perbaiki kapitalisasi
+        # Step 5: Fix capitalization
         cleaned_text = self._fix_capitalization(cleaned_text)
         
-        # Langkah 6: Pembersihan akhir
+        # Step 6: Final cleanup
         cleaned_text = self._final_cleanup(cleaned_text)
         
         return cleaned_text.strip()
 
     def _normalize_text(self, text: str) -> str:
-        """Normalisasi dasar teks"""
+        """Basic text normalization"""
         # Hapus karakter aneh dan normalize whitespace
         text = re.sub(r'[^\w\s\.,;:!?\-/()"\']', ' ', text)
         text = re.sub(r'\s+', ' ', text)  # Multiple spaces to single space
         text = re.sub(r'\n\s*\n', '\n', text)  # Multiple newlines to single
         
-        # Perbaiki tanda baca yang menempel
+        # Fix punctuation that is stuck together
         text = re.sub(r'(\w)([,.;:!?])', r'\1 \2', text)
         text = re.sub(r'([,.;:!?])(\w)', r'\1 \2', text)
         
         return text
 
     def _fix_broken_words(self, text: str) -> str:
-        """Perbaiki kata-kata yang terpotong"""
-        # Convert to lowercase untuk matching
+        """Fix broken/split words"""
+        # Convert to lowercase for matching
         text_lower = text.lower()
         
         # Apply word corrections
@@ -176,8 +176,8 @@ class OCRTextProcessor:
             pattern = re.escape(broken_word)
             text_lower = re.sub(pattern, correct_word, text_lower, flags=re.IGNORECASE)
         
-        # Perbaiki pola umum spasi berlebihan dalam kata
-        # Contoh: "per moh onan" -> "permohonan"
+        # Fix common pattern of excessive spaces within words
+        # Example: "per moh onan" -> "permohonan"
         common_patterns = [
             (r'\b(\w{2,3})\s+(\w{2,3})\s+(\w{2,3})\b', self._merge_if_valid),
             (r'\b(\w{3,4})\s+(\w{3,4})\b', self._merge_if_valid),
@@ -204,11 +204,11 @@ class OCRTextProcessor:
         if merged.lower() in valid_merged_words:
             return merged
         
-        # Jika tidak valid, kembalikan dengan spasi yang diperbaiki
+        # If not valid, return with fixed spacing
         return ' '.join(parts)
 
     def _fix_legal_terms(self, text: str) -> str:
-        """Perbaiki istilah-istilah hukum"""
+        """Fix legal terms"""
         for broken_term, correct_term in self.legal_terms.items():
             pattern = re.escape(broken_term)
             text = re.sub(pattern, correct_term, text, flags=re.IGNORECASE)
@@ -216,14 +216,14 @@ class OCRTextProcessor:
         return text
 
     def _fix_number_formats(self, text: str) -> str:
-        """Perbaiki format nomor surat dan tanggal"""
+        """Fix letter number and date formats"""
         for pattern, replacement in self.number_patterns:
             text = re.sub(pattern, replacement, text)
         
         return text
 
     def _fix_capitalization(self, text: str) -> str:
-        """Perbaiki kapitalisasi kata-kata penting"""
+        """Fix capitalization of important words"""
         words = text.split()
         fixed_words = []
         
@@ -247,22 +247,22 @@ class OCRTextProcessor:
         return ' '.join(fixed_words)
 
     def _final_cleanup(self, text: str) -> str:
-        """Pembersihan akhir"""
-        # Perbaiki spasi berlebihan
+        """Final cleanup"""
+        # Fix excessive spaces
         text = re.sub(r'\s+', ' ', text)
         
-        # Perbaiki tanda baca
+        # Fix punctuation
         text = re.sub(r'\s+([,.;:!?])', r'\1', text)
         text = re.sub(r'([,.;:!?])\s*([,.;:!?])', r'\1\2', text)
         
-        # Perbaiki format paragraf
+        # Fix paragraph format
         text = re.sub(r'\.\s*([a-z])', lambda m: '. ' + m.group(1).upper(), text)
         
         return text
 
     def process_surat_masuk_fields(self, surat_data: Dict) -> Dict:
         """
-        Proses semua field dalam data surat masuk
+        Process all fields in surat masuk data
         """
         processed_data = surat_data.copy()
         
@@ -291,38 +291,38 @@ class OCRTextProcessor:
 
     def get_text_quality_score(self, text: str) -> float:
         """
-        Menghitung skor kualitas teks (0-1)
+        Calculate text quality score (0-1)
         """
         if not text:
             return 0.0
         
-        # Faktor-faktor kualitas
+        # Quality factors
         factors = []
         
-        # 1. Rasio kata vs karakter aneh
+        # 1. Ratio of words vs odd characters
         words = re.findall(r'\b\w+\b', text)
         if len(text) > 0:
             word_ratio = len(' '.join(words)) / len(text)
             factors.append(word_ratio)
         
-        # 2. Rata-rata panjang kata (kata terlalu pendek menandakan OCR buruk)
+        # 2. Average word length (very short words indicate poor OCR)
         if words:
             avg_word_length = sum(len(word) for word in words) / len(words)
             length_score = min(avg_word_length / 5.0, 1.0)  # Optimal ~5 karakter
             factors.append(length_score)
         
-        # 3. Rasio spasi berlebihan
+        # 3. Ratio of excessive spaces
         excessive_spaces = len(re.findall(r'\s{2,}', text))
         space_score = max(0, 1 - (excessive_spaces / len(text.split())))
         factors.append(space_score)
         
-        # 4. Keberadaan kata-kata umum bahasa Indonesia
+        # 4. Presence of common Indonesian words
         common_words = ['dan', 'atau', 'dengan', 'untuk', 'dari', 'ke', 'di', 'pada', 'yang', 'adalah']
         found_common = sum(1 for word in common_words if word in text.lower())
         common_score = min(found_common / 5.0, 1.0)
         factors.append(common_score)
         
-        # Rata-rata semua faktor
+        # Average of all factors
         return sum(factors) / len(factors) if factors else 0.0
 
 # Instance global untuk digunakan di seluruh aplikasi

@@ -1,0 +1,266 @@
+{% extends "layouts/base.html" %}
+{% block title %}Buat Disposisi{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-6 px-4">
+  <div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-lg shadow-md p-4 mb-4 text-white">
+      <h2 class="text-2xl font-bold flex items-center gap-2">
+        <i class="fas fa-plus-circle"></i>
+        Buat Disposisi Baru
+      </h2>
+      <p class="text-blue-100 text-sm mt-1">Disposisikan surat kepada pengguna lain</p>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <form method="post" class="space-y-5" id="disposisiForm" data-no-ajax>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- Tipe Surat -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-file-alt text-gray-500 mr-1"></i>
+            Tipe Surat
+            <span class="text-red-500">*</span>
+          </label>
+          <select name="surat_tipe" id="surat_tipe" 
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                  required>
+            <option value="">Pilih tipe surat</option>
+            <option value="masuk" {% if pre_tipe == 'masuk' %}selected{% endif %}>📥 Surat Masuk</option>
+            <option value="keluar" {% if pre_tipe == 'keluar' %}selected{% endif %}>📤 Surat Keluar</option>
+          </select>
+        </div>
+
+        <!-- Surat Masuk -->
+        <div id="surat_masuk_wrapper" style="display:none;">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-inbox text-blue-500 mr-1"></i>
+            Pilih Surat Masuk
+            <span class="text-red-500">*</span>
+          </label>
+          <select id="surat_masuk_select" name="surat_masuk_id" 
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <option value="">-- Pilih surat masuk --</option>
+            {% for s in surat_masuk %}
+            <option value="{{ s.id_suratMasuk }}" {% if pre_tipe == 'masuk' and pre_surat_id == s.id_suratMasuk %}selected{% endif %}>
+              {{ s.nomor_suratMasuk or '-' }} | {{ s.pengirim_suratMasuk or '-' }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Surat Keluar -->
+        <div id="surat_keluar_wrapper" style="display:none;">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-paper-plane text-red-500 mr-1"></i>
+            Pilih Surat Keluar
+            <span class="text-red-500">*</span>
+          </label>
+          <select id="surat_keluar_select" name="surat_keluar_id" 
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <option value="">-- Pilih surat keluar --</option>
+            {% for s in surat_keluar %}
+            <option value="{{ s.id_suratKeluar }}" {% if pre_tipe == 'keluar' and pre_surat_id == s.id_suratKeluar %}selected{% endif %}>
+              {{ s.nomor_suratKeluar or '-' }} | {{ s.penerima_suratKeluar or '-' }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <input type="hidden" name="surat_id" id="surat_id">
+
+        <!-- Disposisikan Kepada -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-user text-purple-500 mr-1"></i>
+            Disposisikan Kepada
+            <span class="text-red-500">*</span>
+          </label>
+          <select name="kepada_user_id" 
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                  required>
+            <option value="">Pilih pengguna</option>
+            {% for u in users %}
+            <option value="{{ u.id }}">{{ u.email }} ({{ u.role|capitalize }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Perihal -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-tag text-green-500 mr-1"></i>
+            Perihal
+          </label>
+          <input type="text" name="perihal" 
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                 placeholder="Contoh: Tindak lanjut surat penting">
+        </div>
+
+        <!-- Instruksi -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-clipboard-list text-orange-500 mr-1"></i>
+            Instruksi
+            <span class="text-red-500">*</span>
+          </label>
+          <textarea name="instruksi" rows="4" 
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y" 
+                    placeholder="Instruksi kerja untuk penerima disposisi..." 
+                    required></textarea>
+        </div>
+
+        <!-- Prioritas & Batas Waktu -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-exclamation-circle text-yellow-500 mr-1"></i>
+              Prioritas
+            </label>
+            <select name="prioritas" 
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+              <option value="rendah">🟢 Rendah</option>
+              <option value="normal" selected>🔵 Normal</option>
+              <option value="tinggi">🟡 Tinggi</option>
+              <option value="urgent">🔴 Urgent</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-calendar-alt text-red-500 mr-1"></i>
+              Batas Waktu
+            </label>
+            <input type="date" name="batas_waktu" 
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-4 flex gap-2 justify-end border-t border-gray-200 mt-6">
+          <a href="{{ url_for('disposisi.list_disposisi') }}" 
+             class="ubtn ubtn-secondary">
+            <i class="fas fa-times"></i>
+            Batal
+          </a>
+          <button type="submit" 
+                  class="ubtn ubtn-primary ubtn-lg">
+            <i class="fas fa-save"></i>
+            Simpan Disposisi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  'use strict';
+  
+  console.log('🚀 Disposisi form script loaded');
+  
+  function syncSuratSelection() {
+    const tipe = document.getElementById("surat_tipe").value;
+    const wrapMasuk = document.getElementById("surat_masuk_wrapper");
+    const wrapKeluar = document.getElementById("surat_keluar_wrapper");
+    const selectMasuk = document.getElementById("surat_masuk_select");
+    const selectKeluar = document.getElementById("surat_keluar_select");
+    const suratId = document.getElementById("surat_id");
+
+    console.log('📝 Sync called, tipe:', tipe);
+
+    wrapMasuk.style.display = tipe === "masuk" ? "block" : "none";
+    wrapKeluar.style.display = tipe === "keluar" ? "block" : "none";
+
+    if (tipe === "masuk") {
+      suratId.value = selectMasuk.value || "";
+      selectKeluar.value = "";
+      // Make surat_masuk_select required
+      selectMasuk.setAttribute('required', 'required');
+      selectKeluar.removeAttribute('required');
+    } else if (tipe === "keluar") {
+      suratId.value = selectKeluar.value || "";
+      selectMasuk.value = "";
+      // Make surat_keluar_select required
+      selectKeluar.setAttribute('required', 'required');
+      selectMasuk.removeAttribute('required');
+    } else {
+      suratId.value = "";
+      selectMasuk.value = "";
+      selectKeluar.value = "";
+      selectMasuk.removeAttribute('required');
+      selectKeluar.removeAttribute('required');
+    }
+    
+    console.log('✅ Surat ID set to:', suratId.value);
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    console.log('🔧 Initializing form...');
+    
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    if (!form || !submitBtn) {
+      console.error('❌ Form or submit button not found!');
+      return;
+    }
+    
+    console.log('✅ Form elements found');
+    
+    // Attach event listeners
+    document.getElementById("surat_tipe").addEventListener("change", syncSuratSelection);
+    document.getElementById("surat_masuk_select").addEventListener("change", syncSuratSelection);
+    document.getElementById("surat_keluar_select").addEventListener("change", syncSuratSelection);
+    
+    // Initial sync
+    syncSuratSelection();
+    
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+      console.log('📤 Form submitting...');
+      
+      // Validate surat selection
+      const tipe = document.getElementById("surat_tipe").value;
+      const suratId = document.getElementById("surat_id").value;
+      
+      if (!tipe) {
+        e.preventDefault();
+        window.toast.error('Silakan pilih tipe surat!');
+        console.log('❌ Validation failed: no tipe');
+        return false;
+      }
+      
+      if (!suratId) {
+        e.preventDefault();
+        window.toast.error('Silakan pilih surat!');
+        console.log('❌ Validation failed: no surat_id');
+        return false;
+      }
+      
+      console.log('✅ Validation passed');
+      console.log('📋 Form data:', {
+        tipe: tipe,
+        surat_id: suratId,
+        kepada: form.querySelector('[name="kepada_user_id"]').value,
+        perihal: form.querySelector('[name="perihal"]').value,
+        instruksi: form.querySelector('[name="instruksi"]').value
+      });
+      
+      // Disable button to prevent double submission
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+      
+      // Allow form to submit normally
+      return true;
+    });
+    
+    console.log('🎉 Form initialization complete!');
+  });
+})();
+</script>
+{% endblock %}

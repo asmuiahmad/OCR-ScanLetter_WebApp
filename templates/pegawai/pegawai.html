@@ -48,6 +48,20 @@
         animation: fade-in-up 0.4s;
         transition: opacity 0.4s;
     }
+    /* Safari/Bulma date input can look centered; force left alignment */
+    input[type="date"].input {
+        text-align: left;
+        padding-right: 2.5rem;
+    }
+    input[type="date"].input::-webkit-date-and-time-value {
+        text-align: left;
+    }
+    input[type="date"].input::-webkit-datetime-edit {
+        text-align: left;
+    }
+    input[type="date"].input::-webkit-calendar-picker-indicator {
+        margin-left: auto;
+    }
 </style>
 
 <link
@@ -67,7 +81,7 @@
         <div class="form-card">
             <div class="page-header">
                 <h2>
-                    <i class="fas fa-user-plus text-green-400"></i>
+                    <i class="fas fa-user-plus"></i>
                     Formulir Data Pegawai
                 </h2>
             </div>
@@ -264,6 +278,28 @@
                         </div>
                     </div>
 
+                    <!-- Batas Cuti -->
+                    <div class="column is-half">
+                        <div class="field">
+                            <label class="label" for="batas_cuti"
+                                >Batas Cuti (hari)</label
+                            >
+                            <div class="control">
+                                <input
+                                    class="input"
+                                    name="batas_cuti"
+                                    id="batas_cuti"
+                                    type="number"
+                                    min="0"
+                                    max="30"
+                                    value="12"
+                                    placeholder="Contoh: 12"
+                                />
+                            </div>
+                            <p class="help">Jumlah hari cuti yang diizinkan (0-30 hari)</p>
+                        </div>
+                    </div>
+
                     <!-- Riwayat Pendidikan -->
                     <div class="column is-full">
                         <div class="field">
@@ -347,8 +383,7 @@
             // Validate required fields
             const nama = document.getElementById("nama").value.trim();
             const nip = document.getElementById("nip").value.trim();
-            const tanggal_lahir =
-                document.getElementById("tanggal_lahir").value;
+            const tanggal_lahir = document.getElementById("tanggal_lahir").value;
             const jenis_kelamin = document.querySelector(
                 'input[name="jenis_kelamin"]:checked',
             )?.value;
@@ -376,21 +411,12 @@
             // Get form data
             const formData = new FormData(this);
 
-            // Get CSRF token from meta tag or cookie
-            let csrfToken = document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content");
-
-            // Fallback: try to get from cookie
-            if (!csrfToken) {
-                const cookieValue = document.cookie
-                    .split("; ")
-                    .find((row) => row.startsWith("csrf_token="))
-                    ?.split("=")[1];
-                csrfToken = cookieValue;
+            console.log("Sending form data...");
+            
+            // Log form data for debugging
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
             }
-
-            console.log("CSRF Token:", csrfToken ? "Found" : "Not found");
 
             // Send POST request
             fetch(this.action, {
@@ -403,48 +429,17 @@
             })
                 .then((response) => {
                     console.log("Response status:", response.status);
-                    console.log("Response statusText:", response.statusText);
                     console.log("Response ok:", response.ok);
-                    console.log("Response type:", response.type);
-
-                    // Clone response to read it twice
-                    const clonedResponse = response.clone();
-
-                    // First, try to get response as text for debugging
-                    return clonedResponse.text().then((text) => {
-                        console.log("Response text:", text);
-
-                        // Try to parse as JSON
-                        try {
-                            const data = JSON.parse(text);
-                            console.log("Parsed JSON:", data);
-
-                            if (!response.ok) {
-                                throw new Error(
-                                    data.message ||
-                                        `Server error: ${response.status} ${response.statusText}`,
-                                );
-                            }
-
-                            return data;
-                        } catch (jsonError) {
-                            console.error("JSON parse error:", jsonError);
-                            console.error("Response was:", text);
-
-                            if (!response.ok) {
-                                throw new Error(
-                                    `Server error (${response.status}): ${text.substring(0, 100)}`,
-                                );
-                            }
-
-                            throw new Error(
-                                `Invalid JSON response: ${jsonError.message}`,
-                            );
-                        }
-                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return response.json();
                 })
                 .then((data) => {
-                    console.log("Success response:", data);
+                    console.log("Response data:", data);
+                    
                     if (data.success) {
                         showToast(
                             data.message || "Data pegawai berhasil ditambahkan",
@@ -453,6 +448,8 @@
                         form.reset();
                         // Reset radio button to default
                         document.getElementById("laki").checked = true;
+                        // Reset batas_cuti to default
+                        document.getElementById("batas_cuti").value = "12";
                     } else {
                         showToast(
                             data.message || "Gagal menyimpan data",
@@ -461,26 +458,8 @@
                     }
                 })
                 .catch((error) => {
-                    console.error("Error details:", error);
-                    console.error("Error message:", error.message);
-                    console.error("Error stack:", error.stack);
-
-                    let errorMessage = "Terjadi kesalahan saat menyimpan data";
-
-                    if (error.message.includes("CSRF")) {
-                        errorMessage =
-                            "Sesi keamanan tidak valid. Silakan refresh halaman dan coba lagi.";
-                    } else if (error.message.includes("400")) {
-                        errorMessage =
-                            "Data tidak valid. Periksa kembali form Anda.";
-                    } else if (error.message.includes("500")) {
-                        errorMessage =
-                            "Terjadi kesalahan di server. Silakan coba lagi.";
-                    } else if (error.message) {
-                        errorMessage = error.message;
-                    }
-
-                    showToast(errorMessage, "error");
+                    console.error("Fetch error:", error);
+                    showToast("Terjadi kesalahan saat mengirim data", "error");
                 })
                 .finally(() => {
                     submitBtn.disabled = false;

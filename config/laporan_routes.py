@@ -6,11 +6,14 @@ Statistical reports and analytics functionality
 from datetime import datetime, timedelta
 
 from flask import Blueprint, current_app, jsonify, render_template, request
-from flask_login import login_required
+from flask_login import current_user, login_required
 from sqlalchemy import func, or_
 
 from config.extensions import db
-from config.models import SuratKeluar, SuratMasuk
+from config.models import (
+    AuditLog, Cuti, DisposisiSurat, Pegawai,
+    SuratKeluar, SuratMasuk, User, UserLoginLog,
+)
 from config.route_utils import role_required
 
 laporan_bp = Blueprint("laporan", __name__)
@@ -215,6 +218,38 @@ def laporan_statistik():
             SuratMasuk.isi_suratMasuk.ilike(f"%{keyword}%")
         ).all()
 
+    # ── Data tambahan untuk laporan cetak ──────────────────────────────
+    # Surat Masuk per status
+    masuk_pending   = SuratMasuk.query.filter_by(status_suratMasuk="pending").count()
+    masuk_approved  = SuratMasuk.query.filter_by(status_suratMasuk="approved").count()
+    masuk_rejected  = SuratMasuk.query.filter_by(status_suratMasuk="rejected").count()
+
+    # Surat Keluar per status
+    keluar_pending  = SuratKeluar.query.filter_by(status_suratKeluar="pending").count()
+    keluar_approved = SuratKeluar.query.filter_by(status_suratKeluar="approved").count()
+    keluar_rejected = SuratKeluar.query.filter_by(status_suratKeluar="rejected").count()
+
+    # Cuti
+    semua_cuti = Cuti.query.order_by(Cuti.tgl_ajuan_cuti.desc()).all()
+    total_cuti          = len(semua_cuti)
+    cuti_pending        = sum(1 for c in semua_cuti if c.status_cuti == "pending")
+    cuti_approved       = sum(1 for c in semua_cuti if c.status_cuti == "approved")
+    cuti_rejected       = sum(1 for c in semua_cuti if c.status_cuti == "rejected")
+
+    # Pegawai
+    semua_pegawai = Pegawai.query.order_by(Pegawai.nama).all()
+    total_pegawai = len(semua_pegawai)
+
+    # Disposisi
+    semua_disposisi = DisposisiSurat.query.order_by(DisposisiSurat.tanggal_disposisi.desc()).all()
+    total_disposisi     = len(semua_disposisi)
+    disposisi_draft     = sum(1 for d in semua_disposisi if d.status == "draft")
+    disposisi_dikirim   = sum(1 for d in semua_disposisi if d.status == "dikirim")
+    disposisi_selesai   = sum(1 for d in semua_disposisi if d.status == "selesai")
+
+    # Tanggal cetak
+    tanggal_cetak = datetime.now().strftime("%d %B %Y, %H:%M")
+
     return render_template(
         "statistik/laporan_statistik.html",
         persentase_berhasil_masuk=persentase_berhasil_masuk,
@@ -235,23 +270,31 @@ def laporan_statistik():
         akurasi_tinggi_keluar=akurasi_tinggi_keluar,
         akurasi_sedang_keluar=akurasi_sedang_keluar,
         akurasi_rendah_keluar=akurasi_rendah_keluar,
+        # Data laporan cetak
+        masuk_pending=masuk_pending,
+        masuk_approved=masuk_approved,
+        masuk_rejected=masuk_rejected,
+        keluar_pending=keluar_pending,
+        keluar_approved=keluar_approved,
+        keluar_rejected=keluar_rejected,
+        semua_cuti=semua_cuti,
+        total_cuti=total_cuti,
+        cuti_pending=cuti_pending,
+        cuti_approved=cuti_approved,
+        cuti_rejected=cuti_rejected,
+        semua_pegawai=semua_pegawai,
+        total_pegawai=total_pegawai,
+        semua_disposisi=semua_disposisi,
+        total_disposisi=total_disposisi,
+        disposisi_draft=disposisi_draft,
+        disposisi_dikirim=disposisi_dikirim,
+        disposisi_selesai=disposisi_selesai,
+        semua_surat_masuk=semua_surat_masuk,
+        semua_surat_keluar=semua_surat_keluar,
+        tanggal_cetak=tanggal_cetak,
+        current_user=current_user,
     )
 
-
-@laporan_bp.route("/chart-data-test")
-@login_required
-def chart_data_test():
-    """Simple test endpoint"""
-    current_app.logger.info("Test endpoint called successfully")
-    return jsonify(
-        {
-            "status": "success",
-            "message": "Chart data endpoint is working",
-            "labels": ["20/01", "21/01", "22/01", "23/01", "24/01", "25/01", "26/01"],
-            "surat_masuk": [2, 3, 1, 4, 2, 5, 3],
-            "surat_keluar": [1, 2, 3, 2, 1, 3, 2],
-        }
-    )
 
 
 @laporan_bp.route("/chart-data")
@@ -329,3 +372,104 @@ def chart_data():
                 "message": str(e),
             }
         )
+
+
+@laporan_bp.route("/laporan/cetak")
+@login_required
+@role_required("admin", "pimpinan")
+def laporan_cetak():
+    """Halaman laporan cetak — 8 laporan siap print"""
+    now = datetime.now()
+    tanggal_cetak = now.strftime("%d %B %Y, %H:%M")
+
+    # 1. Surat Masuk
+    semua_surat_masuk = SuratMasuk.query.order_by(
+        SuratMasuk.tanggal_suratMasuk.desc()
+    ).all()
+    masuk_pending  = sum(1 for s in semua_surat_masuk if s.status_suratMasuk == "pending")
+    masuk_approved = sum(1 for s in semua_surat_masuk if s.status_suratMasuk == "approved")
+    masuk_rejected = sum(1 for s in semua_surat_masuk if s.status_suratMasuk == "rejected")
+
+    # 2. Surat Keluar
+    semua_surat_keluar = SuratKeluar.query.order_by(
+        SuratKeluar.tanggal_suratKeluar.desc()
+    ).all()
+    keluar_pending  = sum(1 for s in semua_surat_keluar if s.status_suratKeluar == "pending")
+    keluar_approved = sum(1 for s in semua_surat_keluar if s.status_suratKeluar == "approved")
+    keluar_rejected = sum(1 for s in semua_surat_keluar if s.status_suratKeluar == "rejected")
+
+    # 3. Cuti
+    semua_cuti = Cuti.query.order_by(Cuti.tgl_ajuan_cuti.desc()).all()
+    cuti_pending  = sum(1 for c in semua_cuti if c.status_cuti == "pending")
+    cuti_approved = sum(1 for c in semua_cuti if c.status_cuti == "approved")
+    cuti_rejected = sum(1 for c in semua_cuti if c.status_cuti == "rejected")
+
+    # 4. Pegawai
+    semua_pegawai = Pegawai.query.order_by(Pegawai.nama).all()
+
+    # 5. Disposisi
+    semua_disposisi = DisposisiSurat.query.order_by(
+        DisposisiSurat.tanggal_disposisi.desc()
+    ).all()
+    disposisi_draft   = sum(1 for d in semua_disposisi if d.status == "draft")
+    disposisi_dikirim = sum(1 for d in semua_disposisi if d.status == "dikirim")
+    disposisi_selesai = sum(1 for d in semua_disposisi if d.status == "selesai")
+
+    # 6. Approval History (dari AuditLog)
+    semua_audit = AuditLog.query.order_by(AuditLog.created_at.desc()).all()
+    audit_approved = sum(1 for a in semua_audit if a.action == "approved")
+    audit_rejected = sum(1 for a in semua_audit if a.action == "rejected")
+
+    # 7. Login Logs
+    semua_login = UserLoginLog.query.order_by(
+        UserLoginLog.login_time.desc()
+    ).limit(500).all()
+    login_success = sum(1 for l in semua_login if l.status == "success")
+    login_failed  = sum(1 for l in semua_login if l.status != "success")
+
+    # 8. OCR Stats
+    akurasi_masuk  = [s.ocr_accuracy_suratMasuk  for s in semua_surat_masuk  if s.ocr_accuracy_suratMasuk  is not None]
+    akurasi_keluar = [s.ocr_accuracy_suratKeluar for s in semua_surat_keluar if s.ocr_accuracy_suratKeluar is not None]
+    rata2_ocr_masuk  = round(sum(akurasi_masuk)  / len(akurasi_masuk),  2) if akurasi_masuk  else 0
+    rata2_ocr_keluar = round(sum(akurasi_keluar) / len(akurasi_keluar), 2) if akurasi_keluar else 0
+
+    # Ringkasan umum
+    ringkasan = [
+        {"label": "Surat Masuk",  "total": len(semua_surat_masuk),  "pending": masuk_pending,  "approved": masuk_approved,  "rejected": masuk_rejected},
+        {"label": "Surat Keluar", "total": len(semua_surat_keluar), "pending": keluar_pending, "approved": keluar_approved, "rejected": keluar_rejected},
+        {"label": "Cuti",         "total": len(semua_cuti),         "pending": cuti_pending,   "approved": cuti_approved,   "rejected": cuti_rejected},
+        {"label": "Disposisi",    "total": len(semua_disposisi),    "pending": disposisi_draft,"approved": disposisi_selesai,"rejected": 0},
+        {"label": "Pegawai",      "total": len(semua_pegawai),      "pending": "-",            "approved": "-",             "rejected": "-"},
+        {"label": "Audit Log",    "total": len(semua_audit),        "pending": "-",            "approved": audit_approved,  "rejected": audit_rejected},
+        {"label": "Login Log",    "total": len(semua_login),        "pending": "-",            "approved": login_success,   "rejected": login_failed},
+    ]
+
+    return render_template(
+        "laporan/cetak.html",
+        tanggal_cetak=tanggal_cetak,
+        # Surat Masuk
+        semua_surat_masuk=semua_surat_masuk,
+        masuk_pending=masuk_pending, masuk_approved=masuk_approved, masuk_rejected=masuk_rejected,
+        # Surat Keluar
+        semua_surat_keluar=semua_surat_keluar,
+        keluar_pending=keluar_pending, keluar_approved=keluar_approved, keluar_rejected=keluar_rejected,
+        # Cuti
+        semua_cuti=semua_cuti,
+        cuti_pending=cuti_pending, cuti_approved=cuti_approved, cuti_rejected=cuti_rejected,
+        # Pegawai
+        semua_pegawai=semua_pegawai,
+        # Disposisi
+        semua_disposisi=semua_disposisi,
+        disposisi_draft=disposisi_draft, disposisi_dikirim=disposisi_dikirim, disposisi_selesai=disposisi_selesai,
+        # Audit / Approval History
+        semua_audit=semua_audit,
+        audit_approved=audit_approved, audit_rejected=audit_rejected,
+        # Login Logs
+        semua_login=semua_login,
+        login_success=login_success, login_failed=login_failed,
+        # OCR Stats
+        rata2_ocr_masuk=rata2_ocr_masuk, rata2_ocr_keluar=rata2_ocr_keluar,
+        akurasi_masuk=akurasi_masuk, akurasi_keluar=akurasi_keluar,
+        # Ringkasan
+        ringkasan=ringkasan,
+    )

@@ -1,0 +1,162 @@
+/**
+ * UNIFIED BUTTON SYSTEM
+ * Satu sistem tombol konsisten untuk seluruh aplikasi.
+ * Semua tombol menggunakan inline style agar tidak bisa di-override
+ * oleh Bootstrap, Bulma, Tailwind, atau no-animations.css.
+ *
+ * KELAS TERSEDIA:
+ *   .ubtn              — base (wajib ada di semua tombol)
+ *   .ubtn-primary      — biru  (aksi utama / simpan / cari)
+ *   .ubtn-success      — hijau (setujui / tambah / disposisi)
+ *   .ubtn-danger       — merah (hapus / tolak)
+ *   .ubtn-warning      — kuning (edit)
+ *   .ubtn-info         — cyan  (detail / lihat)
+ *   .ubtn-secondary    — abu   (batal / reset)
+ *   .ubtn-purple       — ungu  (download / laporan)
+ *
+ *   .ubtn-sm           — ukuran kecil (tabel aksi)
+ *   .ubtn-icon         — ikon bulat kecil (tanpa teks)
+ *   .ubtn-lg           — ukuran besar (submit form)
+ */
+
+/* ── BASE ─────────────────────────────────────────────── */
+.ubtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    padding: 0.45rem 1rem !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    border: none !important;
+    border-radius: 0.45rem !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    outline: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+    transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+}
+
+.ubtn:hover {
+    filter: brightness(0.9) !important;
+    transform: translateY(-1px) !important;
+}
+
+.ubtn:active {
+    filter: brightness(0.85) !important;
+    transform: translateY(0) scale(0.98) !important;
+}
+
+.ubtn i,
+.ubtn .fas,
+.ubtn .far,
+.ubtn .fab,
+.ubtn .feather {
+    font-size: 0.78rem !important;
+    pointer-events: none !important;
+    color: inherit !important;
+    flex-shrink: 0 !important;
+}
+
+.ubtn span {
+    pointer-events: none !important;
+    color: inherit !important;
+}
+
+/* ── VARIANTS ─────────────────────────────────────────── */
+.ubtn-primary {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(59,130,246,0.35) !important;
+}
+
+.ubtn-success {
+    background: #10b981 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(16,185,129,0.35) !important;
+}
+
+.ubtn-danger {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(239,68,68,0.35) !important;
+}
+
+.ubtn-warning {
+    background: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(245,158,11,0.35) !important;
+}
+
+.ubtn-info {
+    background: #06b6d4 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(6,182,212,0.35) !important;
+}
+
+.ubtn-secondary {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+.ubtn-purple {
+    background: #7c3aed !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(124,58,237,0.35) !important;
+}
+
+/* ── SIZES ────────────────────────────────────────────── */
+.ubtn-sm {
+    padding: 0.35rem 0.7rem !important;
+    font-size: 0.775rem !important;
+    border-radius: 0.375rem !important;
+}
+
+.ubtn-sm i,
+.ubtn-sm .fas,
+.ubtn-sm .far,
+.ubtn-sm .feather {
+    font-size: 0.72rem !important;
+}
+
+.ubtn-lg {
+    padding: 0.65rem 1.5rem !important;
+    font-size: 0.95rem !important;
+    border-radius: 0.5rem !important;
+    gap: 0.5rem !important;
+}
+
+.ubtn-lg i,
+.ubtn-lg .fas {
+    font-size: 0.9rem !important;
+}
+
+/* ── ICON-ONLY (bulat) ────────────────────────────────── */
+.ubtn-icon {
+    width: 2rem !important;
+    height: 2rem !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    gap: 0 !important;
+}
+
+.ubtn-icon i,
+.ubtn-icon .fas,
+.ubtn-icon .feather {
+    font-size: 0.8rem !important;
+}
+
+/* ── DISABLED ─────────────────────────────────────────── */
+.ubtn:disabled,
+.ubtn[disabled] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    transform: none !important;
+}

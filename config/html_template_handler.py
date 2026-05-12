@@ -23,6 +23,7 @@ class HtmlTemplateHandler:
     def create_qr_code(self, cuti_data, signature_hash):
         """Create QR code for digital signature"""
         try:
+            from flask import current_app
             # Data untuk QR code
             qr_data = f"PERSETUJUAN CUTI\n"
             qr_data += f"ID: {cuti_data.id_cuti}\n"
@@ -52,10 +53,14 @@ class HtmlTemplateHandler:
             qr_path = os.path.join(self.signatures_folder, qr_filename)
             qr_img.save(qr_path)
             
+            current_app.logger.info(f"✅ QR code created successfully: {qr_path}")
             return qr_path
             
         except Exception as e:
-            print(f"Error creating QR code: {str(e)}")
+            from flask import current_app
+            import traceback
+            current_app.logger.error(f"Error creating QR code: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
             return None
     
     def generate_signature_hash(self, cuti_data):
@@ -116,6 +121,20 @@ class HtmlTemplateHandler:
                 '«c_lahir»': '✓' if cuti_data.jenis_cuti == 'c_lahir' else '',
                 '«c_penting»': '✓' if cuti_data.jenis_cuti == 'c_penting' else '',
                 '«c_luarnegara»': '✓' if cuti_data.jenis_cuti == 'c_luarnegara' else '',
+                # Approval status
+                '«status_disetujui»': '✓' if cuti_data.status_cuti == 'approved' else '',
+                '«status_ditolak»': '✓' if cuti_data.status_cuti == 'rejected' else '',
+                '«status_ditangguhkan»': '',
+                '«approved_by»': cuti_data.approved_by.split('@')[0] if cuti_data.approved_by else '___________________',
+                '«approved_at»': self.format_date_indonesian(cuti_data.approved_at) if cuti_data.approved_at else '_______________',
+                '«approval_notes»': cuti_data.notes if cuti_data.notes else '-',
+                '«approval_status_label»': 'DISETUJUI' if cuti_data.status_cuti == 'approved' else ('DITOLAK' if cuti_data.status_cuti == 'rejected' else 'MENUNGGU PERSETUJUAN'),
+                # Dynamic styles based on status
+                '«status_banner_bg»': '#d1fae5' if cuti_data.status_cuti == 'approved' else ('#fee2e2' if cuti_data.status_cuti == 'rejected' else '#fef3c7'),
+                '«status_banner_color»': '#065f46' if cuti_data.status_cuti == 'approved' else ('#991b1b' if cuti_data.status_cuti == 'rejected' else '#92400e'),
+                '«status_banner_border»': '#6ee7b7' if cuti_data.status_cuti == 'approved' else ('#fca5a5' if cuti_data.status_cuti == 'rejected' else '#fde68a'),
+                '«disetujui_bg»': '#d1fae5' if cuti_data.status_cuti == 'approved' else 'white',
+                '«ditolak_bg»': '#fee2e2' if cuti_data.status_cuti == 'rejected' else 'white',
             }
             
             # Replace all placeholders in HTML content
@@ -158,6 +177,7 @@ class HtmlTemplateHandler:
     def html_to_pdf_weasyprint(self, html_content, pdf_path):
         """Convert HTML to PDF using WeasyPrint"""
         try:
+            from flask import current_app
             from weasyprint import HTML, CSS
             from weasyprint.text.fonts import FontConfiguration
             
@@ -170,16 +190,18 @@ class HtmlTemplateHandler:
                 font_config=font_config
             )
             
-            print(f"✅ PDF generated successfully with WeasyPrint: {pdf_path}")
+            current_app.logger.info(f"✅ PDF generated successfully with WeasyPrint: {pdf_path}")
             return True
             
         except ImportError as e:
-            print(f"WeasyPrint not available: {str(e)}")
+            from flask import current_app
+            current_app.logger.warning(f"WeasyPrint not available: {str(e)}")
             return False
         except Exception as e:
-            print(f"Error converting HTML to PDF with WeasyPrint: {str(e)}")
+            from flask import current_app
             import traceback
-            traceback.print_exc()
+            current_app.logger.error(f"Error converting HTML to PDF with WeasyPrint: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
             return False
     
     def html_to_pdf_playwright(self, html_content, pdf_path):
@@ -408,9 +430,14 @@ class HtmlTemplateHandler:
     def fill_template_and_generate_pdf(self, cuti_data):
         """Main function to fill HTML template and generate PDF"""
         try:
+            from flask import current_app
+            import traceback
+            
             # Check if template exists
             if not os.path.exists(self.template_path):
                 raise FileNotFoundError(f"Template not found: {self.template_path}")
+            
+            current_app.logger.info(f"Starting PDF generation for cuti ID: {cuti_data.id_cuti}")
             
             # Generate signature hash
             signature_hash = self.generate_signature_hash(cuti_data)
@@ -421,6 +448,8 @@ class HtmlTemplateHandler:
             # Read HTML template
             with open(self.template_path, 'r', encoding='utf-8') as file:
                 html_content = file.read()
+            
+            current_app.logger.info(f"HTML template loaded, size: {len(html_content)} bytes")
             
             # Replace placeholders
             html_content = self.replace_placeholders_in_html(html_content, cuti_data, signature_hash)
@@ -438,6 +467,7 @@ class HtmlTemplateHandler:
                     else:
                         # Add QR code before closing body tag
                         html_content = html_content.replace('</body>', f'{qr_img_tag}</body>')
+                current_app.logger.info("QR code embedded in HTML")
             
             # Generate PDF filename
             pdf_filename = f"surat_cuti_{cuti_data.id_cuti}_{signature_hash}.pdf"
@@ -448,36 +478,44 @@ class HtmlTemplateHandler:
             
             # Method 1: Try WeasyPrint first (best HTML rendering)
             if not pdf_success:
-                print("Trying WeasyPrint...")
+                current_app.logger.info("Attempting PDF generation with WeasyPrint...")
                 pdf_success = self.html_to_pdf_weasyprint(html_content, pdf_path)
             
             # Method 2: Try Playwright as fallback
             if not pdf_success:
-                print("Trying Playwright...")
+                current_app.logger.info("Attempting PDF generation with Playwright...")
                 pdf_success = self.html_to_pdf_playwright(html_content, pdf_path)
             
             # Method 3: Try ReportLab with HTML parsing
             if not pdf_success:
-                print("Trying ReportLab with HTML...")
+                current_app.logger.info("Attempting PDF generation with ReportLab (HTML)...")
                 pdf_success = self.html_to_pdf_reportlab(html_content, pdf_path)
             
             # Method 4: Direct PDF generation with ReportLab (no HTML)
             if not pdf_success:
-                print("Trying direct ReportLab generation...")
+                current_app.logger.info("Attempting PDF generation with direct ReportLab...")
                 pdf_success = self.generate_pdf_direct_reportlab(cuti_data, pdf_path)
             
             if pdf_success:
-                return {
-                    'success': True,
-                    'pdf_path': pdf_path,
-                    'qr_path': qr_path,
-                    'signature_hash': signature_hash
-                }
+                # Verify PDF file exists and has content
+                if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
+                    current_app.logger.info(f"✅ PDF generated successfully: {pdf_path} ({os.path.getsize(pdf_path)} bytes)")
+                    return {
+                        'success': True,
+                        'pdf_path': pdf_path,
+                        'qr_path': qr_path,
+                        'signature_hash': signature_hash
+                    }
+                else:
+                    raise Exception(f"PDF file is empty or doesn't exist: {pdf_path}")
             else:
                 raise Exception("Failed to convert HTML to PDF - no PDF library available")
                 
         except Exception as e:
-            print(f"Error in fill_template_and_generate_pdf: {str(e)}")
+            from flask import current_app
+            import traceback
+            current_app.logger.error(f"Error in fill_template_and_generate_pdf: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'error': str(e)

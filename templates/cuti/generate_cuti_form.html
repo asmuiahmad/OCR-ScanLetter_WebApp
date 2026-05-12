@@ -124,14 +124,285 @@
   .phone-number-input {
     padding-left: 85px !important;
   }
+
+  /* Employee Selector Styles */
+  .employee-search-section {
+    position: relative;
+    z-index: 3000;
+    isolation: isolate;
+  }
+
+  .employee-selector-container {
+    position: relative;
+    z-index: 50;
+    isolation: isolate;
+  }
+
+  .employee-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 4000;
+    max-height: 400px;
+    overflow: hidden;
+    margin-top: 0.25rem;
+    pointer-events: auto;
+  }
+
+  /*
+   * Override global SPA transform rule (.content *) that creates
+   * many stacking contexts and breaks dropdown layering.
+   */
+  .content .employee-search-section,
+  .content .employee-search-section * {
+    transform: none !important;
+    backface-visibility: visible !important;
+  }
+
+  .employee-results-header {
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+  }
+
+  .employee-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .employee-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .employee-item:hover {
+    background: #f1f5f9;
+  }
+
+  .employee-item:last-child {
+    border-bottom: none;
+  }
+
+  .employee-avatar-small {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .employee-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .employee-name {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.125rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .employee-nip {
+    color: #64748b;
+    font-size: 0.75rem;
+    margin-bottom: 0.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .employee-jabatan {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .employee-quota {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .selected-employee {
+    background: #f0fdf4;
+    border: 2px solid #22c55e;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .selected-employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .selected-employee-info {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    overflow: hidden;
+  }
+
+  .employee-avatar {
+    font-size: 2.25rem;
+    color: #3b82f6;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .employee-details h6 {
+    color: #1e293b;
+  }
+
+  .employee-details p {
+    margin: 0;
+  }
+
+  /* Bulma's .title + .subtitle rule causes overlap here */
+  .selected-employee .employee-details .title,
+  .selected-employee .employee-details .subtitle {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .selected-employee .employee-details .subtitle {
+    margin-top: 0.2rem !important;
+  }
+
+  /* Prevent text overlap in selected employee card */
+  .selected-employee-info .columns {
+    margin: 0 !important;
+    align-items: center;
+  }
+
+  .selected-employee-info .column {
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  #selectedName,
+  #selectedNIP,
+  #selectedJabatan {
+    display: block;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  #selectedName {
+    margin-bottom: 0.25rem !important;
+  }
+
+  #selectedNIP {
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Loading and empty states */
+  .employee-loading {
+    padding: 2rem;
+    text-align: center;
+    color: #64748b;
+  }
+
+  .employee-empty {
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+  }
+
+  .employee-empty i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  /* Keep main form fields below search dropdown */
+  .cuti-form-main {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Validation error styling */
+  .is-danger {
+    border-color: #f14668 !important;
+    box-shadow: 0 0 0 0.125em rgba(241, 70, 104, 0.25) !important;
+  }
+
+  .validation-error-notification {
+    margin-bottom: 1rem;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Loading overlay */
+  .form-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+
+  .form-loading-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>
-<head>
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
-  />
-  <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css" />
-</head>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+/>
+<link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css" />
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-4xl mx-auto">
     <div class="form-card">
@@ -142,7 +413,7 @@
         </h2>
       </div>
     </div>
-    <div class="form-card bg-white rounded-2xl overflow-hidden shadow">
+    <div class="form-card bg-white rounded-2xl overflow-visible shadow">
       <!-- Flash Messages -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -182,124 +453,189 @@
         data-no-ajax
       >
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <div class="columns is-multiline">
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.nama(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="nama">Nama</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.nip(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="nip">NIP</label>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.jabatan(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="jabatan"
-                  >Jabatan</label
+        
+        <!-- Employee Selector Section -->
+        <div class="mb-6 employee-search-section">
+          <div class="field">
+            <label class="label has-text-weight-semibold mb-3">
+              <i class="fas fa-user-search mr-2 has-text-primary"></i>
+              Pilih Data Pegawai
+            </label>
+            <div class="employee-selector-container">
+              <div class="control has-icons-left has-icons-right">
+                <input 
+                  type="text" 
+                  id="employeeSearch" 
+                  class="input is-medium" 
+                  placeholder="Cari nama pegawai atau NIP..."
+                  autocomplete="off"
                 >
+                <span class="icon is-small is-left">
+                  <i class="fas fa-search"></i>
+                </span>
+                <span class="icon is-small is-right" id="searchLoader" style="display: none;">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </span>
               </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.gol_ruang(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="gol_ruang"
-                  >Gol. Ruang</label
-                >
+              
+              <!-- Search Results Dropdown -->
+              <div id="employeeResults" class="employee-results" style="display: none;">
+                <div class="employee-results-header">
+                  <span class="has-text-weight-semibold">Hasil Pencarian</span>
+                  <span id="resultsCount" class="tag is-light is-small"></span>
+                </div>
+                <div id="employeeList" class="employee-list">
+                  <!-- Results will be populated here -->
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.unit_kerja(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="unit_kerja"
-                  >Unit Kerja</label
-                >
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.masa_kerja(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="masa_kerja"
-                  >Masa Kerja</label
-                >
-              </div>
-            </div>
-          </div>
-          <div class="column is-full">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.alamat(class="textarea", placeholder=" ", rows="5",
-                style="min-height: 120px;") }}
-                <label class="label is-floating-label" for="alamat"
-                  >Alamat</label
-                >
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.no_suratmasuk(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="no_suratmasuk"
-                  >Nomor Surat Masuk</label
-                >
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="field is-floating-label">
-              <div class="control">
-                {{ form.tgl_ajuan_cuti(class="input", placeholder=" ") }}
-                <label class="label is-floating-label" for="tgl_ajuan_cuti"
-                  >Tanggal Ajuan Cuti</label
-                >
+              
+              <!-- Selected Employee Display -->
+              <div id="selectedEmployee" class="selected-employee" style="display: none;">
+                <div class="selected-employee-header">
+                  <span class="has-text-weight-semibold has-text-success">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Pegawai Terpilih
+                  </span>
+                  <button type="button" id="clearSelection" class="button is-small is-light">
+                    <span class="icon is-small">
+                      <i class="fas fa-times"></i>
+                    </span>
+                    <span>Ganti</span>
+                  </button>
+                </div>
+                <div class="selected-employee-info">
+                  <div class="columns is-mobile">
+                    <div class="column">
+                      <div class="employee-avatar">
+                        <i class="fas fa-user-circle"></i>
+                      </div>
+                    </div>
+                    <div class="column is-four-fifths">
+                      <div class="employee-details">
+                        <h6 id="selectedName" class="title is-6 mb-1"></h6>
+                        <p id="selectedNIP" class="subtitle is-7 has-text-grey mb-1"></p>
+                        <p id="selectedJabatan" class="has-text-grey is-size-7"></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="columns is-multiline">
+        
+        <div class="columns is-multiline cuti-form-main">
           <div class="column is-half">
-            <div class="field is-floating-label">
+            <div class="field">
+              <label class="label" for="nama" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Nama</label>
               <div class="control">
-                <div class="date-input-wrapper">
-                  {{ form.tanggal_cuti(class="input", placeholder=" ",
-                  id="tanggal_mulai") }}
-                </div>
-                <label class="label is-floating-label" for="tanggal_cuti"
-                  >Tanggal Mulai Cuti</label
-                >
+                {{ form.nama(class="input", placeholder="Masukkan nama lengkap") }}
               </div>
             </div>
           </div>
           <div class="column is-half">
-            <div class="field is-floating-label">
+            <div class="field">
+              <label class="label" for="nip" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">NIP</label>
               <div class="control">
-                <div class="date-input-wrapper">
-                  {{ form.sampai_cuti(class="input", placeholder=" ",
-                  id="tanggal_selesai") }}
-                </div>
-                <label class="label is-floating-label" for="sampai_cuti"
-                  >Tanggal Selesai Cuti</label
-                >
+                {{ form.nip(class="input", placeholder="Masukkan NIP") }}
+              </div>
+            </div>
+          </div>
+          <!-- Quota Info Box -->
+          <div class="column is-full">
+            <div id="quotaInfo" class="notification is-info" style="display: none;">
+              <button class="delete" onclick="this.parentElement.style.display='none'"></button>
+              <p><strong>Informasi Batas Cuti:</strong></p>
+              <p>Batas cuti Anda: <span id="quotaLimit" class="has-text-weight-bold">-</span> hari</p>
+              <p>Durasi yang diminta: <span id="quotaDuration" class="has-text-weight-bold">-</span> hari</p>
+              <p id="quotaWarning" class="has-text-danger" style="display: none; margin-top: 0.5rem;">
+                <i class="fas fa-exclamation-triangle"></i> Durasi cuti melebihi batas yang diizinkan!
+              </p>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="jabatan" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Jabatan</label>
+              <div class="control">
+                {{ form.jabatan(class="input", placeholder="Masukkan jabatan") }}
               </div>
             </div>
           </div>
           <div class="column is-half">
-            <div class="field is-floating-label">
+            <div class="field">
+              <label class="label" for="gol_ruang" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Gol. Ruang</label>
+              <div class="control">
+                {{ form.gol_ruang(class="input", placeholder="Contoh: III/a") }}
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="unit_kerja" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Unit Kerja</label>
+              <div class="control">
+                {{ form.unit_kerja(class="input", placeholder="Masukkan unit kerja") }}
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="masa_kerja" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Masa Kerja</label>
+              <div class="control">
+                {{ form.masa_kerja(class="input", placeholder="Contoh: 5 tahun 3 bulan") }}
+              </div>
+            </div>
+          </div>
+          <div class="column is-full">
+            <div class="field">
+              <label class="label" for="alamat" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Alamat</label>
+              <div class="control">
+                {{ form.alamat(class="textarea", placeholder="Masukkan alamat lengkap", rows="5", style="min-height: 120px;") }}
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="no_suratmasuk" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Nomor Surat Masuk</label>
+              <div class="control">
+                {{ form.no_suratmasuk(class="input", placeholder="Masukkan nomor surat masuk") }}
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="tgl_ajuan_cuti" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Tanggal Ajuan Cuti</label>
+              <div class="control">
+                <div class="date-input-wrapper">
+                  {{ form.tgl_ajuan_cuti(class="input", placeholder=" ") }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-multiline cuti-form-main">
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="tanggal_cuti" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Tanggal Mulai Cuti</label>
+              <div class="control">
+                <div class="date-input-wrapper">
+                  {{ form.tanggal_cuti(class="input", placeholder=" ", id="tanggal_mulai") }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="sampai_cuti" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Tanggal Selesai Cuti</label>
+              <div class="control">
+                <div class="date-input-wrapper">
+                  {{ form.sampai_cuti(class="input", placeholder=" ", id="tanggal_selesai") }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field">
+              <label class="label" for="telp" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Nomor Telepon</label>
               <div class="control">
                 <div class="phone-input-wrapper">
                   <select class="country-select" id="country_code">
@@ -307,17 +643,18 @@
                     <option value="+65">🇸🇬 +65</option>
                     <option value="+60">🇲🇾 +60</option>
                   </select>
-                  {{ form.telp(class="input phone-number-input", placeholder="
-                  ", id="phone_number") }}
+                  {{ form.telp(class="input phone-number-input", placeholder="812-3456-7890", id="phone_number") }}
                 </div>
-                <label class="label is-floating-label" for="telp"
-                  >Nomor Telepon</label
-                >
               </div>
             </div>
           </div>
           <div class="column is-full">
-            <div class="field is-floating-label">
+            <div class="field">
+              <label class="label has-text-weight-semibold mb-2">
+                <i class="fas fa-clipboard-list mr-2 has-text-primary"></i>
+                Jenis Cuti
+                <span class="has-text-danger">*</span>
+              </label>
               <div class="control">
                 <div class="radio-group">
                   {% for subfield in form.jenis_cuti %}
@@ -325,43 +662,33 @@
                     <input
                       type="radio"
                       name="jenis_cuti"
-                      value="{{ subfield.data }}"
-                      id="jenis_{{ subfield.data }}"
-                      {%
-                      if
-                      subfield.checked
-                      %}checked{%
-                      endif
-                      %}
+                      value="{{ subfield._value() }}"
+                      id="jenis_{{ loop.index }}"
+                      {% if loop.index == 1 %}checked{% endif %}
+                      required
                     />
-                    <label for="jenis_{{ subfield.data }}"
+                    <label for="jenis_{{ loop.index }}"
                       >{{ subfield.label.text }}</label
                     >
                   </div>
                   {% endfor %}
                 </div>
-                <label class="label is-floating-label" for="jenis_cuti"
-                  >Jenis Cuti</label
-                >
               </div>
             </div>
           </div>
           <div class="column is-full">
-            <div class="field is-floating-label">
+            <div class="field">
+              <label class="label" for="alasan_cuti" style="font-size:0.85rem; font-weight:600; color:#374151; margin-bottom:0.35rem; display:block;">Alasan Cuti</label>
               <div class="control">
-                {{ form.alasan_cuti(class="textarea", placeholder=" ", rows="3")
-                }}
-                <label class="label is-floating-label" for="alasan_cuti"
-                  >Alasan Cuti</label
-                >
+                {{ form.alasan_cuti(class="textarea", placeholder="Jelaskan alasan pengajuan cuti", rows="3") }}
               </div>
             </div>
           </div>
         </div>
         <div class="field mt-5 has-text-right">
           <div class="buttons">
-            <button type="submit" class="button is-primary is-large" id="submitBtn">
-              <span class="icon"><i class="fas fa-file-pdf"></i></span>
+            <button type="submit" class="ubtn ubtn-primary ubtn-lg" id="submitBtn">
+              <i class="fas fa-file-pdf"></i>
               <span id="btnText">Generate Surat Cuti PDF</span>
             </button>
           </div>
@@ -398,130 +725,364 @@
     const btnText = document.getElementById("btnText");
     const loadingMessage = document.getElementById("loadingMessage");
     const successMessage = document.getElementById("successMessage");
+    const nipInput = document.getElementById("nip");
+    const quotaInfo = document.getElementById("quotaInfo");
+    const quotaLimit = document.getElementById("quotaLimit");
+    const quotaDuration = document.getElementById("quotaDuration");
+    const quotaWarning = document.getElementById("quotaWarning");
 
-    // Set minimum date to today for both date inputs
-    const today = new Date().toISOString().split("T")[0];
-    tanggalMulai.setAttribute("min", today);
-    tanggalSelesai.setAttribute("min", today);
+    // Employee selector elements
+    const employeeSearch = document.getElementById("employeeSearch");
+    const employeeResults = document.getElementById("employeeResults");
+    const employeeList = document.getElementById("employeeList");
+    const selectedEmployee = document.getElementById("selectedEmployee");
+    const clearSelection = document.getElementById("clearSelection");
+    const searchLoader = document.getElementById("searchLoader");
+    const resultsCount = document.getElementById("resultsCount");
 
-    // Update minimum date for end date when start date changes
-    tanggalMulai.addEventListener("change", function () {
-      tanggalSelesai.setAttribute("min", this.value);
-      if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
-        tanggalSelesai.value = "";
+    let employeeQuota = null;
+    let searchTimeout = null;
+    let selectedEmployeeData = null;
+
+    // CSRF Token refresh function
+    function refreshCSRFToken() {
+      fetch('/api/csrf-token', {
+        method: 'GET',
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.csrf_token) {
+          const csrfInput = document.querySelector('input[name="csrf_token"]');
+          if (csrfInput) {
+            csrfInput.value = data.csrf_token;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error refreshing CSRF token:', error);
+      });
+    }
+
+    // Refresh CSRF token every 10 minutes
+    setInterval(refreshCSRFToken, 10 * 60 * 1000);
+
+    // Check for flash messages and handle CSRF errors
+    const flashMessages = document.querySelectorAll('.notification');
+    flashMessages.forEach(message => {
+      if (message.textContent.includes('Token keamanan') || message.textContent.includes('CSRF')) {
+        // Auto-refresh CSRF token if there's a CSRF error
+        setTimeout(refreshCSRFToken, 1000);
       }
     });
 
-    // Form submission handler
-    cutiForm.addEventListener("submit", function(e) {
-      // Show loading state
-      submitBtn.disabled = true;
-      submitBtn.classList.add("is-loading");
-      btnText.textContent = "Membuat PDF...";
-      loadingMessage.style.display = "block";
-      successMessage.style.display = "none";
+    // Employee search functionality
+    employeeSearch.addEventListener("input", function() {
+      const query = this.value.trim();
       
-      // Note: We don't prevent default because we want normal form submission
-      // The PDF will be downloaded via the response
+      // Clear previous timeout
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
       
-      // Set a timeout to show success message
-      setTimeout(function() {
-        loadingMessage.style.display = "none";
-        successMessage.style.display = "block";
+      // Hide results if query is empty
+      if (!query) {
+        employeeResults.style.display = "none";
+        return;
+      }
+      
+      // Show loader
+      searchLoader.style.display = "block";
+      
+      // Debounce search
+      searchTimeout = setTimeout(() => {
+        searchEmployees(query);
+      }, 300);
+    });
+
+    // Search employees function
+    async function searchEmployees(query) {
+      try {
+        const response = await fetch(`/api/pegawai/search?q=${encodeURIComponent(query)}`);
         
-        // Reset button after a delay
-        setTimeout(function() {
-          submitBtn.disabled = false;
-          submitBtn.classList.remove("is-loading");
-          btnText.textContent = "Generate Surat Cuti PDF";
-          successMessage.style.display = "none";
-        }, 3000);
-      }, 2000);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        searchLoader.style.display = "none";
+        
+        if (data.success) {
+          displaySearchResults(data.pegawai);
+        } else {
+          showEmptyResults(data.message || "Terjadi kesalahan saat mencari pegawai");
+        }
+      } catch (error) {
+        console.error("Error searching employees:", error);
+        searchLoader.style.display = "none";
+        
+        if (error.message.includes('Failed to fetch')) {
+          showEmptyResults("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+        } else if (error.message.includes('HTTP 401')) {
+          showEmptyResults("Sesi Anda telah berakhir. Silakan login kembali.");
+          // Optionally redirect to login
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 3000);
+        } else if (error.message.includes('HTTP 403')) {
+          showEmptyResults("Anda tidak memiliki akses untuk mencari data pegawai.");
+        } else {
+          showEmptyResults("Terjadi kesalahan jaringan. Silakan coba lagi.");
+        }
+      }
+    }
+
+    // Display search results
+    function displaySearchResults(employees) {
+      if (employees.length === 0) {
+        showEmptyResults("Tidak ada pegawai yang ditemukan");
+        return;
+      }
+      
+      resultsCount.textContent = `${employees.length} hasil`;
+      
+      employeeList.innerHTML = employees.map(emp => `
+        <div class="employee-item" data-employee-id="${emp.id}">
+          <div class="employee-avatar-small">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="employee-info">
+            <div class="employee-name">${emp.nama}</div>
+            <div class="employee-nip">NIP: ${emp.nip}</div>
+            <div class="employee-jabatan">${emp.jabatan}</div>
+          </div>
+          <div class="employee-quota">${emp.batas_cuti} hari</div>
+        </div>
+      `).join("");
+      
+      employeeResults.style.display = "block";
+      
+      // Add click listeners to employee items
+      document.querySelectorAll(".employee-item").forEach(item => {
+        item.addEventListener("click", function() {
+          const employeeId = this.dataset.employeeId;
+          selectEmployee(employeeId);
+        });
+      });
+    }
+
+    // Show empty results
+    function showEmptyResults(message) {
+      employeeList.innerHTML = `
+        <div class="employee-empty">
+          <i class="fas fa-user-slash"></i>
+          <div>${message}</div>
+        </div>
+      `;
+      resultsCount.textContent = "0 hasil";
+      employeeResults.style.display = "block";
+    }
+
+    // Select employee
+    async function selectEmployee(employeeId) {
+      try {
+        const response = await fetch(`/api/pegawai/${employeeId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          selectedEmployeeData = data.pegawai;
+          fillEmployeeData(data.pegawai);
+          showSelectedEmployee(data.pegawai);
+          hideSearchResults();
+        } else {
+          alert(data.message || "Gagal mengambil data pegawai");
+        }
+      } catch (error) {
+        console.error("Error selecting employee:", error);
+        
+        if (error.message.includes('Failed to fetch')) {
+          alert("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+        } else if (error.message.includes('HTTP 401')) {
+          alert("Sesi Anda telah berakhir. Silakan login kembali.");
+          window.location.href = '/login';
+        } else if (error.message.includes('HTTP 404')) {
+          alert("Data pegawai tidak ditemukan.");
+        } else {
+          alert("Terjadi kesalahan saat mengambil data pegawai. Silakan coba lagi.");
+        }
+      }
+    }
+
+    // Fill form with employee data
+    function fillEmployeeData(employee) {
+      // Fill form fields
+      document.getElementById("nama").value = employee.nama;
+      document.getElementById("nip").value = employee.nip;
+      document.getElementById("jabatan").value = employee.jabatan;
+      document.getElementById("gol_ruang").value = employee.golongan;
+      document.getElementById("unit_kerja").value = employee.unit_kerja;
+      document.getElementById("masa_kerja").value = employee.masa_kerja;
+      document.getElementById("phone_number").value = employee.nomor_telpon || "";
+      
+      // Set employee quota
+      employeeQuota = employee.batas_cuti;
+      quotaLimit.textContent = employeeQuota;
+      quotaInfo.style.display = "block";
+      setEmployeeFieldsReadonly(true);
+      
+      // Update quota warning
+      updateQuotaWarning();
+    }
+
+    // Show selected employee
+    function showSelectedEmployee(employee) {
+      document.getElementById("selectedName").textContent = employee.nama;
+      document.getElementById("selectedNIP").textContent = `NIP: ${employee.nip}`;
+      document.getElementById("selectedJabatan").textContent = employee.jabatan;
+      
+      selectedEmployee.style.display = "block";
+      employeeSearch.value = "";
+    }
+
+    // Hide search results
+    function hideSearchResults() {
+      employeeResults.style.display = "none";
+    }
+
+    // Clear selection
+    clearSelection.addEventListener("click", function() {
+      selectedEmployeeData = null;
+      selectedEmployee.style.display = "none";
+      
+      // Clear form fields
+      document.getElementById("nama").value = "";
+      document.getElementById("nip").value = "";
+      document.getElementById("jabatan").value = "";
+      document.getElementById("gol_ruang").value = "";
+      document.getElementById("unit_kerja").value = "";
+      document.getElementById("masa_kerja").value = "";
+      document.getElementById("phone_number").value = "";
+      
+      // Clear quota info
+      employeeQuota = null;
+      quotaInfo.style.display = "none";
+      setEmployeeFieldsReadonly(false);
+      
+      // Focus on search
+      employeeSearch.focus();
     });
 
+    // Hide results when clicking outside
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest(".employee-selector-container")) {
+        hideSearchResults();
+      }
+    });
+
+    function setEmployeeFieldsReadonly(isReadonly) {
+      const fields = ["nama", "nip", "jabatan", "gol_ruang", "unit_kerja", "masa_kerja"];
+      fields.forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.readOnly = isReadonly;
+          field.classList.toggle("has-background-light", isReadonly);
+        }
+      });
+    }
+
+    // Fetch employee quota when NIP is entered
+    nipInput.addEventListener("blur", async function() {
+      const nip = this.value.trim();
+      if (!nip) {
+        quotaInfo.style.display = "none";
+        employeeQuota = null;
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/pegawai/quota/${nip}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            employeeQuota = data.batas_cuti;
+            quotaLimit.textContent = employeeQuota;
+            quotaInfo.style.display = "block";
+            updateQuotaWarning();
+          } else {
+            quotaInfo.style.display = "none";
+            employeeQuota = null;
+          }
+        } else if (response.status === 404) {
+          // Employee not found - this is normal, don't show error
+          quotaInfo.style.display = "none";
+          employeeQuota = null;
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error("Error fetching quota:", error);
+        quotaInfo.style.display = "none";
+        employeeQuota = null;
+        
+        // Only show error for network issues, not for missing employees
+        if (error.message.includes('Failed to fetch')) {
+          console.warn("Tidak dapat mengambil data kuota cuti. Periksa koneksi internet.");
+        }
+      }
+    });
+
+    // Update quota warning when dates change
+    function updateQuotaWarning() {
+      const startDate = tanggalMulai.value;
+      const endDate = tanggalSelesai.value;
+      
+      if (!startDate || !endDate || !employeeQuota) {
+        quotaWarning.style.display = "none";
+        return;
+      }
+      
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      
+      quotaDuration.textContent = days;
+      
+      if (days > employeeQuota) {
+        quotaWarning.style.display = "block";
+      } else {
+        quotaWarning.style.display = "none";
+      }
+    }
+    
+    // Update quota warning when dates change
+    if (tanggalMulai) {
+      tanggalMulai.addEventListener("change", updateQuotaWarning);
+    }
+    if (tanggalSelesai) {
+      tanggalSelesai.addEventListener("change", updateQuotaWarning);
+    }
+    
     // Phone number formatting
-    function formatPhoneNumber(value, countryCode) {
-      // Remove all non-digits
-      const digits = value.replace(/\D/g, "");
-
-      // Format based on country
-      if (countryCode === "+62") {
-        // Indonesia
-        if (digits.length <= 3) return digits;
-        if (digits.length <= 7)
-          return digits.slice(0, 3) + "-" + digits.slice(3);
-        if (digits.length <= 11)
-          return (
-            digits.slice(0, 3) +
-            "-" +
-            digits.slice(3, 7) +
-            "-" +
-            digits.slice(7)
-          );
-        return (
-          digits.slice(0, 3) +
-          "-" +
-          digits.slice(3, 7) +
-          "-" +
-          digits.slice(7, 11) +
-          "-" +
-          digits.slice(11, 15)
-        );
-      } else if (countryCode === "+65") {
-        // Singapore
-        if (digits.length <= 4) return digits;
-        if (digits.length <= 8)
-          return digits.slice(0, 4) + "-" + digits.slice(4);
-        return digits.slice(0, 4) + "-" + digits.slice(4, 8);
-      } else if (countryCode === "+60") {
-        // Malaysia
-        if (digits.length <= 2) return digits;
-        if (digits.length <= 6)
-          return digits.slice(0, 2) + "-" + digits.slice(2);
-        if (digits.length <= 10)
-          return (
-            digits.slice(0, 2) +
-            "-" +
-            digits.slice(2, 6) +
-            "-" +
-            digits.slice(6)
-          );
-        return (
-          digits.slice(0, 2) +
-          "-" +
-          digits.slice(2, 6) +
-          "-" +
-          digits.slice(6, 10)
-        );
-      }
-      return digits;
+    if (phoneInput) {
+      phoneInput.addEventListener("input", function() {
+        // Remove non-numeric characters
+        this.value = this.value.replace(/[^0-9]/g, "");
+      });
     }
-
-    phoneInput.addEventListener("input", function (e) {
-      const countryCode = countrySelect.value;
-      const formatted = formatPhoneNumber(e.target.value, countryCode);
-      e.target.value = formatted;
-    });
-
-    countrySelect.addEventListener("change", function () {
-      const formatted = formatPhoneNumber(phoneInput.value, this.value);
-      phoneInput.value = formatted;
-    });
-
-    // Set initial placeholder based on country
-    function updatePlaceholder() {
-      const countryCode = countrySelect.value;
-      if (countryCode === "+62") {
-        phoneInput.placeholder = "811-1234-5678";
-      } else if (countryCode === "+65") {
-        phoneInput.placeholder = "9123-4567";
-      } else if (countryCode === "+60") {
-        phoneInput.placeholder = "12-345-6789";
-      }
+    
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    const tglAjuanInput = document.getElementById("tgl_ajuan_cuti");
+    if (tglAjuanInput && !tglAjuanInput.value) {
+      tglAjuanInput.value = today;
     }
-
-    countrySelect.addEventListener("change", updatePlaceholder);
-    updatePlaceholder(); // Set initial placeholder
   });
 </script>
 {% endblock %}

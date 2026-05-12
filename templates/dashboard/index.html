@@ -22,27 +22,27 @@
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- Total Surat Masuk Card -->
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg overflow-hidden">
-            <div class="px-6 py-5 flex items-center">
-                <div class="flex items-center justify-center p-3 rounded-full bg-blue-100 bg-opacity-30">
-                    <i class="fas fa-arrow-down text-green-600 text-2xl"></i>
+        <div class="summary-card card-gradient-primary">
+            <div class="summary-card-content">
+                <div class="summary-card-icon">
+                    <i class="fas fa-inbox"></i>
                 </div>
-                <div class="ml-4">
-                    <h5 class="text-xl font-semibold text-white">Total Surat Masuk</h5>
-                    <p class="text-4xl font-bold text-white">{{ suratMasuk_count }}</p>
+                <div class="summary-card-info">
+                    <h5 class="summary-card-title">Total Surat Masuk</h5>
+                    <p class="summary-card-value">{{ suratMasuk_count }}</p>
                 </div>
             </div>
         </div>
         
         <!-- Total Surat Keluar Card -->
-        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg overflow-hidden">
-            <div class="px-6 py-5 flex items-center">
-                <div class="flex items-center justify-center p-3 rounded-full bg-green-100 bg-opacity-30">
-                    <i class="fas fa-arrow-up text-yellow-400 text-2xl"></i>
+        <div class="summary-card card-gradient-success">
+            <div class="summary-card-content">
+                <div class="summary-card-icon">
+                    <i class="fas fa-paper-plane"></i>
                 </div>
-                <div class="ml-4">
-                    <h5 class="text-xl font-semibold text-white">Total Surat Keluar</h5>
-                    <p class="text-4xl font-bold text-white">{{ suratKeluar_count }}</p>
+                <div class="summary-card-info">
+                    <h5 class="summary-card-title">Total Surat Keluar</h5>
+                    <p class="summary-card-value">{{ suratKeluar_count }}</p>
                 </div>
             </div>
         </div>
@@ -51,80 +51,81 @@
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Yearly Stats -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-indigo-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-indigo-700">Statistik Tahunan</h3>
+        <div class="stat-card">
+            <div class="card-header card-header-indigo">
+                <h3>Statistik Tahunan</h3>
             </div>
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
+            <div class="stat-card-body">
+                <div class="stat-item">
                     <div>
-                        <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_year }}</p>
+                        <p class="stat-label">Surat Masuk</p>
+                        <p class="stat-value">{{ suratMasuk_this_year }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
-                        <i class="fas fa-arrow-down text-green-600"></i>
+                    <div class="stat-icon" style="background: #eef2ff;">
+                        <i class="fas fa-inbox" style="color: #6366f1;"></i>
                     </div>
                 </div>
-                <div class="flex justify-between items-center">
+                <div class="stat-item">
                     <div>
-                        <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_year }}</p>
+                        <p class="stat-label">Surat Keluar</p>
+                        <p class="stat-value">{{ suratKeluar_this_year }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100">
-                        <i class="fas fa-arrow-up text-yellow-400"></i>
+                    <div class="stat-icon" style="background: #eef2ff;">
+                        <i class="fas fa-paper-plane" style="color: #6366f1;"></i>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Monthly Stats -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-pink-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-pink-700">Statistik Bulanan</h3>
+        <div class="stat-card">
+            <div class="card-header card-header-pink">
+                <h3>Statistik Bulanan</h3>
             </div>
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
+            <div class="stat-card-body">
+                <div class="stat-item">
                     <div>
-                        <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_month }}</p>
+                        <p class="stat-label">Surat Masuk</p>
+                        <p class="stat-value">{{ suratMasuk_this_month }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100">
-                        <i class="fas fa-arrow-down text-green-600"></i>
+                    <div class="stat-icon" style="background: #fce7f3;">
+                        <i class="fas fa-inbox" style="color: #ec4899;"></i>
                     </div>
                 </div>
-                <div class="flex justify-between items-center">
+                <div class="stat-item">
                     <div>
-                        <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_month }}</p>
+                        <p class="stat-label">Surat Keluar</p>
+                        <p class="stat-value">{{ suratKeluar_this_month }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-pink-100">
-                        <i class="fas fa-arrow-up text-yellow-400"></i>
+                    <div class="stat-icon" style="background: #fce7f3;">
+                        <i class="fas fa-paper-plane" style="color: #ec4899;"></i>
                     </div>
                 </div>
             </div>
         </div>
+        
         <!-- Weekly Stats -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-emerald-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-emerald-700">Statistik Mingguan</h3>
+        <div class="stat-card">
+            <div class="card-header card-header-emerald">
+                <h3>Statistik Mingguan</h3>
             </div>
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
+            <div class="stat-card-body">
+                <div class="stat-item">
                     <div>
-                        <p class="text-sm text-gray-500">Surat Masuk</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratMasuk_this_week }}</p>
+                        <p class="stat-label">Surat Masuk</p>
+                        <p class="stat-value">{{ suratMasuk_this_week }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
-                        <i class="fas fa-arrow-down text-green-600"></i>
+                    <div class="stat-icon" style="background: #d1fae5;">
+                        <i class="fas fa-inbox" style="color: #10b981;"></i>
                     </div>
                 </div>
-                <div class="flex justify-between items-center">
+                <div class="stat-item">
                     <div>
-                        <p class="text-sm text-gray-500">Surat Keluar</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ suratKeluar_this_week }}</p>
+                        <p class="stat-label">Surat Keluar</p>
+                        <p class="stat-value">{{ suratKeluar_this_week }}</p>
                     </div>
-                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
-                        <i class="fas fa-arrow-up text-yellow-400"></i>
+                    <div class="stat-icon" style="background: #d1fae5;">
+                        <i class="fas fa-paper-plane" style="color: #10b981;"></i>
                     </div>
                 </div>
             </div>
@@ -134,29 +135,27 @@
     <!-- Recent Activity and User Login -->
     <div class="flex flex-col lg:flex-row gap-6">
         <!-- Log Surat Masuk & Keluar -->
-        <div class="flex-1 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-700">Log Surat Masuk & Keluar</h3>
+        <div class="flex-1 activity-card">
+            <div class="card-header">
+                <h3>Log Surat Masuk & Keluar</h3>
             </div>
-            <div class="p-6 log-container">
-                <div class="space-y-4">
+            <div class="card-body log-container">
+                <div class="space-y-2">
                     {% set all_surat = (recent_surat_masuk + recent_surat_keluar) %}
                     {% set all_surat = all_surat|sort(attribute='created_at', reverse=True) %}
                     {% for surat in all_surat %}
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="flex items-center justify-center h-8 w-8 rounded-full {{ 'bg-blue-100' if surat.__class__.__name__ == 'SuratMasuk' else 'bg-green-100' }}">
-                                <i class="fas {{ 'fa-arrow-down text-green-600' if surat.__class__.__name__ == 'SuratMasuk' else 'fa-arrow-up text-yellow-400' }} text-sm"></i>
-                            </div>
+                    <div class="activity-item">
+                        <div class="activity-icon {{ 'bg-blue-100' if surat.__class__.__name__ == 'SuratMasuk' else 'bg-green-100' }}">
+                            <i class="fas {{ 'fa-inbox text-blue-600' if surat.__class__.__name__ == 'SuratMasuk' else 'fa-paper-plane text-green-600' }} text-sm"></i>
                         </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900">
+                        <div class="activity-content">
+                            <p class="activity-title">
                                 {{ surat.pengirim_suratMasuk if surat.__class__.__name__ == 'SuratMasuk' else surat.pengirim_suratKeluar }}
-                                <span class="ml-2 px-2 py-0.5 rounded text-xs font-semibold {{ 'bg-blue-200 text-blue-800' if surat.__class__.__name__ == 'SuratMasuk' else 'bg-green-200 text-green-800' }}">
+                                <span class="badge badge-sm {{ 'badge-primary' if surat.__class__.__name__ == 'SuratMasuk' else 'badge-success' }} ml-2">
                                     {{ 'Masuk' if surat.__class__.__name__ == 'SuratMasuk' else 'Keluar' }}
                                 </span>
                             </p>
-                            <p class="text-xs text-gray-500">
+                            <p class="activity-meta">
                                 {{ surat.created_at.strftime('%d %b %Y %H:%M') }} - {{ surat.nomor_suratMasuk if surat.__class__.__name__ == 'SuratMasuk' else surat.nomor_suratKeluar }}
                             </p>
                         </div>
@@ -165,80 +164,80 @@
                 </div>
             </div>
         </div>
-        <!-- Recent User Logins - Fixed width 300px -->
-        <div class="w-full lg:w-80 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-700">User Login Terakhir</h3>
+        
+        <!-- Recent User Logins - Fixed width 300px - Admin Only -->
+        {% if current_user.is_admin %}
+        <div class="w-full lg:w-80 activity-card">
+            <div class="card-header">
+                <h3>User Login Terakhir</h3>
             </div>
-            <div class="p-6">
+            <div class="card-body">
                 <div class="recent-users-container">
-                    <ul class="divide-y divide-gray-200">
+                    <div class="space-y-2">
                         {% for user in users %}
-                        <li class="py-3 flex items-center">
-                            <div class="flex-shrink-0">
-                                <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100">
-                                    <i class="fas fa-user text-indigo-600 text-lg"></i>
-                                </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-indigo-100">
+                                <i class="fas fa-user text-indigo-600 text-sm"></i>
                             </div>
-                            <div class="ml-4 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">{{ user.email }}</p>
-                                <p class="text-xs text-gray-500">Last login: {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}</p>
+                            <div class="activity-content">
+                                <p class="activity-title truncate">{{ user.email }}</p>
+                                <p class="activity-meta">{{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}</p>
                             </div>
-                        </li>
+                        </div>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
-    <!-- User Login Logs Section -->
-    <div class="mt-8">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-            <div class="page-header">
+    <!-- User Login Logs Section - Admin Only -->
+    {% if current_user.is_admin %}
+    <div class="mt-4">
+        <div class="card">
+            <div class="card-header card-header-primary">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3>
-                            <i class="fas fa-sign-in-alt"></i>Log User Masuk
+                        <h3 class="text-white m-0" style="font-size:0.95rem;">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Log User Masuk
                         </h3>
-                        <p class="text-white text-opacity-80 text-sm mt-1" id="backend-status">
+                        <p class="text-white text-opacity-80 text-xs mt-0.5 mb-0" id="backend-status">
                             Memuat status sistem...
                         </p>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <span class="text-white text-sm opacity-90" id="login-count">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-white text-xs opacity-90" id="login-count">
                             Total: <span id="total-logins">0</span> login
                         </span>
-                        <button onclick="refreshLoginLogs()" class="px-3 py-1 bg-purple-700 hover:bg-purple-800 rounded text-white text-sm font-medium transition-all duration-200 border border-purple-400">
-                            <i class="fas fa-sync-alt mr-1"></i>Refresh
+                        <button onclick="refreshLoginLogs()" class="ubtn ubtn-sm" style="background:rgba(255,255,255,0.2); color:white; border:1px solid rgba(255,255,255,0.3);">
+                            <i class="fas fa-sync-alt"></i> Refresh
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="p-6">
+            <div class="card-body" style="padding:0.75rem 1rem;">
                 <!-- Filter Controls -->
-                <div class="mb-4 flex flex-col sm:flex-row gap-4">
+                <div class="mb-3 flex flex-col sm:flex-row gap-3">
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Filter Tanggal</label>
-                        <input type="date" id="date-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Filter Tanggal</label>
+                        <input type="date" id="date-filter" class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Filter User</label>
-                        <input type="text" id="user-filter" placeholder="Cari nama user..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Filter User</label>
+                        <input type="text" id="user-filter" placeholder="Cari nama user..." class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex items-end">
-                        <button onclick="clearFilters()" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors duration-200">
-                            <i class="fas fa-times mr-1"></i>Clear
+                        <button onclick="clearFilters()" class="ubtn ubtn-secondary ubtn-sm">
+                            <i class="fas fa-times"></i> Clear
                         </button>
                     </div>
                 </div>
 
-
-
-                <!-- Login Logs Container with Scrollbar -->
+                <!-- Login Logs Container -->
                 <div class="border border-gray-200 rounded-lg">
-                    <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                        <div class="grid grid-cols-4 gap-4 text-sm font-medium text-gray-700">
+                    <div class="bg-gray-50 px-3 py-1.5 border-b border-gray-200">
+                        <div class="grid grid-cols-4 gap-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">
                             <div>Tanggal & Waktu</div>
                             <div>User</div>
                             <div>IP Address</div>
@@ -247,8 +246,7 @@
                     </div>
                     <div id="login-logs-container" class="login-logs-container">
                         <div id="login-logs-content">
-                            <!-- Login logs will be loaded here -->
-                            <div class="p-8 text-center text-gray-500">
+                            <div class="py-4 text-center text-gray-500 text-sm">
                                 <i class="fas fa-spinner fa-spin mr-2"></i>Memuat log login...
                             </div>
                         </div>
@@ -256,25 +254,26 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-4 flex justify-between items-center">
-                    <div class="text-sm text-gray-600">
+                <div class="mt-3 flex justify-between items-center">
+                    <div class="text-xs text-gray-600">
                         Menampilkan <span id="showing-count">0</span> dari <span id="total-count">0</span> log
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="loadLoginLogs(currentPage - 1)" id="prev-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200" disabled>
-                            <i class="fas fa-chevron-left mr-1"></i>Sebelumnya
+                        <button onclick="loadLoginLogs(currentPage - 1)" id="prev-btn" class="ubtn ubtn-secondary ubtn-sm" disabled>
+                            <i class="fas fa-chevron-left"></i> Sebelumnya
                         </button>
-                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded text-sm font-medium" id="page-info">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium" id="page-info">
                             Halaman 1
                         </span>
-                        <button onclick="loadLoginLogs(currentPage + 1)" id="next-btn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200" disabled>
-                            Selanjutnya<i class="fas fa-chevron-right ml-1"></i>
+                        <button onclick="loadLoginLogs(currentPage + 1)" id="next-btn" class="ubtn ubtn-secondary ubtn-sm" disabled>
+                            Selanjutnya <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 {% block extra_js %}
