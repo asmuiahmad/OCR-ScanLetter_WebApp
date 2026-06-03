@@ -121,7 +121,7 @@
   </div>
 
   <!-- Action bar -->
-  <div style="background:white;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:0.85rem 1.25rem;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+  <div style="background:white;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:0.85rem 1.25rem;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.75rem;">
     <button onclick="cetakTerpilih()" class="ubtn ubtn-primary"><i class="fas fa-print"></i> Cetak Terpilih</button>
     <button onclick="cetakSemua()"    class="ubtn ubtn-success"><i class="fas fa-print"></i> Cetak Semua (8 Laporan)</button>
     <div style="width:1px;height:1.5rem;background:#e5e7eb;"></div>
@@ -132,6 +132,40 @@
       <i class="fas fa-clock" style="color:#93c5fd;"></i> {{ tanggal_cetak }}
     </span>
     <span id="lc-count" style="margin-left:auto;font-size:0.75rem;font-weight:700;color:#3b82f6;">8 laporan terpilih</span>
+  </div>
+
+  <!-- ── Preview Ringkasan di Layar (centered) ── -->
+  <div style="background:white;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:1.25rem;margin-bottom:0.75rem;">
+    <h3 style="font-size:0.85rem;font-weight:700;color:#1e293b;margin:0 0 0.85rem;display:flex;align-items:center;gap:0.4rem;">
+      <i class="fas fa-table" style="color:#3b82f6;"></i> Preview Ringkasan Data
+    </h3>
+    <div style="display:flex;justify-content:center;">
+      <table style="width:80%;border-collapse:collapse;font-size:0.8rem;">
+        <thead>
+          <tr>
+            <th style="background:#1e3a8a;color:white;padding:0.5rem 0.75rem;text-align:left;border:1px solid #1e3a8a;">Kategori</th>
+            <th style="background:#1e3a8a;color:white;padding:0.5rem 0.75rem;text-align:center;border:1px solid #1e3a8a;">Total</th>
+            <th style="background:#f59e0b;color:white;padding:0.5rem 0.75rem;text-align:center;border:1px solid #d97706;">Pending</th>
+            <th style="background:#10b981;color:white;padding:0.5rem 0.75rem;text-align:center;border:1px solid #059669;">Disetujui</th>
+            <th style="background:#ef4444;color:white;padding:0.5rem 0.75rem;text-align:center;border:1px solid #dc2626;">Ditolak</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in ringkasan %}
+          <tr style="{% if loop.index % 2 == 0 %}background:#f8fafc;{% else %}background:white;{% endif %}">
+            <td style="padding:0.45rem 0.75rem;border:1px solid #e5e7eb;font-weight:600;color:#1e293b;">{{ r.label }}</td>
+            <td style="padding:0.45rem 0.75rem;border:1px solid #e5e7eb;text-align:center;font-weight:700;color:#1e293b;">{{ r.total }}</td>
+            <td style="padding:0.45rem 0.75rem;border:1px solid #e5e7eb;text-align:center;color:#92400e;">{{ r.pending }}</td>
+            <td style="padding:0.45rem 0.75rem;border:1px solid #e5e7eb;text-align:center;color:#065f46;">{{ r.approved }}</td>
+            <td style="padding:0.45rem 0.75rem;border:1px solid #e5e7eb;text-align:center;color:#991b1b;">{{ r.rejected }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:0.7rem;color:#9ca3af;text-align:center;margin:0.75rem 0 0;">
+      <i class="fas fa-info-circle"></i> Data di atas adalah ringkasan. Klik <strong>Cetak</strong> untuk mencetak laporan lengkap.
+    </p>
   </div>
 
 </div>
