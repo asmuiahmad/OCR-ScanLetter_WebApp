@@ -131,59 +131,66 @@
     <!-- Global Print CSS — hanya tampilkan data & tabel, sembunyikan semua UI -->
     <style>
     @media print {
-        /* Sembunyikan SEGALANYA dulu */
-        body > * { display: none !important; }
+        /* Langkah 1: Sembunyikan semua body children termasuk sidebar */
+        body > * {
+            display: none !important;
+            visibility: hidden !important;
+        }
 
-        /* Tampilkan hanya .main-content */
-        body > .main-content { display: block !important; }
-
-        /* Di dalam main-content, sembunyikan navbar, sidebar, progress, breadcrumb */
-        .main-content > nav,
-        .main-content > .spa-progress,
-        .main-content nav,
-        .modern-sidebar,
-        #spaProgress,
-        .no-print,
-        .sticky-search-container,
-        .search-controls,
-        .page-header,
-        .form-card .page-header,
-        .breadcrumb,
-        nav ol { display: none !important; }
-
-        /* Tampilkan area konten */
-        .main-content,
-        .main-content .content,
-        .main-content .content > * { display: block !important; }
-
-        /* Reset layout */
-        .main-content {
+        /* Langkah 2: Tampilkan hanya main-content */
+        body > .main-content {
+            display: block !important;
+            visibility: visible !important;
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            box-shadow: none !important;
+            position: static !important;
+            left: 0 !important;
         }
 
-        .content {
+        /* Langkah 3: Semua isi main-content visible */
+        .main-content * {
+            visibility: visible !important;
+        }
+
+        /* Langkah 4: Sembunyikan UI chrome di dalam main-content */
+        .main-content nav,
+        .main-content .spa-progress,
+        .main-content #spaProgress,
+        .main-content .no-print,
+        .main-content .sticky-search-container,
+        .main-content .search-controls,
+        .main-content .abar,
+        .main-content .lc-panel,
+        .main-content .lc-stats,
+        .main-content .lc-hero,
+        .main-content canvas,
+        .main-content .ubtn,
+        .main-content button,
+        .main-content .action-cell,
+        .main-content .action-buttons {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* Reset body */
+        body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Reset main-content dan content */
+        .main-content, .content {
+            background: white !important;
             margin: 0 !important;
             padding: 0.5cm !important;
         }
 
-        body {
-            background: white !important;
-            margin: 0 !important;
-        }
-
-        /* Tabel dan data terlihat bersih */
+        /* Tabel bersih */
         table { width: 100% !important; border-collapse: collapse !important; }
-        th, td { border: 1px solid #ccc !important; padding: 4px 6px !important; font-size: 9pt !important; }
-        thead { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-        /* Sembunyikan tombol aksi di tabel */
-        .ubtn, button:not([type="submit"]),
-        .action-buttons, .action-cell,
-        .abar, .lc-panel, .lc-stats,
-        .lc-hero, canvas { display: none !important; }
+        th, td { border: 1px solid #999 !important; padding: 4px 6px !important; font-size: 9pt !important; }
+        thead { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
         @page { size: A4 portrait; margin: 1.5cm; }
     }
