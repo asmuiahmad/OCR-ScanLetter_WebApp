@@ -131,29 +131,42 @@
     <!-- Global Print CSS — sembunyikan sidebar & navbar saat print di semua halaman -->
     <style>
     @media print {
-        /* Sembunyikan elemen UI navigasi */
+        /* Sembunyikan SEMUA elemen UI — sidebar kiri, navbar atas, progress bar, breadcrumb */
         .modern-sidebar,
+        .modern-sidebar *,
         nav,
+        nav *,
         .spa-progress,
-        .breadcrumb,
+        .spa-progress *,
         nav ol,
-        .no-print { display: none !important; }
+        .breadcrumb,
+        .no-print,
+        #spaProgress,
+        .sticky-search-container,
+        .search-controls { display: none !important; }
 
-        /* Hapus margin kiri dari main-content (biasanya untuk sidebar) */
+        /* Hapus margin/padding dari main-content agar konten mulai dari pojok kiri */
         .main-content {
             margin-left: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
         }
 
-        /* Konten mengisi penuh halaman */
-        body, .content {
+        /* Reset body dan content */
+        body {
             background: white !important;
             margin: 0 !important;
             padding: 0 !important;
         }
 
-        /* Ukuran kertas default A4 portrait untuk halaman biasa */
-        @page { margin: 1.5cm; }
+        .content {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0.5cm !important;
+        }
+
+        /* Ukuran kertas A4 portrait untuk halaman biasa */
+        @page { size: A4 portrait; margin: 1.5cm; }
     }
     </style>
 
