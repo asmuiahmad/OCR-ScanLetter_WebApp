@@ -128,44 +128,63 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <!-- Global Print CSS — sembunyikan sidebar & navbar saat print di semua halaman -->
+    <!-- Global Print CSS — hanya tampilkan data & tabel, sembunyikan semua UI -->
     <style>
     @media print {
-        /* Sembunyikan SEMUA elemen UI — sidebar kiri, navbar atas, progress bar, breadcrumb */
+        /* Sembunyikan SEGALANYA dulu */
+        body > * { display: none !important; }
+
+        /* Tampilkan hanya .main-content */
+        body > .main-content { display: block !important; }
+
+        /* Di dalam main-content, sembunyikan navbar, sidebar, progress, breadcrumb */
+        .main-content > nav,
+        .main-content > .spa-progress,
+        .main-content nav,
         .modern-sidebar,
-        .modern-sidebar *,
-        nav,
-        nav *,
-        .spa-progress,
-        .spa-progress *,
-        nav ol,
-        .breadcrumb,
-        .no-print,
         #spaProgress,
+        .no-print,
         .sticky-search-container,
-        .search-controls { display: none !important; }
+        .search-controls,
+        .page-header,
+        .form-card .page-header,
+        .breadcrumb,
+        nav ol { display: none !important; }
 
-        /* Hapus margin/padding dari main-content agar konten mulai dari pojok kiri */
+        /* Tampilkan area konten */
+        .main-content,
+        .main-content .content,
+        .main-content .content > * { display: block !important; }
+
+        /* Reset layout */
         .main-content {
-            margin-left: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-        }
-
-        /* Reset body dan content */
-        body {
-            background: white !important;
             margin: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
+            box-shadow: none !important;
         }
 
         .content {
-            background: white !important;
             margin: 0 !important;
             padding: 0.5cm !important;
         }
 
-        /* Ukuran kertas A4 portrait untuk halaman biasa */
+        body {
+            background: white !important;
+            margin: 0 !important;
+        }
+
+        /* Tabel dan data terlihat bersih */
+        table { width: 100% !important; border-collapse: collapse !important; }
+        th, td { border: 1px solid #ccc !important; padding: 4px 6px !important; font-size: 9pt !important; }
+        thead { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+        /* Sembunyikan tombol aksi di tabel */
+        .ubtn, button:not([type="submit"]),
+        .action-buttons, .action-cell,
+        .abar, .lc-panel, .lc-stats,
+        .lc-hero, canvas { display: none !important; }
+
         @page { size: A4 portrait; margin: 1.5cm; }
     }
     </style>
