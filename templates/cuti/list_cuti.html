@@ -4,8 +4,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/cuti.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/consistent-headers.css') }}">
 <style>
   .summary { 
     display: flex; 
@@ -29,736 +27,273 @@
   .table-small { 
     font-size: .95rem; 
   }
-  
-  /* Action Buttons Styling - Colorful and Aesthetic */
-  .action-buttons {
-    display: flex !important;
-    gap: 0.5rem !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-wrap: wrap !important;
+  .table td, .table th { 
+    vertical-align: middle; 
   }
   
+  /* Action Buttons Styling */
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .action-btn-group {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+  }
+  
+  /* Button Styling - Base */
   .btn-action {
-    padding: 0.625rem 1rem !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    border: 2px solid transparent !important;
-    border-radius: 0.5rem !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    text-decoration: none !important;
-    white-space: nowrap !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    text-transform: capitalize !important;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 2px solid;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
   }
   
   .btn-action:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    text-decoration: none !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   
   .btn-action:active {
-    transform: translateY(0) !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
   
   .btn-action i {
-    font-size: 1rem !important;
+    font-size: 0.95rem;
   }
   
-  /* View Button - Purple/Violet with gradient */
+  /* View Button */
   .btn-view {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
-    border-color: #5568d3 !important;
+    background-color: #667eea;
+    border-color: #5568d3;
+    color: white;
   }
   
   .btn-view:hover {
-    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%) !important;
-    color: white !important;
-    border-color: #4452b8 !important;
+    background-color: #5568d3;
+    border-color: #4452b8;
+    color: white;
+    text-decoration: none;
   }
   
-  /* Download Button - Blue with gradient */
+  .btn-view:active {
+    background-color: #4452b8;
+    border-color: #3a42a0;
+  }
+  
+  /* Download Button */
   .btn-download {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
-    color: white !important;
-    border-color: #3c96e6 !important;
+    background-color: #f093fb;
+    border-color: #e577e5;
+    color: white;
   }
   
   .btn-download:hover {
-    background: linear-gradient(135deg, #3c96e6 0%, #00d9e6 100%) !important;
-    color: white !important;
-    border-color: #2e7fce !important;
+    background-color: #e577e5;
+    border-color: #d661cf;
+    color: white;
+    text-decoration: none;
   }
   
-  /* Approve Button - Green with gradient */
+  .btn-download:active {
+    background-color: #d661cf;
+    border-color: #c84bb9;
+  }
+  
+  /* Approve Button */
   .btn-approve {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
-    color: white !important;
-    border-color: #0e8074 !important;
+    background-color: #4facfe;
+    border-color: #3c96e6;
+    color: white;
   }
   
   .btn-approve:hover {
-    background: linear-gradient(135deg, #0e8074 0%, #2dd46a 100%) !important;
-    color: white !important;
-    border-color: #0c6b61 !important;
+    background-color: #3c96e6;
+    border-color: #2e7fce;
+    color: white;
+    text-decoration: none;
   }
   
-  /* Reject Button - Orange/Yellow with gradient */
+  .btn-approve:active {
+    background-color: #2e7fce;
+    border-color: #2067b6;
+  }
+  
+  /* Reject Button */
   .btn-reject {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-    color: white !important;
-    border-color: #e577e5 !important;
+    background-color: #fa709a;
+    border-color: #e55a82;
+    color: white;
   }
   
   .btn-reject:hover {
-    background: linear-gradient(135deg, #e577e5 0%, #e34558 100%) !important;
-    color: white !important;
-    border-color: #d661cf !important;
+    background-color: #e55a82;
+    border-color: #d0446a;
+    color: white;
+    text-decoration: none;
   }
   
-  /* Delete Button - Red with gradient */
+  .btn-reject:active {
+    background-color: #d0446a;
+    border-color: #bb2e52;
+  }
+  
+  /* Delete Button */
   .btn-delete {
-    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%) !important;
-    color: white !important;
-    border-color: #d12737 !important;
+    background-color: #eb3349;
+    border-color: #d12737;
+    color: white;
   }
   
   .btn-delete:hover {
-    background: linear-gradient(135deg, #d12737 0%, #e04a3a 100%) !important;
-    color: white !important;
-    border-color: #b71525 !important;
+    background-color: #d12737;
+    border-color: #b71525;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .btn-delete:active {
+    background-color: #b71525;
+    border-color: #9d0d19;
+  }
+  
+  /* Button Group Separator */
+  .btn-separator {
+    width: 1px;
+    height: 2rem;
+    background: #e9ecef;
+    margin: 0 0.25rem;
   }
   
   /* Form inline styling */
   .action-form {
-    display: inline !important;
-    margin: 0 !important;
+    display: inline;
+    margin: 0;
   }
   
   .action-form button {
-    margin: 0 !important;
-  }
-  
-  /* Add shine effect on hover */
-  .btn-action::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: -100% !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
-    transition: left 0.5s ease !important;
-  }
-  
-  .btn-action:hover::before {
-    left: 100% !important;
-  }
-  
-  .btn-action {
-    position: relative !important;
-    overflow: hidden !important;
+    margin: 0;
   }
   
   /* Responsive Design */
-  @media (max-width: 768px) {
+  @media (max-width: 992px) {
     .action-buttons {
-      flex-direction: column !important;
-      gap: 0.5rem !important;
+      flex-direction: column;
+      gap: 0.4rem;
     }
     
-    .btn-action {
-      width: 100% !important;
-      justify-content: center !important;
-      padding: 0.625rem 0.875rem !important;
-      font-size: 0.8125rem !important;
-    }
-  }
-
-  /* Enhanced Checkbox Styling - Modern Design */
-  .checkbox-cell {
-    text-align: center;
-    vertical-align: middle;
-    padding: 12px !important;
-    width: 60px;
-  }
-
-  .checkbox-cell input[type="checkbox"] {
-    width: 20px !important;
-    height: 20px !important;
-    cursor: pointer !important;
-    accent-color: #3b82f6 !important;
-    border: 2px solid #d1d5db !important;
-    border-radius: 4px !important;
-    background-color: #ffffff !important;
-    transition: all 0.2s ease !important;
-    position: relative !important;
-    margin: 0 !important;
-    display: inline-block !important;
-    vertical-align: middle !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    z-index: 1 !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-  }
-
-  .checkbox-cell input[type="checkbox"]:hover {
-    border-color: #3b82f6 !important;
-    transform: scale(1.05) !important;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2) !important;
-  }
-
-  .checkbox-cell input[type="checkbox"]:checked {
-    background-color: #3b82f6 !important;
-    border-color: #3b82f6 !important;
-    transform: scale(1) !important;
-  }
-
-  .checkbox-cell input[type="checkbox"]:checked::after {
-    content: '✓' !important;
-    color: white !important;
-    font-size: 14px !important;
-    font-weight: bold !important;
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    line-height: 1 !important;
-  }
-
-  .checkbox-cell input[type="checkbox"]:focus {
-    outline: none !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-  }
-
-  /* Select All Checkbox Special Styling */
-  #selectAllCheckbox {
-    width: 22px !important;
-    height: 22px !important;
-    border: 2px solid #6b7280 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    background-color: #ffffff !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    position: relative !important;
-  }
-
-  #selectAllCheckbox:hover {
-    border-color: #3b82f6 !important;
-  }
-
-  #selectAllCheckbox:checked {
-    background-color: #3b82f6 !important;
-    border-color: #3b82f6 !important;
-  }
-
-  #selectAllCheckbox:checked::after {
-    content: '✓' !important;
-    color: white !important;
-    font-size: 16px !important;
-    font-weight: bold !important;
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    line-height: 1 !important;
-  }
-
-  #selectAllCheckbox:indeterminate {
-    background-color: #3b82f6 !important;
-    border-color: #3b82f6 !important;
-  }
-
-  #selectAllCheckbox:indeterminate::after {
-    content: '−' !important;
-    color: white !important;
-    font-size: 18px !important;
-    font-weight: bold !important;
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    line-height: 1 !important;
-  }
-
-  /* Force checkbox visibility - Override any hiding CSS */
-  input[type="checkbox"].cuti-checkbox,
-  input[type="checkbox"]#selectAllCheckbox {
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: inline-block !important;
-    position: static !important;
-    width: 20px !important;
-    height: 20px !important;
-    left: auto !important;
-    top: auto !important;
-    clip: auto !important;
-    clip-path: none !important;
-    transform: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Ensure table cell is visible */
-  .checkbox-cell {
-    display: table-cell !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  /* Clean checkbox cell styling */
-  .checkbox-cell {
-    background-color: transparent !important;
-    border: none !important;
-  }
-
-  /* Bulk Actions Bar - Modern Gmail Style */
-  .bulk-actions-bar {
-    display: none;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border: 1px solid #e8eaed;
-    border-radius: 12px;
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(60, 64, 67, 0.1), 0 1px 4px rgba(60, 64, 67, 0.08);
-    z-index: 10;
-    position: relative;
-    backdrop-filter: blur(10px);
-    animation: slideDown 0.3s ease-out;
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .bulk-actions-bar.active {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
-  .bulk-actions-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 0 0 auto;
-    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-    border: 1px solid #1976d2;
-    border-radius: 8px;
-    padding: 10px 16px;
-    color: #1565c0;
-    font-size: 14px;
-    font-weight: 600;
-    min-height: 40px;
-    box-sizing: border-box;
-    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.15);
-  }
-
-  .bulk-actions-info i {
-    font-size: 16px;
-    color: #1565c0;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .bulk-actions-info span {
-    font-weight: 600;
-    color: #1565c0;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-  }
-
-  .bulk-actions-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    flex: 1;
-  }
-
-  .bulk-btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    white-space: nowrap;
-    min-height: 48px;
-    box-sizing: border-box;
-    text-decoration: none;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
-  .bulk-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.6s ease;
-  }
-
-  .bulk-btn:hover::before {
-    left: 100%;
-  }
-
-  .bulk-btn:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    text-decoration: none;
-  }
-
-  .bulk-btn:active {
-    transform: translateY(-1px) scale(0.98);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.1s ease;
-  }
-
-  .bulk-btn i {
-    font-size: 16px;
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-  }
-
-  .bulk-btn:hover i {
-    transform: scale(1.15) rotate(5deg);
-  }
-
-  .bulk-btn span {
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Approve Button - Modern Success Style */
-  .bulk-btn-approve {
-    background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%) !important;
-    color: white !important;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
-  }
-
-  .bulk-btn-approve:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%) !important;
-    color: white !important;
-    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5) !important;
-  }
-
-  .bulk-btn-approve:active {
-    background: linear-gradient(135deg, #047857 0%, #065f46 50%, #064e3b 100%) !important;
-  }
-
-  /* Delete Button - Modern Danger Style */
-  .bulk-btn-delete {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%) !important;
-    color: white !important;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
-  }
-
-  .bulk-btn-delete:hover {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%) !important;
-    color: white !important;
-    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.5) !important;
-  }
-
-  .bulk-btn-delete:active {
-    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 50%, #7f1d1d 100%) !important;
-  }
-
-  /* Cancel Button - Modern Neutral Style */
-  .bulk-btn-cancel {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%) !important;
-    color: #475569 !important;
-    box-shadow: 0 4px 15px rgba(148, 163, 184, 0.3) !important;
-    border: 1px solid rgba(148, 163, 184, 0.2) !important;
-  }
-
-  .bulk-btn-cancel:hover {
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%) !important;
-    color: #334155 !important;
-    box-shadow: 0 8px 25px rgba(148, 163, 184, 0.4) !important;
-  }
-
-  .bulk-btn-cancel:active {
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 50%, #64748b 100%) !important;
-  }
-
-  /* Loading State */
-  .bulk-btn.loading {
-    pointer-events: none;
-    opacity: 0.8;
-  }
-
-  .bulk-btn.loading i {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  /* Success State */
-  .bulk-btn.success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    color: white !important;
-  }
-
-  .bulk-btn.success i {
-    animation: checkmark 0.6s ease-in-out;
-  }
-
-  @keyframes checkmark {
-    0% { transform: scale(0) rotate(0deg); }
-    50% { transform: scale(1.2) rotate(180deg); }
-    100% { transform: scale(1) rotate(360deg); }
-  }
-
-  /* Responsive Design - Enhanced Mobile Experience */
-  @media (max-width: 768px) {
-    .bulk-actions-bar.active {
+    .action-btn-group {
       flex-direction: column;
-      align-items: stretch;
-      gap: 18px;
-      padding: 18px 20px;
-      border-radius: 12px;
-    }
-
-    .bulk-actions-info {
-      justify-content: center;
-      width: 100%;
-      padding: 14px 18px;
-      font-size: 15px;
-      border-radius: 10px;
-    }
-
-    .bulk-actions-info i {
-      font-size: 18px;
-    }
-
-    .bulk-actions-buttons {
-      justify-content: stretch;
-      gap: 12px;
       width: 100%;
     }
-
-    .bulk-btn {
-      flex: 1;
+    
+    .action-btn {
+      width: 100%;
       justify-content: center;
-      padding: 14px 20px;
-      font-size: 15px;
-      min-height: 52px;
-      border-radius: 12px;
+      padding: 0.55rem 0.8rem;
     }
-
-    .bulk-btn i {
-      font-size: 18px;
-    }
-
-    .bulk-btn span {
-      font-size: 15px;
-      font-weight: 600;
+    
+    .btn-separator {
+      display: none;
     }
   }
-
+  
   @media (max-width: 576px) {
-    .bulk-actions-bar.active {
-      padding: 15px 18px;
-      gap: 15px;
-      margin-bottom: 18px;
+    .action-btn {
+      padding: 0.45rem 0.6rem;
+      font-size: 0.8rem;
     }
-
-    .bulk-actions-info {
-      font-size: 14px;
-      padding: 12px 16px;
-    }
-
-    .bulk-actions-info i {
-      font-size: 16px;
-    }
-
-    .bulk-btn {
-      padding: 12px 18px;
-      font-size: 14px;
-      min-height: 48px;
-      gap: 8px;
-    }
-
-    .bulk-btn i {
-      font-size: 16px;
-    }
-
-    .bulk-btn span {
-      font-size: 14px;
+    
+    .action-btn i {
+      font-size: 0.85rem;
     }
   }
-
-  @media (max-width: 480px) {
-    .bulk-actions-buttons {
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .bulk-btn {
-      width: 100%;
-      padding: 14px 20px;
-      min-height: 50px;
-    }
+  
+  /* Disabled State */
+  .btn-action:disabled,
+  .btn-action[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
   }
-
-  /* Row Selection Highlight - Gmail Style */
-  tbody tr.selected {
-    background-color: #e8f0fe !important;
-    border-left: 3px solid #1a73e8;
-    transition: all 0.2s ease;
-  }
-
-  tbody tr.selected:hover {
-    background-color: #d2e3fc !important;
+  
+  /* Focus State for Accessibility */
+  .btn-action:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto">
-  <div class="max-w-6xl mx-auto">
-    <!-- Page Header -->
-    <div class="form-card mb-6">
-      <div class="page-header">
-        <h2>
-          <i class="fas fa-list"></i>
-          Daftar Permohonan Cuti
-        </h2>
-      </div>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Daftar Permohonan Cuti</h2>
+      <small class="text-muted">Lihat dan kelola permohonan cuti</small>
     </div>
-
-    <!-- Search Box -->
-    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-      <form method="get" action="{{ url_for('cuti.list_cuti') }}" class="flex gap-2" data-no-ajax>
-        <div class="flex-1">
-          <input 
-            type="text" 
-            name="search" 
-            placeholder="Cari berdasarkan nama, NIP, atau jenis cuti..." 
-            value="{{ search_query or '' }}"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-        </div>
-        <button 
-          type="submit" 
-          class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium"
-        >
-          <i class="fas fa-search"></i> Cari
-        </button>
-        {% if search_query %}
-        <a 
-          href="{{ url_for('cuti.list_cuti') }}" 
-          class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
-        >
-          <i class="fas fa-times"></i> Reset
-        </a>
-        {% endif %}
-      </form>
+    <div>
+      <a href="{{ url_for('ocr_cuti_v2.ocr_cuti_v2') }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus-circle"></i> Tambah Cuti
+      </a>
     </div>
+  </div>
 
-    {# Source rows: support paginated `entries` or plain `cuti_list` #}
-    {% set is_paginated = entries is defined and entries is not none and entries.items is defined %}
-    {% set rows = entries.items if is_paginated else (cuti_list or []) %}
+  {# Source rows: support paginated `entries` or plain `cuti_list` #}
+  {% set is_paginated = entries is defined and entries is not none and entries.items is defined %}
+  {% set rows = entries.items if is_paginated else (cuti_list or []) %}
 
-    <!-- Summary Stats -->
-    <div class="grid grid-cols-4 gap-3 mb-6">
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-gray-400">
-        <div class="text-2xl font-bold text-gray-900">{{ entries.total if is_paginated else rows|length }}</div>
-        <div class="text-sm text-gray-600">{% if search_query %}Hasil Pencarian{% else %}Total{% endif %}</div>
-      </div>
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-400">
-        <div class="text-2xl font-bold text-yellow-600">{{ rows|selectattr('status_cuti', 'equalto', 'pending')|list|length }}</div>
-        <div class="text-sm text-gray-600">Pending (Halaman Ini)</div>
-      </div>
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-400">
-        <div class="text-2xl font-bold text-green-600">{{ rows|selectattr('status_cuti', 'equalto', 'approved')|list|length }}</div>
-        <div class="text-sm text-gray-600">Disetujui (Halaman Ini)</div>
-      </div>
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-400">
-        <div class="text-2xl font-bold text-red-600">{{ rows|selectattr('status_cuti', 'equalto', 'rejected')|list|length }}</div>
-        <div class="text-sm text-gray-600">Ditolak (Halaman Ini)</div>
-      </div>
-    </div>
+  <div class="summary">
+    <span class="badge bg-light text-dark">Total: {{ rows|length }}</span>
+    <span class="badge bg-warning text-dark">Pending: {{ rows|selectattr('status_cuti', 'equalto', 'pending')|list|length }}</span>
+    <span class="badge bg-success text-white">Approved: {{ rows|selectattr('status_cuti', 'equalto', 'approved')|list|length }}</span>
+    <span class="badge bg-danger text-white">Rejected: {{ rows|selectattr('status_cuti', 'equalto', 'rejected')|list|length }}</span>
+    {% if current_user.is_authenticated %}
+      <small class="muted ms-3">Anda: <strong>{{ current_user.role|default('')|capitalize }}</strong></small>
+    {% endif %}
+  </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-100 border-b border-gray-200">
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-small mb-0 align-middle">
+          <thead class="table-light">
             <tr>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">No</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nama</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">NIP</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Jenis</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tgl Mulai</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tgl Selesai</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Lama</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Perlu Persetujuan?</th>
-              <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700">Aksi</th>
+              <th style="width:60px">No</th>
+              <th>Nama</th>
+              <th>NIP</th>
+              <th>Jenis</th>
+              <th>Tgl Mulai</th>
+              <th>Tgl Selesai</th>
+              <th>Lama</th>
+              <th>Status</th>
+              <th>Perlu Persetujuan?</th>
+              <th class="text-center" style="width:350px">Aksi</th>
             </tr>
           </thead>
 
-          <tbody class="divide-y divide-gray-200">
+          <tbody>
             {% if rows and rows|length > 0 %}
               {% for cuti in rows %}
                 {% set status = (cuti.status_cuti or '') | lower %}
                 {% set needs_approval = (status == 'pending') %}
-                <tr class="hover:bg-gray-50 transition {% if needs_approval %}bg-yellow-50{% endif %}" data-cuti-id="{{ cuti.id_cuti }}">
-                  <td class="px-6 py-3 text-sm text-gray-700">
+                <tr class="{% if needs_approval %}needs-approval{% endif %}" data-cuti-id="{{ cuti.id_cuti }}">
+                  <td>
                     {% if is_paginated %}
                       {{ (entries.page - 1) * entries.per_page + loop.index }}
                     {% else %}
@@ -766,11 +301,11 @@
                     {% endif %}
                   </td>
 
-                  <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.nama or '-' }}</td>
-                  <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.nip or '-' }}</td>
-                  <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.jenis_cuti or '-' }}</td>
+                  <td>{{ cuti.nama or '-' }}</td>
+                  <td>{{ cuti.nip or '-' }}</td>
+                  <td>{{ cuti.jenis_cuti or '-' }}</td>
 
-                  <td class="px-6 py-3 text-sm text-gray-700">
+                  <td>
                     {% if cuti.tanggal_cuti %}
                       {% if cuti.tanggal_cuti.strftime is defined %}
                         {{ cuti.tanggal_cuti.strftime('%d/%m/%Y') }}
@@ -782,7 +317,7 @@
                     {% endif %}
                   </td>
 
-                  <td class="px-6 py-3 text-sm text-gray-700">
+                  <td>
                     {% if cuti.sampai_cuti %}
                       {% if cuti.sampai_cuti.strftime is defined %}
                         {{ cuti.sampai_cuti.strftime('%d/%m/%Y') }}
@@ -794,100 +329,108 @@
                     {% endif %}
                   </td>
 
-                  <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.lama_cuti or '-' }}</td>
+                  <td>{{ cuti.lama_cuti or '-' }}</td>
 
-                  <td class="px-6 py-3 text-sm">
+                  <td>
                     {% if status == 'pending' %}
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                      <span class="badge bg-warning text-dark">Pending</span>
                     {% elif status == 'approved' %}
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Disetujui{% if cuti.approved_role %} ({{ cuti.approved_role|capitalize }}){% endif %}</span>
+                      <span class="badge bg-success text-white">Disetujui{% if cuti.approved_role %} ({{ cuti.approved_role|capitalize }}){% endif %}</span>
                     {% elif status == 'rejected' %}
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Ditolak</span>
+                      <span class="badge bg-danger text-white">Ditolak</span>
                     {% else %}
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ (cuti.status_cuti or '-')|capitalize }}</span>
+                      <span class="badge bg-secondary">{{ (cuti.status_cuti or '-')|capitalize }}</span>
                     {% endif %}
                   </td>
 
-                  <td class="px-6 py-3 text-sm text-gray-700">
+                  <td>
                     {% if status == 'pending' %}
                       {% if current_user.is_authenticated and current_user.role in ['pimpinan', 'admin'] %}
-                        <span class="text-green-600 font-medium"><small>Perlu Persetujuan Anda</small></span>
+                        <span class="text-success"><small><strong>Perlu Persetujuan Anda</strong></small></span>
                       {% else %}
-                        <span class="text-yellow-600"><small>Menunggu Persetujuan</small></span>
+                        <span class="text-warning"><small>Menunggu Persetujuan</small></span>
                       {% endif %}
                     {% elif status == 'approved' %}
                       {% if cuti.approved_by %}
-                        <span class="text-gray-600"><small>Disetujui oleh {{ cuti.approved_by }}</small></span>
+                        <span class="muted"><small>Disetujui oleh {{ cuti.approved_by }}</small></span>
                       {% else %}
-                        <span class="text-gray-600"><small>Sudah disetujui</small></span>
+                        <span class="muted"><small>Sudah disetujui</small></span>
                       {% endif %}
                     {% elif status == 'rejected' %}
-                      <span class="text-red-600"><small>Ditolak</small></span>
+                      <span class="text-danger"><small>Ditolak</small></span>
                     {% else %}
-                      <span class="text-gray-600"><small>{{ (cuti.status_cuti or '-')|capitalize }}</small></span>
+                      <span class="muted"><small>{{ (cuti.status_cuti or '-')|capitalize }}</small></span>
                     {% endif %}
                   </td>
 
-                  <td class="px-6 py-3 text-sm">
-                    <div style="display:flex; gap:0.3rem; align-items:center; justify-content:center; flex-wrap:wrap;">
-                      <!-- View Button -->
-                      <a href="{{ url_for('cuti.preview_cuti_html', cuti_id=cuti.id_cuti) }}" 
-                         class="ubtn ubtn-purple ubtn-sm"
-                         title="Preview Cuti" 
-                         target="_blank">
-                        <i class="fas fa-eye"></i>
-                        Lihat
-                      </a>
-
-                      <!-- Download PDF Button (only if approved) -->
-                      {% if status == 'approved' %}
-                        <a href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}" 
-                           class="ubtn ubtn-info ubtn-sm"
-                           title="Unduh PDF" 
+                  <td>
+                    <div class="action-buttons">
+                      <!-- View & Download Group -->
+                      <div class="action-btn-group">
+                        <a href="{{ url_for('cuti.preview_cuti_html', cuti_id=cuti.id_cuti) }}" 
+                           class="btn-action btn-view" 
+                           title="Preview Cuti" 
                            target="_blank">
-                          <i class="fas fa-file-pdf"></i>
-                          PDF
+                          <i class="fas fa-eye"></i>
+                          Lihat
                         </a>
-                      {% endif %}
 
-                      <!-- Approve Button (only for pending and authorized users) -->
+                        {% if status == 'approved' %}
+                          <a href="{{ url_for('cuti.download_cuti_pdf', cuti_id=cuti.id_cuti) }}" 
+                             class="btn-action btn-download" 
+                             title="Unduh PDF" 
+                             target="_blank">
+                            <i class="fas fa-file-pdf"></i>
+                            PDF
+                          </a>
+                        {% endif %}
+                      </div>
+
+                      <!-- Approval Group -->
                       {% if current_user.is_authenticated and current_user.role in ['pimpinan', 'admin'] and status == 'pending' %}
-                        <form method="post" 
-                              action="{{ url_for('cuti.approve_cuti', cuti_id=cuti.id_cuti) }}" 
-                              style="display:inline; margin:0;">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                          <button type="submit" 
-                                  class="ubtn ubtn-success ubtn-sm"
-                                  title="Setujui Cuti">
-                            <i class="fas fa-check"></i>
-                            Setujui
-                          </button>
-                        </form>
+                        <div class="btn-separator"></div>
+                        
+                        <div class="action-btn-group">
+                          <form method="post" 
+                                action="{{ url_for('cuti.approve_cuti', cuti_id=cuti.id_cuti) }}" 
+                                class="action-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" 
+                                    class="btn-action btn-approve" 
+                                    title="Setujui Cuti">
+                              <i class="fas fa-check"></i>
+                              Setujui
+                            </button>
+                          </form>
 
-                        <!-- Reject Button -->
-                        <form method="post" 
-                              action="{{ url_for('cuti.reject_cuti', cuti_id=cuti.id_cuti) }}" 
-                              class="reject-form" style="display:inline; margin:0;">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                          <input type="hidden" name="reason" value="">
-                          <button type="button" 
-                                  class="ubtn ubtn-warning ubtn-sm btn-reject-action"
-                                  title="Tolak Cuti">
-                            <i class="fas fa-times"></i>
-                            Tolak
-                          </button>
-                        </form>
+                          <form method="post" 
+                                action="{{ url_for('cuti.reject_cuti', cuti_id=cuti.id_cuti) }}" 
+                                class="action-form reject-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="reason" value="">
+                            <button type="button" 
+                                    class="btn-action btn-reject btn-reject-action" 
+                                    title="Tolak Cuti">
+                              <i class="fas fa-times"></i>
+                              Tolak
+                            </button>
+                          </form>
+                        </div>
                       {% endif %}
 
-                      <!-- Delete Button (Admin only) -->
+                      <!-- Delete Group (Admin Only) -->
                       {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                        {% if (current_user.role in ['pimpinan', 'admin'] and status == 'pending') %}
+                          <div class="btn-separator"></div>
+                        {% endif %}
+                        
                         <form method="post" 
                               action="{{ url_for('cuti.delete_cuti', cuti_id=cuti.id_cuti) }}" 
-                              onsubmit="return confirm('Yakin ingin menghapus data cuti ini?');"
-                              style="display:inline; margin:0;">
+                              class="action-form"
+                              onsubmit="return confirm('Yakin ingin menghapus data cuti ini?');">
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           <button type="submit" 
-                                  class="ubtn ubtn-danger ubtn-sm"
+                                  class="btn-action btn-delete" 
                                   title="Hapus Data Cuti">
                             <i class="fas fa-trash"></i>
                             Hapus
@@ -900,45 +443,46 @@
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="10" class="px-6 py-8 text-center text-gray-500">
-                  <i class="fas fa-inbox text-gray-300" style="font-size: 2.5rem;"></i>
-                  <p class="text-gray-500 mt-2 mb-0">Belum ada permohonan cuti.</p>
+                <td colspan="10" class="text-center py-4">
+                  <i class="fas fa-inbox text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                  <p class="text-muted mt-2 mb-0">Belum ada permohonan cuti.</p>
                 </td>
               </tr>
             {% endif %}
           </tbody>
         </table>
       </div>
-
-      <!-- Pagination -->
-      {% if is_paginated and entries.pages > 1 %}
-      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-        <div class="flex justify-center gap-2">
-          {% if entries.has_prev %}
-          <a href="{{ url_for('cuti.list_cuti', page=entries.prev_num, search=search_query or '') }}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100 transition">Previous</a>
-          {% endif %}
-          
-          {% for p in entries.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-            {% if p %}
-              {% if p != entries.page %}
-              <a href="{{ url_for('cuti.list_cuti', page=p, search=search_query or '') }}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100 transition">{{ p }}</a>
-              {% else %}
-              <span class="px-3 py-1 rounded bg-blue-500 text-white text-sm">{{ p }}</span>
-              {% endif %}
-            {% else %}
-            <span class="px-3 py-1 text-gray-400 text-sm">…</span>
-            {% endif %}
-          {% endfor %}
-          
-          {% if entries.has_next %}
-          <a href="{{ url_for('cuti.list_cuti', page=entries.next_num, search=search_query or '') }}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100 transition">Next</a>
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
     </div>
-
   </div>
+
+  {# Pagination controls #}
+  {% if is_paginated and entries.pages > 1 %}
+    <nav aria-label="Pagination" class="mt-3">
+      <ul class="pagination justify-content-center mb-0">
+        {% if entries.has_prev %}
+          <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, page=entries.prev_num, **request.view_args) }}">
+            <i class="fas fa-chevron-left"></i> Sebelumnya
+          </a></li>
+        {% endif %}
+
+        {% for p in entries.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <li class="page-item {% if p == entries.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for(request.endpoint, page=p, **request.view_args) }}">{{ p }}</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if entries.has_next %}
+          <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, page=entries.next_num, **request.view_args) }}">
+            Selanjutnya <i class="fas fa-chevron-right"></i>
+          </a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
 </div>
 {% endblock %}
 
@@ -968,407 +512,6 @@ document.addEventListener('DOMContentLoaded', function() {
       form.submit();
     });
   });
-
-  // Get CSRF token from meta tag or form
-  function getCsrfToken() {
-    // Try to get from meta tag first
-    let token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    if (token) return token;
-    
-    // Try to get from form input
-    token = document.querySelector('input[name="csrf_token"]')?.value;
-    if (token) return token;
-    
-    return '';
-  }
-
-  // Checkbox functionality
-  const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-  const cutiCheckboxes = document.querySelectorAll('.cuti-checkbox');
-  const bulkActionsBar = document.getElementById('bulkActionsBar');
-  const selectedCountSpan = document.getElementById('selectedCount');
-  const bulkApproveBtn = document.getElementById('bulkApproveBtn');
-  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-  const bulkCancelBtn = document.getElementById('bulkCancelBtn');
-
-  console.log('Initializing checklist functionality...');
-  console.log('selectAllCheckbox:', selectAllCheckbox);
-  console.log('cutiCheckboxes count:', cutiCheckboxes.length);
-  console.log('bulkActionsBar:', bulkActionsBar);
-  console.log('bulkApproveBtn:', bulkApproveBtn);
-  console.log('bulkDeleteBtn:', bulkDeleteBtn);
-
-  // Debug: Check if checkboxes are visible
-  if (cutiCheckboxes.length === 0) {
-    console.warn('No cuti checkboxes found! Checking for elements...');
-    const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-    console.log('All checkboxes found:', allCheckboxes.length);
-    allCheckboxes.forEach((cb, index) => {
-      console.log(`Checkbox ${index}:`, cb, 'class:', cb.className, 'id:', cb.id);
-    });
-  } else {
-    console.log('Cuti checkboxes found successfully');
-    cutiCheckboxes.forEach((cb, index) => {
-      console.log(`Cuti checkbox ${index}:`, cb.value, 'visible:', cb.offsetParent !== null);
-    });
-  }
-
-  // Update bulk actions bar visibility and count with enhanced UX
-  function updateBulkActionsBar() {
-    const checkedCount = document.querySelectorAll('.cuti-checkbox:checked').length;
-    console.log('updateBulkActionsBar called, checkedCount:', checkedCount);
-    
-    // Update text with better formatting
-    if (checkedCount === 0) {
-      selectedCountSpan.textContent = 'Tidak ada item dipilih';
-    } else if (checkedCount === 1) {
-      selectedCountSpan.textContent = '1 item dipilih';
-    } else {
-      selectedCountSpan.textContent = `${checkedCount} item dipilih`;
-    }
-    
-    if (checkedCount > 0) {
-      console.log('Showing bulk actions bar and buttons');
-      bulkActionsBar.classList.add('active');
-      
-      // Add smooth animation delay for buttons
-      setTimeout(() => {
-        if (bulkApproveBtn) {
-          bulkApproveBtn.style.display = 'inline-flex';
-          bulkApproveBtn.style.animation = 'fadeInUp 0.3s ease-out';
-          console.log('bulkApproveBtn displayed');
-        }
-        if (bulkDeleteBtn) {
-          bulkDeleteBtn.style.display = 'inline-flex';
-          bulkDeleteBtn.style.animation = 'fadeInUp 0.3s ease-out 0.1s both';
-          console.log('bulkDeleteBtn displayed');
-        }
-        if (bulkCancelBtn) {
-          bulkCancelBtn.style.display = 'inline-flex';
-          bulkCancelBtn.style.animation = 'fadeInUp 0.3s ease-out 0.2s both';
-          console.log('bulkCancelBtn displayed');
-        }
-      }, 100);
-      
-    } else {
-      console.log('Hiding bulk actions bar and buttons');
-      bulkActionsBar.classList.remove('active');
-      
-      // Hide the buttons immediately
-      if (bulkApproveBtn) {
-        bulkApproveBtn.style.display = 'none';
-        console.log('bulkApproveBtn hidden');
-      }
-      if (bulkDeleteBtn) {
-        bulkDeleteBtn.style.display = 'none';
-        console.log('bulkDeleteBtn hidden');
-      }
-      if (bulkCancelBtn) {
-        bulkCancelBtn.style.display = 'none';
-        console.log('bulkCancelBtn hidden');
-      }
-    }
-  }
-
-  // Select all checkbox handler
-  if (selectAllCheckbox) {
-    selectAllCheckbox.addEventListener('change', function() {
-      console.log('Select all checkbox changed:', this.checked);
-      cutiCheckboxes.forEach(checkbox => {
-        checkbox.checked = this.checked;
-        updateRowHighlight(checkbox);
-      });
-      updateBulkActionsBar();
-    });
-  }
-
-  // Individual checkbox handlers with enhanced debugging
-  cutiCheckboxes.forEach((checkbox, index) => {
-    console.log(`Setting up checkbox ${index}:`, checkbox.value);
-    
-    checkbox.addEventListener('change', function() {
-      console.log(`Checkbox ${this.value} changed to:`, this.checked);
-      updateRowHighlight(this);
-      
-      // Update select all checkbox state
-      const allChecked = document.querySelectorAll('.cuti-checkbox:checked').length === cutiCheckboxes.length;
-      const someChecked = document.querySelectorAll('.cuti-checkbox:checked').length > 0;
-      if (selectAllCheckbox) {
-        selectAllCheckbox.checked = allChecked;
-        selectAllCheckbox.indeterminate = someChecked && !allChecked;
-      }
-      
-      console.log('Calling updateBulkActionsBar from checkbox change');
-      updateBulkActionsBar();
-    });
-    
-    // Add click event as backup
-    checkbox.addEventListener('click', function(e) {
-      console.log(`Checkbox ${this.value} clicked`);
-    });
-  });
-
-  // Enhanced row highlight function
-  function updateRowHighlight(checkbox) {
-    const row = checkbox.closest('tr');
-    if (row) {
-      if (checkbox.checked) {
-        row.classList.add('selected');
-        console.log('Row selected:', checkbox.value);
-      } else {
-        row.classList.remove('selected');
-        console.log('Row deselected:', checkbox.value);
-      }
-    }
-  }
-
-  // Bulk approve handler with enhanced visual feedback
-  if (bulkApproveBtn) {
-    bulkApproveBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      console.log('=== BULK APPROVE CLICKED ===');
-      
-      // Add loading state
-      const originalContent = bulkApproveBtn.innerHTML;
-      bulkApproveBtn.classList.add('loading');
-      bulkApproveBtn.innerHTML = '<i class="fas fa-spinner"></i> <span>Memproses...</span>';
-      bulkApproveBtn.disabled = true;
-      
-      const checkedIds = Array.from(document.querySelectorAll('.cuti-checkbox:checked')).map(cb => cb.value);
-      console.log('Checked IDs:', checkedIds);
-      console.log('Checked IDs count:', checkedIds.length);
-      
-      if (checkedIds.length === 0) {
-        // Reset button state
-        bulkApproveBtn.classList.remove('loading');
-        bulkApproveBtn.innerHTML = originalContent;
-        bulkApproveBtn.disabled = false;
-        
-        alert('Pilih minimal 1 cuti untuk disetujui');
-        return;
-      }
-      
-      // Enhanced confirmation dialog
-      const confirmMessage = `🎯 Konfirmasi Persetujuan\n\n` +
-                           `Anda akan menyetujui ${checkedIds.length} permohonan cuti.\n` +
-                           `Tindakan ini akan mengubah status menjadi "Disetujui".\n\n` +
-                           `Lanjutkan?`;
-      
-      if (confirm(confirmMessage)) {
-        console.log('User confirmed, proceeding with approve...');
-        
-        // Show success state briefly before submitting
-        bulkApproveBtn.classList.remove('loading');
-        bulkApproveBtn.classList.add('success');
-        bulkApproveBtn.innerHTML = '<i class="fas fa-check"></i> <span>Berhasil!</span>';
-        
-        setTimeout(() => {
-          // Create a temporary form and submit it
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = '{{ url_for("cuti.bulk_approve_cuti") }}';
-          form.setAttribute('data-no-ajax', 'true'); // Prevent AJAX interception
-          
-          // Add CSRF token
-          const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
-          if (!csrfToken) {
-            console.error('CSRF token not found!');
-            alert('Error: CSRF token tidak ditemukan. Silakan refresh halaman.');
-            
-            // Reset button state
-            bulkApproveBtn.classList.remove('success');
-            bulkApproveBtn.innerHTML = originalContent;
-            bulkApproveBtn.disabled = false;
-            return;
-          }
-          
-          const csrfInput = document.createElement('input');
-          csrfInput.type = 'hidden';
-          csrfInput.name = 'csrf_token';
-          csrfInput.value = csrfToken;
-          form.appendChild(csrfInput);
-          
-          // Add each ID as a separate input
-          checkedIds.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'cuti_ids[]';  // Array notation
-            input.value = id;
-            form.appendChild(input);
-          });
-          
-          document.body.appendChild(form);
-          console.log('Form created and appended to body');
-          console.log('Form action:', form.action);
-          console.log('Form method:', form.method);
-          console.log('Form inputs:', form.querySelectorAll('input'));
-          
-          form.submit();
-        }, 800);
-        
-      } else {
-        console.log('User cancelled approve');
-        // Reset button state
-        bulkApproveBtn.classList.remove('loading');
-        bulkApproveBtn.innerHTML = originalContent;
-        bulkApproveBtn.disabled = false;
-      }
-          console.log('Added input for ID:', id);
-        });
-        
-        // Append form to body and submit
-        document.body.appendChild(form);
-        console.log('Form created and appended to body');
-        console.log('Submitting form...');
-        form.submit();
-      }
-    });
-  }
-
-  // Bulk delete handler with enhanced visual feedback
-  if (bulkDeleteBtn) {
-    bulkDeleteBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      console.log('=== BULK DELETE CLICKED ===');
-      
-      // Add loading state
-      const originalContent = bulkDeleteBtn.innerHTML;
-      
-      const checkedIds = Array.from(document.querySelectorAll('.cuti-checkbox:checked')).map(cb => cb.value);
-      console.log('Checked IDs:', checkedIds);
-      console.log('Checked IDs count:', checkedIds.length);
-      
-      if (checkedIds.length === 0) {
-        alert('Pilih minimal 1 cuti untuk dihapus');
-        return;
-      }
-      
-      // Enhanced confirmation dialog with warning
-      const confirmMessage = `⚠️ PERINGATAN - Hapus Data\n\n` +
-                           `Anda akan menghapus ${checkedIds.length} permohonan cuti.\n` +
-                           `TINDAKAN INI TIDAK DAPAT DIBATALKAN!\n\n` +
-                           `Data yang dihapus akan hilang permanen.\n` +
-                           `Yakin ingin melanjutkan?`;
-      
-      if (confirm(confirmMessage)) {
-        console.log('User confirmed, proceeding with delete...');
-        
-        // Add loading state after confirmation
-        bulkDeleteBtn.classList.add('loading');
-        bulkDeleteBtn.innerHTML = '<i class="fas fa-spinner"></i> <span>Menghapus...</span>';
-        bulkDeleteBtn.disabled = true;
-        
-        // Show processing state briefly before submitting
-        setTimeout(() => {
-          // Create a temporary form and submit it
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = '{{ url_for("cuti.bulk_delete_cuti") }}';
-          form.setAttribute('data-no-ajax', 'true'); // Prevent AJAX interception
-          
-          console.log('Form action:', form.action);
-          console.log('Form method:', form.method);
-          
-          // Add CSRF token
-          const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
-          if (!csrfToken) {
-            console.error('CSRF token not found!');
-            alert('Error: CSRF token tidak ditemukan. Silakan refresh halaman.');
-            
-            // Reset button state
-            bulkDeleteBtn.classList.remove('loading');
-            bulkDeleteBtn.innerHTML = originalContent;
-            bulkDeleteBtn.disabled = false;
-            return;
-          }
-          
-          console.log('CSRF token found:', csrfToken.substring(0, 10) + '...');
-          
-          const csrfInput = document.createElement('input');
-          csrfInput.type = 'hidden';
-          csrfInput.name = 'csrf_token';
-          csrfInput.value = csrfToken;
-          form.appendChild(csrfInput);
-          
-          // Add each ID as a separate input
-          checkedIds.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'cuti_ids[]';  // Array notation
-            input.value = id;
-            form.appendChild(input);
-          });
-          
-          document.body.appendChild(form);
-          console.log('Form created and appended to body');
-          console.log('Form inputs:', form.querySelectorAll('input'));
-          
-          form.submit();
-        }, 500);
-        
-      } else {
-        console.log('User cancelled delete');
-      }
-        
-        // Add each ID as a separate input (ARRAY NOTATION - SAME AS BULK APPROVE)
-        checkedIds.forEach(id => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'cuti_ids[]';  // Array notation
-          input.value = id;
-          form.appendChild(input);
-          console.log('Added input for ID:', id);
-        });
-        
-        // Append form to body and submit
-        document.body.appendChild(form);
-        console.log('Form created and appended to body');
-        console.log('Form inputs count:', form.querySelectorAll('input').length);
-        console.log('Form HTML:', form.innerHTML.substring(0, 200));
-        console.log('Submitting form NOW...');
-        
-        // Submit the form
-        form.submit();
-        
-        console.log('Form.submit() called');
-      } else {
-        console.log('User cancelled bulk delete');
-      }
-    });
-  }
-
-  // Bulk cancel handler with enhanced UX
-  if (bulkCancelBtn) {
-    bulkCancelBtn.addEventListener('click', function() {
-      console.log('Bulk cancel button clicked');
-      
-      // Add visual feedback
-      bulkCancelBtn.style.transform = 'scale(0.95)';
-      setTimeout(() => {
-        bulkCancelBtn.style.transform = 'scale(1)';
-      }, 150);
-      
-      // Uncheck all checkboxes with animation
-      cutiCheckboxes.forEach((checkbox, index) => {
-        setTimeout(() => {
-          checkbox.checked = false;
-          updateRowHighlight(checkbox);
-        }, index * 20); // Stagger the unchecking for visual effect
-      });
-      
-      if (selectAllCheckbox) {
-        selectAllCheckbox.checked = false;
-        selectAllCheckbox.indeterminate = false;
-      }
-      
-      // Update bulk actions bar after a short delay
-      setTimeout(() => {
-        updateBulkActionsBar();
-      }, cutiCheckboxes.length * 20 + 100);
-    });
-  }
-
-  console.log('Checklist functionality initialized');
 });
 </script>
 {% endblock %}

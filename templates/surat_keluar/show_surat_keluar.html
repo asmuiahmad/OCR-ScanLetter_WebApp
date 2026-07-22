@@ -98,24 +98,16 @@
                 </td>
                 <td class="py-2 px-4 text-center">
                   <div class="flex justify-center gap-2">
-                    {% if current_user.role in ['admin', 'pimpinan'] %}
-                    <a href="{{ url_for('disposisi.buat_disposisi', tipe='keluar', surat_id=entry.id_suratKeluar) }}"
-                        class="ubtn ubtn-success ubtn-icon"
-                        title="Buat Disposisi">
-                        <i class="fas fa-share-alt"></i>
-                    </a>
-                    {% endif %}
                     {% if current_user.role == 'admin' %}
                     <a href="{{ url_for('surat_keluar.edit_surat_keluar', id_suratKeluar=entry.id_suratKeluar) }}"
-                        class="ubtn ubtn-warning ubtn-icon"
-                        title="Edit">
-                        <i class="fas fa-edit"></i>
+                        class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition">
+                        <i class="feather icon-edit"></i>
                     </a>
                     <form action="{{ url_for('surat_keluar.delete_surat_keluar', id_suratKeluar=entry.id_suratKeluar) }}" method="POST"
                         style="display:inline;" onsubmit="return confirmDelete();">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="ubtn ubtn-danger ubtn-icon" title="Hapus">
-                            <i class="fas fa-trash"></i>
+                        <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition">
+                            <i class="feather icon-trash"></i>
                         </button>
                     </form>
                     {% else %}

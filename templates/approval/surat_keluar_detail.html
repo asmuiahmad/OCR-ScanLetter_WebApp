@@ -161,28 +161,6 @@
 
     .btn-secondary:hover {
         background-color: #4b5563;
-        color: white;
-        text-decoration: none;
-    }
-
-    .btn-secondary:focus,
-    .btn-secondary:active {
-        color: white;
-        text-decoration: none;
-    }
-
-    .btn-info {
-        background-color: #0ea5e9;
-        color: white;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    .btn-info:hover {
-        background-color: #0284c7;
-        color: white;
     }
 
     .ocr-accuracy {
@@ -614,32 +592,12 @@
             <button onclick="openRejectModal()" class="btn btn-danger">
                 <i class="fas fa-times"></i> Tolak Surat
             </button>
-            {% if surat.file_suratKeluar %}
-            <a href="{{ url_for('approval.view_file_surat_keluar', surat_id=surat.id_suratKeluar) }}"
-               target="_blank" class="btn btn-info">
-                <i class="fas fa-file-alt"></i> Lihat File
-            </a>
-            <a href="{{ url_for('approval.view_file_surat_keluar', surat_id=surat.id_suratKeluar, download=1) }}"
-               class="btn btn-secondary">
-                <i class="fas fa-download"></i> Unduh
-            </a>
-            {% endif %}
             <a href="{{ url_for('approval.list_pending_surat_keluar') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
         </div>
         {% else %}
         <div class="action-buttons">
-            {% if surat.file_suratKeluar %}
-            <a href="{{ url_for('approval.view_file_surat_keluar', surat_id=surat.id_suratKeluar) }}"
-               target="_blank" class="btn btn-info">
-                <i class="fas fa-file-alt"></i> Lihat File
-            </a>
-            <a href="{{ url_for('approval.view_file_surat_keluar', surat_id=surat.id_suratKeluar, download=1) }}"
-               class="btn btn-secondary">
-                <i class="fas fa-download"></i> Unduh
-            </a>
-            {% endif %}
             <a href="{{ url_for('approval.list_pending_surat_keluar') }}" class="btn btn-primary">
                 <i class="fas fa-arrow-left"></i> Kembali ke Daftar
             </a>

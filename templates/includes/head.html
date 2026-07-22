@@ -3,21 +3,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}{% endblock %}</title>
 
-    <!-- Favicon and PWA manifest -->
-    <link rel="icon" href="{{ url_for('static', filename='assets/favicon.svg') }}" type="image/svg+xml" sizes="any">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" sizes="any">
-    <link rel="icon" href="{{ url_for('static', filename='favicon-simple.svg') }}" type="image/svg+xml" sizes="16x16 32x32">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicon.svg') }}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='assets/favicon.svg') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    
-    <!-- Theme and PWA settings -->
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="msapplication-TileColor" content="#3b82f6">
-    <meta name="application-name" content="Surat Masuk & Keluar OCR">
-    <meta name="apple-mobile-web-app-title" content="Surat OCR">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Favicon -->
+    <link
+        rel="icon"
+        href="{{ url_for('static', filename='assets/images/favicon.svg') }}"
+        type="image/x-icon"
+    />
 
     <!-- Fonts -->
     <link
@@ -35,31 +26,6 @@
     />
 
     <!-- Custom CSS Files -->
-    <!-- Design System - Load first for CSS variables -->
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='assets/css/design-system.css') }}"
-    />
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='assets/css/buttons.css') }}"
-    />
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='assets/css/badges.css') }}"
-    />
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='assets/css/cards.css') }}"
-    />
-    
-    <!-- Unified Button System -->
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='assets/css/unified-buttons.css') }}"
-    />
-    
-    <!-- Legacy CSS Files -->
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='assets/css/styles.css') }}"
@@ -83,18 +49,6 @@
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='assets/css/pagination.css') }}"
-    />
-    
-    <!-- No Animations CSS - Disable all animations for better performance -->
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='assets/css/no-animations.css') }}"
-    />
-    
-    <!-- Form Labels Top - All labels above inputs for better UX -->
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='assets/css/form-labels-top.css') }}"
     />
 
     <!-- Icon Fonts -->
@@ -127,78 +81,6 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-
-    <!-- Global Print CSS — hanya tampilkan data & tabel, sembunyikan semua UI -->
-    <style>
-    @media print {
-        /* Langkah 1: Sembunyikan semua body children termasuk sidebar */
-        body > * {
-            display: none !important;
-            visibility: hidden !important;
-        }
-
-        /* Langkah 2: Tampilkan hanya main-content */
-        body > .main-content {
-            display: block !important;
-            visibility: visible !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            position: static !important;
-            left: 0 !important;
-        }
-
-        /* Langkah 3: Semua isi main-content visible */
-        .main-content * {
-            visibility: visible !important;
-        }
-
-        /* Langkah 4: Sembunyikan UI chrome di dalam main-content */
-        .main-content nav,
-        .main-content .spa-progress,
-        .main-content #spaProgress,
-        .main-content .no-print,
-        .main-content .sticky-search-container,
-        .main-content .search-controls,
-        .main-content .abar,
-        .main-content .lc-panel,
-        .main-content .lc-stats,
-        .main-content .lc-hero,
-        .main-content canvas,
-        .main-content .ubtn,
-        .main-content button,
-        .main-content .action-cell,
-        .main-content .action-buttons {
-            display: none !important;
-            visibility: hidden !important;
-        }
-
-        /* Reset body */
-        body {
-            background: white !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-
-        /* Reset main-content dan content */
-        .main-content, .content {
-            background: white !important;
-            margin: 0 !important;
-            padding: 0.5cm !important;
-        }
-
-        /* Tabel bersih dan centered */
-        table {
-            width: 90% !important;
-            border-collapse: collapse !important;
-            margin: 0 auto !important;
-        }
-        th, td { border: 1px solid #999 !important; padding: 4px 6px !important; font-size: 9pt !important; }
-        thead { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-        @page { size: A4 portrait; margin: 1.5cm; }
-    }
-    </style>
 
     <!-- Per-page styles injected by child templates -->
     {% block styles %}{% endblock %}

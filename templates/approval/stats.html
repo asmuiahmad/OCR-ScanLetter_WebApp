@@ -1,207 +1,429 @@
 {% extends "layouts/base.html" %}
 {% block title %}Statistik Persetujuan - PA Banjarbaru{% endblock %}
 
+{% block styles %}
+<style>
+  .stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+  .stat-icon {
+    width: 52px; height: 52px; border-radius: 0.75rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .stat-value { font-size: 2rem; font-weight: 900; line-height: 1; color: #111827; }
+  .stat-label { font-size: 0.78rem; font-weight: 600; color: #6b7280; margin-top: 0.2rem; }
+
+  .section-card {
+    background: white; border-radius: 1rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07); overflow: hidden;
+  }
+  .section-header {
+    padding: 0.9rem 1.25rem;
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.9rem; font-weight: 700; color: white;
+  }
+
+  .progress-bar-wrap {
+    background: #f3f4f6; border-radius: 999px; height: 10px; overflow: hidden;
+  }
+  .progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.2rem 0.6rem; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 700;
+  }
+  .badge-pending  { background: #fef3c7; color: #92400e; }
+  .badge-approved { background: #d1fae5; color: #065f46; }
+  .badge-rejected { background: #fee2e2; color: #991b1b; }
+  .badge-masuk    { background: #dbeafe; color: #1e40af; }
+  .badge-keluar   { background: #ede9fe; color: #5b21b6; }
+
+  .activity-row {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    gap: 0.75rem; align-items: start;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.1s;
+  }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-row:hover { background: #f8faff; }
+  .activity-dot {
+    width: 2rem; height: 2rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; flex-shrink: 0; margin-top: 2px;
+  }
+
+  /* ── Tabel Riwayat ── */
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .history-table thead tr {
+    background: #f8fafc;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .history-table thead th {
+    padding: 0.75rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .history-table thead th:last-child { text-align: right; }
+  .history-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.12s;
+  }
+  .history-table tbody tr:last-child { border-bottom: none; }
+  .history-table tbody tr:hover { background: #f8faff; }
+  .history-table tbody td {
+    padding: 0.85rem 1rem;
+    font-size: 0.82rem;
+    color: #374151;
+    vertical-align: middle;
+  }
+  .history-table tbody td:last-child { text-align: right; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.25rem 0.65rem; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+  }
+  .pill-approved { background: #d1fae5; color: #065f46; }
+  .pill-rejected { background: #fee2e2; color: #991b1b; }
+  .pill-masuk    { background: #dbeafe; color: #1e40af; }
+  .pill-keluar   { background: #ede9fe; color: #5b21b6; }
+
+  .history-nomor {
+    font-weight: 700; color: #111827; font-size: 0.83rem;
+    max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .history-pengirim {
+    color: #6b7280; font-size: 0.78rem; margin-top: 2px;
+    max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .history-notes {
+    color: #9ca3af; font-size: 0.75rem; font-style: italic;
+    max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .history-approver {
+    font-weight: 600; color: #374151; font-size: 0.8rem;
+  }
+  .history-time {
+    color: #9ca3af; font-size: 0.75rem; margin-top: 2px;
+  }
+  .row-indicator {
+    width: 3px; height: 100%;
+    border-radius: 999px;
+  }
+  .history-table tbody tr td:first-child {
+    padding-left: 0;
+    width: 4px;
+  }
+  .col-indicator { width: 4px; padding: 0 !important; }
+  .indicator-bar {
+    display: block; width: 4px; height: 100%; min-height: 48px;
+    border-radius: 0 2px 2px 0;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/table-search.css') }}">
+{% set total_masuk = surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected %}
+{% set total_keluar = surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected %}
+{% set total_all = total_masuk + total_keluar %}
 
 <div class="container mx-auto">
   <div class="max-w-6xl mx-auto">
-    
+
     <!-- Page Header -->
-    <div class="form-card mb-6">
+    <div class="form-card mb-5">
       <div class="page-header">
         <h2>
-          <i class="fas fa-chart-pie"></i>
+          <i class="fas fa-chart-pie text-blue-500"></i>
           Statistik Persetujuan Surat
         </h2>
       </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-blue-500 hover:shadow-lg transition">
-        <div class="text-3xl font-bold text-blue-600">{{ surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected + surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected }}</div>
-        <div class="text-sm text-gray-600 mt-1"><i class="fas fa-layer-group mr-1"></i>Total Semua Surat</div>
+    <!-- ── Ringkasan Total ── -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <!-- Total Semua -->
+      <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+        <div class="stat-icon" style="background:#dbeafe; color:#2563eb;">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ total_all }}</div>
+          <div class="stat-label">Total Semua Surat</div>
+        </div>
       </div>
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-500 hover:shadow-lg transition">
-        <div class="text-3xl font-bold text-yellow-600">{{ surat_masuk_pending + surat_keluar_pending }}</div>
-        <div class="text-sm text-gray-600 mt-1"><i class="fas fa-hourglass-half mr-1"></i>Menunggu Persetujuan</div>
+      <!-- Pending -->
+      <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+        <div class="stat-icon" style="background:#fef3c7; color:#d97706;">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ surat_masuk_pending + surat_keluar_pending }}</div>
+          <div class="stat-label">Menunggu Persetujuan</div>
+        </div>
       </div>
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500 hover:shadow-lg transition">
-        <div class="text-3xl font-bold text-green-600">{{ surat_masuk_approved + surat_keluar_approved }}</div>
-        <div class="text-sm text-gray-600 mt-1"><i class="fas fa-check-circle mr-1"></i>Telah Disetujui</div>
+      <!-- Approved -->
+      <div class="stat-card" style="border-left: 4px solid #10b981;">
+        <div class="stat-icon" style="background:#d1fae5; color:#059669;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ surat_masuk_approved + surat_keluar_approved }}</div>
+          <div class="stat-label">Telah Disetujui</div>
+        </div>
       </div>
-      <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500 hover:shadow-lg transition">
-        <div class="text-3xl font-bold text-red-600">{{ surat_masuk_rejected + surat_keluar_rejected }}</div>
-        <div class="text-sm text-gray-600 mt-1"><i class="fas fa-times-circle mr-1"></i>Ditolak</div>
+      <!-- Rejected -->
+      <div class="stat-card" style="border-left: 4px solid #ef4444;">
+        <div class="stat-icon" style="background:#fee2e2; color:#dc2626;">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ surat_masuk_rejected + surat_keluar_rejected }}</div>
+          <div class="stat-label">Ditolak</div>
+        </div>
       </div>
     </div>
 
-    <!-- Statistics Table -->
-    <div class="overflow-x-auto mt-4 rounded-xl shadow-lg bg-white mb-6">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-100 sticky top-0 z-10">
-          <tr>
-            <th class="py-3 px-4 font-semibold text-left">Jenis Surat</th>
-            <th class="py-3 px-4 font-semibold text-center">Total</th>
-            <th class="py-3 px-4 font-semibold text-center">Menunggu</th>
-            <th class="py-3 px-4 font-semibold text-center">Disetujui</th>
-            <th class="py-3 px-4 font-semibold text-center">Ditolak</th>
-            <th class="py-3 px-4 font-semibold text-left">Progress Persetujuan</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <!-- Surat Masuk -->
-          <tr class="transition hover:bg-blue-50 bg-white">
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
-                <i class="fas fa-inbox text-blue-500"></i>
-                <span class="font-semibold">Surat Masuk</span>
-              </div>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="text-lg font-bold text-gray-800">{{ surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">{{ surat_masuk_pending }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">{{ surat_masuk_approved }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">{{ surat_masuk_rejected }}</span>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
-                <div class="flex-1 bg-gray-200 rounded-full h-2">
-                  <div class="bg-green-500 h-2 rounded-full" style="width: {% if (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected) > 0 %}{{ (surat_masuk_approved / (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected) * 100)|round(1) }}{% else %}0{% endif %}%;"></div>
+    <!-- ── Detail per Jenis ── -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+
+      <!-- Surat Masuk -->
+      <div class="section-card">
+        <div class="section-header" style="background: linear-gradient(135deg,#1e40af,#3b82f6);">
+          <i class="fas fa-inbox"></i> Surat Masuk
+          <span class="ml-auto text-xs font-normal opacity-80">Total: {{ total_masuk }}</span>
+        </div>
+        <div class="p-5 space-y-4">
+          <!-- Pending -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-hourglass-half text-yellow-500"></i> Menunggu
+              </span>
+              <span class="badge badge-pending">{{ surat_masuk_pending }}</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="background:#f59e0b; width:{% if total_masuk > 0 %}{{ (surat_masuk_pending / total_masuk * 100)|round(1) }}%{% else %}0%{% endif %};"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">
+              {% if total_masuk > 0 %}{{ (surat_masuk_pending / total_masuk * 100)|round(1) }}%{% else %}0%{% endif %} dari total
+            </div>
+          </div>
+          <!-- Approved -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-check-circle text-green-500"></i> Disetujui
+              </span>
+              <span class="badge badge-approved">{{ surat_masuk_approved }}</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="background:#10b981; width:{% if total_masuk > 0 %}{{ (surat_masuk_approved / total_masuk * 100)|round(1) }}%{% else %}0%{% endif %};"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">
+              {% if total_masuk > 0 %}{{ (surat_masuk_approved / total_masuk * 100)|round(1) }}%{% else %}0%{% endif %} dari total
+            </div>
+          </div>
+          <!-- Rejected -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-times-circle text-red-500"></i> Ditolak
+              </span>
+              <span class="badge badge-rejected">{{ surat_masuk_rejected }}</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="background:#ef4444; width:{% if total_masuk > 0 %}{{ (surat_masuk_rejected / total_masuk * 100)|round(1) }}%{% else %}0%{% endif %};"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">
+              {% if total_masuk > 0 %}{{ (surat_masuk_rejected / total_masuk * 100)|round(1) }}%{% else %}0%{% endif %} dari total
+            </div>
+          </div>
+          <a href="{{ url_for('approval.list_pending_surat_masuk') }}"
+             class="mt-2 flex items-center justify-center gap-2 text-sm font-semibold text-white py-2 rounded-lg no-underline"
+             style="background: linear-gradient(135deg,#1e40af,#3b82f6);">
+            <i class="fas fa-list"></i> Kelola Surat Masuk
+          </a>
+        </div>
+      </div>
+
+      <!-- Surat Keluar -->
+      <div class="section-card">
+        <div class="section-header" style="background: linear-gradient(135deg,#5b21b6,#8b5cf6);">
+          <i class="fas fa-paper-plane"></i> Surat Keluar
+          <span class="ml-auto text-xs font-normal opacity-80">Total: {{ total_keluar }}</span>
+        </div>
+        <div class="p-5 space-y-4">
+          <!-- Pending -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-hourglass-half text-yellow-500"></i> Menunggu
+              </span>
+              <span class="badge badge-pending">{{ surat_keluar_pending }}</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="background:#f59e0b; width:{% if total_keluar > 0 %}{{ (surat_keluar_pending / total_keluar * 100)|round(1) }}%{% else %}0%{% endif %};"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">
+              {% if total_keluar > 0 %}{{ (surat_keluar_pending / total_keluar * 100)|round(1) }}%{% else %}0%{% endif %} dari total
+            </div>
+          </div>
+          <!-- Approved -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-check-circle text-green-500"></i> Disetujui
+              </span>
+              <span class="badge badge-approved">{{ surat_keluar_approved }}</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="background:#10b981; width:{% if total_keluar > 0 %}{{ (surat_keluar_approved / total_keluar * 100)|round(1) }}%{% else %}0%{% endif %};"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">
+              {% if total_keluar > 0 %}{{ (surat_keluar_approved / total_keluar * 100)|round(1) }}%{% else %}0%{% endif %} dari total
+            </div>
+          </div>
+          <!-- Rejected -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <i class="fas fa-times-circle text-red-500"></i> Ditolak
+              </span>
+              <span class="badge badge-rejected">{{ surat_keluar_rejected }}</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="background:#ef4444; width:{% if total_keluar > 0 %}{{ (surat_keluar_rejected / total_keluar * 100)|round(1) }}%{% else %}0%{% endif %};"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">
+              {% if total_keluar > 0 %}{{ (surat_keluar_rejected / total_keluar * 100)|round(1) }}%{% else %}0%{% endif %} dari total
+            </div>
+          </div>
+          <a href="{{ url_for('approval.list_pending_surat_keluar') }}"
+             class="mt-2 flex items-center justify-center gap-2 text-sm font-semibold text-white py-2 rounded-lg no-underline"
+             style="background: linear-gradient(135deg,#5b21b6,#8b5cf6);">
+            <i class="fas fa-list"></i> Kelola Surat Keluar
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Riwayat Aktivitas Terbaru ── -->
+    <div class="section-card mb-6">
+      <div class="section-header" style="background: linear-gradient(135deg,#1e293b,#475569);">
+        <i class="fas fa-history"></i> Riwayat Persetujuan Terbaru
+        {% if recent_activity %}
+        <span class="ml-auto text-xs font-normal opacity-70">{{ recent_activity|length }} entri</span>
+        {% endif %}
+      </div>
+      {% if recent_activity %}
+      <div style="overflow-x: auto;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th class="col-indicator"></th>
+              <th>Jenis &amp; Status</th>
+              <th>Nomor / Pengirim</th>
+              <th>Catatan</th>
+              <th>Diproses Oleh</th>
+              <th>Waktu</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in recent_activity %}
+            <tr>
+              <!-- Indikator warna kiri -->
+              <td class="col-indicator" style="padding:0!important;">
+                <span class="indicator-bar" style="background:{% if item.status == 'approved' %}#10b981{% else %}#ef4444{% endif %};"></span>
+              </td>
+
+              <!-- Jenis & Status -->
+              <td>
+                <div class="flex flex-col gap-1">
+                  <span class="status-pill {% if item.type == 'masuk' %}pill-masuk{% else %}pill-keluar{% endif %}">
+                    <i class="fas {% if item.type == 'masuk' %}fa-inbox{% else %}fa-paper-plane{% endif %}"></i>
+                    {{ 'Masuk' if item.type == 'masuk' else 'Keluar' }}
+                  </span>
+                  <span class="status-pill {% if item.status == 'approved' %}pill-approved{% else %}pill-rejected{% endif %}">
+                    <i class="fas {% if item.status == 'approved' %}fa-check{% else %}fa-times{% endif %}"></i>
+                    {{ 'Disetujui' if item.status == 'approved' else 'Ditolak' }}
+                  </span>
                 </div>
-                <span class="text-sm font-semibold text-gray-700 min-w-[45px] text-right">{% if (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected) > 0 %}{{ (surat_masuk_approved / (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected) * 100)|round(1) }}{% else %}0{% endif %}%</span>
-              </div>
-            </td>
-          </tr>
+              </td>
 
-          <!-- Surat Keluar -->
-          <tr class="transition hover:bg-blue-50 bg-gray-50">
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
-                <i class="fas fa-paper-plane text-purple-500"></i>
-                <span class="font-semibold">Surat Keluar</span>
-              </div>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="text-lg font-bold text-gray-800">{{ surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">{{ surat_keluar_pending }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">{{ surat_keluar_approved }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">{{ surat_keluar_rejected }}</span>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
-                <div class="flex-1 bg-gray-200 rounded-full h-2">
-                  <div class="bg-green-500 h-2 rounded-full" style="width: {% if (surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) > 0 %}{{ (surat_keluar_approved / (surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) * 100)|round(1) }}{% else %}0{% endif %}%;"></div>
+              <!-- Nomor & Pengirim -->
+              <td>
+                <div class="history-nomor" title="{{ item.nomor }}">{{ item.nomor }}</div>
+                <div class="history-pengirim">
+                  <i class="fas fa-user" style="font-size:0.65rem; margin-right:3px;"></i>{{ item.pengirim }}
                 </div>
-                <span class="text-sm font-semibold text-gray-700 min-w-[45px] text-right">{% if (surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) > 0 %}{{ (surat_keluar_approved / (surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) * 100)|round(1) }}{% else %}0{% endif %}%</span>
-              </div>
-            </td>
-          </tr>
+              </td>
 
-          <!-- Total -->
-          <tr class="transition hover:bg-blue-50 bg-blue-50 font-bold">
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
-                <i class="fas fa-sum text-blue-600"></i>
-                <span>Total Keseluruhan</span>
-              </div>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="text-lg text-blue-600">{{ surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected + surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">{{ surat_masuk_pending + surat_keluar_pending }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">{{ surat_masuk_approved + surat_keluar_approved }}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">{{ surat_masuk_rejected + surat_keluar_rejected }}</span>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-2">
-                <div class="flex-1 bg-gray-200 rounded-full h-2">
-                  <div class="bg-blue-600 h-2 rounded-full" style="width: {% if (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected + surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) > 0 %}{{ ((surat_masuk_approved + surat_keluar_approved) / (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected + surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) * 100)|round(1) }}{% else %}0{% endif %}%;"></div>
+              <!-- Catatan -->
+              <td>
+                {% if item.notes and item.notes != '-' %}
+                <div class="history-notes" title="{{ item.notes }}">"{{ item.notes | truncate(60) }}"</div>
+                {% else %}
+                <span style="color:#d1d5db; font-size:0.75rem;">—</span>
+                {% endif %}
+              </td>
+
+              <!-- Diproses Oleh -->
+              <td>
+                {% if item.approved_by %}
+                <div class="history-approver">
+                  <i class="fas fa-user-check" style="color:#60a5fa; margin-right:4px; font-size:0.75rem;"></i>
+                  {{ item.approved_by.split('@')[0] }}
                 </div>
-                <span class="text-sm font-semibold text-gray-700 min-w-[45px] text-right">{% if (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected + surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) > 0 %}{{ ((surat_masuk_approved + surat_keluar_approved) / (surat_masuk_pending + surat_masuk_approved + surat_masuk_rejected + surat_keluar_pending + surat_keluar_approved + surat_keluar_rejected) * 100)|round(1) }}{% else %}0{% endif %}%</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                {% else %}
+                <span style="color:#d1d5db; font-size:0.75rem;">—</span>
+                {% endif %}
+              </td>
 
-    <!-- Activity History Table -->
-    {% if recent_activity %}
-    <div class="overflow-x-auto mt-4 rounded-xl shadow-lg bg-white">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-100 sticky top-0 z-10">
-          <tr>
-            <th class="py-3 px-4 font-semibold text-left">Jenis &amp; Status</th>
-            <th class="py-3 px-4 font-semibold text-left">Nomor Surat</th>
-            <th class="py-3 px-4 font-semibold text-left">Pengirim</th>
-            <th class="py-3 px-4 font-semibold text-left">Catatan</th>
-            <th class="py-3 px-4 font-semibold text-left">Diproses Oleh</th>
-            <th class="py-3 px-4 font-semibold text-left">Waktu</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          {% for item in recent_activity %}
-          <tr class="transition hover:bg-blue-50 {% if loop.index % 2 == 0 %}bg-gray-50{% else %}bg-white{% endif %}">
-            <td class="py-3 px-4">
-              <div class="flex flex-col gap-1">
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold {% if item.type == 'masuk' %}bg-blue-100 text-blue-800{% else %}bg-purple-100 text-purple-800{% endif %}">
-                  <i class="fas {% if item.type == 'masuk' %}fa-inbox{% else %}fa-paper-plane{% endif %}"></i>
-                  {{ 'Surat Masuk' if item.type == 'masuk' else 'Surat Keluar' }}
-                </span>
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold {% if item.status == 'approved' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                  <i class="fas {% if item.status == 'approved' %}fa-check{% else %}fa-times{% endif %}"></i>
-                  {{ 'Disetujui' if item.status == 'approved' else 'Ditolak' }}
-                </span>
-              </div>
-            </td>
-            <td class="py-3 px-4 font-semibold text-gray-800">{{ item.nomor }}</td>
-            <td class="py-3 px-4 text-gray-700">{{ item.pengirim }}</td>
-            <td class="py-3 px-4 text-gray-600 max-w-xs overflow-hidden whitespace-nowrap text-ellipsis" title="{{ item.notes }}">
-              {% if item.notes and item.notes != '-' %}"{{ item.notes | truncate(50) }}"{% else %}<span class="text-gray-400">—</span>{% endif %}
-            </td>
-            <td class="py-3 px-4 text-gray-700">
-              {% if item.approved_by %}
-              <div class="font-semibold">{{ item.approved_by.split('@')[0] }}</div>
-              <div class="text-xs text-gray-500">{{ item.approved_by }}</div>
-              {% else %}<span class="text-gray-400">—</span>{% endif %}
-            </td>
-            <td class="py-3 px-4 text-gray-700">
-              {% if item.approved_at %}
-              <div class="font-semibold">{{ item.approved_at.strftime('%d %b %Y') }}</div>
-              <div class="text-xs text-gray-500">{{ item.approved_at.strftime('%H:%M') }} WIB</div>
-              {% else %}<span class="text-gray-400">—</span>{% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              <!-- Waktu -->
+              <td>
+                {% if item.approved_at %}
+                <div class="history-approver" style="text-align:right;">{{ item.approved_at.strftime('%d %b %Y') }}</div>
+                <div class="history-time">{{ item.approved_at.strftime('%H:%M') }} WIB</div>
+                {% else %}
+                <span style="color:#d1d5db; font-size:0.75rem;">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="py-14 text-center">
+        <div style="width:56px;height:56px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;">
+          <i class="fas fa-history" style="font-size:1.4rem;color:#d1d5db;"></i>
+        </div>
+        <p style="font-size:0.875rem;font-weight:600;color:#9ca3af;margin:0;">Belum ada riwayat persetujuan</p>
+        <p style="font-size:0.75rem;color:#d1d5db;margin-top:0.25rem;">Riwayat akan muncul setelah ada surat yang diproses</p>
+      </div>
+      {% endif %}
     </div>
-    {% else %}
-    <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-      <i class="fas fa-inbox text-gray-300 text-4xl mb-3 block"></i>
-      <p class="text-gray-600 font-semibold">Belum ada riwayat persetujuan</p>
-      <p class="text-gray-400 text-sm mt-1">Riwayat akan muncul setelah ada surat yang diproses</p>
-    </div>
-    {% endif %}
 
   </div>
 </div>

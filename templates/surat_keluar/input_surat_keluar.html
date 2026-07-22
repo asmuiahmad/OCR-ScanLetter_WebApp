@@ -6,7 +6,6 @@
 <head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}">
   <style>
     input[type="date"]::-webkit-calendar-picker-indicator {
       position: absolute;
@@ -33,7 +32,7 @@
     }
   </style>
 </head>
-<style>
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}"
   .form-card:hover {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
@@ -53,6 +52,22 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    padding: 0 0.2rem;
+    background: white;
+    font-size: 0.7rem;
+    color: #2563eb;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    line-height: 1;
+    pointer-events: none;
+    box-shadow: 0 1px 4px rgba(59,130,246,0.07);
+  }
 </style>
 <div class="container mx-auto py-8 px-4">
   <div class="max-w-4xl mx-auto">
@@ -68,103 +83,61 @@
       <form method="POST" enctype="multipart/form-data" class="p-6">
         {{ form.csrf_token()|safe }}
         <div class="columns is-multiline">
-          <!-- Pengirim -->
           <div class="column is-half">
-            <div class="field">
-              <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                <i class="fas fa-user text-gray-500 mr-1 text-xs"></i>
-                Pengirim
-                <span class="text-red-500">*</span>
-              </label>
+            <div class="field is-floating-label">
               <div class="control">
-                {{ form.pengirim_suratKeluar(class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition", placeholder="Nama pengirim surat") }}
+                {{ form.pengirim_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="pengirim_suratKeluar">Pengirim</label>
               </div>
             </div>
           </div>
-          
-          <!-- Penerima -->
           <div class="column is-half">
-            <div class="field">
-              <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                <i class="fas fa-user-tie text-gray-500 mr-1 text-xs"></i>
-                Penerima
-                <span class="text-red-500">*</span>
-              </label>
+            <div class="field is-floating-label">
               <div class="control">
-                {{ form.penerima_suratKeluar(class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition", placeholder="Nama penerima surat") }}
+                {{ form.penerima_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="penerima_suratKeluar">Penerima</label>
               </div>
             </div>
           </div>
-          
-          <!-- Nomor Surat -->
           <div class="column is-half">
-            <div class="field">
-              <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                <i class="fas fa-hashtag text-gray-500 mr-1 text-xs"></i>
-                Nomor Surat
-                <span class="text-red-500">*</span>
-              </label>
+            <div class="field is-floating-label">
               <div class="control">
-                {{ form.nomor_suratKeluar(class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition", placeholder="Nomor surat keluar") }}
+                {{ form.nomor_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="nomor_suratKeluar">Nomor Surat</label>
               </div>
             </div>
           </div>
-          
-          <!-- Tanggal Surat -->
           <div class="column is-half">
-            <div class="field">
-              <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                <i class="fas fa-calendar text-gray-500 mr-1 text-xs"></i>
-                Tanggal Surat
-                <span class="text-red-500">*</span>
-              </label>
+            <div class="field is-floating-label">
               <div class="control">
-                {{ form.tanggal_suratKeluar(class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition", type="date") }}
+                {{ form.tanggal_suratKeluar(class="input", type="date", placeholder=" ") }}
+              </div>
+              <label class="label is-floating-label" for="tanggal_suratKeluar">Tanggal Surat</label>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="field is-floating-label">
+              <div class="control">
+                {{ form.kode_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="kode_suratKeluar">Kode Surat</label>
               </div>
             </div>
           </div>
-          
-          <!-- Kode Surat -->
           <div class="column is-half">
-            <div class="field">
-              <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                <i class="fas fa-code text-gray-500 mr-1 text-xs"></i>
-                Kode Surat
-                <span class="text-red-500">*</span>
-              </label>
+            <div class="field is-floating-label">
               <div class="control">
-                {{ form.kode_suratKeluar(class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition", placeholder="Contoh: W10-A") }}
+                {{ form.jenis_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="jenis_suratKeluar">Jenis Surat</label>
               </div>
             </div>
           </div>
-          
-          <!-- Jenis Surat -->
-          <div class="column is-half">
-            <div class="field">
-              <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                <i class="fas fa-tag text-gray-500 mr-1 text-xs"></i>
-                Jenis Surat
-                <span class="text-red-500">*</span>
-              </label>
-              <div class="control">
-                {{ form.jenis_suratKeluar(class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition", placeholder="Jenis/kategori surat") }}
-              </div>
-            </div>
-          </div>
-          
-          <!-- Isi Surat -->
           <div class="column is-full">
-            <div class="field">
-              <label class="block text-xs font-semibold text-gray-700 mb-1.5">
-                <i class="fas fa-file-alt text-gray-500 mr-1 text-xs"></i>
-                Isi Surat
-                <span class="text-red-500">*</span>
-              </label>
+            <div class="field is-floating-label">
               <div class="control">
-                {{ form.isi_suratKeluar(class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y", placeholder="Isi surat keluar", style="min-height:120px;") }}
+                {{ form.isi_suratKeluar(class="input", placeholder=" ") }}
+                <label class="label is-floating-label" for="isi_suratKeluar">Isi Surat</label>
               </div>
-              <p class="text-xs text-gray-500 mt-1">Ringkasan isi surat keluar</p>
-            </div>
+        </div>
           </div>
           <div class="column is-full">
             <div class="field">

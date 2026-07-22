@@ -2,30 +2,38 @@
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 <link
     rel="stylesheet"
-    href="{{ url_for('static', filename='assets/css/form-card.css') }}"
-/>
-<link
-    rel="stylesheet"
     href="{{ url_for('static', filename='assets/css/modal.css') }}"
 />
 <link
     rel="stylesheet"
     href="{{ url_for('static', filename='assets/css/ocr_cuti.css') }}"
 />
-{% endblock %} {% block title %}OCR Cuti & Formulir Cuti - PA Banjarbaru{%
+{% endblock %} {% block title %}OCR Cuti V2 & Formulir Cuti - PA Banjarbaru{%
 endblock %} {% block content %}
 <div class="container mx-auto py-8 px-4">
     <div class="max-w-4xl mx-auto">
-        <div class="form-card mb-6">
+        <div class="form-card">
             <div class="page-header">
                 <h2>
-                    <i class="fas fa-file-invoice"></i>
-                    OCR Formulir Cuti
+                    <i class="fas fa-eye"></i>
+                    OCR Cuti V2 & Formulir Cuti (Improved)
                 </h2>
             </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- Page Title -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                    OCR Formulir Cuti V2 (Improved)
+                </h1>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Unggah gambar formulir cuti untuk mengekstrak informasi
+                    penting secara otomatis. Sistem akan membaca dan menampilkan
+                    data pegawai serta detail cuti.
+                </p>
+            </div>
+
             <!-- Flash Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %} {%
             if messages %} {% for category, message in messages %}
@@ -57,7 +65,7 @@ endblock %} {% block content %}
                         value="{{ csrf_token() }}"
                     />
 
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
                         Unggah Formulir Cuti
                     </h3>
 

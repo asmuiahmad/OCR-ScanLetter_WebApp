@@ -1,0 +1,410 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Persetujuan Surat Keluar - PA Banjarbaru{% endblock %}
+
+{% block styles %}
+<style>
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .status-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-approved {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-rejected {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .approval-container {
+        background-color: #f9fafb;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+    }
+
+    .surat-card {
+        background-color: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .surat-card:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-small {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-view {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background-color: #2563eb;
+    }
+
+    .btn-approve {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .btn-approve:hover {
+        background-color: #059669;
+    }
+
+    .btn-reject {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-reject:hover {
+        background-color: #dc2626;
+    }
+
+    .filter-section {
+        background-color: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background-color: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1f2937;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .pagination a, .pagination span {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        color: #374151;
+    }
+
+    .pagination a:hover {
+        background-color: #f3f4f6;
+    }
+
+    .pagination .active {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Persetujuan Surat Keluar</h1>
+        <p class="text-gray-600">Mengelola persetujuan dan penolakan surat keluar</p>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_count }}</div>
+            <div class="stat-label">Menunggu Persetujuan</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ approved_count }}</div>
+            <div class="stat-label">Disetujui</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ rejected_count }}</div>
+            <div class="stat-label">Ditolak</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_count + approved_count + rejected_count }}</div>
+            <div class="stat-label">Total Surat</div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="flex flex-wrap gap-4">
+            <!-- Status Filter -->
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="pending" {% if status == 'pending' %}selected{% endif %}>Menunggu Persetujuan</option>
+                    <option value="approved" {% if status == 'approved' %}selected{% endif %}>Disetujui</option>
+                    <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Ditolak</option>
+                    <option value="all" {% if status == 'all' %}selected{% endif %}>Semua</option>
+                </select>
+            </div>
+
+            <!-- Search -->
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Cari</label>
+                <input type="text" name="search" value="{{ search }}" placeholder="Nomor surat, pengirim, atau isi..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex items-end gap-2">
+                <button type="submit" class="btn-small btn-view">Cari</button>
+                <a href="{{ url_for('approval.list_pending_surat_keluar') }}" class="btn-small" style="background-color: #6b7280; color: white;">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Surat List -->
+    <div class="approval-container">
+        {% if surat_list %}
+            {% for surat in surat_list %}
+            <div class="surat-card">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="font-bold text-lg text-gray-900">{{ surat.nomor_suratKeluar or 'Nomor tidak tersedia' }}</h3>
+                            <span class="status-badge status-{{ surat.status_suratKeluar }}">
+                                {% if surat.status_suratKeluar == 'pending' %}
+                                    Menunggu Persetujuan
+                                {% elif surat.status_suratKeluar == 'approved' %}
+                                    Disetujui
+                                {% elif surat.status_suratKeluar == 'rejected' %}
+                                    Ditolak
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-1">
+                            <strong>Pengirim:</strong> {{ surat.pengirim_suratKeluar or '-' }}
+                        </p>
+                        <p class="text-sm text-gray-600 mb-1">
+                            <strong>Penerima:</strong> {{ surat.penerima_suratKeluar or '-' }}
+                        </p>
+                        <p class="text-sm text-gray-600 mb-1">
+                            <strong>Tanggal:</strong>
+                            {% if surat.tanggal_suratKeluar %}
+                                {{ surat.tanggal_suratKeluar.strftime('%d %B %Y') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-gray-600 mb-2">
+                            <strong>Isi:</strong> {{ surat.isi_suratKeluar[:100] or '-' }}{% if surat.isi_suratKeluar and surat.isi_suratKeluar|length > 100 %}...{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Approval Info (jika sudah disetujui) -->
+                {% if surat.status_suratKeluar != 'pending' %}
+                <div class="bg-gray-50 p-3 rounded mb-3 border-l-4 {% if surat.status_suratKeluar == 'approved' %}border-green-500{% else %}border-red-500{% endif %}">
+                    <p class="text-sm text-gray-600">
+                        <strong>Disetujui oleh:</strong> {{ surat.approved_by or '-' }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        <strong>Tanggal Persetujuan:</strong>
+                        {% if surat.approved_at %}
+                            {{ surat.approved_at.strftime('%d %B %Y %H:%M') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </p>
+                    {% if surat.approval_notes %}
+                    <p class="text-sm text-gray-600 mt-2">
+                        <strong>Catatan:</strong> {{ surat.approval_notes }}
+                    </p>
+                    {% endif %}
+                    {% if surat.rejected_reason %}
+                    <p class="text-sm text-red-600 mt-2">
+                        <strong>Alasan Penolakan:</strong> {{ surat.rejected_reason }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="{{ url_for('approval.surat_keluar_detail', surat_id=surat.id_suratKeluar) }}" class="btn-small btn-view">
+                        <i class="fas fa-eye"></i> Lihat Detail
+                    </a>
+
+                    {% if surat.status_suratKeluar == 'pending' %}
+                        <button onclick="openApproveModal({{ surat.id_suratKeluar }})" class="btn-small btn-approve">
+                            <i class="fas fa-check"></i> Setujui
+                        </button>
+                        <button onclick="openRejectModal({{ surat.id_suratKeluar }})" class="btn-small btn-reject">
+                            <i class="fas fa-times"></i> Tolak
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            {% if pagination.pages > 1 %}
+            <div class="pagination">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('approval.list_pending_surat_keluar', page=pagination.prev_num, status=status, search=search) }}">« Sebelumnya</a>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                            <span class="active">{{ page_num }}</span>
+                        {% else %}
+                            <a href="{{ url_for('approval.list_pending_surat_keluar', page=page_num, status=status, search=search) }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                        <span>...</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('approval.list_pending_surat_keluar', page=pagination.next_num, status=status, search=search) }}">Berikutnya »</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="text-center py-8">
+            <p class="text-gray-500 text-lg">Tidak ada surat keluar untuk ditampilkan.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div id="approveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4">Setujui Surat Keluar</h2>
+        <form method="POST" id="approveForm" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
+                <textarea name="approval_notes" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Tambahkan catatan persetujuan..."></textarea>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" onclick="closeApproveModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Batal</button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Setujui</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4">Tolak Surat Keluar</h2>
+        <form method="POST" id="rejectForm" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                <textarea name="rejection_reason" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Jelaskan alasan penolakan..." required></textarea>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Batal</button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Tolak</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openApproveModal(suratId) {
+    const form = document.getElementById('approveForm');
+    form.action = `/approval/surat-keluar/${suratId}/approve`;
+    document.getElementById('approveModal').classList.remove('hidden');
+}
+
+function closeApproveModal() {
+    document.getElementById('approveModal').classList.add('hidden');
+}
+
+function openRejectModal(suratId) {
+    const form = document.getElementById('rejectForm');
+    form.action = `/approval/surat-keluar/${suratId}/reject`;
+    document.getElementById('rejectModal').classList.remove('hidden');
+}
+
+function closeRejectModal() {
+    document.getElementById('rejectModal').classList.add('hidden');
+}
+
+// Close modals on escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeApproveModal();
+        closeRejectModal();
+    }
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const approveModal = document.getElementById('approveModal');
+    const rejectModal = document.getElementById('rejectModal');
+
+    if (event.target === approveModal) {
+        approveModal.classList.add('hidden');
+    }
+    if (event.target === rejectModal) {
+        rejectModal.classList.add('hidden');
+    }
+};
+</script>
+{% endblock %}

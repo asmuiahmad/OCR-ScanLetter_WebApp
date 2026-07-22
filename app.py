@@ -32,7 +32,6 @@ def create_app():
     app.config["WTF_CSRF_METHODS"] = ["POST", "PUT", "PATCH", "DELETE"]
     app.config["WTF_CSRF_HEADERS"] = ["X-CSRFToken", "X-CSRF-Token"]
     app.config["WTF_CSRF_TIME_LIMIT"] = 86400  # 24 hours
-    app.config["WTF_CSRF_SSL_STRICT"] = False  # Allow HTTP for development
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SECURE"] = False
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -40,7 +39,7 @@ def create_app():
 
     db.init_app(app)
 
-    # Initialize Flask-Migrate
+    # Inisialisasi Flask-Migrate
     from flask_migrate import Migrate
 
     migrate = Migrate(app, db)
@@ -57,7 +56,7 @@ def create_app():
     from config.ocr_surat_keluar import ocr_surat_keluar_bp
     from config.ocr_surat_masuk import ocr_surat_masuk_bp
     from config.routes_main import register_blueprints
-    # Removed duplicate user_login_logs_bp import - it's handled in api_bp
+    from config.routes_user_login_logs import user_login_logs_bp
 
     # Register all main blueprints (routes_main)
     register_blueprints(app)
@@ -68,7 +67,7 @@ def create_app():
     app.register_blueprint(ocr_surat_masuk_bp, url_prefix="/surat-masuk")
     app.register_blueprint(ocr_surat_keluar_bp, url_prefix="/surat-keluar")
     app.register_blueprint(approval_bp)
-    # Removed duplicate user_login_logs_bp registration - it's handled in api_bp
+    app.register_blueprint(user_login_logs_bp)
 
     @login_manager.user_loader
     def load_user(user_id):

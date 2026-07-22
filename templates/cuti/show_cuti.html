@@ -3,165 +3,177 @@
 {% block title %}Daftar Cuti - PA Banjarbaru{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}">
-
-<div class="container mx-auto">
-  <div class="max-w-6xl mx-auto">
-    <!-- Page Header -->
-    <div class="form-card mb-6">
-      <div class="page-header">
-        <h2>
-          <i class="fas fa-list"></i>
-          Daftar Permohonan Cuti
-        </h2>
-      </div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Daftar Cuti</h1>
+        <a href="{{ url_for('cuti.input_cuti') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Input Cuti
+        </a>
     </div>
 
     <!-- Search and Filter -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-      <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <input type="text" name="search" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Cari nama, NIP, atau jenis cuti..." value="{{ request.args.get('search', '') }}">
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Cari nama, NIP, atau jenis cuti..." value="{{ request.args.get('search', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-control">
+                        <option value="">Semua Status</option>
+                        <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="approved" {% if request.args.get('status') == 'approved' %}selected{% endif %}>Disetujui</option>
+                        <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="jenis_cuti" class="form-control">
+                        <option value="">Semua Jenis Cuti</option>
+                        <option value="c_tahun" {% if request.args.get('jenis_cuti') == 'c_tahun' %}selected{% endif %}>Tahun</option>
+                        <option value="c_besar" {% if request.args.get('jenis_cuti') == 'c_besar' %}selected{% endif %}>Besar</option>
+                        <option value="c_sakit" {% if request.args.get('jenis_cuti') == 'c_sakit' %}selected{% endif %}>Sakit</option>
+                        <option value="c_lahir" {% if request.args.get('jenis_cuti') == 'c_lahir' %}selected{% endif %}>Lahir</option>
+                        <option value="c_penting" {% if request.args.get('jenis_cuti') == 'c_penting' %}selected{% endif %}>Penting</option>
+                        <option value="c_luarnegara" {% if request.args.get('jenis_cuti') == 'c_luarnegara' %}selected{% endif %}>Luar Negara</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">Filter</button>
+                </div>
+            </form>
         </div>
-        <div>
-          <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-            <option value="">Semua Status</option>
-            <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
-            <option value="approved" {% if request.args.get('status') == 'approved' %}selected{% endif %}>Disetujui</option>
-            <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>Ditolak</option>
-          </select>
-        </div>
-        <div>
-          <select name="jenis_cuti" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-            <option value="">Semua Jenis Cuti</option>
-            <option value="c_tahun" {% if request.args.get('jenis_cuti') == 'c_tahun' %}selected{% endif %}>Cuti Tahunan</option>
-            <option value="c_besar" {% if request.args.get('jenis_cuti') == 'c_besar' %}selected{% endif %}>Cuti Besar</option>
-            <option value="c_sakit" {% if request.args.get('jenis_cuti') == 'c_sakit' %}selected{% endif %}>Cuti Sakit</option>
-            <option value="c_lahir" {% if request.args.get('jenis_cuti') == 'c_lahir' %}selected{% endif %}>Cuti Melahirkan</option>
-            <option value="c_penting" {% if request.args.get('jenis_cuti') == 'c_penting' %}selected{% endif %}>Cuti Penting</option>
-            <option value="c_luarnegara" {% if request.args.get('jenis_cuti') == 'c_luarnegara' %}selected{% endif %}>Cuti Luar Negara</option>
-          </select>
-        </div>
-        <div>
-          <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition font-medium">
-            <i class="fas fa-filter mr-2"></i>Filter
-          </button>
-        </div>
-      </form>
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-100 border-b border-gray-200">
-            <tr>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">No</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nama</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">NIP</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Jenis Cuti</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tanggal Cuti</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Lama Cuti</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            {% for cuti in entries.items %}
-            <tr class="hover:bg-gray-50 transition">
-              <td class="px-6 py-3 text-sm text-gray-700">{{ loop.index + (entries.page - 1) * entries.per_page }}</td>
-              <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.nama }}</td>
-              <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.nip }}</td>
-              <td class="px-6 py-3 text-sm text-gray-700">
-                {% if cuti.jenis_cuti == 'c_tahun' %}Cuti Tahunan
-                {% elif cuti.jenis_cuti == 'c_besar' %}Cuti Besar
-                {% elif cuti.jenis_cuti == 'c_sakit' %}Cuti Sakit
-                {% elif cuti.jenis_cuti == 'c_lahir' %}Cuti Melahirkan
-                {% elif cuti.jenis_cuti == 'c_penting' %}Cuti Penting
-                {% elif cuti.jenis_cuti == 'c_luarnegara' %}Cuti Luar Negara
-                {% else %}{{ cuti.jenis_cuti }}{% endif %}
-              </td>
-              <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.tanggal_cuti.strftime('%d/%m/%Y') }} - {{ cuti.sampai_cuti.strftime('%d/%m/%Y') }}</td>
-              <td class="px-6 py-3 text-sm text-gray-700">{{ cuti.lama_cuti }}</td>
-              <td class="px-6 py-3 text-sm">
-                {% if cuti.status_cuti == 'pending' %}
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
-                {% elif cuti.status_cuti == 'approved' %}
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Disetujui</span>
-                {% elif cuti.status_cuti == 'rejected' %}
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Ditolak</span>
-                {% else %}
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ cuti.status_cuti }}</span>
-                {% endif %}
-              </td>
-              <td class="px-6 py-3 text-sm">
-                <div class="flex gap-2">
-                  <a href="{{ url_for('cuti.detail_cuti', id=cuti.id_cuti) }}" class="inline-flex items-center justify-center w-8 h-8 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 transition" title="Lihat Detail">
-                    <i class="fas fa-eye text-xs"></i>
-                  </a>
-                  
-                  <a href="{{ url_for('cuti.preview_form_pdf', cuti_id=cuti.id_cuti) }}" class="inline-flex items-center justify-center w-8 h-8 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition" title="Preview Formulir">
-                    <i class="fas fa-file-alt text-xs"></i>
-                  </a>
-                  
-                  <a href="{{ url_for('cuti.generate_form_pdf', cuti_id=cuti.id_cuti) }}" class="inline-flex items-center justify-center w-8 h-8 rounded bg-red-100 text-red-600 hover:bg-red-200 transition" title="Download PDF" target="_blank">
-                    <i class="fas fa-file-pdf text-xs"></i>
-                  </a>
-                  
-                  {% if current_user.role in ['admin', 'pimpinan'] %}
-                  <a href="{{ url_for('cuti.edit_cuti', id=cuti.id_cuti) }}" class="inline-flex items-center justify-center w-8 h-8 rounded bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition" title="Edit">
-                    <i class="fas fa-edit text-xs"></i>
-                  </a>
-                  {% endif %}
-                  
-                  {% if cuti.status_cuti == 'pending' and current_user.role in ['admin', 'pimpinan'] %}
-                  <button type="button" class="inline-flex items-center justify-center w-8 h-8 rounded bg-green-100 text-green-600 hover:bg-green-200 transition" onclick="approveCuti({{ cuti.id_cuti }})" title="Setujui">
-                    <i class="fas fa-check text-xs"></i>
-                  </button>
-                  <button type="button" class="inline-flex items-center justify-center w-8 h-8 rounded bg-red-100 text-red-600 hover:bg-red-200 transition" onclick="rejectCuti({{ cuti.id_cuti }})" title="Tolak">
-                    <i class="fas fa-times text-xs"></i>
-                  </button>
-                  {% endif %}
-                </div>
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="8" class="px-6 py-8 text-center text-gray-500">Tidak ada data cuti</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>NIP</th>
+                            <th>Jenis Cuti</th>
+                            <th>Tanggal Cuti</th>
+                            <th>Lama Cuti</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cuti in entries.items %}
+                        <tr>
+                            <td>{{ loop.index + (entries.page - 1) * entries.per_page }}</td>
+                            <td>{{ cuti.nama }}</td>
+                            <td>{{ cuti.nip }}</td>
+                            <td>
+                                {% if cuti.jenis_cuti == 'c_tahun' %}Tahun
+                                {% elif cuti.jenis_cuti == 'c_besar' %}Besar
+                                {% elif cuti.jenis_cuti == 'c_sakit' %}Sakit
+                                {% elif cuti.jenis_cuti == 'c_lahir' %}Lahir
+                                {% elif cuti.jenis_cuti == 'c_penting' %}Penting
+                                {% elif cuti.jenis_cuti == 'c_luarnegara' %}Luar Negara
+                                {% else %}{{ cuti.jenis_cuti }}{% endif %}
+                            </td>
+                            <td>{{ cuti.tanggal_cuti.strftime('%d/%m/%Y') }} - {{ cuti.sampai_cuti.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ cuti.lama_cuti }}</td>
+                            <td>
+                                {% if cuti.status_cuti == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% elif cuti.status_cuti == 'approved' %}
+                                    <span class="badge bg-success">Disetujui</span>
+                                {% elif cuti.status_cuti == 'rejected' %}
+                                    <span class="badge bg-danger">Ditolak</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ cuti.status_cuti }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('cuti.detail_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-info" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <!-- Preview Formulir Button -->
+                                    <a href="{{ url_for('cuti.preview_form_pdf', cuti_id=cuti.id_cuti) }}" 
+                                       class="btn btn-sm btn-secondary" 
+                                       title="Preview Formulir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <!-- Generate PDF Formulir Button -->
+                                    <a href="{{ url_for('cuti.generate_form_pdf', cuti_id=cuti.id_cuti) }}" 
+                                       class="btn btn-sm btn-primary" 
+                                       title="Download Formulir PDF"
+                                       target="_blank">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    
+                                    {% if current_user.role in ['admin', 'pimpinan'] %}
+                                    <a href="{{ url_for('cuti.edit_cuti', id=cuti.id_cuti) }}" class="btn btn-sm btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if cuti.status_cuti == 'pending' and current_user.role in ['admin', 'pimpinan'] %}
+                                    <button type="button" class="btn btn-sm btn-success" onclick="approveCuti({{ cuti.id_cuti }})" title="Setujui">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="rejectCuti({{ cuti.id_cuti }})" title="Tolak">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">Tidak ada data cuti</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-      <!-- Pagination -->
-      {% if entries.pages > 1 %}
-      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-        <div class="flex justify-center gap-2">
-          {% if entries.has_prev %}
-          <a href="{{ url_for('cuti.show_cuti', page=entries.prev_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100 transition">Previous</a>
-          {% endif %}
-          
-          {% for page_num in entries.iter_pages() %}
-            {% if page_num %}
-              {% if page_num != entries.page %}
-              <a href="{{ url_for('cuti.show_cuti', page=page_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100 transition">{{ page_num }}</a>
-              {% else %}
-              <span class="px-3 py-1 rounded bg-blue-500 text-white text-sm">{{ page_num }}</span>
-              {% endif %}
-            {% else %}
-            <span class="px-3 py-1 text-gray-400 text-sm">...</span>
+            <!-- Pagination -->
+            {% if entries.pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if entries.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('cuti.show_cuti', page=entries.prev_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in entries.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != entries.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('cuti.show_cuti', page=page_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if entries.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('cuti.show_cuti', page=entries.next_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
             {% endif %}
-          {% endfor %}
-          
-          {% if entries.has_next %}
-          <a href="{{ url_for('cuti.show_cuti', page=entries.next_num, search=request.args.get('search', ''), status=request.args.get('status', ''), jenis_cuti=request.args.get('jenis_cuti', '')) }}" class="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100 transition">Next</a>
-          {% endif %}
         </div>
-      </div>
-      {% endif %}
     </div>
-  </div>
 </div>
 
 <script>
@@ -177,15 +189,14 @@ function approveCuti(id) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.toast.success('Cuti berhasil disetujui');
-                setTimeout(() => location.reload(), 1000);
+                location.reload();
             } else {
-                window.toast.error('Gagal menyetujui cuti: ' + data.error);
+                alert('Gagal menyetujui cuti: ' + data.error);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            window.toast.error('Terjadi kesalahan saat menyetujui cuti');
+            alert('Terjadi kesalahan saat menyetujui cuti');
         });
     }
 }
@@ -202,15 +213,14 @@ function rejectCuti(id) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.toast.success('Cuti berhasil ditolak');
-                setTimeout(() => location.reload(), 1000);
+                location.reload();
             } else {
-                window.toast.error('Gagal menolak cuti: ' + data.error);
+                alert('Gagal menolak cuti: ' + data.error);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            window.toast.error('Terjadi kesalahan saat menolak cuti');
+            alert('Terjadi kesalahan saat menolak cuti');
         });
     }
 }

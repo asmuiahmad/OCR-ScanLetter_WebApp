@@ -20,8 +20,7 @@
 {% endif %}
 
 <h1>Login</h1>
-
-<form action="{{ url_for('auth.login') }}" method="POST" class="auth-form" id="loginForm">
+<form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
   {{ form.hidden_tag() }}
   {% if request.args.get('next') %}
     <input type="hidden" name="next" value="{{ request.args.get('next') }}" />
@@ -53,28 +52,7 @@
     {% endif %}
   </div>
 
-  {{ form.submit(class="btn-primary", id="loginSubmit") }}
+  {{ form.submit(class="btn-primary") }}
 </form>
-
 <p class="mt-4 text-center">Belum punya akun? <a href="{{ url_for('auth.register') }}">Register di sini</a></p>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const loginForm = document.getElementById('loginForm');
-  const loginSubmit = document.getElementById('loginSubmit');
-
-  if (loginForm) {
-    loginForm.addEventListener('submit', function() {
-      if (loginSubmit) {
-        loginSubmit.disabled = true;
-        loginSubmit.textContent = 'Logging in...';
-        setTimeout(function() {
-          loginSubmit.disabled = false;
-          loginSubmit.textContent = 'Login';
-        }, 10000);
-      }
-    });
-  }
-});
-</script>
 {% endblock %}

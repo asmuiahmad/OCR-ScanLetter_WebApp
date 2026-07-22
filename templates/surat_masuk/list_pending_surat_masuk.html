@@ -2,136 +2,6 @@
 
 {% block title %}Daftar Surat Masuk Pending - PA Banjarbaru{% endblock %}
 
-{% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/table-search.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/form-card.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/approval-buttons.css') }}?v={{ range(1, 9999) | random }}">
-{% endblock %}
-
-{% block content %}
-<div class="container mx-auto px-4 py-6">
-    <div class="max-w-7xl mx-auto">
-        <!-- Page Header -->
-        <div class="form-card mb-4">
-            <div class="page-header">
-                <h2>
-                    <i class="fas fa-inbox"></i>
-                    Persetujuan Surat Masuk
-                </h2>
-            </div>
-        </div>
-    
-        {% if surat_masuk %}
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden approval-table">
-            <table class="w-full table-auto">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nomor Surat</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Penerima</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Tanggal</th>
-                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    {% for surat in surat_masuk %}
-                    <tr class="hover:bg-blue-50 transition" data-surat-id="{{ surat.id_suratMasuk }}">
-                        <td class="px-4 py-3 text-sm font-semibold text-purple-700">{{ surat.nomor_suratMasuk or '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">{{ surat.penerima_suratMasuk or '-' }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-500">
-                          {% if surat.tanggal_suratMasuk %}
-                            {% if surat.tanggal_suratMasuk.strftime is defined %}
-                              {{ surat.tanggal_suratMasuk.strftime('%d/%m/%Y') }}
-                            {% else %}
-                              {{ surat.tanggal_suratMasuk|string }}
-                            {% endif %}
-                          {% else %}
-                            -
-                          {% endif %}
-                        </td>
-                        <td class="action-cell">
-                            <div style="display:flex; gap:0.3rem; align-items:center;">
-                                <button onclick="showDetailModal({{ surat.id_suratMasuk }})"
-                                    class="ubtn ubtn-info ubtn-sm"
-                                    title="Lihat Detail Surat">
-                                    <i class="fas fa-eye"></i>
-                                    <span>Detail</span>
-                                </button>
-                                <button onclick="approveSurat({{ surat.id_suratMasuk }})"
-                                    class="ubtn ubtn-success ubtn-sm"
-                                    title="Setujui Surat">
-                                    <i class="fas fa-check"></i>
-                                    <span>Setujui</span>
-                                </button>
-                                <button onclick="rejectSurat({{ surat.id_suratMasuk }})"
-                                    class="ubtn ubtn-danger ubtn-sm"
-                                    title="Tolak Surat">
-                                    <i class="fas fa-times"></i>
-                                    <span>Tolak</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="bg-white shadow-md rounded-lg p-8 text-center">
-            <i class="fas fa-inbox text-5xl text-gray-200 mb-4"></i>
-            <p class="text-gray-500 text-lg font-medium">Tidak ada surat masuk yang pending.</p>
-            <p class="text-gray-400 text-sm mt-2">Semua surat sudah diproses.</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Detail Modal -->
-<div id="detailModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50" style="backdrop-filter: blur(3px);">
-    <div class="relative top-20 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-1/2 shadow-2xl rounded-xl bg-white" style="animation: slideUp 0.2s ease;">
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <i class="fas fa-file-alt text-blue-600"></i>
-                Detail Surat Masuk
-            </h3>
-            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 transition">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-        </div>
-        
-        <div id="modalContent" class="space-y-4">
-            <!-- Content will be loaded here -->
-        </div>
-        
-        <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-3">
-            <button id="approveBtn" onclick="approveSuratFromModal()" 
-                    class="ubtn ubtn-success hidden">
-                <i class="fas fa-check"></i>
-                <span>Setujui</span>
-            </button>
-            <button id="rejectBtn" onclick="rejectSuratFromModal()" 
-                    class="ubtn ubtn-danger hidden">
-                <i class="fas fa-times"></i>
-                <span>Tolak</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<style>
-@keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-</style>
-
-{% endblock %}
-
 {% block scripts %}
 <script>
 // Update notification count when page loads
@@ -140,93 +10,156 @@ document.addEventListener('DOMContentLoaded', function() {
         updateNotificationCount();
     }
 });
+</script>
+{% endblock %}
 
-function confirmDelete() {
-    return confirm('Are you sure you want to delete this entry?');
-}
-
-function showDetailModal(suratId) {
-    // Implementation for showing detail modal
-    const modal = document.getElementById('detailModal');
-    modal.classList.remove('hidden');
-    // Load surat details via AJAX here
-}
-
-function closeDetailModal() {
-    const modal = document.getElementById('detailModal');
-    modal.classList.add('hidden');
-}
-
-function approveSurat(suratId) {
-    if (!confirm('Apakah Anda yakin ingin menyetujui surat ini?')) return;
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">Surat Masuk Pending</h1>
     
-    fetch(`/approval/surat-masuk/${suratId}/approve`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            window.toast.success('Surat berhasil disetujui!');
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            window.toast.error(data.message || 'Gagal menyetujui surat!');
-        }
-    })
-    .catch(err => {
-        console.error('Error:', err);
-        window.toast.error('Terjadi kesalahan saat menyetujui surat');
-    });
-}
-
-function rejectSurat(suratId) {
-    const reason = prompt('Masukkan alasan penolakan:');
-    if (!reason) {
-        window.toast.warning('Alasan penolakan diperlukan');
-        return;
-    }
     
-    fetch(`/approval/surat-masuk/${suratId}/reject`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ rejection_reason: reason })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            window.toast.success('Surat berhasil ditolak!');
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            window.toast.error(data.message || 'Gagal menolak surat!');
-        }
-    })
-    .catch(err => {
-        console.error('Error:', err);
-        window.toast.error('Terjadi kesalahan saat menolak surat');
+    {% if surat_masuk %}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="w-full table-auto">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left">Nomor Surat</th>
+                    <th class="px-4 py-2 text-left">Penerima</th>
+                    <th class="px-4 py-2 text-left">Tanggal</th>
+                    <th class="px-4 py-2 text-left">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for surat in surat_masuk %}
+                <tr class="border-b hover:bg-gray-50" data-surat-id="{{ surat.id_suratMasuk }}">
+                    <td class="px-4 py-2">{{ surat.nomor_suratMasuk or '-' }}</td>
+                    <td class="px-4 py-2">{{ surat.penerima_suratMasuk or '-' }}</td>
+                    <td class="px-4 py-2">
+                      {% if surat.tanggal_suratMasuk %}
+                        {% if surat.tanggal_suratMasuk.strftime is defined %}
+                          {{ surat.tanggal_suratMasuk.strftime('%d/%m/%Y') }}
+                        {% else %}
+                          {{ surat.tanggal_suratMasuk|string }}
+                        {% endif %}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td class="px-4 py-2">
+                        <div class="flex space-x-2">
+                            <button onclick="showDetailModal({{ surat.id_suratMasuk }})"
+                                class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="approveSurat({{ surat.id_suratMasuk }})"
+                                class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button onclick="rejectSurat({{ surat.id_suratMasuk }})"
+                                class="btn btn-sm btn-danger">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="bg-white shadow-md rounded-lg p-6 text-center">
+        <p class="text-gray-500">Tidak ada surat masuk yang pending.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Detail Modal -->
+<div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Detail Surat Masuk</h3>
+                <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="modalContent" class="space-y-4">
+                <!-- Content will be loaded here -->
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="approveBtn" onclick="approveSuratFromModal()" 
+                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 hidden">
+                    <i class="fas fa-check mr-2"></i>Setujui
+                </button>
+                <button id="rejectBtn" onclick="rejectSuratFromModal()" 
+                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 hidden">
+                    <i class="fas fa-times mr-2"></i>Tolak
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="custom-toast" class="fixed left-1/2 bottom-8 z-50 hidden px-6 py-3 rounded-lg shadow-lg text-white text-center text-base font-semibold bg-green-500 transform -translate-x-1/2 transition-all duration-300"></div>
+
+<script>
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this entry?');
+    }
+
+// Custom toast for approve/reject
+function showCustomToast(message, colorClass) {
+    const toast = document.getElementById('custom-toast');
+    toast.textContent = message;
+    toast.className = `fixed left-1/2 bottom-8 z-50 px-6 py-3 rounded-lg shadow-lg text-white text-center text-base font-semibold ${colorClass} transform -translate-x-1/2 transition-all duration-300`;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.classList.add('opacity-0');
+    }, 1800);
+    setTimeout(() => {
+        toast.style.display = 'none';
+        toast.classList.remove('opacity-0');
+    }, 2200);
+}
+
+// Patch approve/reject button logic if present
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.approve-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const id = btn.getAttribute('data-id') || btn.dataset.id;
+      fetch(`/surat-keluar/approve/${id}`, {method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}})
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showCustomToast('Surat telah disetujui!', 'bg-green-500');
+            btn.closest('tr').remove();
+          } else {
+            showCustomToast(data.message || 'Gagal menyetujui surat!', 'bg-red-500');
+          }
+        })
+        .catch(() => showCustomToast('Gagal menyetujui surat!', 'bg-red-500'));
     });
-}
-
-function approveSuratFromModal() {
-    // Get surat ID from modal context
-    const suratId = document.querySelector('[data-surat-id]')?.dataset.suratId;
-    if (suratId) {
-        closeDetailModal();
-        approveSurat(suratId);
-    }
-}
-
-function rejectSuratFromModal() {
-    // Get surat ID from modal context
-    const suratId = document.querySelector('[data-surat-id]')?.dataset.suratId;
-    if (suratId) {
-        closeDetailModal();
-        rejectSurat(suratId);
-    }
-}
-</script> 
+  });
+  document.querySelectorAll('.reject-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const id = btn.getAttribute('data-id') || btn.dataset.id;
+      fetch(`/surat-keluar/reject/${id}`, {method: 'POST', headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}})
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showCustomToast('Surat telah ditolak!', 'bg-red-500');
+            btn.closest('tr').remove();
+          } else {
+            showCustomToast(data.message || 'Gagal menolak surat!', 'bg-red-500');
+          }
+        })
+        .catch(() => showCustomToast('Gagal menolak surat!', 'bg-red-500'));
+    });
+  });
+});
+</script>
+{% endblock %} 
