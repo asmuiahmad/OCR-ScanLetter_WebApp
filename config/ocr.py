@@ -17,9 +17,20 @@ from .ocr_utils import (
 )
 from config.ocr_surat_keluar import extract_ocr_data as extract_ocr_data_surat_keluar
 from config.ocr_surat_masuk import extract_ocr_data_surat_masuk
-from config.route_utils import role_required  # Import from route_utils
 
 ocr_bp = Blueprint('ocr', __name__)
+
+# Role required decorator for blueprints
+def role_required(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if current_user.role not in roles:
+                flash('You do not have permission to access this page.', 'error')
+                return redirect(url_for('index'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
 
 @ocr_bp.route('/ocr', methods=['GET', 'POST'])
 @login_required

@@ -1,11 +1,11 @@
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from urllib.parse import urlparse, urljoin
 
 from config.extensions import db
-from config.models import User, UserLoginLog
+from config.models import User
 from config.forms import LoginForm, RegistrationForm
 from config.route_utils import log_user_login, log_user_logout
 
@@ -23,79 +23,49 @@ def get_redirect_target():
         if is_safe_url(target):
             return target
 
-
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """User login with enhanced error handling"""
+    """User login"""
     form = LoginForm()
     
     next_page = request.args.get('next') or request.form.get('next')
     
     if form.validate_on_submit():
-        try:
-            # Normalize email (strip spaces and enforce lowercase)
-            email_input = (form.email.data or '').strip().lower()
-            from sqlalchemy import func
-            user = User.query.filter(func.lower(User.email) == email_input).first()
+        # Normalize email (strip spaces and enforce lowercase)
+        email_input = (form.email.data or '').strip().lower()
+        from sqlalchemy import func
+        user = User.query.filter(func.lower(User.email) == email_input).first()
+        if user and form.password.data and check_password_hash(user.password, form.password.data):
+            if not user.is_approved:
+                flash('Your account is pending approval by an administrator.', 'warning')
+                log_user_login(user.id, user.email, 'blocked', request)
+                return render_template('auth/login.html', form=form)
             
-            if user and form.password.data and check_password_hash(user.password, form.password.data):
-                if not user.is_approved:
-                    flash('Your account is pending approval by an administrator.', 'warning')
-                    try:
-                        log_user_login(user.id, user.email, 'blocked', request)
-                    except Exception as log_error:
-                        current_app.logger.error(f"Login log error: {str(log_error)}")
-                    return render_template('auth/login.html', form=form)
-                
-                # Update user login info
-                try:
-                    user.last_login = datetime.now()
-                    if user.login_count is None:
-                        user.login_count = 0
-                    user.login_count += 1
-                    db.session.commit()
-                except Exception as db_error:
-                    current_app.logger.error(f"Database update error: {str(db_error)}")
-                    db.session.rollback()
-                    # Continue with login even if logging fails
-                
-                # Login user
-                login_user(user)
-                
-                # Log successful login
-                try:
-                    log_user_login(user.id, user.email, 'success', request)
-                except Exception as log_error:
-                    current_app.logger.error(f"Login log error: {str(log_error)}")
-                    # Continue with login even if logging fails
-                
-                # Handle redirect
-                if next_page and is_safe_url(next_page):
-                    current_app.logger.info(f"Redirecting user {user.email} to: {next_page}")
-                    # Add parameter to indicate successful login for JavaScript handling
-                    separator = '&' if '?' in next_page else '?'
-                    redirect_url = f"{next_page}{separator}from_login=true"
-                    return redirect(redirect_url)
-                else:
-                    # Redirect to dashboard with login indicator
-                    return redirect(url_for('dashboard.dashboard', from_login='true'))
+            user.last_login = datetime.now()
+            if user.login_count is None:
+                user.login_count = 0
+            user.login_count += 1
+            db.session.commit()
+            login_user(user)
+            
+            log_user_login(user.id, user.email, 'success', request)
+            
+            # Use the next_page already retrieved at the beginning of the function
+            if next_page and is_safe_url(next_page):
+                current_app.logger.info(f"Redirecting user {user.email} to: {next_page}")
+                # Add parameter to indicate successful login for JavaScript handling
+                separator = '&' if '?' in next_page else '?'
+                redirect_url = f"{next_page}{separator}from_login=true"
+                return redirect(redirect_url)
             else:
-                # Log failed login attempt
-                try:
-                    if user:
-                        log_user_login(user.id, email_input, 'failed', request)
-                    else:
-                        log_user_login(None, email_input, 'failed', request)
-                except Exception as log_error:
-                    current_app.logger.error(f"Failed login log error: {str(log_error)}")
-                
-                flash('Invalid email or password', 'error')
-                
-        except Exception as e:
-            current_app.logger.error(f"Login error: {str(e)}")
-            import traceback
-            current_app.logger.error(f"Login traceback: {traceback.format_exc()}")
-            flash('An error occurred during login. Please try again.', 'error')
+                # Redirect to dashboard with login indicator
+                return redirect(url_for('dashboard.dashboard', from_login='true'))
+        else:
+            if user:
+                log_user_login(user.id, email_input, 'failed', request)
+            else:
+                log_user_login(None, email_input, 'failed', request)
+            flash('Invalid email or password', 'error')
     
     return render_template('auth/login.html', form=form)
 

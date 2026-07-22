@@ -12,7 +12,6 @@ from config.api_routes import api_bp
 from config.auth_routes import auth_bp
 from config.cuti_routes import cuti_bp
 from config.dashboard_routes import dashboard_bp
-from config.disposisi_routes import disposisi_bp
 from config.laporan_routes import laporan_bp
 from config.ocr_routes import ocr_routes_bp
 from config.pegawai_routes import pegawai_bp
@@ -38,7 +37,6 @@ def register_blueprints(app):
     app.register_blueprint(pegawai_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(cuti_bp, url_prefix="/cuti")
-    app.register_blueprint(disposisi_bp)
     app.register_blueprint(ocr_routes_bp)
     app.register_blueprint(laporan_bp)
 

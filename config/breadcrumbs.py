@@ -28,13 +28,6 @@ route_breadcrumbs = {
     "ocr_test": "OCR Test",
     "login": "Login",
     "logout": "Logout",
-    # Disposisi breadcrumbs
-    "disposisi.list_disposisi": "Daftar Disposisi",
-    "disposisi.buat_disposisi": "Buat Disposisi",
-    "disposisi.detail_disposisi": "Detail Disposisi",
-    "list_disposisi": "Daftar Disposisi",
-    "buat_disposisi": "Buat Disposisi",
-    "detail_disposisi": "Detail Disposisi",
     "register": "Register",
     "ocr_cuti": "OCR Cuti",
     "favicon": "Favicon",
@@ -182,7 +175,7 @@ def register_breadcrumbs(app):
                 g.surat_masuk_list = []
                 g.notification_items = []
         else:
-            # Non-admin/pimpinan users do not receive notification data
+            # Non-pimpinan tidak mendapat data notifikasi
             g.pending_surat_masuk_count = 0
             g.pending_masuk_count = 0
             g.pending_keluar_count = 0
@@ -211,8 +204,3 @@ def register_breadcrumbs(app):
     # Add utilities to Jinja2
     app.jinja_env.globals["zip"] = zip
     app.jinja_env.globals.update(max=max, min=min)
-    
-    # Add datetime utilities
-    from datetime import datetime
-    app.jinja_env.globals['datetime'] = datetime
-    app.jinja_env.globals['now'] = datetime.utcnow

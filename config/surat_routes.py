@@ -29,5 +29,5 @@ from config.ocr_utils import hitung_field_not_found
 
 surat_bp = Blueprint('surat', __name__)
 
-# All surat keluar and surat masuk endpoints have been moved to surat_keluar_routes.py and surat_masuk_routes.py
-# This file can be left empty or contain only an empty blueprint if surat_bp still needs to be registered
+# Seluruh endpoint surat keluar dan surat masuk sudah dipindahkan ke surat_keluar_routes.py dan surat_masuk_routes.py
+# File ini bisa dikosongkan atau hanya berisi blueprint kosong jika ingin tetap register surat_bp

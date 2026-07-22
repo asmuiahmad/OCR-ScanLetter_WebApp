@@ -87,12 +87,12 @@ class CutiForm(FlaskForm):
     jenis_cuti = RadioField(
         "Jenis Cuti",
         choices=[
-            ("c_tahun", "Cuti Tahunan"),
-            ("c_besar", "Cuti Besar"),
-            ("c_sakit", "Cuti Sakit"),
-            ("c_lahir", "Cuti Melahirkan"),
-            ("c_penting", "Cuti Penting"),
-            ("c_luarnegara", "Cuti Luar Negara"),
+            ("c_tahun", "Tahun"),
+            ("c_besar", "Besar"),
+            ("c_sakit", "Sakit"),
+            ("c_lahir", "Lahir"),
+            ("c_penting", "Penting"),
+            ("c_luarnegara", "Luar Negara"),
         ],
         validators=[DataRequired()],
     )
@@ -115,12 +115,12 @@ class InputCutiForm(FlaskForm):
     jenis_cuti = SelectField(
         "Jenis Cuti",
         choices=[
-            ("c_tahun", "Cuti Tahunan"),
-            ("c_besar", "Cuti Besar"),
-            ("c_sakit", "Cuti Sakit"),
-            ("c_lahir", "Cuti Melahirkan"),
-            ("c_penting", "Cuti Penting"),
-            ("c_luarnegara", "Cuti Luar Negara"),
+            ("c_tahun", "Tahun"),
+            ("c_besar", "Besar"),
+            ("c_sakit", "Sakit"),
+            ("c_lahir", "Lahir"),
+            ("c_penting", "Penting"),
+            ("c_luarnegara", "Luar Negara"),
         ],
         validators=[DataRequired()],
     )

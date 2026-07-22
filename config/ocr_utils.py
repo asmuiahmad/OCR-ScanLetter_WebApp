@@ -17,7 +17,7 @@ def normalize_ocr_text(text):
     Normalize OCR text with minimal changes:
     - Only collapse multiple spaces to a single space
     - Preserve all original characters, punctuation, and structure
-    - Do NOT replace I/O/l or anything in any context
+    - Do NOT replace I/O/l or apapun dalam konteks apapun
     """
     if not text:
         return text
@@ -57,9 +57,9 @@ pengirim_keywords = dictionary.get('pengirim_keywords', [])
 
 def parse_date_to_ddmmyyyy(date_str):
     """
-    Convert date like '17 September 2024', '26Mei2024', '26 Mei 2024', '26-Mei-2024', '26/Mei/2024' to 'dd/mm/yyyy'.
-    If already in yyyy-mm-dd format, convert to dd/mm/yyyy.
-    If cannot be parsed, return None.
+    Konversi tanggal seperti '17 September 2024', '26Mei2024', '26 Mei 2024', '26-Mei-2024', '26/Mei/2024' ke 'dd/mm/yyyy'.
+    Jika sudah dalam format yyyy-mm-dd, konversi ke dd/mm/yyyy.
+    Jika tidak bisa diparse, return None.
     """
     if not date_str or not isinstance(date_str, str):
         return None
@@ -90,8 +90,8 @@ def parse_date_to_ddmmyyyy(date_str):
 
 def extract_dates(text):
     """
-    Extract all dates containing Indonesian month names and convert to dd/mm/yyyy if possible.
-    Now searches for dates anywhere in a line, including after commas, colons, or dashes.
+    Ekstrak semua tanggal yang mengandung nama bulan Indonesia dan konversi ke dd/mm/yyyy jika bisa.
+    Sekarang mencari tanggal di mana saja dalam baris, termasuk setelah koma, titik dua, atau strip.
     """
     months = [
         'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
@@ -183,7 +183,7 @@ def extract_tanggal(text):
 def normalize_case(text):
     """
     Normalize text case: capitalize first letter of each word, keep proper nouns in title case.
-    Fix: Do not split words excessively, only remove double spaces, not add spaces in the middle of words.
+    Perbaikan: Jangan memecah kata secara berlebihan, hanya hapus spasi ganda, bukan menambah spasi di tengah kata.
     """
     if not text or text == "Not found" or text == "N/A":
         return text
@@ -448,7 +448,7 @@ def split_merged_words(text):
     return text
 
 def extract_isi_suratkeluar(text):
-    # Patterns to search for subject or letter content, only take one line after keyword
+    # Pola untuk mencari perihal atau isi surat, hanya ambil satu baris setelah kata kunci
     patterns = [
         r"perihal\s*[:\-]?\s*(.*?)(?:\n|$)",
         r"hal\s*[:\-]?\s*(.*?)(?:\n|$)",
@@ -854,19 +854,13 @@ def extract_text_with_multiple_configs(file_path):
     Extract text from image using multiple Tesseract configurations
     with comprehensive logging and debugging
     """
+    import pytesseract
+    from PIL import Image
     import logging
     import re
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
-
-    try:
-        import pytesseract
-        from PIL import Image
-    except ImportError as e:
-        logger.error(f"Missing required library: {str(e)}")
-        logger.error("Please install: pip install pytesseract Pillow")
-        return None
 
     # Konfigurasi Tesseract yang berbeda
     configs = [
@@ -878,23 +872,19 @@ def extract_text_with_multiple_configs(file_path):
 
     # Preprocessing untuk meningkatkan kualitas OCR
     def preprocess_image(image):
-        try:
-            # Convert to grayscale
-            gray = image.convert('L')
-            
-            # Optional: Enhance contrast
-            from PIL import ImageEnhance
-            enhancer = ImageEnhance.Contrast(gray)
-            gray = enhancer.enhance(2.5)  # Meningkatkan kontras lebih tinggi
-            
-            # Optional: Sharpen image
-            from PIL import ImageFilter
-            gray = gray.filter(ImageFilter.SHARPEN)
-            
-            return gray
-        except Exception as e:
-            logger.warning(f"Error preprocessing image: {str(e)}, using original")
-            return image
+        # Convert to grayscale
+        gray = image.convert('L')
+        
+        # Optional: Enhance contrast
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Contrast(gray)
+        gray = enhancer.enhance(2.5)  # Meningkatkan kontras lebih tinggi
+        
+        # Optional: Sharpen image
+        from PIL import ImageFilter
+        gray = gray.filter(ImageFilter.SHARPEN)
+        
+        return gray
 
     try:
         # Buka gambar
@@ -909,17 +899,6 @@ def extract_text_with_multiple_configs(file_path):
         logger.info(f"  Format: {img.format}")
         logger.info(f"  Mode: {img.mode}")
         logger.info(f"  Size: {img.size}")
-
-        # Check if Tesseract is installed
-        try:
-            pytesseract.get_tesseract_version()
-        except pytesseract.TesseractNotFoundError:
-            logger.error("Tesseract is not installed on this system")
-            logger.error("Please install Tesseract OCR:")
-            logger.error("  Ubuntu/Debian: sudo apt-get install tesseract-ocr tesseract-ocr-ind")
-            logger.error("  macOS: brew install tesseract tesseract-lang")
-            logger.error("  Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki")
-            return None
 
         # Ekstraksi teks dengan konfigurasi berbeda
         extracted_texts = []
@@ -943,19 +922,10 @@ def extract_text_with_multiple_configs(file_path):
         logger.info("Combined Extracted Text:")
         logger.info(combined_text)
 
-        if not combined_text.strip():
-            logger.warning(f"No text extracted from {file_path}")
-            return None
+        return combined_text if combined_text else None
 
-        return combined_text
-
-    except FileNotFoundError:
-        logger.error(f"File not found: {file_path}")
-        return None
     except Exception as e:
         logger.error(f"Error extracting text from {file_path}: {str(e)}")
-        import traceback
-        logger.error(traceback.format_exc())
         return None
 
 # Update extract_ocr_data agar lebih robust

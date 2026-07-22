@@ -8,7 +8,6 @@ from datetime import datetime
 
 from flask import (
     Blueprint,
-    Response,
     current_app,
     flash,
     jsonify,
@@ -35,7 +34,7 @@ approval_bp = Blueprint("approval", __name__, url_prefix="/approval")
 @login_required
 @role_required("pimpinan", "admin")
 def list_pending_surat_masuk():
-    """List all pending surat masuk for approval"""
+    """List semua surat masuk pending untuk persetujuan"""
     try:
         page = request.args.get("page", 1, type=int)
         status = request.args.get("status", "pending", type=str)
@@ -63,7 +62,7 @@ def list_pending_surat_masuk():
                 | (SuratMasuk.isi_suratMasuk.ilike(f"%{search}%"))
             )
 
-        # Order by most recent date
+        # Order by tanggal terbaru
         query = query.order_by(desc(SuratMasuk.tanggal_suratMasuk))
 
         # Pagination
@@ -94,11 +93,12 @@ def list_pending_surat_masuk():
         flash("Terjadi kesalahan saat memuat daftar surat masuk.", "error")
         return redirect(url_for("main.index"))
 
+
 @approval_bp.route("/surat-masuk/<int:surat_id>/detail", methods=["GET"])
 @login_required
 @role_required("pimpinan", "admin")
 def surat_masuk_detail(surat_id):
-    """View surat masuk detail for approval"""
+    """Lihat detail surat masuk untuk persetujuan"""
     try:
         surat = SuratMasuk.query.get_or_404(surat_id)
 
@@ -203,7 +203,7 @@ def reject_surat_masuk(surat_id):
 @login_required
 @role_required("pimpinan", "admin")
 def approve_surat_masuk_api(surat_id):
-    """API endpoint to approve surat masuk (AJAX)"""
+    """API endpoint untuk approve surat masuk (AJAX)"""
     try:
         surat = SuratMasuk.query.get_or_404(surat_id)
 
@@ -249,7 +249,7 @@ def approve_surat_masuk_api(surat_id):
 @login_required
 @role_required("pimpinan", "admin")
 def reject_surat_masuk_api(surat_id):
-    """API endpoint to reject surat masuk (AJAX)"""
+    """API endpoint untuk reject surat masuk (AJAX)"""
     try:
         surat = SuratMasuk.query.get_or_404(surat_id)
 
@@ -302,7 +302,7 @@ def reject_surat_masuk_api(surat_id):
 @login_required
 @role_required("pimpinan", "admin")
 def list_pending_surat_keluar():
-    """List all pending surat keluar for approval"""
+    """List semua surat keluar pending untuk persetujuan"""
     try:
         page = request.args.get("page", 1, type=int)
         status = request.args.get("status", "pending", type=str)
@@ -330,7 +330,7 @@ def list_pending_surat_keluar():
                 | (SuratKeluar.isi_suratKeluar.ilike(f"%{search}%"))
             )
 
-        # Order by most recent date
+        # Order by tanggal terbaru
         query = query.order_by(desc(SuratKeluar.tanggal_suratKeluar))
 
         # Pagination
@@ -368,7 +368,7 @@ def list_pending_surat_keluar():
 @login_required
 @role_required("pimpinan", "admin")
 def surat_keluar_detail(surat_id):
-    """View surat keluar detail for approval"""
+    """Lihat detail surat keluar untuk persetujuan"""
     try:
         surat = SuratKeluar.query.get_or_404(surat_id)
 
@@ -473,7 +473,7 @@ def reject_surat_keluar(surat_id):
 @login_required
 @role_required("pimpinan", "admin")
 def approve_surat_keluar_api(surat_id):
-    """API endpoint to approve surat keluar (AJAX)"""
+    """API endpoint untuk approve surat keluar (AJAX)"""
     try:
         surat = SuratKeluar.query.get_or_404(surat_id)
 
@@ -519,7 +519,7 @@ def approve_surat_keluar_api(surat_id):
 @login_required
 @role_required("pimpinan", "admin")
 def reject_surat_keluar_api(surat_id):
-    """API endpoint to reject surat keluar (AJAX)"""
+    """API endpoint untuk reject surat keluar (AJAX)"""
     try:
         surat = SuratKeluar.query.get_or_404(surat_id)
 
@@ -572,7 +572,7 @@ def reject_surat_keluar_api(surat_id):
 @login_required
 @role_required("pimpinan", "admin")
 def approval_stats():
-    """Approval statistics page"""
+    """Halaman statistik persetujuan"""
     try:
         from sqlalchemy import func
 
@@ -584,7 +584,7 @@ def approval_stats():
         surat_keluar_approved = SuratKeluar.query.filter_by(status_suratKeluar="approved").count()
         surat_keluar_rejected = SuratKeluar.query.filter_by(status_suratKeluar="rejected").count()
 
-        # Recent approval history (last 10)
+        # Riwayat persetujuan terbaru (10 terakhir)
         recent_masuk = (
             SuratMasuk.query
             .filter(SuratMasuk.status_suratMasuk.in_(["approved", "rejected"]))
@@ -602,7 +602,7 @@ def approval_stats():
             .all()
         )
 
-        # Merge and sort by approved_at
+        # Gabung dan urutkan berdasarkan approved_at
         recent_activity = []
         for s in recent_masuk:
             recent_activity.append({
@@ -641,61 +641,3 @@ def approval_stats():
         logger.error(f"Error in approval_stats: {str(e)}")
         flash("Terjadi kesalahan saat memuat statistik.", "error")
         return redirect(url_for("main.index"))
-
-
-# ==================== FILE SERVING ====================
-
-
-@approval_bp.route("/surat-masuk/<int:surat_id>/file", methods=["GET"])
-@login_required
-@role_required("pimpinan", "admin")
-def view_file_surat_masuk(surat_id):
-    """Serve the original file (PDF/image) for surat masuk"""
-    surat = SuratMasuk.query.get_or_404(surat_id)
-    if not surat.file_suratMasuk:
-        flash("File tidak tersedia untuk surat ini.", "warning")
-        return redirect(url_for("approval.surat_masuk_detail", surat_id=surat_id))
-
-    # Detect content type: PDF starts with %PDF
-    data = surat.file_suratMasuk
-    if data[:4] == b"%PDF":
-        mimetype = "application/pdf"
-        filename = f"surat_masuk_{surat_id}.pdf"
-    else:
-        mimetype = "image/jpeg"
-        filename = f"surat_masuk_{surat_id}.jpg"
-
-    inline = request.args.get("download") != "1"
-    disposition = "inline" if inline else f'attachment; filename="{filename}"'
-    return Response(
-        data,
-        mimetype=mimetype,
-        headers={"Content-Disposition": disposition},
-    )
-
-
-@approval_bp.route("/surat-keluar/<int:surat_id>/file", methods=["GET"])
-@login_required
-@role_required("pimpinan", "admin")
-def view_file_surat_keluar(surat_id):
-    """Serve the original file (PDF/image) for surat keluar"""
-    surat = SuratKeluar.query.get_or_404(surat_id)
-    if not surat.file_suratKeluar:
-        flash("File tidak tersedia untuk surat ini.", "warning")
-        return redirect(url_for("approval.surat_keluar_detail", surat_id=surat_id))
-
-    data = surat.file_suratKeluar
-    if data[:4] == b"%PDF":
-        mimetype = "application/pdf"
-        filename = f"surat_keluar_{surat_id}.pdf"
-    else:
-        mimetype = "image/jpeg"
-        filename = f"surat_keluar_{surat_id}.jpg"
-
-    inline = request.args.get("download") != "1"
-    disposition = "inline" if inline else f'attachment; filename="{filename}"'
-    return Response(
-        data,
-        mimetype=mimetype,
-        headers={"Content-Disposition": disposition},
-    )

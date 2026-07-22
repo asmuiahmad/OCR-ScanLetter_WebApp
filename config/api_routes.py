@@ -2,7 +2,6 @@ import math
 
 from flask import Blueprint, current_app, jsonify, request
 from flask_login import current_user, login_required
-from sqlalchemy import or_
 
 from config.extensions import db
 from config.models import SuratKeluar, SuratMasuk, UserLoginLog
@@ -16,7 +15,7 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 def get_notification_count():
     """Get notification count for current user - only for admin or pimpinan"""
     try:
-        # Only admin or pimpinan can view notification counts
+        # Hanya admin atau pimpinan yang dapat melihat jumlah notifikasi
         if current_user.role not in ("pimpinan", "admin"):
             # Return empty but successful payload to avoid exposing details to unauthorized users
             return jsonify(
@@ -27,7 +26,7 @@ def get_notification_count():
                 }
             )
 
-        # Count pending surat masuk and surat keluar
+        # Hitung surat masuk dan surat keluar yang pending
         pending_masuk = SuratMasuk.query.filter_by(status_suratMasuk="pending").count()
         pending_keluar = SuratKeluar.query.filter_by(
             status_suratKeluar="pending"
@@ -61,7 +60,7 @@ def get_notification_count():
 def get_recent_notifications():
     """Get recent pending surat masuk and surat keluar for notifications - only for admin or pimpinan"""
     try:
-        # Only admin or pimpinan can view approval notifications
+        # Hanya admin atau pimpinan yang dapat melihat notifikasi persetujuan
         if current_user.role not in ("pimpinan", "admin"):
             return jsonify(
                 {
@@ -70,7 +69,7 @@ def get_recent_notifications():
                 }
             ), 403
 
-        # Fetch pending surat masuk, ordered by creation time (newest first)
+        # Ambil surat masuk yang pending, diurutkan berdasarkan waktu dibuat (terbaru dulu)
         recent_masuk = (
             SuratMasuk.query.filter_by(status_suratMasuk="pending")
             .order_by(SuratMasuk.created_at.desc())
@@ -78,7 +77,7 @@ def get_recent_notifications():
             .all()
         )
 
-        # Fetch pending surat keluar, ordered by creation time (newest first)
+        # Ambil surat keluar yang pending, diurutkan berdasarkan waktu dibuat (terbaru dulu)
         recent_keluar = (
             SuratKeluar.query.filter_by(status_suratKeluar="pending")
             .order_by(SuratKeluar.created_at.desc())
@@ -86,13 +85,13 @@ def get_recent_notifications():
             .all()
         )
 
-        # Count total pending (separate query for accuracy despite limit=10)
+        # Hitung total pending (query terpisah agar akurat meski limit=10)
         pending_masuk = SuratMasuk.query.filter_by(status_suratMasuk="pending").count()
         pending_keluar = SuratKeluar.query.filter_by(status_suratKeluar="pending").count()
 
         surat_list = []
 
-        # Add surat masuk
+        # Tambahkan surat masuk
         for surat in recent_masuk:
             surat_data = {
                 "id": surat.id_suratMasuk,
@@ -115,7 +114,7 @@ def get_recent_notifications():
             }
             surat_list.append(surat_data)
 
-        # Add surat keluar
+        # Tambahkan surat keluar
         for surat in recent_keluar:
             surat_data = {
                 "id": surat.id_suratKeluar,
@@ -138,10 +137,10 @@ def get_recent_notifications():
             }
             surat_list.append(surat_data)
 
-        # Sort by created_at (newest first)
+        # Urutkan berdasarkan created_at (terbaru dulu)
         surat_list.sort(key=lambda x: x.get("created_at_sort") or "", reverse=True)
 
-        # Limit total to 15 items
+        # Batasi total menjadi 15 item
         surat_list = surat_list[:15]
 
         return jsonify(
@@ -291,12 +290,7 @@ def chart_data():
 @api_bp.route("/user-login-logs")
 @login_required
 def get_user_login_logs():
-    """Get user login logs with pagination - Admin only"""
-    if not current_user.is_admin:
-        return jsonify(
-            {"success": False, "message": "Tidak memiliki izin untuk melihat log login"}
-        ), 403
-    
+    """Get user login logs with pagination"""
     try:
         page = request.args.get("page", 1, type=int)
         per_page = min(request.args.get("per_page", 20, type=int), 100)
@@ -398,133 +392,3 @@ def update_ocr_accuracy(id):
         db.session.rollback()
         current_app.logger.error(f"Error updating OCR accuracy: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
-
-
-@api_bp.route("/csrf-token", methods=["GET"])
-@login_required
-def get_csrf_token():
-    """Get fresh CSRF token"""
-    try:
-        from flask_wtf.csrf import generate_csrf
-        token = generate_csrf()
-        return jsonify({"success": True, "csrf_token": token})
-    except Exception as e:
-        current_app.logger.error(f"Error generating CSRF token: {str(e)}")
-        return jsonify({"success": False, "message": str(e)}), 500
-
-
-@api_bp.route("/pegawai/quota/<nip>", methods=["GET"])
-@login_required
-def get_pegawai_quota(nip):
-    """Get leave quota for an employee by NIP"""
-    try:
-        from config.models import Pegawai
-
-        pegawai = Pegawai.query.filter_by(nip=nip).first()
-        if not pegawai:
-            return jsonify({"success": False, "message": "Pegawai tidak ditemukan"}), 404
-
-        return jsonify(
-            {
-                "success": True,
-                "nip": pegawai.nip,
-                "nama": pegawai.nama,
-                "batas_cuti": pegawai.batas_cuti,
-            }
-        )
-
-    except Exception as e:
-        current_app.logger.error(f"Error getting pegawai quota: {str(e)}")
-        return jsonify({"success": False, "message": str(e)}), 500
-
-
-@api_bp.route("/pegawai/search", methods=["GET"])
-@login_required
-def search_pegawai():
-    """Search pegawai by name or NIP"""
-    try:
-        from config.models import Pegawai
-
-        query = request.args.get("q", "").strip()
-        if not query:
-            # Return all pegawai if no query
-            pegawai_list = Pegawai.query.limit(20).all()
-        else:
-            # Search by name or NIP
-            pegawai_list = (
-                Pegawai.query.filter(
-                    or_(
-                        Pegawai.nama.ilike(f"%{query}%"),
-                        Pegawai.nip.ilike(f"%{query}%"),
-                    )
-                )
-                .limit(20)
-                .all()
-            )
-        
-        # Format data for frontend
-        results = []
-        for pegawai in pegawai_list:
-            results.append({
-                "id": pegawai.id,
-                "nama": pegawai.nama,
-                "nip": pegawai.nip,
-                "jabatan": pegawai.jabatan or "",
-                "golongan": pegawai.golongan or "",
-                "nomor_telpon": pegawai.nomor_telpon or "",
-                "batas_cuti": pegawai.batas_cuti,
-                "unit_kerja": getattr(pegawai, 'unit_kerja', None) or pegawai.jabatan or "",
-                "masa_kerja": getattr(pegawai, 'masa_kerja', None) or "",
-                "alamat": ""
-            })
-        
-        return jsonify({"success": True, "pegawai": results})
-    except Exception as e:
-        current_app.logger.error(f"Error searching pegawai: {str(e)}")
-        import traceback
-        current_app.logger.error(traceback.format_exc())
-        return jsonify({"success": False, "message": "Terjadi kesalahan saat mencari data pegawai"}), 500
-
-
-@api_bp.route("/pegawai/<int:pegawai_id>", methods=["GET"])
-@login_required
-def get_pegawai_detail(pegawai_id):
-    """Get detailed pegawai information by ID"""
-    try:
-        from config.models import Pegawai
-        from datetime import date
-
-        pegawai = Pegawai.query.get_or_404(pegawai_id)
-        
-        # Calculate masa kerja if tanggal_lahir is available
-        masa_kerja = getattr(pegawai, 'masa_kerja', None) or ""
-        if not masa_kerja and pegawai.tanggal_lahir:
-            today = date.today()
-            age = today.year - pegawai.tanggal_lahir.year - ((today.month, today.day) < (pegawai.tanggal_lahir.month, pegawai.tanggal_lahir.day))
-            masa_kerja = f"{age} tahun"
-        
-        result = {
-            "id": pegawai.id,
-            "nama": pegawai.nama,
-            "nip": pegawai.nip,
-            "jabatan": pegawai.jabatan or "",
-            "golongan": pegawai.golongan or "",
-            "nomor_telpon": pegawai.nomor_telpon or "",
-            "batas_cuti": pegawai.batas_cuti,
-            "unit_kerja": getattr(pegawai, 'unit_kerja', None) or pegawai.jabatan or "",
-            "masa_kerja": masa_kerja,
-            "alamat": "",
-            "tanggal_lahir": pegawai.tanggal_lahir.strftime("%Y-%m-%d") if pegawai.tanggal_lahir else "",
-            "jenis_kelamin": pegawai.jenis_kelamin or "",
-            "agama": pegawai.agama or "",
-            "riwayat_pendidikan": pegawai.riwayat_pendidikan or "",
-            "riwayat_pekerjaan": pegawai.riwayat_pekerjaan or ""
-        }
-        
-        return jsonify({"success": True, "pegawai": result})
-    except Exception as e:
-        current_app.logger.error(f"Error getting pegawai detail: {str(e)}")
-        import traceback
-        current_app.logger.error(traceback.format_exc())
-        return jsonify({"success": False, "message": "Terjadi kesalahan saat mengambil data pegawai"}), 500
-

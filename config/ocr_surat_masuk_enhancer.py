@@ -1,7 +1,7 @@
 """
 OCR Surat Masuk Enhancer
 =========================
-Special enhancements for OCR surat masuk with pattern recognition
+Peningkatan khusus untuk OCR surat masuk dengan pattern recognition
 """
 
 import re
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class SuratMasukOCREnhancer:
     def __init__(self):
-        # Special patterns for surat masuk
+        # Pattern khusus untuk surat masuk
         self.surat_masuk_patterns = {
             # Pattern untuk jenis surat
             'permohonan_patterns': [
@@ -48,7 +48,7 @@ class SuratMasukOCREnhancer:
             ]
         }
         
-        # Common surat masuk contexts
+        # Konteks surat masuk yang umum
         self.context_corrections = {
             # Konteks permohonan
             'permohonan_context': {

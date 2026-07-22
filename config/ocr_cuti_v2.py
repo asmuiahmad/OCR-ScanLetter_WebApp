@@ -30,7 +30,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import for PDF processing
+# Import untuk PDF processing
 try:
     import pdf2image
 
@@ -82,10 +82,10 @@ def extract_text_from_pdf(pdf_file_or_path):
                 pdf_path = tmp_pdf.name
             temp_file_created = True
 
-        # Convert PDF to images
+        # Konversi PDF ke gambar
         images = pdf2image.convert_from_path(pdf_path)
 
-        # Extract text from each page
+        # Ekstrak teks dari setiap halaman
         full_text = ""
         for i, image in enumerate(images):
             import pytesseract
@@ -95,7 +95,7 @@ def extract_text_from_pdf(pdf_file_or_path):
             if len(images) > 1:
                 full_text += f"\n\n--- PAGE {i + 1} ---\n\n"
 
-        # Delete temporary file if we created it
+        # Hapus file sementara jika kita yang membuat
         if temp_file_created:
             os.unlink(pdf_path)
 
@@ -110,8 +110,8 @@ def extract_text_from_pdf(pdf_file_or_path):
 
 def extract_cuti_fields(text):
     """
-    Extract fields from cuti form using line-by-line parsing strategy
-    to handle 2-column layout read vertically by OCR
+    Ekstrak field dari formulir cuti dengan strategi line-by-line parsing
+    untuk menangani layout 2 kolom yang dibaca OCR secara vertikal
     """
     print("\n" + "=" * 70)
     print("OCR CUTI V2 - EXTRACTION")
@@ -293,7 +293,7 @@ def extract_cuti_fields(text):
                 result["telp"] = value_lines[1]
                 print(f"✓ Telepon: {result['telp']}")
 
-            # Alasan Cuti - value_lines[2] (can be text or number)
+            # Alasan Cuti - value_lines[2] (bisa berupa text atau angka)
             if value_lines[2]:
                 result["alasan_cuti"] = value_lines[2]
                 print(f"✓ Alasan Cuti: {result['alasan_cuti']}")
@@ -476,7 +476,7 @@ def ocr_cuti_v2():
             extracted_text = ""
 
             if file_ext == "pdf":
-                # Process PDF file
+                # Proses file PDF
                 if not PDF_SUPPORT:
                     flash(
                         f"Dukungan PDF tidak tersedia. Install pdf2image: pip install pdf2image",
@@ -508,7 +508,7 @@ def ocr_cuti_v2():
                     f"Successfully extracted {len(extracted_text)} characters from PDF"
                 )
             else:
-                # Process image file
+                # Proses file gambar
                 import pytesseract
                 from PIL import Image
 
@@ -565,17 +565,13 @@ def ocr_cuti_v2():
 @ocr_cuti_v2_bp.route("/list", methods=["GET"])
 @login_required
 def list_cuti_v2():
-    """Menampilkan daftar data cuti yang tersimpan di database dengan pagination"""
+    """Menampilkan daftar data cuti yang tersimpan di database"""
     try:
         # Log access attempt for debugging
         current_app.logger.info(
             f"list_cuti_v2 accessed by user: {getattr(current_user, 'email', 'unknown')} "
             f"(role: {getattr(current_user, 'role', 'unknown')})"
         )
-
-        # Get page number from query parameters (default to 1)
-        page = request.args.get("page", 1, type=int)
-        per_page = 20
 
         # Base query
         query = Cuti.query
@@ -604,14 +600,12 @@ def list_cuti_v2():
             query = query.filter(Cuti.jenis_cuti == jenis_cuti)
             current_app.logger.debug(f"Applied jenis_cuti filter: {jenis_cuti}")
 
-        # Order by created_at descending and paginate
-        entries = query.order_by(Cuti.created_at.desc()).paginate(
-            page=page, per_page=per_page, error_out=False
-        )
-        current_app.logger.info(f"Retrieved {len(entries.items)} cuti records for page {page}")
+        # Order by created_at descending
+        cuti_list = query.order_by(Cuti.created_at.desc()).all()
+        current_app.logger.info(f"Retrieved {len(cuti_list)} cuti records")
 
         # Annotate each cuti with an `approved_role` attribute
-        for c in entries.items:
+        for c in cuti_list:
             c.approved_role = None
             if c.approved_by:
                 try:
@@ -635,7 +629,7 @@ def list_cuti_v2():
         # Render template
         current_app.logger.info("Rendering list_cuti.html template")
         return render_template(
-            "cuti/list_cuti.html", entries=entries, viewer_role=viewer_role
+            "cuti/list_cuti.html", cuti_list=cuti_list, viewer_role=viewer_role
         )
 
     except Exception as e:
@@ -679,7 +673,7 @@ def list_cuti_v2():
             viewer_role = ""
 
         return render_template(
-            "cuti/list_cuti.html", entries=None, viewer_role=viewer_role
+            "cuti/list_cuti.html", cuti_list=[], viewer_role=viewer_role
         ), 500
 
 
