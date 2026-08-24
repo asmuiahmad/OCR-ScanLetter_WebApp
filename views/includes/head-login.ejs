@@ -1,0 +1,27 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Sistem Persuratan PA Banjarbaru' %></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="<%= url_for('static', {filename: 'assets/favicon.svg'}) %>" type="image/svg+xml">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    
+    <!-- Custom Login CSS -->
+    <link rel="stylesheet" href="<%= url_for('static', {filename: 'assets/css/styles-login.css'}) %>">
+    <link rel="stylesheet" href="<%= url_for('static', {filename: 'assets/css/auth.css'}) %>">
+    
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+    </style>
+</head>

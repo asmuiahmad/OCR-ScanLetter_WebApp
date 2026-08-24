@@ -1,0 +1,208 @@
+/* ===== SIDEBAR OVERRIDE - REMOVE PROBLEMATIC STYLES ===== */
+
+/* Remove all transform animations that cause bugs */
+.modern-sidebar .nav-links li a,
+.modern-sidebar .nav-links li a i,
+.modern-sidebar .nav-links li .links_name,
+.modern-sidebar .nav-links li a:hover,
+.modern-sidebar .nav-links li a:hover i,
+.modern-sidebar .nav-links li a:hover .links_name {
+    transform: none !important;
+    animation: none !important;
+    transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+
+/* Override any existing problematic hover effects */
+.modern-sidebar .nav-links li a:hover i {
+    transform: none !important;
+    scale: none !important;
+}
+
+/* Fix dropdown positioning issues */
+.modern-sidebar .nav-links li .dropdown {
+    position: static !important;
+    width: 100% !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Ensure dropdown items don't go offside */
+.modern-sidebar .nav-links li .dropdown a {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Remove any gradient backgrounds that cause visual issues */
+.modern-sidebar .nav-links li a.active {
+    background: transparent !important;
+    background-image: none !important;
+    background-attachment: initial !important;
+    background-origin: initial !important;
+    background-clip: initial !important;
+    background-size: initial !important;
+    background-repeat: initial !important;
+    background-position: initial !important;
+}
+
+/* Fix notification badge positioning */
+.modern-sidebar .nav-links li a .absolute {
+    position: absolute !important;
+    right: 12px !important;
+    top: 12px !important;
+    transform: none !important;
+}
+
+/* Ensure proper z-index for dropdowns */
+.modern-sidebar .nav-links li .dropdown {
+    z-index: 10 !important;
+}
+
+/* Remove box-shadow that might cause visual glitches */
+.modern-sidebar .nav-links li a {
+    box-shadow: none !important;
+}
+
+.modern-sidebar .nav-links li a:hover {
+    box-shadow: none !important;
+}
+
+.modern-sidebar .nav-links li a.active {
+    box-shadow: none !important;
+}
+
+/* Fix user profile section positioning */
+.modern-sidebar .sidebar-user-profile {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+}
+
+/* Ensure proper scrolling behavior */
+.modern-sidebar .nav-links {
+    scroll-behavior: smooth !important;
+}
+
+/* Remove any problematic pseudo-elements */
+.modern-sidebar .nav-links li a::before {
+    display: none !important;
+}
+
+/* Fix collapsed state tooltip positioning */
+.modern-sidebar.sidebar-collapsed .nav-links li a::after {
+    left: 65px !important;
+    transform: translateY(-50%) !important;
+    max-width: 200px !important;
+    word-wrap: break-word !important;
+}
+
+/* Ensure dropdown chevron doesn't interfere with layout */
+.modern-sidebar .nav-links li a .fa-chevron-down {
+    flex-shrink: 0 !important;
+    width: auto !important;
+    min-width: auto !important;
+}
+
+/* Fix any layout issues with flex containers */
+.modern-sidebar .nav-links li a > div {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important;
+}
+
+/* Ensure text doesn't overflow */
+.modern-sidebar .nav-links li .links_name {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    flex: 1 !important;
+}
+
+/* Remove any border-radius that might cause visual issues */
+.modern-sidebar .nav-links li a {
+    border-radius: 6px !important;
+}
+
+.modern-sidebar .nav-links li .dropdown {
+    border-radius: 6px !important;
+}
+
+.modern-sidebar .nav-links li .dropdown a {
+    border-radius: 0 !important;
+}
+
+.modern-sidebar .nav-links li .dropdown a:first-child {
+    border-radius: 6px 6px 0 0 !important;
+}
+
+.modern-sidebar .nav-links li .dropdown a:last-child {
+    border-radius: 0 0 6px 6px !important;
+}
+
+/* Ensure proper color inheritance */
+.modern-sidebar .nav-links li a * {
+    color: inherit !important;
+}
+
+/* Fix any margin/padding issues */
+.modern-sidebar .nav-links li {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Remove any problematic transitions on page load */
+.modern-sidebar.no-transition * {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Ensure proper cursor behavior */
+.modern-sidebar .nav-links li a {
+    cursor: pointer !important;
+}
+
+.modern-sidebar .nav-links li .dropdown a {
+    cursor: pointer !important;
+}
+
+/* Fix any issues with collapsed state */
+.modern-sidebar.sidebar-collapsed .nav-links li a {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+.modern-sidebar.sidebar-collapsed .nav-links li a i {
+    margin: 0 !important;
+}
+
+/* Ensure dropdown is completely hidden in collapsed state */
+.modern-sidebar.sidebar-collapsed .dropdown {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Remove any problematic outline styles */
+.modern-sidebar .nav-links li a:focus {
+    outline: 2px solid #60a5fa !important;
+    outline-offset: 2px !important;
+}
+
+/* No active state borders - keep it clean */
+.modern-sidebar .nav-links li a.active {
+    border: none !important;
+    padding-left: 16px !important;
+}
+
+.modern-sidebar.sidebar-collapsed .nav-links li a.active {
+    border: none !important;
+    padding-left: 12px !important;
+}

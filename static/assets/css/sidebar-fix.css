@@ -1,0 +1,51 @@
+/* Sidebar Layout Fix - Clean and simple */
+
+/* Reset any conflicting styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure body and html don't have margins/padding that could cause gaps */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* When sidebar is collapsed - ensure main content adjusts */
+.modern-sidebar.sidebar-collapsed ~ .main-content {
+  margin-left: 80px !important;
+  width: calc(100vw - 80px) !important;
+}
+
+/* When sidebar is expanded - ensure main content adjusts to new width */
+.modern-sidebar:not(.sidebar-collapsed) ~ .main-content {
+  margin-left: 300px !important;
+  width: calc(100vw - 300px) !important;
+}
+
+/* Fix for any potential scrollbar issues */
+.main-content {
+  overflow-x: hidden;
+  background: #f8fafc;
+}
+
+.modern-sidebar {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.main-content {
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Ensure no gaps on mobile */
+@media (max-width: 768px) {
+  .modern-sidebar {
+    width: 80px !important;
+  }
+  
+  .main-content {
+    margin-left: 80px !important;
+    width: calc(100vw - 80px) !important;
+  }
+}

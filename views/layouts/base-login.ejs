@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <%- include('../includes/head-login') %>
+    
+    <!-- Auth-specific CSS -->
+    <link rel="stylesheet" href="<%= url_for('static', {filename: 'assets/css/auth.css'}) %>">
+
+<body>
+    <div class="login-container">
+        <div class="col-md-7">
+            <div class="login-box">
+                <%- body %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Management -->
+    <script src="<%= url_for('static', {filename: 'assets/js/session-manager.js'}) %>"></script>
+    
+    <!-- Auth-specific JavaScript -->
+    <script src="<%= url_for('static', {filename: 'assets/js/auth/auth.js'}) %>"></script>
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+<%- include('../layouts/base-header') %>
+<div class="container mx-auto py-6 px-4">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 rounded-2xl p-6 text-white shadow-lg flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
+          <i class="fas fa-paper-plane text-yellow-300"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Input Surat Keluar</h1>
+          <p class="text-emerald-100 text-sm mt-0.5">Tambah Berkas Surat Keluar Manual</p>
+        </div>
+      </div>
+    </div>
+    <!-- Alert Notifications -->
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-xl shadow-sm flex items-center justify-between">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-emerald-500 text-xl mr-3"></i>
+        <p class="font-semibold text-sm"><%= success %></p>
+      </div>
+      <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fas fa-times"></i></button>
+    </div>
+    <% } %>
+    <!-- Form Input -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+      <form action="/surat-keluar/input" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <input type="hidden" name="type" value="Keluar">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kategori Surat</label>
+            <input type="text" value="Surat Keluar" readonly class="w-full bg-gray-100 border border-gray-300 rounded-xl p-2.5 text-sm text-gray-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Surat</label>
+            <input type="date" name="tanggal" required value="<%= new Date().toISOString().split('T')[0] %>" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nomor Surat</label>
+          <input type="text" name="nomor" required placeholder="Contoh: W15-A12/1120/HK.05/2026" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm font-mono focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pengirim / Instansi</label>
+            <input type="text" name="pengirim" required placeholder="PA Banjarbaru" value="Pengadilan Agama Banjarbaru" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Penerima / Tujuan</label>
+            <input type="text" name="penerima" required placeholder="Tujuan Surat" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Unggah Berkas Asli (Opsional)</label>
+          <input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 text-sm focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+          <p class="text-[10px] text-gray-500 mt-1">Hanya mendukung format .pdf, .png, .jpg, .jpeg</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Ringkasan Perihal / Isi Surat</label>
+          <textarea name="isi" rows="4" required placeholder="Tuliskan perihal atau deskripsi ringkas isi surat..." class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+        </div>
+        <div class="pt-4 flex items-center justify-end space-x-3 border-t border-gray-100">
+          <button type="reset" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition">
+            Reset
+          </button>
+          <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow transition flex items-center space-x-2">
+            <i class="fas fa-save"></i>
+            <span>Simpan Surat Keluar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('../layouts/base-footer') %>

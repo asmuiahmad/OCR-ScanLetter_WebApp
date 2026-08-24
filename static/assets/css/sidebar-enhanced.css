@@ -1,0 +1,267 @@
+/* ===== CLEAN SIDEBAR FIXES ===== */
+
+/* Fix sidebar scrolling */
+.modern-sidebar {
+    height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.modern-sidebar .nav-links {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: calc(100vh - 140px) !important;
+}
+
+/* Custom scrollbar for nav-links */
+.modern-sidebar .nav-links::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+.modern-sidebar .nav-links::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.modern-sidebar .nav-links::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 2px !important;
+}
+
+.modern-sidebar .nav-links::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Increase icon and text sizes */
+.modern-sidebar .nav-links li a i {
+    font-size: 18px !important;
+    min-width: 28px !important;
+    width: 28px !important;
+    text-align: center !important;
+    color: #e2e8f0 !important;
+}
+
+.modern-sidebar .nav-links li .links_name {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    margin-left: 12px !important;
+    color: #f8fafc !important;
+}
+
+.modern-sidebar .nav-links li a {
+    padding: 12px 16px !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 1px 8px !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* Remove problematic animations and colors */
+.modern-sidebar .nav-links li a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.modern-sidebar .nav-links li a:hover i,
+.modern-sidebar .nav-links li a:hover .links_name {
+    color: #ffffff !important;
+}
+
+/* No active state highlighting - keep it simple */
+.modern-sidebar .nav-links li a.active {
+    background: transparent !important;
+    border: none !important;
+    padding-left: 16px !important;
+}
+
+.modern-sidebar .nav-links li a.active i,
+.modern-sidebar .nav-links li a.active .links_name {
+    color: #f8fafc !important;
+}
+
+/* Fix dropdown positioning and sizing */
+.modern-sidebar .nav-links li .dropdown {
+    background: rgba(0, 0, 0, 0.3) !important;
+    margin: 0 8px !important;
+    border-radius: 6px !important;
+    padding: 4px 0 !important;
+    display: none !important;
+    overflow: hidden !important;
+}
+
+.modern-sidebar .nav-links li .dropdown.show {
+    display: block !important;
+}
+
+.modern-sidebar .nav-links li .dropdown a {
+    padding: 10px 16px 10px 44px !important;
+    font-size: 14px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    color: #cbd5e1 !important;
+}
+
+.modern-sidebar .nav-links li .dropdown a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Dropdown arrow */
+.modern-sidebar .nav-links li a .fa-chevron-down {
+    font-size: 10px !important;
+    margin-left: auto !important;
+    transition: transform 0.2s ease !important;
+}
+
+.modern-sidebar .nav-links li a.active .fa-chevron-down {
+    transform: rotate(180deg) !important;
+}
+
+/* Logo section */
+.modern-sidebar .logo-details {
+    padding: 16px 20px !important;
+    min-height: 60px !important;
+    flex-shrink: 0 !important;
+}
+
+.modern-sidebar .logo_name {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+}
+
+.modern-sidebar .logo-details i {
+    font-size: 22px !important;
+    margin-right: 10px !important;
+    color: #60a5fa !important;
+}
+
+/* User profile section */
+.modern-sidebar .sidebar-user-profile {
+    flex-shrink: 0 !important;
+    padding: 12px 16px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.modern-sidebar .sidebar-user-profile .user-name {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+}
+
+.modern-sidebar .sidebar-user-profile .user-email {
+    font-size: 12px !important;
+    color: #cbd5e1 !important;
+}
+
+.modern-sidebar .sidebar-user-profile .user-role-badge {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+}
+
+.modern-sidebar .sidebar-user-profile .user-avatar i {
+    font-size: 40px !important;
+}
+
+/* Collapsed state */
+.modern-sidebar.sidebar-collapsed .nav-links li a {
+    padding: 12px !important;
+    justify-content: center !important;
+}
+
+.modern-sidebar.sidebar-collapsed .nav-links li a i {
+    font-size: 20px !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.modern-sidebar.sidebar-collapsed .links_name,
+.modern-sidebar.sidebar-collapsed .fa-chevron-down {
+    display: none !important;
+}
+
+.modern-sidebar.sidebar-collapsed .dropdown {
+    display: none !important;
+}
+
+/* Tooltip for collapsed state */
+.modern-sidebar.sidebar-collapsed .nav-links li a::after {
+    content: attr(data-tooltip) !important;
+    position: absolute !important;
+    left: 70px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: white !important;
+    padding: 6px 10px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.2s ease !important;
+    z-index: 1000 !important;
+}
+
+.modern-sidebar.sidebar-collapsed .nav-links li a:hover::after {
+    opacity: 1 !important;
+}
+
+/* Notification badge */
+.modern-sidebar .nav-links li a .absolute {
+    min-width: 18px !important;
+    height: 18px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    right: 8px !important;
+    top: 8px !important;
+}
+
+/* Remove all problematic transitions and animations */
+.modern-sidebar .nav-links li a,
+.modern-sidebar .nav-links li a i,
+.modern-sidebar .nav-links li .links_name {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+.modern-sidebar .nav-links li a:hover i {
+    transform: none !important;
+}
+
+/* Focus states for accessibility */
+.modern-sidebar .nav-links li a:focus {
+    outline: 2px solid #60a5fa !important;
+    outline-offset: 2px !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .modern-sidebar .nav-links li a {
+        padding: 10px 12px !important;
+        min-height: 44px !important;
+    }
+    
+    .modern-sidebar .nav-links li a i {
+        font-size: 16px !important;
+    }
+    
+    .modern-sidebar .nav-links li .links_name {
+        font-size: 14px !important;
+    }
+    
+    .modern-sidebar .logo_name {
+        font-size: 16px !important;
+    }
+    
+    .modern-sidebar .logo-details i {
+        font-size: 20px !important;
+    }
+}

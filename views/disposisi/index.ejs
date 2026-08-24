@@ -1,0 +1,165 @@
+<%- include('../layouts/base-header') %>
+
+<div class="container mx-auto py-6 px-4">
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-purple-700 via-indigo-700 to-blue-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between">
+      <div class="flex items-center space-x-4 mb-4 md:mb-0">
+        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
+          <i class="fas fa-share-alt text-yellow-300"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Disposisi Surat</h1>
+          <p class="text-purple-100 text-sm mt-0.5">Pengelolaan & Instruksi Disposisi Pimpinan Pengadilan Agama Banjarbaru</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modalBuatDisposisi').classList.remove('hidden')" class="px-5 py-2.5 bg-white text-purple-800 hover:bg-purple-50 font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+        <i class="fas fa-plus text-purple-600"></i>
+        <span>Buat Disposisi Baru</span>
+      </button>
+    </div>
+
+    <!-- Alert Notifications -->
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-xl shadow-sm flex items-center justify-between">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-emerald-500 text-xl mr-3"></i>
+        <p class="font-semibold text-sm"><%= success %></p>
+      </div>
+      <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fas fa-times"></i></button>
+    </div>
+    <% } %>
+
+    <!-- Disposisi Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center space-x-2">
+          <h3 class="font-bold text-gray-800">Daftar Lembar Disposisi Surat</h3>
+          <span class="px-2.5 py-0.5 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full"><%= disposisiList ? disposisiList.length : 0 %> Disposisi</span>
+        </div>
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="searchDisposisi" onkeyup="filterDisposisi()" placeholder="Cari surat / penerima..." class="w-full bg-gray-50 border border-gray-300 rounded-xl pl-9 pr-4 py-2 text-sm focus:ring-purple-500 focus:border-purple-500">
+          <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-600" id="tableDisposisi">
+          <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-3.5">Nomor & Tanggal Surat</th>
+              <th class="px-6 py-3.5">Diteruskan Kepada</th>
+              <th class="px-6 py-3.5">Isi Instruksi Disposisi</th>
+              <th class="px-6 py-3.5">Sifat Disposisi</th>
+              <th class="px-6 py-3.5 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% if (disposisiList && disposisiList.length > 0) { %>
+              <% disposisiList.forEach(function(d) { %>
+              <tr class="hover:bg-purple-50/40 transition">
+                <td class="px-6 py-4">
+                  <div class="font-bold text-gray-900"><%= d.nomor_surat %></div>
+                  <div class="text-xs text-gray-500">Tgl: <%= d.tanggal_disposisi %></div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-1 bg-indigo-100 text-indigo-800 rounded-lg text-xs font-semibold"><%= d.tujuan %></span>
+                </td>
+                <td class="px-6 py-4 max-w-xs truncate text-xs font-medium text-gray-800">
+                  <%= d.instruksi %>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-1 rounded-full text-xs font-bold <%= d.sifat === 'Penting' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' %>">
+                    <%= d.sifat || 'Biasa' %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <button onclick="alert('Instruksi Disposisi:\n\n' + '<%= d.instruksi %>')" class="px-3 py-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg text-xs font-bold transition">
+                    <i class="fas fa-print"></i> Cetak Lembar
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="px-6 py-8 text-center text-gray-400">Belum ada lembar disposisi.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Form Buat Disposisi -->
+<div id="modalBuatDisposisi" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+      <h3 class="text-lg font-bold text-gray-900 flex items-center">
+        <i class="fas fa-share-alt text-purple-600 mr-2"></i> Buat Lembar Disposisi Surat
+      </h3>
+      <button onclick="document.getElementById('modalBuatDisposisi').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+    </div>
+
+    <form action="<%= url_for('disposisi.buat') %>" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nomor Surat Masuk</label>
+        <input type="text" name="nomor_surat" required placeholder="W15-A12/1088/HK.05/X/2024" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm font-semibold focus:ring-purple-500 focus:border-purple-500">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Diteruskan Kepada</label>
+          <select name="tujuan" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+            <option value="Panitera">Panitera</option>
+            <option value="Sekretaris">Sekretaris</option>
+            <option value="Hakim">Hakim</option>
+            <option value="Kasubbag Kepegawaian">Kasubbag Kepegawaian</option>
+            <option value="Kasubbag Umum">Kasubbag Umum & Keuangan</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Sifat Disposisi</label>
+          <select name="sifat" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+            <option value="Biasa">Biasa</option>
+            <option value="Penting">Penting</option>
+            <option value="Sangat Segera">Sangat Segera</option>
+            <option value="Rahasia">Rahasia</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Isi Petunjuk / Instruksi Disposisi</label>
+        <textarea name="instruksi" rows="3" required placeholder="Tuliskan petunjuk penanganan atau penyelesaian surat..." class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end space-x-3 border-t border-gray-100">
+        <button type="button" onclick="document.getElementById('modalBuatDisposisi').classList.add('hidden')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition">
+          Batal
+        </button>
+        <button type="submit" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold shadow transition">
+          Simpan Disposisi
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function filterDisposisi() {
+    const input = document.getElementById('searchDisposisi').value.toLowerCase();
+    const rows = document.querySelectorAll('#tableDisposisi tbody tr');
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(input) ? '' : 'none';
+    });
+  }
+</script>
+
+<%- include('../layouts/base-footer') %>

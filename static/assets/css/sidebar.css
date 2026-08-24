@@ -1,0 +1,502 @@
+/* ===== MODERN SIDEBAR STYLES ===== */
+
+/* Modern Sidebar Main Container */
+.modern-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 300px;
+  background: linear-gradient(135deg, #11101d 0%, #1a1a2e 100%);
+  padding: 20px 0 0 0;
+  z-index: 100;
+  overflow: hidden;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-sidebar.sidebar-collapsed {
+  width: 80px !important;
+}
+
+/* Prevent initial animation on page load */
+.modern-sidebar.no-transition {
+  transition: none !important;
+}
+
+.modern-sidebar.no-transition .logo_name,
+.modern-sidebar.no-transition .links_name,
+.modern-sidebar.no-transition .fa-chevron-down {
+  transition: none !important;
+}
+
+.main-content.no-transition {
+  transition: none !important;
+}
+
+/* Ensure main content adjusts properly */
+.main-content {
+  margin-left: 300px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 100vh;
+  width: auto;
+  max-width: 100%;
+}
+
+.modern-sidebar.sidebar-collapsed + .main-content {
+  margin-left: 80px;
+}
+
+/* Logo Section */
+.modern-sidebar .logo-details {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin: 0 10px;
+  transition: background-color 0.2s ease;
+}
+
+.modern-sidebar .logo-details:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-sidebar .logo-details i {
+  font-size: 28px;
+  color: #fff;
+  min-width: 50px;
+  text-align: center;
+}
+
+.modern-sidebar .logo-details .logo_name {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  flex: 1;
+  margin-left: 10px;
+}
+
+.modern-sidebar.sidebar-collapsed .logo_name {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Navigation Links */
+.modern-sidebar ul.nav-links {
+  margin-top: 10px;
+  padding-left: 0;
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 8px;
+  margin-bottom: 0;
+  max-height: calc(100vh - 100px);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modern-sidebar ul.nav-links::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.modern-sidebar ul.nav-links li {
+  position: relative;
+  list-style: none;
+  width: 100%;
+  margin: 0;
+}
+
+.modern-sidebar ul.nav-links li a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #fff;
+  padding: 10px 16px !important;
+  margin: 0 8px !important;
+  border-radius: 8px;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+  gap: 0.75rem;
+  line-height: 1.2;
+}
+
+.modern-sidebar ul.nav-links li a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modern-sidebar ul.nav-links li a.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.modern-sidebar ul.nav-links li i {
+  min-width: 35px;
+  text-align: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.modern-sidebar ul.nav-links li a i {
+  min-width: 28px;
+  text-align: left;
+  font-size: 20px;
+  margin-right: 0.75rem;
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.modern-sidebar ul.nav-links li .links_name {
+  font-size: 15px !important;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  flex: 1;
+  margin-left: 0 !important;
+  overflow: hidden;
+  text-align: left;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+}
+
+.modern-sidebar.sidebar-collapsed .links_name {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Perbaikan alignment untuk struktur konsisten */
+.modern-sidebar .nav-links li a {
+  padding: 10px 16px !important;
+}
+
+.modern-sidebar .nav-links li a > div {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.modern-sidebar .nav-links li a i:first-child {
+  width: 24px;
+  text-align: center;
+  font-size: 14px !important;
+}
+
+.modern-sidebar .nav-links li a .links_name {
+  margin-left: 12px;
+  flex-grow: 1;
+  font-size: 12px !important;
+  font-weight: 400;
+}
+
+/* Perbaikan untuk dropdown icon */
+.modern-sidebar .nav-links li a .fa-chevron-down {
+  font-size: 10px !important;
+  transition: transform 0.3s;
+}
+
+/* Animasi rotasi saat dropdown terbuka */
+.modern-sidebar .nav-links li a.active .fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+/* Konsistensi saat sidebar collapsed */
+.modern-sidebar.sidebar-collapsed .nav-links li a .links_name,
+.modern-sidebar.sidebar-collapsed .nav-links li a .fa-chevron-down {
+  display: none;
+}
+
+.modern-sidebar.sidebar-collapsed .nav-links li a i:first-child {
+  width: 100%;
+  font-size: 16px !important;
+}
+
+/* Dropdown Chevron */
+.modern-sidebar ul.nav-links li .fa-chevron-down {
+  margin-left: auto;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  font-size: 14px !important;
+  flex-shrink: 0;
+}
+
+.modern-sidebar.sidebar-collapsed .fa-chevron-down {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Dropdown Menus */
+.modern-sidebar ul.nav-links li .dropdown {
+  display: none;
+  background: rgba(35, 33, 58, 0.8);
+  margin: 5px 10px 0 10px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.modern-sidebar ul.nav-links li .dropdown.show {
+  display: block;
+  animation: slideDown 0.3s ease;
+}
+
+.modern-sidebar ul.nav-links li .dropdown a {
+  padding: 10px 20px 10px 50px;
+  font-size: 14px;
+  margin: 0;
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+.modern-sidebar ul.nav-links li .dropdown a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(0);
+  padding-left: 55px;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li .dropdown {
+  display: none !important;
+}
+
+/* Badge Styles */
+.modern-sidebar .badge {
+  background: #ff4757;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+  min-width: 18px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.modern-sidebar.sidebar-collapsed .badge {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* User Profile Link (Legacy) */
+.modern-sidebar .user-profile-link {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.modern-sidebar .user-role-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.modern-sidebar .user-role-badge[data-role="admin"] {
+  background: #ff6b6b;
+  color: white;
+}
+
+.modern-sidebar .user-role-badge[data-role="pimpinan"] {
+  background: #4ecdc4;
+  color: white;
+}
+
+.modern-sidebar .user-role-badge[data-role="karyawan"] {
+  background: #45b7d1;
+  color: white;
+}
+
+.modern-sidebar.sidebar-collapsed .user-role-badge {
+  display: none;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+    transform: translateY(0);
+  }
+}
+
+/* Tooltips for Collapsed State */
+.modern-sidebar.sidebar-collapsed ul.nav-links li a::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 70px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 10000;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li a:hover::after {
+  opacity: 1;
+  left: 75px;
+}
+
+/* Hide Scrollbar */
+.modern-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.modern-sidebar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modern-sidebar {
+    width: 80px;
+  }
+  
+  .main-content {
+    margin-left: 80px;
+    width: calc(100vw - 80px);
+  }
+}
+
+/* User profile section styling */
+.sidebar-user-profile {
+  margin-top: auto;
+  padding: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-profile-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.modern-sidebar.sidebar-collapsed .user-profile-container {
+  justify-content: center;
+  gap: 0;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+  transition: all 0.3s ease;
+}
+
+.modern-sidebar.sidebar-collapsed .user-info {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.user-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role-badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Remove ellipsis and let text flow naturally when expanded */
+.modern-sidebar ul.nav-links li .links_name {
+  white-space: nowrap;
+}
+
+.modern-sidebar .logo_name {
+  white-space: nowrap;
+}
+
+.modern-sidebar .logo_name,
+.modern-sidebar .links_name {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li a::after {
+  z-index: 10000;
+  min-width: 140px;
+}
+
+.modern-sidebar.sidebar-collapsed .badge {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.modern-sidebar {
+  width: 280px !important;
+  font-size: 14px !important;
+}
+
+.modern-sidebar .links_name {
+  font-size: 14px !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  max-width: 220px !important;
+}
+
+.modern-sidebar ul.nav-links li a .links_name {
+  margin-left: 0 !important;
+}
+
+.modern-sidebar .logo-details {
+  padding: 0 10px !important;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li a {
+  padding: 8px 16px !important;
+  justify-content: center;
+}
+
+.modern-sidebar.sidebar-collapsed ul.nav-links li a i {
+  margin-right: 0 !important;
+  font-size: 20px !important;
+  min-width: auto !important;
+}

@@ -1,0 +1,1055 @@
+<%- include('../layouts/base-header') %>
+
+<div class="container mx-auto px-4 py-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header Card -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+            <i class="fas fa-inbox"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-800 tracking-tight">Daftar Surat Masuk</h1>
+            <p class="text-xs text-slate-500">Pengelolaan dan rekapitulasi berkas surat masuk Pengadilan Agama Banjarbaru</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <% if (current_user && (current_user.role === 'admin' || current_user.role === 'pegawai')) { %>
+          <a href="/surat/input" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm hover:shadow">
+            <i class="fas fa-plus"></i> Tambah Surat Masuk
+          </a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 mb-6">
+      <form method="GET" action="<%= url_for('surat_masuk.show_surat_masuk') %>" class="flex flex-col sm:flex-row items-center gap-3">
+        <div class="relative flex-1 w-full">
+          <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
+            <i class="fas fa-search"></i>
+          </div>
+          <input type="text" name="search" placeholder="Cari berdasarkan nomor, pengirim, penerima, atau isi..."
+                 value="<%= typeof search !== 'undefined' ? search : '' %>" 
+                 class="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition">
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+            <i class="fas fa-filter"></i> Filter
+          </button>
+          <% if (typeof search !== 'undefined' && search) { %>
+          <a href="<%= url_for('surat_masuk.show_surat_masuk') %>" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium text-xs rounded-xl transition">
+            Reset
+          </a>
+          <% } %>
+        </div>
+      </form>
+    </div>
+
+    <!-- Table Container -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200/80 text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <th class="py-3.5 px-4">Tanggal</th>
+              <th class="py-3.5 px-4">Pengirim</th>
+              <th class="py-3.5 px-4">Penerima</th>
+              <th class="py-3.5 px-4">Nomor Surat</th>
+              <th class="py-3.5 px-4">Isi / Perihal</th>
+              <th class="py-3.5 px-4">Status</th>
+              <th class="py-3.5 px-4 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+            <% if (entries && entries.items && entries.items.length > 0) { %>
+              <% entries.items.forEach(function(entry, index) { %>
+              <tr class="hover:bg-slate-50/80 transition" id="row-masuk-<%= entry.id %>">
+                <td class="py-3 px-4 font-medium whitespace-nowrap"><%= entry.tanggal %></td>
+                <td class="py-3 px-4 font-semibold text-slate-800"><%= entry.pengirim %></td>
+                <td class="py-3 px-4 max-w-xs truncate" title="<%= entry.penerima %>"><%= entry.penerima %></td>
+                <td class="py-3 px-4 font-mono font-medium text-blue-600"><%= entry.nomor %></td>
+                <td class="py-3 px-4 max-w-xs truncate" title="<%= entry.isi %>"><%= entry.isi %></td>
+                <td class="py-3 px-4 whitespace-nowrap">
+                  <% if (entry.status === 'pending') { %>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[11px] font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                  </span>
+                  <% } else if (entry.status === 'approved') { %>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Disetujui
+                  </span>
+                  <% } else if (entry.status === 'rejected') { %>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-full text-[11px] font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Ditolak
+                  </span>
+                  <% } else { %>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 border border-slate-200 rounded-full text-[11px] font-semibold">
+                    <%= entry.status %>
+                  </span>
+                  <% } %>
+                </td>
+                <td class="py-3 px-4 text-center whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5">
+                    <button type="button" 
+                            onclick='openDetailModal("Masuk", <%= JSON.stringify(entry) %>)' 
+                            class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" 
+                            title="Detail Surat">
+                      <i class="fas fa-eye text-sm"></i>
+                    </button>
+                    <button type="button" 
+                            onclick='openPreviewFisikModal("Masuk", <%= JSON.stringify(entry) %>)' 
+                            class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" 
+                            title="Preview Surat Fisik Resmi">
+                      <i class="fas fa-file-invoice text-sm"></i>
+                    </button>
+                    
+                    <% if (current_user && (current_user.role === 'admin' || current_user.role === 'pimpinan')) { %>
+                    <a href="/disposisi" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Buat Disposisi">
+                      <i class="fas fa-share-alt text-sm"></i>
+                    </a>
+                    <% } %>
+
+                    <% if (current_user && current_user.role === 'admin') { %>
+                    <button type="button" 
+                            onclick='openEditModal("Masuk", <%= JSON.stringify(entry) %>)' 
+                            class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition" 
+                            title="Edit Surat">
+                      <i class="fas fa-edit text-sm"></i>
+                    </button>
+                    <button type="button" 
+                            onclick='deleteSurat("masuk", <%= entry.id %>, "<%= entry.nomor %>")' 
+                            class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition" 
+                            title="Hapus Surat">
+                      <i class="fas fa-trash text-sm"></i>
+                    </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" class="py-8 text-center text-slate-400">
+                  <i class="fas fa-folder-open text-3xl mb-2 block"></i>
+                  Tidak ada data surat masuk.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <% if (entries && entries.pages > 1) { %>
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+      <div>
+        Halaman <span class="font-bold text-slate-800"><%= entries.page %></span> dari <span class="font-bold text-slate-800"><%= entries.pages %></span>
+      </div>
+      <div class="flex items-center gap-1">
+        <% if (entries.page > 1) { %>
+        <a href="<%= url_for('surat_masuk.show_surat_masuk', {page: 1}) %>" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+          <i class="fas fa-angle-double-left"></i>
+        </a>
+        <a href="<%= url_for('surat_masuk.show_surat_masuk', {page: entries.prev_num}) %>" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+          <i class="fas fa-angle-left"></i>
+        </a>
+        <% } %>
+
+        <% for (let p = Math.max(1, entries.page - 1); p <= Math.min(entries.pages, entries.page + 2); p++) { %>
+        <a href="<%= url_for('surat_masuk.show_surat_masuk', {page: p}) %>" 
+           class="px-3 py-1.5 rounded-lg font-bold transition <%= p === entries.page ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' %>">
+          <%= p %>
+        </a>
+        <% } %>
+
+        <% if (entries.page < entries.pages) { %>
+        <a href="<%= url_for('surat_masuk.show_surat_masuk', {page: entries.next_num}) %>" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+          <i class="fas fa-angle-right"></i>
+        </a>
+        <a href="<%= url_for('surat_masuk.show_surat_masuk', {page: entries.pages}) %>" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+          <i class="fas fa-angle-double-right"></i>
+        </a>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- DETAIL MODAL SURAT -->
+<div id="detailSuratModal" onclick="if(event.target === this) closeDetailModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 hidden transition-all duration-200">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 border border-slate-100 relative max-h-[90vh] overflow-y-auto transition-all duration-300" onclick="bringToFront(this.parentElement)">
+    <!-- Header (macOS Finder Window Style) -->
+    <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4 select-none">
+      <!-- macOS Window Traffic Light Controls (Top-Left) -->
+      <div class="flex items-center gap-2 group py-1">
+        <!-- Close (Red) -->
+        <button type="button" 
+                onclick="closeDetailModal()" 
+                title="Tutup (Close)" 
+                class="btn-close-window w-3.5 h-3.5 rounded-full bg-[#FF5F56] border border-[#E0443E] hover:bg-[#E0443E] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-times opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+
+        <!-- Minimize (Yellow) -->
+        <button type="button" 
+                onclick="minimizeModal('detailSuratModal', 'Detail Surat')" 
+                title="Minimalisir (Minimize)" 
+                class="btn-min-window w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[#DEA123] hover:bg-[#DEA123] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-minus opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+
+        <!-- Fullscreen / Expand (Green) -->
+        <button type="button" 
+                onclick="toggleModalFullscreen('detailSuratModal')" 
+                title="Layar Penuh (Fullscreen)" 
+                class="btn-full-window w-3.5 h-3.5 rounded-full bg-[#27C93F] border border-[#1AAB29] hover:bg-[#1AAB29] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-expand-alt opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+      </div>
+
+      <!-- Window Title & Icon (Centered Header) -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs shadow-xs">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-slate-800 leading-tight" id="modalTitle">Detail Surat Masuk</h3>
+          <p class="text-[10px] text-slate-500" id="modalSubTitle">Informasi lengkap dokumen surat</p>
+        </div>
+      </div>
+
+      <!-- Right Spacer for visual balance -->
+      <div class="w-12"></div>
+    </div>
+
+    <!-- Content Body -->
+    <div class="space-y-4 text-xs">
+      <!-- Badge Bar -->
+      <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <span class="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Status Verifikasi</span>
+        <div id="modalStatusBadge"></div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nomor Surat</span>
+          <span class="font-mono font-bold text-blue-600 text-xs" id="modalNomor">-</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tanggal Surat</span>
+          <span class="font-semibold text-slate-700 text-xs" id="modalTanggal">-</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pengirim / Instansi</span>
+          <span class="font-bold text-slate-800 text-xs" id="modalPengirim">-</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Penerima / Tujuan</span>
+          <span class="font-semibold text-slate-700 text-xs" id="modalPenerima">-</span>
+        </div>
+      </div>
+
+      <!-- Isi / Perihal -->
+      <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Perihal / Ringkasan Isi Surat</span>
+        <p class="text-slate-800 font-medium leading-relaxed m-0 text-xs" id="modalIsi">-</p>
+      </div>
+
+      <!-- Metadata Audit -->
+      <div class="grid grid-cols-2 gap-3 text-[11px] text-slate-500 pt-1">
+        <div><i class="far fa-clock mr-1"></i> Waktu Input: <span id="modalCreatedAt" class="font-medium text-slate-700">-</span></div>
+        <div id="modalApprovedByContainer"><i class="fas fa-user-check mr-1 text-emerald-500"></i> Disetujui: <span id="modalApprovedBy" class="font-medium text-slate-700">-</span></div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-slate-100 flex-wrap">
+      <button type="button" 
+              onclick="previewSuratFisikFromModal(this)" 
+              class="btn-preview-fisik px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm"
+              title="Preview Bentuk Surat Fisik Resmi">
+        <i class="fas fa-file-invoice"></i> Preview Surat Fisik
+      </button>
+      <button type="button" onclick="window.print()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center gap-1.5">
+        <i class="fas fa-print"></i> Cetak
+      </button>
+      <a href="/disposisi" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+        <i class="fas fa-share-alt"></i> Buat Disposisi
+      </a>
+      <button type="button" onclick="closeDetailModal()" class="btn-bottom-close px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL SURAT -->
+<div id="editSuratModal" onclick="if(event.target === this) closeEditModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 hidden transition-all duration-200">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-100 relative transition-all duration-300" onclick="bringToFront(this.parentElement)">
+    <!-- Header (macOS Finder Window Style) -->
+    <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4 select-none">
+      <!-- macOS Window Traffic Light Controls (Top-Left) -->
+      <div class="flex items-center gap-2 group py-1">
+        <!-- Close (Red) -->
+        <button type="button" 
+                onclick="closeEditModal()" 
+                title="Tutup (Close)" 
+                class="btn-close-window w-3.5 h-3.5 rounded-full bg-[#FF5F56] border border-[#E0443E] hover:bg-[#E0443E] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-times opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+
+        <!-- Minimize (Yellow) -->
+        <button type="button" 
+                onclick="minimizeModal('editSuratModal', 'Edit Surat')" 
+                title="Minimalisir (Minimize)" 
+                class="btn-min-window w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[#DEA123] hover:bg-[#DEA123] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-minus opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+
+        <!-- Fullscreen / Expand (Green) -->
+        <button type="button" 
+                onclick="toggleModalFullscreen('editSuratModal')" 
+                title="Layar Penuh (Fullscreen)" 
+                class="btn-full-window w-3.5 h-3.5 rounded-full bg-[#27C93F] border border-[#1AAB29] hover:bg-[#1AAB29] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-expand-alt opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+      </div>
+
+      <!-- Window Title & Icon (Centered Header) -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-xs shadow-xs">
+          <i class="fas fa-edit"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-slate-800 leading-tight">Edit Data Surat</h3>
+          <p class="text-[10px] text-slate-500">Ubah rincian informasi berkas surat</p>
+        </div>
+      </div>
+
+      <!-- Right Spacer for visual balance -->
+      <div class="w-12"></div>
+    </div>
+
+    <form id="editForm" onsubmit="submitEditForm(event)" class="space-y-3 text-xs">
+      <input type="hidden" id="editType" value="masuk">
+      <input type="hidden" id="editId" value="">
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Nomor Surat</label>
+        <input type="text" id="editNomor" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none" required>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Tanggal</label>
+          <input type="date" id="editTanggal" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none" required>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Status</label>
+          <select id="editStatus" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none">
+            <option value="pending">Pending</option>
+            <option value="approved">Disetujui</option>
+            <option value="rejected">Ditolak</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Pengirim</label>
+        <input type="text" id="editPengirim" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none" required>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Penerima</label>
+        <input type="text" id="editPenerima" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none" required>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Isi / Perihal</label>
+        <textarea id="editIsi" rows="3" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none" required></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="closeEditModal()" class="btn-cancel-edit px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition">Batal</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- PREVIEW SURAT FISIK MODAL TEMPLATE -->
+<div id="previewSuratFisikModalTemplate" onclick="if(event.target === this) closePreviewFisikModal(this.id)" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-[10000] flex items-center justify-center p-2 sm:p-4 hidden transition-all duration-200">
+  <div class="bg-slate-100 rounded-2xl shadow-2xl max-w-3xl w-full border border-slate-300 relative max-h-[92vh] flex flex-col transition-all duration-300" onclick="bringToFront(this.parentElement)">
+    
+    <!-- Window Topbar Header (macOS Finder Style) -->
+    <div class="flex items-center justify-between px-5 py-3 bg-slate-800 text-white rounded-t-2xl border-b border-slate-700 select-none shrink-0">
+      <!-- Traffic Light Controls -->
+      <div class="flex items-center gap-2 group">
+        <button type="button" onclick="closePreviewFisikModal()" title="Tutup (Close)" class="btn-close-window w-3.5 h-3.5 rounded-full bg-[#FF5F56] border border-[#E0443E] hover:bg-[#E0443E] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-times opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+        <button type="button" onclick="minimizeModal('previewSuratFisikModalTemplate', 'Preview Fisik')" title="Minimalisir (Minimize)" class="btn-min-window w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[#DEA123] hover:bg-[#DEA123] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-minus opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+        <button type="button" onclick="toggleModalFullscreen('previewSuratFisikModalTemplate')" title="Layar Penuh (Fullscreen)" class="btn-full-window w-3.5 h-3.5 rounded-full bg-[#27C93F] border border-[#1AAB29] hover:bg-[#1AAB29] active:scale-90 transition flex items-center justify-center text-[7px] text-slate-900 font-bold shadow-xs">
+          <i class="fas fa-expand-alt opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </button>
+      </div>
+
+      <!-- Header Title -->
+      <div class="flex items-center gap-2">
+        <i class="fas fa-file-invoice text-amber-400 text-sm"></i>
+        <span class="text-xs font-bold tracking-wide pf-window-title">Preview Fisik Dokumen Surat</span>
+      </div>
+
+      <!-- Quick Action Icons (Zoom & Print) -->
+      <div class="flex items-center gap-1.5">
+        <button type="button" onclick="zoomPaperModal(this, -0.1)" title="Zoom Out (-)" class="p-1.5 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white text-xs transition">
+          <i class="fas fa-search-minus"></i>
+        </button>
+        <button type="button" onclick="zoomPaperModal(this, 0.1)" title="Zoom In (+)" class="p-1.5 hover:bg-slate-700 rounded-lg text-slate-300 hover:text-white text-xs transition">
+          <i class="fas fa-search-plus"></i>
+        </button>
+        <button type="button" onclick="printPhysicalDocument(this)" title="Cetak Dokumen / Simpan PDF" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg transition flex items-center gap-1 shadow-sm">
+          <i class="fas fa-print"></i> Cetak PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Paper Sheet Container (Scrollable Paper Stage) -->
+    <div class="p-4 sm:p-8 overflow-y-auto flex-1 bg-slate-200/80 flex justify-center items-start scrollbar-thin">
+      
+      <!-- Authentic Physical Paper Sheet (A4 Style) -->
+      <div class="pf-paper bg-white text-slate-900 shadow-2xl border border-slate-300 p-8 sm:p-12 w-full max-w-2xl relative font-serif text-xs leading-relaxed transition-transform duration-200 min-h-[720px] flex flex-col justify-between">
+        
+        <!-- Status Watermark Stamp -->
+        <div class="pf-stamp absolute top-10 right-10 border-4 border-emerald-600/80 text-emerald-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-emerald-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm">
+          <i class="fas fa-check-circle text-sm"></i> DISETUJUI / VALID
+        </div>
+
+        <div>
+          <!-- Kop Surat Resmi Pengadilan Agama Banjarbaru -->
+          <div class="text-center pb-3 border-b-4 border-double border-slate-900 mb-6 select-none">
+            <div class="flex items-center justify-center gap-3 mb-2">
+              <div class="w-14 h-14 rounded-full bg-emerald-900 text-amber-300 flex items-center justify-center text-xl font-bold border-2 border-amber-400 shadow-sm shrink-0">
+                <i class="fas fa-balance-scale"></i>
+              </div>
+              <div class="text-center">
+                <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-900 leading-tight">MAHKAMAH AGUNG REPUBLIK INDONESIA</h2>
+                <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-800">PENGADILAN TINGGI AGAMA BANJARMASIN</h3>
+                <h1 class="text-sm font-extrabold uppercase tracking-wide text-emerald-950">PENGADILAN AGAMA BANJARBARU KELAS I B</h1>
+                <p class="text-[9px] text-slate-600 italic font-sans mt-0.5">Jl. Trikora No. 01, Loktabat Selatan, Kota Banjarbaru, Kalimantan Selatan 70714</p>
+                <p class="text-[8px] text-slate-500 font-sans">Situs Web: www.pa-banjarbaru.go.id | Pos El: info@pa-banjarbaru.go.id</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Letter Meta & Date Grid -->
+          <div class="flex justify-between items-start mb-6 font-sans text-xs">
+            <div class="space-y-1">
+              <div><span class="font-bold w-20 inline-block">Nomor</span>: <span class="pf-nomor font-mono font-bold text-slate-900">W15-A12/902/HM.01/VII/2026</span></div>
+              <div><span class="font-bold w-20 inline-block">Lampiran</span>: <span>1 (satu) Berkas Lengkap</span></div>
+              <div><span class="font-bold w-20 inline-block">Perihal</span>: <span class="pf-perihal font-bold text-slate-900 underline">Undangan & Permohonan Dokumen</span></div>
+            </div>
+            <div class="text-right font-semibold text-slate-800">
+              <div class="pf-tanggal">Banjarbaru, 19 Juli 2026</div>
+            </div>
+          </div>
+
+          <!-- Destination Address -->
+          <div class="mb-6 font-sans text-xs space-y-1">
+            <div>Kepada Yth.</div>
+            <div class="pf-penerima font-bold text-slate-900 text-sm">Wali Kota Banjarbaru</div>
+            <div>di -</div>
+            <div class="pl-4 italic text-slate-700">Tempat</div>
+          </div>
+
+          <!-- Letter Body Paragraphs -->
+          <div class="space-y-3 text-justify text-slate-900 font-serif leading-relaxed text-xs">
+            <p>Dengan hormat,</p>
+            <p>
+              Sehubungan dengan pelaksanaan tugas pokok, fungsi kepemerintahan, serta tertib administrasi di lingkungan Pengadilan Agama Banjarbaru, bersama ini kami sampaikan dokumen resmi terkait:
+            </p>
+            
+            <!-- Boxed Letter Content Detail -->
+            <div class="p-4 bg-slate-50 border-l-4 border-emerald-800 rounded-r-lg font-sans my-3 text-slate-800 leading-normal">
+              <span class="block text-[10px] font-bold text-emerald-900 uppercase tracking-wider mb-1">Rincian / Perihal Isi Surat:</span>
+              <p class="pf-isi font-medium m-0 text-slate-900 text-xs">
+                Surat Permohonan Dukungan Fasilitas Pelaksanaan Sidang Terpadu Isbat Nikah TA 2026.
+              </p>
+            </div>
+
+            <p>
+              Demikian surat ini kami sampaikan untuk dapat dipergunakan sebagaimana mestinya. Atas perhatian, dukungan, dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.
+            </p>
+          </div>
+        </div>
+
+        <!-- Official Signature & Digital Seal Footer -->
+        <div class="mt-12 pt-4 flex justify-between items-end font-sans select-none">
+          <!-- E-Seal / QR Code Verification Badge -->
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
+            <div class="w-12 h-12 bg-white border border-slate-300 rounded-lg p-1 flex items-center justify-center text-slate-800 shrink-0">
+              <i class="fas fa-qrcode text-3xl"></i>
+            </div>
+            <div class="text-[9px] text-slate-600 leading-tight">
+              <span class="font-bold text-emerald-800 block uppercase">E-SIGNATURE MAHKAMAH AGUNG</span>
+              <span>Dokumen ini telah ditandatangani secara elektronik & terverifikasi sistem database PA Banjarbaru.</span>
+            </div>
+          </div>
+
+          <!-- Signature Block -->
+          <div class="text-center space-y-1 font-serif min-w-[200px]">
+            <div class="text-xs font-bold text-slate-800">An. KETUA PENGADILAN AGAMA BANJARBARU</div>
+            <div class="pf-pengirim-title text-[11px] text-slate-700">Pejabat Penandatangan</div>
+            
+            <!-- Digital Stamp Graphic -->
+            <div class="h-16 flex items-center justify-center relative my-1">
+              <span class="font-serif italic text-slate-400 text-[10px] uppercase tracking-widest opacity-60">[ Tanda Tangan Digital ]</span>
+              <div class="absolute inset-0 flex items-center justify-center opacity-25 text-emerald-800 pointer-events-none">
+                <i class="fas fa-stamp text-4xl rotate-12"></i>
+              </div>
+            </div>
+
+            <div class="pf-signer font-extrabold text-xs text-slate-900 underline">Drs. H. Muhammad, M.H.</div>
+            <div class="text-[10px] text-slate-600 font-mono">NIP. 19650412 199203 1 003</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Bottom Footer Bar -->
+    <div class="px-5 py-3 bg-white rounded-b-2xl border-t border-slate-200 flex items-center justify-between text-xs shrink-0">
+      <div class="flex items-center gap-2 text-slate-500 text-[11px]">
+        <i class="fas fa-database text-emerald-600"></i>
+        <span>Data surat tersimpan sah di database Pengadilan Agama Banjarbaru</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="printPhysicalDocument(this)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition flex items-center gap-1.5">
+          <i class="fas fa-print"></i> Cetak
+        </button>
+        <button type="button" onclick="closePreviewFisikModal(this.closest('[id^=\'preview\']').id)" class="btn-bottom-close px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition">
+          Tutup Preview
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FLOATING MINIMIZED WINDOWS DOCK (BAR DIBAWAH MULTI-WINDOW) -->
+<div id="minimizedDock" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[10000] hidden flex items-center gap-3 bg-slate-900/95 text-white px-4 py-2.5 rounded-2xl border border-slate-700/80 shadow-2xl backdrop-blur-md text-xs transition-all duration-300 max-w-[90vw] overflow-x-auto">
+  <div class="flex items-center gap-2 text-amber-400 font-bold text-[11px] uppercase tracking-wider pr-3 border-r border-slate-700/80 shrink-0">
+    <span class="relative flex h-2 w-2">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+    </span>
+    <i class="fas fa-window-restore"></i> Minimized (<span id="minimizedCount">0</span>)
+  </div>
+  <div id="minimizedDockItems" class="flex items-center gap-2 overflow-x-auto py-0.5 scrollbar-none"></div>
+</div>
+
+<script>
+let activeZIndex = 10000;
+const minimizedModals = {};
+
+function bringToFront(modal) {
+  if (!modal) return;
+  activeZIndex++;
+  modal.style.zIndex = activeZIndex;
+}
+
+function getOrCloneModal(templateId, modalId) {
+  let modal = document.getElementById(modalId);
+  if (!modal) {
+    const template = document.getElementById(templateId);
+    if (!template) return null;
+    modal = template.cloneNode(true);
+    modal.id = modalId;
+    document.body.appendChild(modal);
+  }
+  bringToFront(modal);
+  return modal;
+}
+
+function toggleModalFullscreen(modalId) {
+  const modal = document.getElementById(modalId) || document.getElementById('detailSuratModal');
+  if (!modal) return;
+  const card = modal.querySelector('.bg-white');
+  if (!card) return;
+
+  if (card.classList.contains('is-fullscreen')) {
+    card.classList.remove('is-fullscreen', 'max-w-none', 'w-[96vw]', 'max-h-[95vh]');
+    if (card.dataset.origMax) {
+      card.classList.add(card.dataset.origMax);
+    } else {
+      card.classList.add('max-w-xl');
+    }
+  } else {
+    if (card.classList.contains('max-w-xl')) card.dataset.origMax = 'max-w-xl';
+    else if (card.classList.contains('max-w-lg')) card.dataset.origMax = 'max-w-lg';
+    
+    card.classList.remove('max-w-xl', 'max-w-lg');
+    card.classList.add('is-fullscreen', 'max-w-none', 'w-[96vw]', 'max-h-[95vh]');
+  }
+}
+
+function minimizeModal(modalId, defaultTitle) {
+  const id = modalId || 'detailSuratModal';
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  const card = modal.querySelector('.bg-white');
+  if (!card) return;
+
+  card.classList.add('scale-90', 'opacity-0');
+  setTimeout(() => {
+    modal.classList.add('hidden');
+    card.classList.remove('scale-90', 'opacity-0');
+  }, 200);
+
+  let displayTitle = defaultTitle || 'Dokumen Surat';
+  const nomorEl = modal.querySelector('#modalNomor') || modal.querySelector('#editNomor');
+  if (nomorEl && nomorEl.innerText && nomorEl.innerText.trim() !== '-') {
+    displayTitle = (id.includes('edit') ? 'Edit: ' : 'Detail: ') + nomorEl.innerText.trim();
+  } else if (nomorEl && nomorEl.value && nomorEl.value.trim() !== '') {
+    displayTitle = (id.includes('edit') ? 'Edit: ' : 'Detail: ') + nomorEl.value.trim();
+  }
+
+  minimizedModals[id] = { title: displayTitle };
+  renderMinimizedDock();
+}
+
+function restoreModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  bringToFront(modal);
+  const card = modal.querySelector('.bg-white');
+  if (card) {
+    card.classList.add('scale-95');
+    setTimeout(() => card.classList.remove('scale-95'), 50);
+  }
+  delete minimizedModals[modalId];
+  renderMinimizedDock();
+}
+
+function removeMinimizedModal(modalId) {
+  if (minimizedModals[modalId]) {
+    delete minimizedModals[modalId];
+    renderMinimizedDock();
+  }
+}
+
+function renderMinimizedDock() {
+  const dock = document.getElementById('minimizedDock');
+  const itemsContainer = document.getElementById('minimizedDockItems');
+  const countEl = document.getElementById('minimizedCount');
+  if (!dock || !itemsContainer) return;
+
+  const keys = Object.keys(minimizedModals);
+  if (keys.length === 0) {
+    dock.classList.add('hidden');
+    itemsContainer.innerHTML = '';
+    return;
+  }
+
+  if (countEl) countEl.innerText = keys.length;
+  dock.classList.remove('hidden');
+
+  itemsContainer.innerHTML = keys.map(id => {
+    const item = minimizedModals[id];
+    const isEdit = id.includes('edit');
+    const iconClass = isEdit ? 'fa-edit text-amber-400' : 'fa-file-alt text-blue-400';
+
+    return `
+      <div class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700/90 text-slate-100 px-3 py-1.5 rounded-xl border border-slate-700/80 transition-all group shadow-sm shrink-0">
+        <button type="button" onclick="restoreModal('${id}')" class="flex items-center gap-1.5 text-xs font-semibold hover:text-white transition">
+          <i class="fas ${iconClass} text-xs group-hover:scale-110 transition-transform"></i>
+          <span class="max-w-[180px] truncate">${item.title}</span>
+        </button>
+        <button type="button" onclick="closeModalCompletely('${id}')" class="p-1 text-slate-400 hover:text-rose-400 hover:bg-slate-700 rounded-lg transition ml-0.5" title="Tutup Window">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function closeModalCompletely(modalId) {
+  if (modalId && modalId.includes('detail')) closeDetailModal(modalId);
+  else if (modalId && modalId.includes('edit')) closeEditModal(modalId);
+  else {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('hidden');
+  }
+  removeMinimizedModal(modalId);
+}
+
+function openDetailModal(type, entry) {
+  const modalId = `detailModal-${type.toLowerCase()}-${entry.id || Math.random().toString(36).substring(2,7)}`;
+  const modal = getOrCloneModal('detailSuratModal', modalId);
+  if (!modal) return;
+
+  modal.dataset.entry = JSON.stringify(entry);
+  modal.dataset.type = type;
+
+  modal.setAttribute('onclick', `if(event.target === this) closeDetailModal('${modalId}')`);
+
+  const closeBtn = modal.querySelector('.btn-close-window');
+  if (closeBtn) closeBtn.setAttribute('onclick', `closeDetailModal('${modalId}')`);
+
+  const minBtn = modal.querySelector('.btn-min-window');
+  if (minBtn) minBtn.setAttribute('onclick', `minimizeModal('${modalId}', 'Detail Surat: ${entry.nomor || '-'}')`);
+
+  const fullBtn = modal.querySelector('.btn-full-window');
+  if (fullBtn) fullBtn.setAttribute('onclick', `toggleModalFullscreen('${modalId}')`);
+
+  const bottomCloseBtn = modal.querySelector('.btn-bottom-close');
+  if (bottomCloseBtn) bottomCloseBtn.setAttribute('onclick', `closeDetailModal('${modalId}')`);
+
+  const titleEl = modal.querySelector('#modalTitle');
+  if (titleEl) titleEl.innerText = 'Detail Surat ' + type;
+
+  const nomorEl = modal.querySelector('#modalNomor');
+  if (nomorEl) nomorEl.innerText = entry.nomor || '-';
+
+  const tanggalEl = modal.querySelector('#modalTanggal');
+  if (tanggalEl) tanggalEl.innerText = entry.tanggal || '-';
+
+  const pengirimEl = modal.querySelector('#modalPengirim');
+  if (pengirimEl) pengirimEl.innerText = entry.pengirim || '-';
+
+  const penerimaEl = modal.querySelector('#modalPenerima');
+  if (penerimaEl) penerimaEl.innerText = entry.penerima || '-';
+
+  const isiEl = modal.querySelector('#modalIsi');
+  if (isiEl) isiEl.innerText = entry.isi || '-';
+
+  const createdEl = modal.querySelector('#modalCreatedAt');
+  if (createdEl) createdEl.innerText = entry.created_at || '-';
+
+  const statusBadge = modal.querySelector('#modalStatusBadge');
+  if (statusBadge) {
+    if (entry.status === 'approved') {
+      statusBadge.innerHTML = '<span class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs"><i class="fas fa-check-circle mr-1"></i> Disetujui</span>';
+    } else if (entry.status === 'rejected') {
+      statusBadge.innerHTML = '<span class="px-3 py-1 bg-rose-100 text-rose-800 rounded-full font-bold text-xs"><i class="fas fa-times-circle mr-1"></i> Ditolak</span>';
+    } else {
+      statusBadge.innerHTML = '<span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full font-bold text-xs"><i class="fas fa-clock mr-1"></i> Pending</span>';
+    }
+  }
+
+  const appContainer = modal.querySelector('#modalApprovedByContainer');
+  const appEl = modal.querySelector('#modalApprovedBy');
+  if (appContainer && appEl) {
+    if (entry.approved_by) {
+      appContainer.style.display = 'block';
+      appEl.innerText = entry.approved_by;
+    } else {
+      appContainer.style.display = 'none';
+    }
+  }
+
+  removeMinimizedModal(modalId);
+  modal.classList.remove('hidden');
+}
+
+function previewSuratFisikFromModal(btn) {
+  const modal = btn.closest('[id^="detailModal"]') || btn.closest('#detailSuratModal');
+  if (modal && modal.dataset.entry) {
+    try {
+      const entry = JSON.parse(modal.dataset.entry);
+      const type = modal.dataset.type || 'Masuk';
+      openPreviewFisikModal(type, entry);
+    } catch(e) {
+      console.error('Error parsing entry for preview:', e);
+    }
+  }
+}
+
+function openPreviewFisikModal(type, entry) {
+  const modalId = `previewModal-${type.toLowerCase()}-${entry.id || Math.random().toString(36).substring(2,7)}`;
+  const modal = getOrCloneModal('previewSuratFisikModalTemplate', modalId);
+  if (!modal) return;
+
+  modal.dataset.zoom = '1';
+
+  modal.setAttribute('onclick', `if(event.target === this) closePreviewFisikModal('${modalId}')`);
+
+  const closeBtn = modal.querySelector('.btn-close-window');
+  if (closeBtn) closeBtn.setAttribute('onclick', `closePreviewFisikModal('${modalId}')`);
+
+  const minBtn = modal.querySelector('.btn-min-window');
+  if (minBtn) minBtn.setAttribute('onclick', `minimizeModal('${modalId}', 'Preview: ${entry.nomor || '-'}')`);
+
+  const fullBtn = modal.querySelector('.btn-full-window');
+  if (fullBtn) fullBtn.setAttribute('onclick', `toggleModalFullscreen('${modalId}')`);
+
+  const windowTitle = modal.querySelector('.pf-window-title');
+  if (windowTitle) windowTitle.innerText = `Preview Physical Letter (${type}): ${entry.nomor || ''}`;
+
+  const nomorEl = modal.querySelector('.pf-nomor');
+  if (nomorEl) nomorEl.innerText = entry.nomor || 'W15-A12/902/HM.01/VII/2026';
+
+  const perihalEl = modal.querySelector('.pf-perihal');
+  if (perihalEl) perihalEl.innerText = entry.isi || 'Penyampaian Berkas Dokumen Resmi';
+
+  const tanggalEl = modal.querySelector('.pf-tanggal');
+  if (tanggalEl) {
+    const rawDate = entry.tanggal ? new Date(entry.tanggal) : new Date();
+    const formatted = !isNaN(rawDate.getTime()) 
+      ? rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+      : entry.tanggal || '19 Juli 2026';
+    tanggalEl.innerText = 'Banjarbaru, ' + formatted;
+  }
+
+  const pengirimEl = modal.querySelector('.pf-pengirim-title');
+  if (pengirimEl) pengirimEl.innerText = entry.pengirim || 'Pengadilan Agama Banjarbaru';
+
+  const penerimaEl = modal.querySelector('.pf-penerima');
+  if (penerimaEl) penerimaEl.innerText = entry.penerima || 'Ketua Pengadilan Agama Banjarbaru';
+
+  const isiEl = modal.querySelector('.pf-isi');
+  if (isiEl) isiEl.innerText = entry.isi || 'Surat resminya telah diregistrasi di database Pengadilan Agama Banjarbaru.';
+
+  const signerEl = modal.querySelector('.pf-signer');
+  if (signerEl) signerEl.innerText = entry.approved_by || entry.pengirim || 'Drs. H. Muhammad, M.H.';
+
+  const stampEl = modal.querySelector('.pf-stamp');
+  if (stampEl) {
+    if (entry.status === 'approved') {
+      stampEl.className = 'pf-stamp absolute top-10 right-10 border-4 border-emerald-600/80 text-emerald-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-emerald-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm';
+      stampEl.innerHTML = '<i class="fas fa-check-circle text-sm"></i> DISETUJUI / VALID';
+    } else if (entry.status === 'rejected') {
+      stampEl.className = 'pf-stamp absolute top-10 right-10 border-4 border-rose-600/80 text-rose-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-rose-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm';
+      stampEl.innerHTML = '<i class="fas fa-times-circle text-sm"></i> DITOLAK';
+    } else {
+      stampEl.className = 'pf-stamp absolute top-10 right-10 border-4 border-amber-600/80 text-amber-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-amber-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm';
+      stampEl.innerHTML = '<i class="fas fa-clock text-sm"></i> DRAFT / PENDING';
+    }
+  }
+
+  removeMinimizedModal(modalId);
+  modal.classList.remove('hidden');
+}
+
+function closePreviewFisikModal(modalId) {
+  const id = modalId || 'previewSuratFisikModalTemplate';
+  const modal = document.getElementById(id);
+  if (modal) {
+    const card = modal.querySelector('.bg-slate-100');
+    if (card && card.classList.contains('is-fullscreen')) {
+      toggleModalFullscreen(id);
+    }
+    modal.classList.add('hidden');
+    if (id !== 'previewSuratFisikModalTemplate') {
+      modal.remove();
+    }
+  }
+  removeMinimizedModal(id);
+}
+
+function zoomPaperModal(btn, delta) {
+  const modal = btn.closest('[id^="previewModal"]') || btn.closest('#previewSuratFisikModalTemplate');
+  if (!modal) return;
+  const paper = modal.querySelector('.pf-paper');
+  if (!paper) return;
+  let zoom = parseFloat(modal.dataset.zoom || '1') + delta;
+  zoom = Math.min(Math.max(0.6, zoom), 1.4);
+  modal.dataset.zoom = zoom.toString();
+  paper.style.transform = `scale(${zoom})`;
+  paper.style.transformOrigin = 'top center';
+}
+
+function printPhysicalDocument(btn) {
+  const modal = btn.closest('[id^="previewModal"]') || btn.closest('#previewSuratFisikModalTemplate');
+  if (!modal) {
+    window.print();
+    return;
+  }
+  const paper = modal.querySelector('.pf-paper');
+  if (!paper) {
+    window.print();
+    return;
+  }
+  
+  const printWin = window.open('', '_blank', 'width=800,height=900');
+  if (printWin) {
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Cetak Surat Fisik Resmi</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+          @page { size: A4; margin: 15mm; }
+          body { font-family: Georgia, serif; background: white; color: black; }
+        </style>
+      </head>
+      <body class="p-6">
+        <div class="max-w-2xl mx-auto">
+          ${paper.outerHTML}
+        </div>
+        <script>
+          setTimeout(() => {
+            window.print();
+          }, 600);
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWin.document.close();
+  } else {
+    window.print();
+  }
+}
+
+function closeDetailModal(modalId) {
+  const id = modalId || 'detailSuratModal';
+  const modal = document.getElementById(id);
+  if (modal) {
+    const card = modal.querySelector('.bg-white');
+    if (card && card.classList.contains('is-fullscreen')) {
+      toggleModalFullscreen(id);
+    }
+    modal.classList.add('hidden');
+    if (id !== 'detailSuratModal') {
+      modal.remove();
+    }
+  }
+  removeMinimizedModal(id);
+}
+
+function openEditModal(type, entry) {
+  const modalId = `editModal-${type.toLowerCase()}-${entry.id || Math.random().toString(36).substring(2,7)}`;
+  const modal = getOrCloneModal('editSuratModal', modalId);
+  if (!modal) return;
+
+  modal.setAttribute('onclick', `if(event.target === this) closeEditModal('${modalId}')`);
+
+  const closeBtn = modal.querySelector('.btn-close-window');
+  if (closeBtn) closeBtn.setAttribute('onclick', `closeEditModal('${modalId}')`);
+
+  const minBtn = modal.querySelector('.btn-min-window');
+  if (minBtn) minBtn.setAttribute('onclick', `minimizeModal('${modalId}', 'Edit Surat: ${entry.nomor || '-'}')`);
+
+  const fullBtn = modal.querySelector('.btn-full-window');
+  if (fullBtn) fullBtn.setAttribute('onclick', `toggleModalFullscreen('${modalId}')`);
+
+  const cancelBtn = modal.querySelector('.btn-cancel-edit');
+  if (cancelBtn) cancelBtn.setAttribute('onclick', `closeEditModal('${modalId}')`);
+
+  const form = modal.querySelector('form');
+  if (form) form.setAttribute('onsubmit', `submitEditForm(event, '${modalId}')`);
+
+  const editType = modal.querySelector('#editType');
+  if (editType) editType.value = type.toLowerCase();
+
+  const editId = modal.querySelector('#editId');
+  if (editId) editId.value = entry.id;
+
+  const editNomor = modal.querySelector('#editNomor');
+  if (editNomor) editNomor.value = entry.nomor || '';
+
+  const editTanggal = modal.querySelector('#editTanggal');
+  if (editTanggal) editTanggal.value = entry.tanggal || '';
+
+  const editStatus = modal.querySelector('#editStatus');
+  if (editStatus) editStatus.value = entry.status || 'pending';
+
+  const editPengirim = modal.querySelector('#editPengirim');
+  if (editPengirim) editPengirim.value = entry.pengirim || '';
+
+  const editPenerima = modal.querySelector('#editPenerima');
+  if (editPenerima) editPenerima.value = entry.penerima || '';
+
+  const editIsi = modal.querySelector('#editIsi');
+  if (editIsi) editIsi.value = entry.isi || '';
+
+  removeMinimizedModal(modalId);
+  modal.classList.remove('hidden');
+}
+
+function closeEditModal(modalId) {
+  const id = modalId || 'editSuratModal';
+  const modal = document.getElementById(id);
+  if (modal) {
+    const card = modal.querySelector('.bg-white');
+    if (card && card.classList.contains('is-fullscreen')) {
+      toggleModalFullscreen(id);
+    }
+    modal.classList.add('hidden');
+    if (id !== 'editSuratModal') {
+      modal.remove();
+    }
+  }
+  removeMinimizedModal(id);
+}
+
+async function submitEditForm(e, modalId) {
+  e.preventDefault();
+  const id = modalId || 'editSuratModal';
+  const modal = document.getElementById(id);
+  if (!modal) return;
+
+  const type = modal.querySelector('#editType').value;
+  const suratId = modal.querySelector('#editId').value;
+  const payload = {
+    nomor: modal.querySelector('#editNomor').value,
+    tanggal: modal.querySelector('#editTanggal').value,
+    status: modal.querySelector('#editStatus').value,
+    pengirim: modal.querySelector('#editPengirim').value,
+    penerima: modal.querySelector('#editPenerima').value,
+    isi: modal.querySelector('#editIsi').value
+  };
+
+  try {
+    const res = await fetch(`/api/surat-${type}/${suratId}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('Data surat berhasil diperbarui!');
+      window.location.reload();
+    } else {
+      alert(data.message || 'Gagal memperbarui surat.');
+    }
+  } catch (err) {
+    alert('Terjadi kesalahan jaringan.');
+  }
+}
+
+async function deleteSurat(type, id, nomor) {
+  if (confirm(`Apakah Anda yakin ingin menghapus Surat ${type.toUpperCase()} No: "${nomor}"?`)) {
+    try {
+      const res = await fetch(`/api/surat-${type}/${id}/delete`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        const row = document.getElementById(`row-${type}-${id}`);
+        if (row) row.remove();
+        alert(`Surat ${nomor} berhasil dihapus.`);
+      } else {
+        alert(data.message || 'Gagal menghapus surat.');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan sistem.');
+    }
+  }
+}
+</script>
+
+<%- include('../layouts/base-footer') %>

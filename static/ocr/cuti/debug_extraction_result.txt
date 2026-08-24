@@ -1,0 +1,23 @@
+============================================================
+HASIL EKSTRAKSI OCR CUTI
+============================================================
+[✓] nomor_surat              : Not found
+[✓] nama                     : Ahmad Asmui
+[✗] nip                      : Tidak terbaca
+[✓] jabatan                  : test
+[✓] gol_ruang                : test
+[✓] unit_kerja               : test
+[✓] masa_kerja               : test
+[✓] alamat                   : Nomor Telepon
+[✗] telp                     : Tidak terbaca
+[✗] jenis_cuti               : Tidak terbaca
+[✗] alasan_cuti              : Tidak terbaca
+[✗] lama_cuti                : Tidak terbaca
+[✗] tanggal_mulai_cuti       : Tidak terbaca
+[✗] tanggal_selesai_cuti     : Tidak terbaca
+[✓] no_suratmasuk            : II. JENIS CUTI YANG DIMOHON
+[✓] jenis_surat              : Cuti
+[✓] pengirim                 : Ahmad Asmui
+[✓] penerima                 : Ketua Pengadilan Agama
+[✓] isi                      : Surat Permintaan Cuti oleh Ahmad Asmui (NIP: N/A) - N/A
+============================================================

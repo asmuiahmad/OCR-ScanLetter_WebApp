@@ -1,0 +1,233 @@
+<%- include('../layouts/base-header') %>
+
+<div class="container mx-auto py-6 px-4">
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- Welcome Header -->
+    <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-2xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between">
+      <div class="space-y-2 mb-4 md:mb-0">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-medium text-blue-200">
+          <i class="fas fa-building text-yellow-300"></i>
+          <span>Pengadilan Agama Banjarbaru</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+          Selamat Datang, <%= current_user ? current_user.email.split('@')[0] : 'Pengguna' %>!
+        </h1>
+        <p class="text-blue-100 text-sm max-w-xl">
+          Sistem Informasi Pengelolaan Surat Masuk, Surat Keluar, Disposisi & Ekstraksi Berkas Otomatis berbasis OCR.
+        </p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <a href="<%= url_for('ocr.ocr_surat_masuk') %>" class="px-5 py-2.5 bg-white text-blue-800 hover:bg-blue-50 font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+          <i class="fas fa-eye text-blue-600"></i>
+          <span>Mulai OCR Berkas</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Total Surat Masuk Card -->
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition flex items-center justify-between">
+        <div class="space-y-1">
+          <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Total Surat Masuk</p>
+          <h2 class="text-4xl font-extrabold text-gray-900">
+            <%= typeof suratMasuk_count !== 'undefined' ? suratMasuk_count : 0 %>
+          </h2>
+          <p class="text-xs text-gray-500">Berkas surat masuk terdaftar</p>
+        </div>
+        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+          <i class="fas fa-inbox"></i>
+        </div>
+      </div>
+      
+      <!-- Total Surat Keluar Card -->
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition flex items-center justify-between">
+        <div class="space-y-1">
+          <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Total Surat Keluar</p>
+          <h2 class="text-4xl font-extrabold text-gray-900">
+            <%= typeof suratKeluar_count !== 'undefined' ? suratKeluar_count : 0 %>
+          </h2>
+          <p class="text-xs text-gray-500">Berkas surat keluar terdaftar</p>
+        </div>
+        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+          <i class="fas fa-paper-plane"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Yearly Stats -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-3.5 bg-indigo-600 text-white flex items-center justify-between">
+          <h3 class="text-sm font-bold flex items-center space-x-2">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Statistik Tahunan</span>
+          </h3>
+          <span class="text-xs px-2 py-0.5 bg-white/20 rounded-full font-medium"><%= new Date().getFullYear() %></span>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Surat Masuk</p>
+              <p class="text-xl font-bold text-gray-900"><%= typeof suratMasuk_this_year !== 'undefined' ? suratMasuk_this_year : 0 %></p>
+            </div>
+            <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+              <i class="fas fa-inbox text-lg"></i>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Surat Keluar</p>
+              <p class="text-xl font-bold text-gray-900"><%= typeof suratKeluar_this_year !== 'undefined' ? suratKeluar_this_year : 0 %></p>
+            </div>
+            <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+              <i class="fas fa-paper-plane text-lg"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Monthly Stats -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-3.5 bg-pink-600 text-white flex items-center justify-between">
+          <h3 class="text-sm font-bold flex items-center space-x-2">
+            <i class="fas fa-chart-line"></i>
+            <span>Statistik Bulanan</span>
+          </h3>
+          <span class="text-xs px-2 py-0.5 bg-white/20 rounded-full font-medium">Bulan Ini</span>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Surat Masuk</p>
+              <p class="text-xl font-bold text-gray-900"><%= typeof suratMasuk_this_month !== 'undefined' ? suratMasuk_this_month : 0 %></p>
+            </div>
+            <div class="p-2.5 bg-pink-50 text-pink-600 rounded-xl">
+              <i class="fas fa-inbox text-lg"></i>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Surat Keluar</p>
+              <p class="text-xl font-bold text-gray-900"><%= typeof suratKeluar_this_month !== 'undefined' ? suratKeluar_this_month : 0 %></p>
+            </div>
+            <div class="p-2.5 bg-pink-50 text-pink-600 rounded-xl">
+              <i class="fas fa-paper-plane text-lg"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Weekly Stats -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-3.5 bg-emerald-600 text-white flex items-center justify-between">
+          <h3 class="text-sm font-bold flex items-center space-x-2">
+            <i class="fas fa-clock"></i>
+            <span>Statistik Mingguan</span>
+          </h3>
+          <span class="text-xs px-2 py-0.5 bg-white/20 rounded-full font-medium">Minggu Ini</span>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Surat Masuk</p>
+              <p class="text-xl font-bold text-gray-900"><%= typeof suratMasuk_this_week !== 'undefined' ? suratMasuk_this_week : 0 %></p>
+            </div>
+            <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+              <i class="fas fa-inbox text-lg"></i>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Surat Keluar</p>
+              <p class="text-xl font-bold text-gray-900"><%= typeof suratKeluar_this_week !== 'undefined' ? suratKeluar_this_week : 0 %></p>
+            </div>
+            <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+              <i class="fas fa-paper-plane text-lg"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity and User Login -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Log Surat Masuk & Keluar -->
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+          <h3 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+            <i class="fas fa-history text-blue-600"></i>
+            <span>Aktivitas Surat Terakhir</span>
+          </h3>
+          <span class="text-xs text-gray-400">Terbaru</span>
+        </div>
+        <div class="space-y-3">
+          <% if (typeof recent_surat !== 'undefined' && recent_surat.length > 0) { %>
+            <% recent_surat.forEach(function(surat) { %>
+            <div class="p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl transition flex items-center space-x-3 border border-gray-100">
+              <div class="p-2.5 rounded-xl <%= surat.type === 'Masuk' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600' %> flex-shrink-0">
+                <i class="fas <%= surat.type === 'Masuk' ? 'fa-inbox' : 'fa-paper-plane' %> text-base"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-bold text-gray-800 truncate"><%= surat.pengirim %></p>
+                  <span class="px-2 py-0.5 text-xs font-semibold rounded-full <%= surat.type === 'Masuk' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800' %> ml-2">
+                    <%= surat.type %>
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-0.5 truncate">
+                  <%= surat.date %> &bull; <span class="font-mono text-gray-700"><%= surat.nomor %></span>
+                </p>
+              </div>
+            </div>
+            <% }); %>
+          <% } else { %>
+            <p class="text-gray-400 text-sm text-center py-6">Belum ada aktivitas surat.</p>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Recent User Logins -->
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+          <h3 class="text-base font-bold text-gray-800 flex items-center space-x-2">
+            <i class="fas fa-users-cog text-purple-600"></i>
+            <span>Sesi Login Terakhir</span>
+          </h3>
+        </div>
+        <div class="space-y-3">
+          <% if (typeof users !== 'undefined' && users.length > 0) { %>
+            <% users.forEach(function(user) { %>
+            <div class="p-3 bg-gray-50 rounded-xl flex items-center space-x-3 border border-gray-100">
+              <div class="p-2.5 rounded-xl bg-purple-100 text-purple-600 flex-shrink-0">
+                <i class="fas fa-user-circle text-base"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-gray-800 truncate"><%= user.email %></p>
+                <p class="text-xs text-gray-400 mt-0.5"><%= user.last_login %></p>
+              </div>
+            </div>
+            <% }); %>
+          <% } else { %>
+            <div class="p-3 bg-gray-50 rounded-xl flex items-center space-x-3 border border-gray-100">
+              <div class="p-2.5 rounded-xl bg-purple-100 text-purple-600 flex-shrink-0">
+                <i class="fas fa-user-circle text-base"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-gray-800 truncate"><%= current_user ? current_user.email : 'pengguna@sistem.local' %></p>
+                <p class="text-xs text-gray-400 mt-0.5">Sesi Aktif Sekarang</p>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layouts/base-footer') %>

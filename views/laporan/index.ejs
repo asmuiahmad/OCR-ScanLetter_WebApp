@@ -1,0 +1,101 @@
+<%- include('../layouts/base-header') %>
+
+<div class="container mx-auto py-6 px-4">
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between">
+      <div class="flex items-center space-x-4 mb-4 md:mb-0">
+        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
+          <i class="fas fa-print text-yellow-300"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Laporan & Rekapitulasi Surat</h1>
+          <p class="text-blue-100 text-sm mt-0.5">Cetak Laporan Administrasi Perkara & Kepegawaian PA Banjarbaru</p>
+        </div>
+      </div>
+      <button onclick="window.print()" class="px-5 py-2.5 bg-white text-blue-800 hover:bg-blue-50 font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+        <i class="fas fa-print text-blue-600"></i>
+        <span>Cetak Laporan</span>
+      </button>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+      <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-filter text-blue-600 mr-2"></i> Filter Periode Laporan
+      </h3>
+      <form action="<%= url_for('laporan.cetak') %>" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Laporan</label>
+          <select name="jenis" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="semua">Semua Surat (Masuk & Keluar)</option>
+            <option value="masuk">Surat Masuk Saja</option>
+            <option value="keluar">Surat Keluar Saja</option>
+            <option value="cuti">Rekapitulasi Cuti Pegawai</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Mulai</label>
+          <input type="date" name="start_date" value="2026-01-01" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Selesai</label>
+          <input type="date" name="end_date" value="2026-12-31" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow transition">
+            Tampilkan Laporan
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Printable Table Container -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+      <div class="text-center pb-4 border-b border-gray-200">
+        <h2 class="text-lg font-extrabold text-gray-900 uppercase tracking-wide">PENGADILAN AGAMA BANJARBARU KELAS I B</h2>
+        <p class="text-xs text-gray-500">Jl. Trikora No. 8, Banjarbaru, Kalimantan Selatan &bull; Telepon: (0511) 4772123</p>
+        <p class="text-sm font-bold text-blue-700 mt-2 uppercase underline">REKAPITULASI SURAT MASUK & SURAT KELUAR TAHUN 2026</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-700 border border-gray-200 divide-y divide-gray-200">
+          <thead class="bg-gray-100 text-xs uppercase font-bold text-gray-700">
+            <tr>
+              <th class="px-4 py-3 border-r">No</th>
+              <th class="px-4 py-3 border-r">Tgl Surat</th>
+              <th class="px-4 py-3 border-r">Nomor Surat</th>
+              <th class="px-4 py-3 border-r">Pengirim / Instansi</th>
+              <th class="px-4 py-3 border-r">Penerima / Tujuan</th>
+              <th class="px-4 py-3 border-r">Ringkasan Perihal</th>
+              <th class="px-4 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 text-xs">
+            <% if (laporanList && laporanList.length > 0) { %>
+              <% laporanList.forEach(function(item, idx) { %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 border-r font-bold text-center"><%= idx + 1 %></td>
+                <td class="px-4 py-3 border-r font-medium"><%= item.tanggal %></td>
+                <td class="px-4 py-3 border-r font-mono font-bold"><%= item.nomor %></td>
+                <td class="px-4 py-3 border-r"><%= item.pengirim %></td>
+                <td class="px-4 py-3 border-r"><%= item.penerima %></td>
+                <td class="px-4 py-3 border-r"><%= item.isi %></td>
+                <td class="px-4 py-3 font-semibold text-emerald-700"><%= item.status.toUpperCase() %></td>
+              </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" class="px-4 py-6 text-center text-gray-400">Tidak ada data untuk periode ini.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layouts/base-footer') %>

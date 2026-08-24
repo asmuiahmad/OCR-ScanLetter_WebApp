@@ -1,0 +1,157 @@
+/* ===== CONSISTENT HEADER STYLES ===== */
+
+/* Standard header container */
+.page-header {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.page-header h1,
+.page-header h2,
+.page-header h3 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.page-header i {
+  margin-right: 0.75rem;
+  font-size: 1.25rem;
+}
+
+/* Form card consistent styling */
+.form-card {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.form-card .page-header {
+  border-radius: 0;
+}
+
+/* Override existing inconsistent headers */
+.bg-gradient-to-r.from-primary.to-secondary {
+  background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.bg-gradient-to-r.from-primary.to-secondary h1,
+.bg-gradient-to-r.from-primary.to-secondary h2,
+.bg-gradient-to-r.from-primary.to-secondary h3 {
+  color: white !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* Dashboard specific adjustments */
+.dashboard-header {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  padding: 0.75rem 1rem;
+}
+
+/* Statistics cards header consistency */
+.stats-card-header {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* Login page header adjustments */
+.login h1 {
+  font-size: 2rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Table header consistency */
+.table-header {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Modal header consistency */
+.modal-header {
+  background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.modal-title {
+  color: white !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-header h1,
+  .page-header h2,
+  .page-header h3 {
+    font-size: 1.25rem;
+  }
+  
+  .page-header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .page-header i {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Fix for existing templates */
+.px-4.py-2 {
+  padding: 0.75rem 1rem !important;
+}
+
+/* Ensure consistent text color */
+.text-black {
+  color: white !important;
+}
+
+/* Card header variants */
+.card-header-primary {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.card-header-success {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.card-header-warning {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.card-header-danger {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}

@@ -1,0 +1,134 @@
+<%- include('../layouts/base-header') %>
+
+<div class="container mx-auto py-6 px-4">
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-purple-700 via-indigo-700 to-blue-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between">
+      <div class="flex items-center space-x-4 mb-4 md:mb-0">
+        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
+          <i class="fas fa-user-cog text-yellow-300"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Manajemen Akun Pengguna</h1>
+          <p class="text-purple-100 text-sm mt-0.5">Pengaturan Hak Akses & Peran Pengguna PA Banjarbaru</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modalTambahUser').classList.remove('hidden')" class="px-5 py-2.5 bg-white text-purple-800 hover:bg-purple-50 font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+        <i class="fas fa-user-plus text-purple-600"></i>
+        <span>Tambah Pengguna Baru</span>
+      </button>
+    </div>
+
+    <!-- Alert Notifications -->
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-xl shadow-sm flex items-center justify-between">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle text-emerald-500 text-xl mr-3"></i>
+        <p class="font-semibold text-sm"><%= success %></p>
+      </div>
+      <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fas fa-times"></i></button>
+    </div>
+    <% } %>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="font-bold text-gray-800">Daftar Pengguna Sistem</h3>
+        <span class="px-2.5 py-0.5 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full"><%= usersList ? usersList.length : 0 %> Pengguna</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-600">
+          <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-3.5">Email Pengguna</th>
+              <th class="px-6 py-3.5">Peran / Role</th>
+              <th class="px-6 py-3.5">Login Terakhir</th>
+              <th class="px-6 py-3.5">Status</th>
+              <th class="px-6 py-3.5 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% if (usersList && usersList.length > 0) { %>
+              <% usersList.forEach(function(u) { %>
+              <tr class="hover:bg-purple-50/40 transition">
+                <td class="px-6 py-4 font-bold text-gray-900">
+                  <%= u.email %>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-1 text-xs font-bold rounded-full <%= u.role === 'admin' ? 'bg-red-100 text-red-800' : (u.role === 'pimpinan' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800') %>">
+                    <%= u.role ? u.role.toUpperCase() : 'PEGAWAI' %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-xs text-gray-500">
+                  <%= u.last_login || 'Belum Pernah' %>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">Aktif</span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <button onclick="alert('Ubah Role User: <%= u.email %>')" class="px-3 py-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg text-xs font-bold transition">
+                    <i class="fas fa-edit"></i> Edit Peran
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="px-6 py-8 text-center text-gray-400">Belum ada data pengguna.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Form Tambah User -->
+<div id="modalTambahUser" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+      <h3 class="text-lg font-bold text-gray-900 flex items-center">
+        <i class="fas fa-user-plus text-purple-600 mr-2"></i> Tambah Pengguna Baru
+      </h3>
+      <button onclick="document.getElementById('modalTambahUser').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+    </div>
+
+    <form action="<%= url_for('users.index') %>" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Email Pengguna</label>
+        <input type="email" name="email" required placeholder="pengguna@pa-banjarbaru.go.id" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kata Sandi</label>
+        <input type="password" name="password" required placeholder="******" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Peran Akses (Role)</label>
+        <select name="role" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+          <option value="pegawai">Pegawai / Staf Admin</option>
+          <option value="pimpinan">Pimpinan (Ketua / Wakil / Panitera / Sekretaris)</option>
+          <option value="admin">Administrator Utama</option>
+        </select>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end space-x-3 border-t border-gray-100">
+        <button type="button" onclick="document.getElementById('modalTambahUser').classList.add('hidden')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition">
+          Batal
+        </button>
+        <button type="submit" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold shadow transition">
+          Tambah User
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../layouts/base-footer') %>

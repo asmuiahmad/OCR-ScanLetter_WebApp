@@ -1,0 +1,100 @@
+<%- include('../layouts/base-login-header') %>
+
+<div class="text-center mb-6">
+  <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl shadow-blue-500/25 mb-3 transform transition hover:scale-105">
+    <i class="fas fa-balance-scale text-2xl"></i>
+  </div>
+  <h1 class="text-xl font-extrabold text-slate-800 tracking-tight m-0 uppercase">PENGADILAN AGAMA BANJARBARU</h1>
+  <p class="text-xs font-semibold text-blue-600 tracking-wider uppercase mt-1">Sistem Informasi Persuratan & OCR</p>
+</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-medium shadow-sm flex items-center justify-center gap-2">
+    <i class="fas fa-exclamation-circle text-rose-500 text-sm flex-shrink-0"></i>
+    <span><%= error %></span>
+  </div>
+<% } %>
+
+<% if (typeof success !== 'undefined' && success) { %>
+  <div class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-medium shadow-sm flex items-center justify-center gap-2">
+    <i class="fas fa-check-circle text-emerald-500 text-sm flex-shrink-0"></i>
+    <span><%= success %></span>
+  </div>
+<% } %>
+
+<% if (typeof session_expired !== 'undefined' && session_expired) { %>
+  <div class="mb-4 p-3.5 bg-sky-50 border border-sky-200 text-sky-700 rounded-xl text-xs font-medium shadow-sm flex items-center justify-center gap-2">
+    <i class="fas fa-info-circle text-sky-500 text-sm flex-shrink-0"></i>
+    <span>Sesi Anda telah berakhir. Silakan login kembali untuk melanjutkan.</span>
+  </div>
+<% } %>
+
+<form action="<%= url_for('auth.login') %>" method="POST" class="space-y-4" id="loginForm">
+  <% if (typeof next !== 'undefined' && next) { %>
+    <input type="hidden" name="next" value="<%= next %>">
+  <% } %>
+
+  <div>
+    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+      Email / Username
+    </label>
+    <div class="relative flex items-center">
+      <div class="absolute left-3.5 text-slate-400 pointer-events-none text-sm">
+        <i class="fas fa-envelope"></i>
+      </div>
+      <input type="text" name="email" 
+             class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition outline-none font-medium" 
+             placeholder="Masukkan Email atau Username" required autocomplete="username">
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+      Password
+    </label>
+    <div class="relative flex items-center">
+      <div class="absolute left-3.5 text-slate-400 pointer-events-none text-sm">
+        <i class="fas fa-lock"></i>
+      </div>
+      <input type="password" name="password" id="loginPassword"
+             class="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition outline-none font-medium" 
+             placeholder="Masukkan Password" required autocomplete="current-password">
+      <button type="button" class="absolute right-3 text-slate-400 hover:text-blue-600 focus:outline-none p-1 transition" onclick="togglePassword('loginPassword', this)" title="Tampilkan/Sembunyikan Password">
+        <i class="fas fa-eye eye-icon"></i>
+        <i class="fas fa-eye-slash eye-off-icon hidden"></i>
+      </button>
+    </div>
+  </div>
+
+  <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/25 transition duration-200 cursor-pointer flex items-center justify-center gap-2 mt-2">
+    <i class="fas fa-sign-in-alt"></i> Masuk ke Sistem
+  </button>
+</form>
+
+<div class="mt-6 pt-5 border-t border-slate-100 text-center">
+  <p class="text-xs text-slate-600 m-0">
+    Belum memiliki akun? 
+    <a href="/auth/register" class="font-bold text-blue-600 hover:text-blue-800 transition inline-flex items-center gap-1 ml-1 hover:underline">
+      <i class="fas fa-user-plus"></i> Daftar Akun Baru
+    </a>
+  </p>
+</div>
+
+<script>
+function togglePassword(id, btn) {
+  const input = document.getElementById(id);
+  const eye = btn.querySelector('.eye-icon');
+  const eyeOff = btn.querySelector('.eye-off-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    eye.classList.add('hidden');
+    eyeOff.classList.remove('hidden');
+  } else {
+    input.type = 'password';
+    eye.classList.remove('hidden');
+    eyeOff.classList.add('hidden');
+  }
+}
+</script>
+
+<%- include('../layouts/base-login-footer') %>

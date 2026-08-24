@@ -1,0 +1,19 @@
+{
+  "name": "Surat Masuk & Keluar OCR",
+  "short_name": "Surat OCR",
+  "description": "Aplikasi pengelolaan surat masuk dan keluar dengan teknologi OCR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#3b82f6",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/static/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "id-ID",
+  "orientation": "portrait-primary"
+}
