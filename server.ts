@@ -7,7 +7,17 @@ import multer from 'multer';
 import bcrypt from 'bcryptjs';
 import fs from 'fs';
 
-const upload = multer({ dest: 'static/uploads/' });
+// Setup multer storage to preserve file extensions
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'static/uploads/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname).toLowerCase());
+  }
+});
+const upload = multer({ storage: storage });
 
 const app = express();
 const PORT = 3000;
@@ -145,6 +155,38 @@ async function insertUserToDB(email: string, password: string, role: string, nam
   return newUser;
 }
 
+async function updateUserInDB(originalEmail: string, newEmail?: string, newRole?: string, newPassword?: string): Promise<boolean> {
+  const users = loadUsersFromDB();
+  const user = users.find(u => u.email === originalEmail);
+  if (user) {
+    if (user.role === 'admin') return false;
+    if (newEmail && newEmail.trim()) {
+      user.email = newEmail.trim();
+    }
+    if (newRole && newRole !== 'admin') {
+      user.role = newRole;
+      user.is_admin = 0;
+    }
+    if (newPassword && newPassword.trim()) {
+      user.password = bcrypt.hashSync(newPassword.trim(), 10);
+    }
+    saveUsersToDB(users);
+    return true;
+  }
+  return false;
+}
+
+async function deleteUserFromDB(email: string): Promise<boolean> {
+  let users = loadUsersFromDB();
+  const initialLen = users.length;
+  users = users.filter(u => u.email !== email || u.role === 'admin');
+  if (users.length < initialLen) {
+    saveUsersToDB(users);
+    return true;
+  }
+  return false;
+}
+
 function updateLastLogin(id: number): void {
   const users = loadUsersFromDB();
   const user = users.find(u => u.id === id);
@@ -191,6 +233,7 @@ interface Surat {
   approved_by?: string;
   type: 'Masuk' | 'Keluar';
   file_path?: string;
+  alasan_penolakan?: string;
 }
 
 
@@ -231,6 +274,7 @@ app.use(async (req, res, next) => {
     if (endpoint === 'ocr.ocr_cuti') return '/ocr/ocr-cuti';
 
     if (endpoint === 'templates.surat_keluar' || endpoint === 'templates.generate_cuti') return '/templates';
+    if (endpoint === 'templates.builder_cuti') return '/templates/builder-cuti';
     if (endpoint === 'surat_masuk.input') return '/surat-masuk/input';
     if (endpoint === 'surat_keluar.input') return '/surat-keluar/input';
     if (endpoint === 'cuti.daftar') return '/cuti';
@@ -245,6 +289,8 @@ app.use(async (req, res, next) => {
     if (endpoint === 'disposisi.daftar') return '/disposisi';
     if (endpoint === 'disposisi.buat') return '/disposisi/buat';
     if (endpoint === 'users.index') return '/users';
+    if (endpoint === 'users.edit') return '/users/edit';
+    if (endpoint === 'users.delete') return '/users/delete';
 
     return '#';
   };
@@ -1384,11 +1430,14 @@ app.get('/persetujuan', requireAuth, (req, res) => {
 });
 
 app.post('/persetujuan/surat-masuk', requireAuth, (req, res) => {
-  const { id, type, action } = req.body;
+  const { id, type, action, alasan_penolakan } = req.body;
   let targetList = type === 'Masuk' ? suratMasukList : suratKeluarList;
   let target = targetList.find(s => s.id === Number(id));
   if (target) {
     target.status = action === 'setujui' ? 'approved' : 'rejected';
+    if (action === 'tolak' && alasan_penolakan) {
+      target.alasan_penolakan = alasan_penolakan;
+    }
     saveState();
     target.approved_by = (req.session as any).user ? (req.session as any).user.email : 'pimpinan@sistem.local';
     saveState();
@@ -1508,6 +1557,13 @@ app.get('/templates/builder-surat-keluar', requireAuth, (req, res) => {
   });
 });
 
+app.get('/templates/builder-cuti', requireAuth, (req, res) => {
+  res.render('templates/builder-cuti', {
+    breadcrumb_active: 'Builder Formulir Cuti',
+    pegawaiList
+  });
+});
+
 // --- 16. INPUT SURAT ROUTES ---
 app.get('/surat-masuk/input', requireAuth, (req, res) => {
   res.render('input_surat_masuk/index', {
@@ -1593,6 +1649,10 @@ app.post('/surat-keluar/input', requireAuth, upload.single('file'), (req, res) =
 
 // --- 17. USERS ROUTES ---
 app.get('/users', requireAuth, async (req, res) => {
+  const user = (req.session && (req.session as any).user) || activeUser;
+  if (!user || user.role !== 'admin') {
+    return res.redirect('/dashboard');
+  }
   try {
     const usersList = await getAllUsersFromDB();
     res.render('users/index', {
@@ -1611,19 +1671,87 @@ app.get('/users', requireAuth, async (req, res) => {
 });
 
 app.post('/users', requireAuth, async (req, res) => {
+  const user = (req.session && (req.session as any).user) || activeUser;
+  if (!user || user.role !== 'admin') {
+    return res.redirect('/dashboard');
+  }
   const { email, password, role } = req.body;
+  // Admin role cannot be added
+  const newRole = role === 'admin' ? 'pegawai' : role;
   try {
     if (email && email.trim()) {
-      await insertUserToDB(email, password || '', role || 'pegawai');
+      await insertUserToDB(email, password || '', newRole || 'pegawai');
     }
     const usersList = await getAllUsersFromDB();
     res.render('users/index', {
       breadcrumb_active: 'Manajemen User',
       usersList,
-      success: `Pengguna baru "${email}" berhasil ditambahkan ke database (instance/app.db)!`
+      success: `Pengguna baru "${email}" berhasil ditambahkan.`
     });
   } catch (err) {
     console.error('Add user error:', err);
+    const usersList = await getAllUsersFromDB();
+    res.render('users/index', {
+      breadcrumb_active: 'Manajemen User',
+      usersList,
+      success: undefined
+    });
+  }
+});
+
+app.post('/users/edit', requireAuth, async (req, res) => {
+  const user = (req.session && (req.session as any).user) || activeUser;
+  if (!user || user.role !== 'admin') {
+    return res.redirect('/dashboard');
+  }
+  const { original_email, email, password, confirmPassword, role } = req.body;
+  if (password && password !== confirmPassword) {
+    const usersList = await getAllUsersFromDB();
+    return res.render('users/index', {
+      breadcrumb_active: 'Manajemen User',
+      usersList,
+      success: undefined
+    }); // could pass error but success is undefined
+  }
+  try {
+    if (original_email && original_email.trim()) {
+      await updateUserInDB(original_email, email, role, password);
+    }
+    const usersList = await getAllUsersFromDB();
+    res.render('users/index', {
+      breadcrumb_active: 'Manajemen User',
+      usersList,
+      success: `Data pengguna "${email}" berhasil diperbarui.`
+    });
+  } catch (err) {
+    console.error('Edit user error:', err);
+    const usersList = await getAllUsersFromDB();
+    res.render('users/index', {
+      breadcrumb_active: 'Manajemen User',
+      usersList,
+      success: undefined
+    });
+  }
+});
+
+app.post('/users/delete', requireAuth, async (req, res) => {
+  const user = (req.session && (req.session as any).user) || activeUser;
+  if (!user || user.role !== 'admin') {
+    return res.redirect('/dashboard');
+  }
+  const { email } = req.body;
+  try {
+    if (email && email.trim()) {
+      await deleteUserFromDB(email);
+    }
+    const usersList = await getAllUsersFromDB();
+    res.render('users/index', {
+      breadcrumb_active: 'Manajemen User',
+      usersList,
+      success: `Pengguna "${email}" berhasil dihapus.`
+    });
+  } catch (err) {
+    console.error('Delete user error:', err);
     const usersList = await getAllUsersFromDB();
     res.render('users/index', {
       breadcrumb_active: 'Manajemen User',

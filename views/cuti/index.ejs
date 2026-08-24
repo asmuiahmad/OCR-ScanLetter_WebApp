@@ -1,243 +1,278 @@
 <%- include('../layouts/base-header') %>
 
-<div class="container mx-auto py-6 px-4">
-  <div class="max-w-6xl mx-auto space-y-6">
-    
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-teal-600 via-emerald-600 to-green-700 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between">
-      <div class="flex items-center space-x-4 mb-4 md:mb-0">
-        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
-          <i class="fas fa-calendar-check text-yellow-300"></i>
+  <div class="container mx-auto py-6 px-4">
+    <div class="max-w-6xl mx-auto space-y-6">
+
+      <!-- Header -->
+      <div
+        class="bg-gradient-to-r from-teal-600 via-emerald-600 to-green-700 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between w-full">
+        <div class="flex items-left gap-4">
+          <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl shrink-0">
+            <i class="fas fa-calendar-check text-yellow-300"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight">Manajemen Cuti Pegawai</h1>
+            <p class="text-teal-100 text-sm mt-0.5">Pengajuan Permohonan & Persetujuan Cuti Pegawai PA Banjarbaru</p>
+          </div>
         </div>
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight">Manajemen Cuti Pegawai</h1>
-          <p class="text-teal-100 text-sm mt-0.5">Pengajuan Permohonan & Persetujuan Cuti Pegawai PA Banjarbaru</p>
-        </div>
+        <button onclick="document.getElementById('modalPermohonanCuti').classList.remove('hidden')"
+          class="px-5 py-2.5 bg-white text-teal-800 hover:bg-teal-50 font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
+          <i class="fas fa-plus text-teal-600"></i>
+          <span>Ajukan Cuti Baru</span>
+        </button>
       </div>
-      <button onclick="document.getElementById('modalPermohonanCuti').classList.remove('hidden')" class="px-5 py-2.5 bg-white text-teal-800 hover:bg-teal-50 font-bold rounded-xl text-sm shadow transition flex items-center space-x-2">
-        <i class="fas fa-plus text-teal-600"></i>
-        <span>Ajukan Cuti Baru</span>
-      </button>
+
+      <!-- Alert Notifications -->
+      <% if (typeof success !=='undefined' && success) { %>
+        <div
+          class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-xl shadow-sm flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fas fa-check-circle text-emerald-500 text-xl mr-3"></i>
+            <p class="font-semibold text-sm">
+              <%= success %>
+            </p>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i
+              class="fas fa-times"></i></button>
+        </div>
+        <% } %>
+
+          <!-- Cuti Table -->
+          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center space-x-2">
+                <h3 class="font-bold text-gray-800">Daftar Permohonan Cuti</h3>
+                <span class="px-2.5 py-0.5 bg-teal-100 text-teal-800 text-xs font-semibold rounded-full">
+                  <%= cutiList ? cutiList.length : 0 %> Permohonan
+                </span>
+              </div>
+              <div class="relative w-full sm:w-64">
+                <input type="text" id="searchCuti" onkeyup="filterCuti()" placeholder="Cari nama / jenis cuti..."
+                  class="w-full bg-gray-50 border border-gray-300 rounded-xl pl-9 pr-4 py-2 text-sm focus:ring-teal-500 focus:border-teal-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-gray-600" id="tableCuti">
+                <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b border-gray-200">
+                  <tr>
+                    <th class="px-6 py-3.5">Pegawai Pemohon</th>
+                    <th class="px-6 py-3.5">Jenis Cuti</th>
+                    <th class="px-6 py-3.5">Periode Cuti</th>
+                    <th class="px-6 py-3.5">Lama Hari</th>
+                    <th class="px-6 py-3.5">Status Persetujuan</th>
+                    <th class="px-6 py-3.5 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <% if (cutiList && cutiList.length> 0) { %>
+                    <% cutiList.forEach(function(c) { %>
+                      <tr class="hover:bg-teal-50/40 transition">
+                        <td class="px-6 py-4">
+                          <div class="font-bold text-gray-900">
+                            <%= c.nama_pegawai %>
+                          </div>
+                          <div class="text-xs text-gray-500">NIP: <%= c.nip %>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4">
+                          <span class="px-2.5 py-1 bg-teal-100 text-teal-800 rounded-lg text-xs font-semibold">
+                            <%= c.jenis_cuti %>
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 text-xs font-medium text-gray-800">
+                          <%= c.tanggal_mulai %> s/d <%= c.tanggal_selesai %>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-gray-900">
+                          <%= c.lama_hari %> Hari
+                        </td>
+                        <td class="px-6 py-4">
+                          <% if (c.status==='disetujui' ) { %>
+                            <span
+                              class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">Disetujui</span>
+                            <% } else if (c.status==='ditolak' ) { %>
+                              <span
+                                class="px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">Ditolak</span>
+                              <% } else { %>
+                                <span
+                                  class="px-2.5 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full animate-pulse">Menunggu
+                                  Persetujuan</span>
+                                <% } %>
+                        </td>
+                        <td class="px-6 py-4 text-right space-x-2">
+                          <% if (c.status==='pending' && current_user && (current_user.role==='pimpinan' ||
+                            current_user.role==='admin' )) { %>
+                            <form action="<%= url_for('cuti.persetujuan') %>" method="POST" class="inline">
+                              <input type="hidden" name="id" value="<%= c.id %>">
+                              <input type="hidden" name="status" value="disetujui">
+                              <button type="submit"
+                                class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow transition">
+                                Setujui
+                              </button>
+                            </form>
+                            <form action="<%= url_for('cuti.persetujuan') %>" method="POST" class="inline">
+                              <input type="hidden" name="id" value="<%= c.id %>">
+                              <input type="hidden" name="status" value="ditolak">
+                              <button type="submit"
+                                class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold shadow transition">
+                                Tolak
+                              </button>
+                            </form>
+                            <% } else { %>
+                              <button onclick="alert('Alasan Cuti: <%= c.alasan %>')"
+                                class="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-xs font-bold transition">
+                                <i class="fas fa-eye"></i> Detail
+                              </button>
+                              <% } %>
+                        </td>
+                      </tr>
+                      <% }); %>
+                        <% } else { %>
+                          <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-400">Belum ada permohonan cuti.</td>
+                          </tr>
+                          <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
     </div>
-
-    <!-- Alert Notifications -->
-    <% if (typeof success !== 'undefined' && success) { %>
-    <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-xl shadow-sm flex items-center justify-between">
-      <div class="flex items-center">
-        <i class="fas fa-check-circle text-emerald-500 text-xl mr-3"></i>
-        <p class="font-semibold text-sm"><%= success %></p>
-      </div>
-      <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fas fa-times"></i></button>
-    </div>
-    <% } %>
-
-    <!-- Cuti Table -->
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center space-x-2">
-          <h3 class="font-bold text-gray-800">Daftar Permohonan Cuti</h3>
-          <span class="px-2.5 py-0.5 bg-teal-100 text-teal-800 text-xs font-semibold rounded-full"><%= cutiList ? cutiList.length : 0 %> Permohonan</span>
-        </div>
-        <div class="relative w-full sm:w-64">
-          <input type="text" id="searchCuti" onkeyup="filterCuti()" placeholder="Cari nama / jenis cuti..." class="w-full bg-gray-50 border border-gray-300 rounded-xl pl-9 pr-4 py-2 text-sm focus:ring-teal-500 focus:border-teal-500">
-          <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-gray-600" id="tableCuti">
-          <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-500 border-b border-gray-200">
-            <tr>
-              <th class="px-6 py-3.5">Pegawai Pemohon</th>
-              <th class="px-6 py-3.5">Jenis Cuti</th>
-              <th class="px-6 py-3.5">Periode Cuti</th>
-              <th class="px-6 py-3.5">Lama Hari</th>
-              <th class="px-6 py-3.5">Status Persetujuan</th>
-              <th class="px-6 py-3.5 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <% if (cutiList && cutiList.length > 0) { %>
-              <% cutiList.forEach(function(c) { %>
-              <tr class="hover:bg-teal-50/40 transition">
-                <td class="px-6 py-4">
-                  <div class="font-bold text-gray-900"><%= c.nama_pegawai %></div>
-                  <div class="text-xs text-gray-500">NIP: <%= c.nip %></div>
-                </td>
-                <td class="px-6 py-4">
-                  <span class="px-2.5 py-1 bg-teal-100 text-teal-800 rounded-lg text-xs font-semibold"><%= c.jenis_cuti %></span>
-                </td>
-                <td class="px-6 py-4 text-xs font-medium text-gray-800">
-                  <%= c.tanggal_mulai %> s/d <%= c.tanggal_selesai %>
-                </td>
-                <td class="px-6 py-4 font-bold text-gray-900">
-                  <%= c.lama_hari %> Hari
-                </td>
-                <td class="px-6 py-4">
-                  <% if (c.status === 'disetujui') { %>
-                  <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">Disetujui</span>
-                  <% } else if (c.status === 'ditolak') { %>
-                  <span class="px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">Ditolak</span>
-                  <% } else { %>
-                  <span class="px-2.5 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full animate-pulse">Menunggu Persetujuan</span>
-                  <% } %>
-                </td>
-                <td class="px-6 py-4 text-right space-x-2">
-                  <% if (c.status === 'pending' && current_user && (current_user.role === 'pimpinan' || current_user.role === 'admin')) { %>
-                  <form action="<%= url_for('cuti.persetujuan') %>" method="POST" class="inline">
-                    <input type="hidden" name="id" value="<%= c.id %>">
-                    <input type="hidden" name="status" value="disetujui">
-                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow transition">
-                      Setujui
-                    </button>
-                  </form>
-                  <form action="<%= url_for('cuti.persetujuan') %>" method="POST" class="inline">
-                    <input type="hidden" name="id" value="<%= c.id %>">
-                    <input type="hidden" name="status" value="ditolak">
-                    <button type="submit" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold shadow transition">
-                      Tolak
-                    </button>
-                  </form>
-                  <% } else { %>
-                  <button onclick="alert('Alasan Cuti: <%= c.alasan %>')" class="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-xs font-bold transition">
-                    <i class="fas fa-eye"></i> Detail
-                  </button>
-                  <% } %>
-                </td>
-              </tr>
-              <% }); %>
-            <% } else { %>
-              <tr>
-                <td colspan="6" class="px-6 py-8 text-center text-gray-400">Belum ada permohonan cuti.</td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </div>
-</div>
 
-<!-- Modal Form Permohonan Cuti -->
-<div id="modalPermohonanCuti" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
-    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-      <h3 class="text-lg font-bold text-gray-900 flex items-center">
-        <i class="fas fa-file-medical text-teal-600 mr-2"></i> Form Permohonan Cuti Baru
-      </h3>
-      <button onclick="document.getElementById('modalPermohonanCuti').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-        <i class="fas fa-times text-lg"></i>
-      </button>
-    </div>
-
-    <form action="<%= url_for('cuti.baru') %>" method="POST" class="space-y-4">
-      <div>
-        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Pegawai Pemohon</label>
-        <select name="nama_pegawai" id="namaPegawaiSelect" required onchange="updateNipCuti()" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-          <option value="" disabled selected>Pilih Pegawai</option>
-          <% if (typeof pegawaiList !== 'undefined' && pegawaiList.length > 0) { %>
-            <% pegawaiList.forEach(function(p) { %>
-              <option value="<%= p.nama %>" data-nip="<%= p.nip %>"><%= p.nama %></option>
-            <% }) %>
-          <% } %>
-        </select>
+  <!-- Modal Form Permohonan Cuti -->
+  <div id="modalPermohonanCuti"
+    class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+          <i class="fas fa-file-medical text-teal-600 mr-2"></i> Form Permohonan Cuti Baru
+        </h3>
+        <button onclick="document.getElementById('modalPermohonanCuti').classList.add('hidden')"
+          class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times text-lg"></i>
+        </button>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
+      <form action="<%= url_for('cuti.baru') %>" method="POST" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">NIP</label>
-          <input type="text" name="nip" id="nipInputCuti" required readonly placeholder="NIP terisi otomatis" class="w-full bg-gray-100 border border-gray-300 rounded-xl p-2.5 text-sm font-mono text-gray-500 cursor-not-allowed focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Cuti</label>
-          <select name="jenis_cuti" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-            <option value="Cuti Tahunan">Cuti Tahunan</option>
-            <option value="Cuti Sakit">Cuti Sakit</option>
-            <option value="Cuti Alasan Penting">Cuti Alasan Penting</option>
-            <option value="Cuti Melahirkan">Cuti Melahirkan</option>
-            <option value="Cuti Besar">Cuti Besar</option>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Pegawai Pemohon</label>
+          <select name="nama_pegawai" id="namaPegawaiSelect" required onchange="updateNipCuti()"
+            class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+            <option value="" disabled selected>Pilih Pegawai</option>
+            <% if (typeof pegawaiList !=='undefined' && pegawaiList.length> 0) { %>
+              <% pegawaiList.forEach(function(p) { %>
+                <option value="<%= p.nama %>" data-nip="<%= p.nip %>">
+                  <%= p.nama %>
+                </option>
+                <% }) %>
+                  <% } %>
           </select>
         </div>
-      </div>
 
-      <div class="grid grid-cols-3 gap-3">
-        <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Mulai</label>
-          <input type="date" name="tanggal_mulai" id="tanggalMulai" onchange="hitungLamaHari()" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs focus:ring-teal-500 focus:border-teal-500">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">NIP</label>
+            <input type="text" name="nip" id="nipInputCuti" required readonly placeholder="NIP terisi otomatis"
+              class="w-full bg-gray-100 border border-gray-300 rounded-xl p-2.5 text-sm font-mono text-gray-500 cursor-not-allowed focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Cuti</label>
+            <select name="jenis_cuti" required
+              class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+              <option value="Cuti Tahunan">Cuti Tahunan</option>
+              <option value="Cuti Sakit">Cuti Sakit</option>
+              <option value="Cuti Alasan Penting">Cuti Alasan Penting</option>
+              <option value="Cuti Melahirkan">Cuti Melahirkan</option>
+              <option value="Cuti Besar">Cuti Besar</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Selesai</label>
-          <input type="date" name="tanggal_selesai" id="tanggalSelesai" onchange="hitungLamaHari()" required class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs focus:ring-teal-500 focus:border-teal-500">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Lama Hari</label>
-          <input type="number" name="lama_hari" id="lamaHari" readonly placeholder="Otomatis" class="w-full bg-gray-100 border border-gray-300 rounded-xl p-2.5 text-sm font-bold text-gray-500 cursor-not-allowed focus:outline-none">
-        </div>
-      </div>
 
-      <div>
-        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alasan Permohonan Cuti</label>
-        <textarea name="alasan" rows="3" required placeholder="Jelaskan alasan pengajuan cuti..." class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500"></textarea>
-      </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Mulai</label>
+            <input type="date" name="tanggal_mulai" id="tanggalMulai" onchange="hitungLamaHari()" required
+              class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs focus:ring-teal-500 focus:border-teal-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Selesai</label>
+            <input type="date" name="tanggal_selesai" id="tanggalSelesai" onchange="hitungLamaHari()" required
+              class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs focus:ring-teal-500 focus:border-teal-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Lama Hari</label>
+            <input type="number" name="lama_hari" id="lamaHari" readonly placeholder="Otomatis"
+              class="w-full bg-gray-100 border border-gray-300 rounded-xl p-2.5 text-sm font-bold text-gray-500 cursor-not-allowed focus:outline-none">
+          </div>
+        </div>
 
-      <div class="pt-2 flex items-center justify-end space-x-3 border-t border-gray-100">
-        <button type="button" onclick="document.getElementById('modalPermohonanCuti').classList.add('hidden')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition">
-          Batal
-        </button>
-        <button type="submit" class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold shadow transition">
-          Kirim Permohonan
-        </button>
-      </div>
-    </form>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alasan Permohonan Cuti</label>
+          <textarea name="alasan" rows="3" required placeholder="Jelaskan alasan pengajuan cuti..."
+            class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-3 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('modalPermohonanCuti').classList.add('hidden')"
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition">
+            Batal
+          </button>
+          <button type="submit"
+            class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold shadow transition">
+            Kirim Permohonan
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<script>
-  function filterCuti() {
-    const input = document.getElementById('searchCuti').value.toLowerCase();
-    const rows = document.querySelectorAll('#tableCuti tbody tr');
-    rows.forEach(row => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(input) ? '' : 'none';
-    });
-  }
-
-  function updateNipCuti() {
-    const select = document.getElementById('namaPegawaiSelect');
-    const nipInput = document.getElementById('nipInputCuti');
-    const selectedOption = select.options[select.selectedIndex];
-    
-    if (selectedOption && selectedOption.dataset.nip) {
-      nipInput.value = selectedOption.dataset.nip;
-    } else {
-      nipInput.value = '';
+  <script>
+    function filterCuti() {
+      const input = document.getElementById('searchCuti').value.toLowerCase();
+      const rows = document.querySelectorAll('#tableCuti tbody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? '' : 'none';
+      });
     }
-  }
 
-  function hitungLamaHari() {
-    const tglMulai = document.getElementById('tanggalMulai').value;
-    const tglSelesai = document.getElementById('tanggalSelesai').value;
-    const inputLamaHari = document.getElementById('lamaHari');
+    function updateNipCuti() {
+      const select = document.getElementById('namaPegawaiSelect');
+      const nipInput = document.getElementById('nipInputCuti');
+      const selectedOption = select.options[select.selectedIndex];
 
-    if (tglMulai && tglSelesai) {
-      const start = new Date(tglMulai);
-      const end = new Date(tglSelesai);
-      
-      // Calculate difference in time
-      const diffTime = Math.abs(end - start);
-      // Calculate difference in days and add 1 to include both start and end days
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      
-      if (start > end) {
-        inputLamaHari.value = ''; // Invalid date range
+      if (selectedOption && selectedOption.dataset.nip) {
+        nipInput.value = selectedOption.dataset.nip;
       } else {
-        inputLamaHari.value = diffDays;
+        nipInput.value = '';
       }
-    } else {
-      inputLamaHari.value = '';
     }
-  }
-</script>
 
-<%- include('../layouts/base-footer') %>
+    function hitungLamaHari() {
+      const tglMulai = document.getElementById('tanggalMulai').value;
+      const tglSelesai = document.getElementById('tanggalSelesai').value;
+      const inputLamaHari = document.getElementById('lamaHari');
+
+      if (tglMulai && tglSelesai) {
+        const start = new Date(tglMulai);
+        const end = new Date(tglSelesai);
+
+        // Calculate difference in time
+        const diffTime = Math.abs(end - start);
+        // Calculate difference in days and add 1 to include both start and end days
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        if (start > end) {
+          inputLamaHari.value = ''; // Invalid date range
+        } else {
+          inputLamaHari.value = diffDays;
+        }
+      } else {
+        inputLamaHari.value = '';
+      }
+    }
+  </script>
+
+  <%- include('../layouts/base-footer') %>

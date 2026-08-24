@@ -424,123 +424,13 @@
     </div>
 
     <!-- Paper Sheet Container (Scrollable Paper Stage) -->
-    <div class="p-4 sm:p-8 overflow-y-auto flex-1 bg-slate-200/80 flex justify-center items-start scrollbar-thin">
+    <div class="p-4 sm:p-8 overflow-y-auto flex-1 bg-slate-200/80 flex justify-center items-start scrollbar-thin rounded-b-2xl">
       
-      <!-- Authentic Physical Paper Sheet (A4 Style) -->
-      <div class="pf-paper bg-white text-slate-900 shadow-2xl border border-slate-300 p-8 sm:p-12 w-full max-w-2xl relative font-serif text-xs leading-relaxed transition-transform duration-200 min-h-[720px] flex flex-col justify-between">
-        
-        <!-- Status Watermark Stamp -->
-        <div class="pf-stamp absolute top-10 right-10 border-4 border-emerald-600/80 text-emerald-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-emerald-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm">
-          <i class="fas fa-check-circle text-sm"></i> DISETUJUI / VALID
-        </div>
-
-        <div>
-          <!-- Kop Surat Resmi Pengadilan Agama Banjarbaru -->
-          <div class="text-center pb-3 border-b-4 border-double border-slate-900 mb-6 select-none">
-            <div class="flex items-center justify-center gap-3 mb-2">
-              <div class="w-14 h-14 rounded-full bg-emerald-900 text-amber-300 flex items-center justify-center text-xl font-bold border-2 border-amber-400 shadow-sm shrink-0">
-                <i class="fas fa-balance-scale"></i>
-              </div>
-              <div class="text-center">
-                <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-900 leading-tight">MAHKAMAH AGUNG REPUBLIK INDONESIA</h2>
-                <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-800">PENGADILAN TINGGI AGAMA BANJARMASIN</h3>
-                <h1 class="text-sm font-extrabold uppercase tracking-wide text-emerald-950">PENGADILAN AGAMA BANJARBARU KELAS I B</h1>
-                <p class="text-[9px] text-slate-600 italic font-sans mt-0.5">Jl. Trikora No. 01, Loktabat Selatan, Kota Banjarbaru, Kalimantan Selatan 70714</p>
-                <p class="text-[8px] text-slate-500 font-sans">Situs Web: www.pa-banjarbaru.go.id | Pos El: info@pa-banjarbaru.go.id</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Letter Meta & Date Grid -->
-          <div class="flex justify-between items-start mb-6 font-sans text-xs">
-            <div class="space-y-1">
-              <div><span class="font-bold w-20 inline-block">Nomor</span>: <span class="pf-nomor font-mono font-bold text-slate-900">W15-A12/902/HM.01/VII/2026</span></div>
-              <div><span class="font-bold w-20 inline-block">Lampiran</span>: <span>1 (satu) Berkas Lengkap</span></div>
-              <div><span class="font-bold w-20 inline-block">Perihal</span>: <span class="pf-perihal font-bold text-slate-900 underline">Undangan & Permohonan Dokumen</span></div>
-            </div>
-            <div class="text-right font-semibold text-slate-800">
-              <div class="pf-tanggal">Banjarbaru, 19 Juli 2026</div>
-            </div>
-          </div>
-
-          <!-- Destination Address -->
-          <div class="mb-6 font-sans text-xs space-y-1">
-            <div>Kepada Yth.</div>
-            <div class="pf-penerima font-bold text-slate-900 text-sm">Wali Kota Banjarbaru</div>
-            <div>di -</div>
-            <div class="pl-4 italic text-slate-700">Tempat</div>
-          </div>
-
-          <!-- Letter Body Paragraphs -->
-          <div class="space-y-3 text-justify text-slate-900 font-serif leading-relaxed text-xs">
-            <p>Dengan hormat,</p>
-            <p>
-              Sehubungan dengan pelaksanaan tugas pokok, fungsi kepemerintahan, serta tertib administrasi di lingkungan Pengadilan Agama Banjarbaru, bersama ini kami sampaikan dokumen resmi terkait:
-            </p>
-            
-            <!-- Boxed Letter Content Detail -->
-            <div class="p-4 bg-slate-50 border-l-4 border-emerald-800 rounded-r-lg font-sans my-3 text-slate-800 leading-normal">
-              <span class="block text-[10px] font-bold text-emerald-900 uppercase tracking-wider mb-1">Rincian / Perihal Isi Surat:</span>
-              <p class="pf-isi font-medium m-0 text-slate-900 text-xs">
-                Surat Permohonan Dukungan Fasilitas Pelaksanaan Sidang Terpadu Isbat Nikah TA 2026.
-              </p>
-            </div>
-
-            <p>
-              Demikian surat ini kami sampaikan untuk dapat dipergunakan sebagaimana mestinya. Atas perhatian, dukungan, dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.
-            </p>
-          </div>
-        </div>
-
-        <!-- Official Signature & Digital Seal Footer -->
-        <div class="mt-12 pt-4 flex justify-between items-end font-sans select-none">
-          <!-- E-Seal / QR Code Verification Badge -->
-          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
-            <div class="w-12 h-12 bg-white border border-slate-300 rounded-lg p-1 flex items-center justify-center text-slate-800 shrink-0">
-              <i class="fas fa-qrcode text-3xl"></i>
-            </div>
-            <div class="text-[9px] text-slate-600 leading-tight">
-              <span class="font-bold text-emerald-800 block uppercase">E-SIGNATURE MAHKAMAH AGUNG</span>
-              <span>Dokumen ini telah ditandatangani secara elektronik & terverifikasi sistem database PA Banjarbaru.</span>
-            </div>
-          </div>
-
-          <!-- Signature Block -->
-          <div class="text-center space-y-1 font-serif min-w-[200px]">
-            <div class="text-xs font-bold text-slate-800">An. KETUA PENGADILAN AGAMA BANJARBARU</div>
-            <div class="pf-pengirim-title text-[11px] text-slate-700">Pejabat Penandatangan</div>
-            
-            <!-- Digital Stamp Graphic -->
-            <div class="h-16 flex items-center justify-center relative my-1">
-              <span class="font-serif italic text-slate-400 text-[10px] uppercase tracking-widest opacity-60">[ Tanda Tangan Digital ]</span>
-              <div class="absolute inset-0 flex items-center justify-center opacity-25 text-emerald-800 pointer-events-none">
-                <i class="fas fa-stamp text-4xl rotate-12"></i>
-              </div>
-            </div>
-
-            <div class="pf-signer font-extrabold text-xs text-slate-900 underline">Drs. H. Muhammad, M.H.</div>
-            <div class="text-[10px] text-slate-600 font-mono">NIP. 19650412 199203 1 003</div>
-          </div>
-        </div>
-
+      <!-- Actual Uploaded File Container -->
+      <div class="pf-container w-full h-full min-h-[720px] flex items-center justify-center">
+        <!-- Content will be injected by JavaScript -->
       </div>
 
-    </div>
-
-    <!-- Bottom Footer Bar -->
-    <div class="px-5 py-3 bg-white rounded-b-2xl border-t border-slate-200 flex items-center justify-between text-xs shrink-0">
-      <div class="flex items-center gap-2 text-slate-500 text-[11px]">
-        <i class="fas fa-database text-emerald-600"></i>
-        <span>Data surat tersimpan sah di database Pengadilan Agama Banjarbaru</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="printPhysicalDocument(this)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition flex items-center gap-1.5">
-          <i class="fas fa-print"></i> Cetak
-        </button>
-        <button type="button" onclick="closePreviewFisikModal(this.closest('[id^=\'preview\']').id)" class="btn-bottom-close px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition">
-          Tutup Preview
-        </button>
-      </div>
     </div>
 
   </div>
@@ -566,6 +456,9 @@ function bringToFront(modal) {
   if (!modal) return;
   activeZIndex++;
   modal.style.zIndex = activeZIndex;
+  if (modal.parentElement) {
+    modal.parentElement.appendChild(modal);
+  }
 }
 
 function getOrCloneModal(templateId, modalId) {
@@ -584,7 +477,7 @@ function getOrCloneModal(templateId, modalId) {
 function toggleModalFullscreen(modalId) {
   const modal = document.getElementById(modalId) || document.getElementById('detailSuratModal');
   if (!modal) return;
-  const card = modal.querySelector('.bg-white');
+  const card = modal.firstElementChild;
   if (!card) return;
 
   if (card.classList.contains('is-fullscreen')) {
@@ -607,7 +500,7 @@ function minimizeModal(modalId, defaultTitle) {
   const id = modalId || 'detailSuratModal';
   const modal = document.getElementById(id);
   if (!modal) return;
-  const card = modal.querySelector('.bg-white');
+  const card = modal.firstElementChild;
   if (!card) return;
 
   card.classList.add('scale-90', 'opacity-0');
@@ -633,7 +526,7 @@ function restoreModal(modalId) {
   if (!modal) return;
   modal.classList.remove('hidden');
   bringToFront(modal);
-  const card = modal.querySelector('.bg-white');
+  const card = modal.firstElementChild;
   if (card) {
     card.classList.add('scale-95');
     setTimeout(() => card.classList.remove('scale-95'), 50);
@@ -687,6 +580,7 @@ function renderMinimizedDock() {
 function closeModalCompletely(modalId) {
   if (modalId && modalId.includes('detail')) closeDetailModal(modalId);
   else if (modalId && modalId.includes('edit')) closeEditModal(modalId);
+  else if (modalId && modalId.includes('preview')) closePreviewFisikModal(modalId);
   else {
     const modal = document.getElementById(modalId);
     if (modal) modal.classList.add('hidden');
@@ -764,6 +658,9 @@ function openDetailModal(type, entry) {
 }
 
 function previewSuratFisikFromModal(btn) {
+  if (window.event) {
+    window.event.stopPropagation();
+  }
   const modal = btn.closest('[id^="detailModal"]') || btn.closest('#detailSuratModal');
   if (modal && modal.dataset.entry) {
     try {
@@ -797,44 +694,14 @@ function openPreviewFisikModal(type, entry) {
   const windowTitle = modal.querySelector('.pf-window-title');
   if (windowTitle) windowTitle.innerText = `Preview Physical Letter (${type}): ${entry.nomor || ''}`;
 
-  const nomorEl = modal.querySelector('.pf-nomor');
-  if (nomorEl) nomorEl.innerText = entry.nomor || 'W15-A12/902/HM.01/VII/2026';
-
-  const perihalEl = modal.querySelector('.pf-perihal');
-  if (perihalEl) perihalEl.innerText = entry.isi || 'Penyampaian Berkas Dokumen Resmi';
-
-  const tanggalEl = modal.querySelector('.pf-tanggal');
-  if (tanggalEl) {
-    const rawDate = entry.tanggal ? new Date(entry.tanggal) : new Date();
-    const formatted = !isNaN(rawDate.getTime()) 
-      ? rawDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-      : entry.tanggal || '19 Juli 2026';
-    tanggalEl.innerText = 'Banjarbaru, ' + formatted;
-  }
-
-  const pengirimEl = modal.querySelector('.pf-pengirim-title');
-  if (pengirimEl) pengirimEl.innerText = entry.pengirim || 'Pengadilan Agama Banjarbaru';
-
-  const penerimaEl = modal.querySelector('.pf-penerima');
-  if (penerimaEl) penerimaEl.innerText = entry.penerima || 'Ketua Pengadilan Agama Banjarbaru';
-
-  const isiEl = modal.querySelector('.pf-isi');
-  if (isiEl) isiEl.innerText = entry.isi || 'Surat resminya telah diregistrasi di database Pengadilan Agama Banjarbaru.';
-
-  const signerEl = modal.querySelector('.pf-signer');
-  if (signerEl) signerEl.innerText = entry.approved_by || entry.pengirim || 'Drs. H. Muhammad, M.H.';
-
-  const stampEl = modal.querySelector('.pf-stamp');
-  if (stampEl) {
-    if (entry.status === 'approved') {
-      stampEl.className = 'pf-stamp absolute top-10 right-10 border-4 border-emerald-600/80 text-emerald-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-emerald-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm';
-      stampEl.innerHTML = '<i class="fas fa-check-circle text-sm"></i> DISETUJUI / VALID';
-    } else if (entry.status === 'rejected') {
-      stampEl.className = 'pf-stamp absolute top-10 right-10 border-4 border-rose-600/80 text-rose-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-rose-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm';
-      stampEl.innerHTML = '<i class="fas fa-times-circle text-sm"></i> DITOLAK';
+  const container = modal.querySelector('.pf-container');
+  if (container) {
+    if (!entry.file_path) {
+      container.innerHTML = '<div class="text-center text-slate-500 font-bold p-10"><i class="fas fa-file-image text-4xl mb-3 block"></i>Belum ada berkas fisik yang diunggah.</div>';
+    } else if (entry.file_path.toLowerCase().endsWith('.pdf')) {
+      container.innerHTML = `<iframe src="${entry.file_path}" class="w-full h-full min-h-[720px] border-0 rounded-lg shadow-xl bg-white" frameborder="0"></iframe>`;
     } else {
-      stampEl.className = 'pf-stamp absolute top-10 right-10 border-4 border-amber-600/80 text-amber-700 font-extrabold uppercase px-3 py-1.5 rounded-xl text-xs rotate-[-12deg] pointer-events-none select-none tracking-widest bg-amber-50/50 backdrop-blur-xs flex items-center gap-1.5 shadow-sm';
-      stampEl.innerHTML = '<i class="fas fa-clock text-sm"></i> DRAFT / PENDING';
+      container.innerHTML = `<img src="${entry.file_path}" alt="Surat Fisik" class="max-w-full max-h-full object-contain rounded-lg shadow-xl cursor-zoom-in" onclick="if(window.Viewer) new window.Viewer(this, {navbar: false, toolbar: true, title: false}).show()">`;
     }
   }
 
@@ -846,7 +713,7 @@ function closePreviewFisikModal(modalId) {
   const id = modalId || 'previewSuratFisikModalTemplate';
   const modal = document.getElementById(id);
   if (modal) {
-    const card = modal.querySelector('.bg-slate-100');
+    const card = modal.firstElementChild;
     if (card && card.classList.contains('is-fullscreen')) {
       toggleModalFullscreen(id);
     }

@@ -1,72 +1,78 @@
 <%- include('../layouts/base-header') %>
 
-<div class="container mx-auto py-6 px-4">
-  <div class="max-w-6xl mx-auto space-y-6">
-    
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between">
-      <div class="flex items-center space-x-4 mb-4 md:mb-0">
-        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
-          <i class="fas fa-file-contract text-yellow-300"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight">Templates Surat & Formulir</h1>
-          <p class="text-blue-100 text-sm mt-0.5">Template Dokumen Resmi Pengadilan Agama Banjarbaru</p>
+  <div class="container mx-auto py-6 px-4">
+    <div class="max-w-6xl mx-auto space-y-6">
+
+      <!-- Header -->
+      <div
+        class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between w-full">
+        <div class="flex items-left gap-4">
+          <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl shrink-0">
+            <i class="fas fa-file-contract text-yellow-300"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight">Templates Surat & Formulir</h1>
+            <p class="text-blue-100 text-sm mt-0.5">Template Dokumen Resmi Pengadilan Agama Banjarbaru</p>
+          </div>
         </div>
       </div>
+
+      <!-- Grid Templates -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Template 1: Surat Dinas Keluar -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-4">
+          <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fas fa-file-signature"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-gray-900 text-base">Template Surat Keluar</h3>
+            <p class="text-xs text-gray-500 mt-1">Buat surat dinas keluar resmi dengan format lengkap (kop, ttd digital)
+              dan simpan sebagai PDF.</p>
+          </div>
+          <a href="/templates/builder-surat-keluar"
+            class="w-full py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
+            <i class="fas fa-magic"></i>
+            <span>Buat Surat Keluar</span>
+          </a>
+        </div>
+
+        <!-- Template 2: Formulir Permohonan Cuti -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-4">
+          <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-gray-900 text-base">Formulir Cuti Pegawai</h3>
+            <p class="text-xs text-gray-500 mt-1">Formulir permohonan cuti tahunan, sakit, dan alasan penting Perma No
+              7/2021.</p>
+          </div>
+          <a href="<%= url_for('templates.builder_cuti') %>"
+            class="w-full py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
+            <i class="fas fa-pen"></i>
+            <span>Generate Formulir Cuti</span>
+          </a>
+        </div>
+
+        <!-- Template 3: Lembar Disposisi -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-4">
+          <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl">
+            <i class="fas fa-share-alt"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-gray-900 text-base">Format Lembar Disposisi</h3>
+            <p class="text-xs text-gray-500 mt-1">Lembar arahan dan instruksi disposisi surat masuk pimpinan.</p>
+          </div>
+          <a href="<%= url_for('disposisi.index') %>"
+            class="w-full py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Buat Lembar Disposisi</span>
+          </a>
+        </div>
+
+      </div>
+
     </div>
-
-    <!-- Grid Templates -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      
-      <!-- Template 1: Surat Dinas Keluar -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-4">
-        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl">
-          <i class="fas fa-file-signature"></i>
-        </div>
-        <div>
-          <h3 class="font-bold text-gray-900 text-base">Template Surat Keluar</h3>
-          <p class="text-xs text-gray-500 mt-1">Buat surat dinas keluar resmi dengan format lengkap (kop, ttd digital) dan simpan sebagai PDF.</p>
-        </div>
-        <a href="/templates/builder-surat-keluar" class="w-full py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
-          <i class="fas fa-magic"></i>
-          <span>Buat Surat Keluar</span>
-        </a>
-      </div>
-
-      <!-- Template 2: Formulir Permohonan Cuti -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-4">
-        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
-          <i class="fas fa-calendar-alt"></i>
-        </div>
-        <div>
-          <h3 class="font-bold text-gray-900 text-base">Formulir Cuti Pegawai</h3>
-          <p class="text-xs text-gray-500 mt-1">Formulir permohonan cuti tahunan, sakit, dan alasan penting Perma No 7/2021.</p>
-        </div>
-        <a href="<%= url_for('cuti.baru') %>" class="w-full py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
-          <i class="fas fa-pen"></i>
-          <span>Generate Formulir Cuti</span>
-        </a>
-      </div>
-
-      <!-- Template 3: Lembar Disposisi -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition space-y-4">
-        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl">
-          <i class="fas fa-share-alt"></i>
-        </div>
-        <div>
-          <h3 class="font-bold text-gray-900 text-base">Format Lembar Disposisi</h3>
-          <p class="text-xs text-gray-500 mt-1">Lembar arahan dan instruksi disposisi surat masuk pimpinan.</p>
-        </div>
-        <a href="<%= url_for('disposisi.buat') %>" class="w-full py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2">
-          <i class="fas fa-plus"></i>
-          <span>Buat Lembar Disposisi</span>
-        </a>
-      </div>
-
-    </div>
-
   </div>
-</div>
 
-<%- include('../layouts/base-footer') %>
+  <%- include('../layouts/base-footer') %>

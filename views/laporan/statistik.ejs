@@ -1,412 +1,488 @@
 <%- include('../layouts/base-header') %>
 
-<div class="container mx-auto py-6 px-4">
-  <div class="max-w-6xl mx-auto space-y-6">
-    
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between">
-      <div class="flex items-center space-x-4 mb-4 md:mb-0">
-        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
-          <i class="fas fa-chart-bar text-yellow-300"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight">Laporan Statistik Surat & Kepegawaian</h1>
-          <p class="text-blue-100 text-sm mt-0.5">Analisis Data Volume Surat Masuk, Surat Keluar, Disposisi & Cuti PA Banjarbaru</p>
-        </div>
-      </div>
-      <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-semibold">
-        <i class="fas fa-calendar text-yellow-300"></i>
-        <span>Tahun Anggaran <%= new Date().getFullYear() %></span>
-      </div>
-    </div>
+  <div class="container mx-auto py-6 px-4">
+    <div class="max-w-6xl mx-auto space-y-6">
 
-    <% if (typeof testSuccessMsg !== 'undefined' && testSuccessMsg) { %>
-    <div class="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
-      <div class="flex items-center space-x-3">
-        <i class="fas fa-check-circle text-emerald-600 text-xl"></i>
-        <span class="text-sm font-bold"><%= testSuccessMsg %></span>
-      </div>
-      <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg">Status: Optimal</span>
-    </div>
-    <% } %>
-
-    <!-- Overview Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
-        <div class="p-3 bg-blue-100 text-blue-600 rounded-2xl text-xl">
-          <i class="fas fa-inbox"></i>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase">Surat Masuk</p>
-          <p class="text-2xl font-extrabold text-gray-900"><%= typeof suratMasukCount !== 'undefined' ? suratMasukCount : 12 %></p>
-          <span class="text-xs text-emerald-600 font-semibold"><i class="fas fa-arrow-up"></i> +15% bulan ini</span>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
-        <div class="p-3 bg-emerald-100 text-emerald-600 rounded-2xl text-xl">
-          <i class="fas fa-paper-plane"></i>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase">Surat Keluar</p>
-          <p class="text-2xl font-extrabold text-gray-900"><%= typeof suratKeluarCount !== 'undefined' ? suratKeluarCount : 8 %></p>
-          <span class="text-xs text-emerald-600 font-semibold"><i class="fas fa-arrow-up"></i> +8% bulan ini</span>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
-        <div class="p-3 bg-purple-100 text-purple-600 rounded-2xl text-xl">
-          <i class="fas fa-share-alt"></i>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase">Disposisi Pimpinan</p>
-          <p class="text-2xl font-extrabold text-gray-900"><%= typeof disposisiCount !== 'undefined' ? disposisiCount : 10 %></p>
-          <span class="text-xs text-blue-600 font-semibold">100% Ditindaklanjuti</span>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
-        <div class="p-3 bg-amber-100 text-amber-600 rounded-2xl text-xl">
-          <i class="fas fa-calendar-check"></i>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-gray-500 uppercase">Permohonan Cuti</p>
-          <p class="text-2xl font-extrabold text-gray-900"><%= typeof cutiCount !== 'undefined' ? cutiCount : 5 %></p>
-          <span class="text-xs text-amber-600 font-semibold">2 Menunggu Approval</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- OCR Accuracy Statistics Section -->
-    <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 rounded-2xl p-6 text-white shadow-xl space-y-6">
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-4 gap-4">
-        <div class="flex items-center space-x-3">
-          <div class="p-3 bg-indigo-500/20 border border-indigo-400/30 rounded-xl text-yellow-300 text-2xl">
-            <i class="fas fa-microchip"></i>
+      <!-- Header -->
+      <div
+        class="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between w-full">
+        <div class="flex items-left gap-4">
+          <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl shrink-0">
+            <i class="fas fa-chart-bar text-yellow-300"></i>
           </div>
           <div>
-            <h2 class="text-xl font-bold tracking-tight">Hasil Pengujian Benchmark 20 Berkas OCR</h2>
-            <p class="text-indigo-200 text-xs mt-0.5">Laporan Keberhasilan Ekstraksi 10 Surat Masuk & 10 Surat Keluar PA Banjarbaru</p>
+            <h1 class="text-2xl font-bold tracking-tight">Laporan Statistik Surat & Kepegawaian</h1>
+            <p class="text-blue-100 text-sm mt-0.5">Analisis Data Volume Surat Masuk, Surat Keluar, Disposisi & Cuti PA
+              Banjarbaru</p>
           </div>
         </div>
-        <div class="flex items-center space-x-3">
-          <form action="/api/test-ocr-20" method="POST" onsubmit="this.querySelector('button').innerHTML='<i class=\'fas fa-spinner fa-spin mr-1\'></i> Menguji...';">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-2 border border-indigo-400/30">
-              <i class="fas fa-play"></i>
-              <span>Jalankan Uji Ulang 20 Berkas</span>
-            </button>
-          </form>
-          <div class="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2">
-            <i class="fas fa-check-circle"></i>
-            <span>Mesin OCR: Active</span>
-          </div>
+        <div
+          class="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-semibold">
+          <i class="fas fa-calendar text-yellow-300"></i>
+          <span>Tahun Anggaran <%= new Date().getFullYear() %></span>
         </div>
       </div>
 
-      <!-- OCR Summary KPIs -->
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
-          <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Tingkat Keberhasilan OCR</div>
-          <div class="flex items-baseline space-x-2">
-            <span class="text-3xl font-extrabold text-emerald-400"><%= typeof ocrStats !== 'undefined' ? ocrStats.avgAccuracy : 97.0 %>%</span>
-            <span class="text-xs text-emerald-300 font-semibold"><i class="fas fa-shield-alt"></i> Lulus Benchmark</span>
+      <% if (typeof testSuccessMsg !=='undefined' && testSuccessMsg) { %>
+        <div
+          class="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-check-circle text-emerald-600 text-xl"></i>
+            <span class="text-sm font-bold">
+              <%= testSuccessMsg %>
+            </span>
           </div>
-          <p class="text-[11px] text-gray-300 mt-1">Akurasi rata-rata dari 20 sampel berkas uji</p>
+          <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg">Status:
+            Optimal</span>
         </div>
+        <% } %>
 
-        <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
-          <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Total Berkas Penguji</div>
-          <div class="flex items-baseline space-x-2">
-            <span class="text-3xl font-extrabold text-white"><%= typeof ocrStats !== 'undefined' ? ocrStats.totalProcessed : 20 %></span>
-            <span class="text-xs text-blue-300 font-semibold">Berkas</span>
-          </div>
-          <p class="text-[11px] text-gray-300 mt-1">10 Surat Masuk + 10 Surat Keluar</p>
-        </div>
-
-        <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
-          <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Akurasi Per Jenis</div>
-          <div class="space-y-1 text-xs mt-1">
-            <div class="flex justify-between"><span class="text-gray-300">Surat Masuk (10):</span> <span class="font-bold text-blue-400"><%= ocrStats.masukAccuracy %>%</span></div>
-            <div class="flex justify-between"><span class="text-gray-300">Surat Keluar (10):</span> <span class="font-bold text-emerald-400"><%= ocrStats.keluarAccuracy %>%</span></div>
-          </div>
-        </div>
-
-        <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
-          <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Kecepatan Rata-Rata</div>
-          <div class="flex items-baseline space-x-2">
-            <span class="text-3xl font-extrabold text-yellow-300"><%= typeof ocrStats !== 'undefined' ? ocrStats.avgTimeSeconds : 0.96 %>s</span>
-            <span class="text-xs text-yellow-200 font-semibold">/ Berkas</span>
-          </div>
-          <p class="text-[11px] text-gray-300 mt-1">Pemrosesan Tesseract OCR tanpa antrean</p>
-        </div>
-      </div>
-
-      <!-- OCR Breakdown Tables & Bars -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-        
-        <!-- Field Level Accuracy -->
-        <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-          <h3 class="text-sm font-bold text-white flex items-center justify-between">
-            <span class="flex items-center"><i class="fas fa-list-check text-indigo-400 mr-2"></i> Akurasi per Field Extracted (20 Berkas)</span>
-            <span class="text-xs font-normal text-indigo-300">Skor Persentase</span>
-          </h3>
-
-          <div class="space-y-3">
-            <% if (typeof ocrStats !== 'undefined' && ocrStats.fieldAccuracy) { %>
-              <% ocrStats.fieldAccuracy.forEach(function(f) { %>
+          <!-- Overview Stats Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-blue-100 text-blue-600 rounded-2xl text-xl">
+                <i class="fas fa-inbox"></i>
+              </div>
               <div>
-                <div class="flex justify-between text-xs font-semibold mb-1">
-                  <span class="text-gray-200"><%= f.field %></span>
-                  <span class="text-emerald-400 font-mono font-bold"><%= f.accuracy %>%</span>
+                <p class="text-xs font-bold text-gray-500 uppercase">Surat Masuk</p>
+                <p class="text-2xl font-extrabold text-gray-900">
+                  <%= typeof suratMasukCount !=='undefined' ? suratMasukCount : 12 %>
+                </p>
+                <span class="text-xs text-emerald-600 font-semibold"><i class="fas fa-arrow-up"></i> +15% bulan
+                  ini</span>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-emerald-100 text-emerald-600 rounded-2xl text-xl">
+                <i class="fas fa-paper-plane"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-500 uppercase">Surat Keluar</p>
+                <p class="text-2xl font-extrabold text-gray-900">
+                  <%= typeof suratKeluarCount !=='undefined' ? suratKeluarCount : 8 %>
+                </p>
+                <span class="text-xs text-emerald-600 font-semibold"><i class="fas fa-arrow-up"></i> +8% bulan
+                  ini</span>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-purple-100 text-purple-600 rounded-2xl text-xl">
+                <i class="fas fa-share-alt"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-500 uppercase">Disposisi Pimpinan</p>
+                <p class="text-2xl font-extrabold text-gray-900">
+                  <%= typeof disposisiCount !=='undefined' ? disposisiCount : 10 %>
+                </p>
+                <span class="text-xs text-blue-600 font-semibold">100% Ditindaklanjuti</span>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm flex items-center space-x-4">
+              <div class="p-3 bg-amber-100 text-amber-600 rounded-2xl text-xl">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-500 uppercase">Permohonan Cuti</p>
+                <p class="text-2xl font-extrabold text-gray-900">
+                  <%= typeof cutiCount !=='undefined' ? cutiCount : 5 %>
+                </p>
+                <span class="text-xs text-amber-600 font-semibold">2 Menunggu Approval</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- OCR Accuracy Statistics Section -->
+          <div
+            class="bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 rounded-2xl p-6 text-white shadow-xl space-y-6">
+            <div
+              class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-4 gap-4">
+              <div class="flex items-center space-x-3">
+                <div class="p-3 bg-indigo-500/20 border border-indigo-400/30 rounded-xl text-yellow-300 text-2xl">
+                  <i class="fas fa-microchip"></i>
                 </div>
-                <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                  <div class="bg-emerald-400 h-full rounded-full transition-all duration-500" style="width: <%= f.accuracy %>%"></div>
+                <div>
+                  <h2 class="text-xl font-bold tracking-tight">Hasil Pengujian Benchmark 20 Berkas OCR</h2>
+                  <p class="text-indigo-200 text-xs mt-0.5">Laporan Keberhasilan Ekstraksi 10 Surat Masuk & 10 Surat
+                    Keluar PA Banjarbaru</p>
                 </div>
               </div>
-              <% }); %>
-            <% } %>
-          </div>
-        </div>
-
-        <!-- Category Level Accuracy -->
-        <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-          <h3 class="text-sm font-bold text-white flex items-center justify-between">
-            <span class="flex items-center"><i class="fas fa-folder-open text-purple-400 mr-2"></i> Rincian Keberhasilan Kategori</span>
-            <span class="text-xs font-normal text-purple-300">100 Field Target</span>
-          </h3>
-
-          <div class="space-y-3">
-            <% if (typeof ocrStats !== 'undefined' && ocrStats.categoryAccuracy) { %>
-              <% ocrStats.categoryAccuracy.forEach(function(cat) { %>
-              <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <div class="p-2.5 bg-indigo-500/20 text-indigo-300 rounded-lg text-sm">
-                    <i class="fas <%= cat.icon %>"></i>
-                  </div>
-                  <div>
-                    <p class="text-xs font-bold text-white"><%= cat.category %></p>
-                    <p class="text-[11px] text-gray-300">Tingkat pencocokan metadata otomatis</p>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <span class="text-sm font-extrabold text-emerald-400 font-mono"><%= cat.accuracy %>%</span>
-                  <p class="text-[10px] text-emerald-300 font-semibold">Tinggi</p>
+              <div class="flex items-center space-x-3">
+                <form action="/api/test-ocr-20" method="POST"
+                  onsubmit="this.querySelector('button').innerHTML='<i class=\'fas fa-spinner fa-spin mr-1\'></i> Menguji...';">
+                  <button type="submit"
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-2 border border-indigo-400/30">
+                    <i class="fas fa-play"></i>
+                    <span>Jalankan Uji Ulang 20 Berkas</span>
+                  </button>
+                </form>
+                <div
+                  class="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Mesin OCR: Active</span>
                 </div>
               </div>
-              <% }); %>
-            <% } %>
-          </div>
-        </div>
+            </div>
 
-      </div>
+            <!-- OCR Summary KPIs -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
+                <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Tingkat Keberhasilan OCR
+                </div>
+                <div class="flex items-baseline space-x-2">
+                  <span class="text-3xl font-extrabold text-emerald-400">
+                    <%= typeof ocrStats !=='undefined' ? ocrStats.avgAccuracy : 97.0 %>%
+                  </span>
+                  <span class="text-xs text-emerald-300 font-semibold"><i class="fas fa-shield-alt"></i> Lulus
+                    Benchmark</span>
+                </div>
+                <p class="text-[11px] text-gray-300 mt-1">Akurasi rata-rata dari 20 sampel berkas uji</p>
+              </div>
 
-      <!-- Detailed 20 Test Documents Table -->
-      <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
-          <div>
-            <h3 class="text-sm font-bold text-white flex items-center">
-              <i class="fas fa-table-list text-yellow-400 mr-2"></i> Rincian Hasil Pengujian 20 Berkas OCR
-            </h3>
-            <p class="text-xs text-indigo-200 mt-0.5">Daftar lengkap 10 Berkas Surat Masuk & 10 Berkas Surat Keluar</p>
-          </div>
-          <div class="flex items-center space-x-2 text-xs">
-            <button type="button" onclick="filterTable('semua')" class="btn-filter-ocr active px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold transition">Semua (20)</button>
-            <button type="button" onclick="filterTable('Surat Masuk')" class="btn-filter-ocr px-3 py-1 bg-white/10 hover:bg-white/20 text-indigo-200 rounded-lg font-semibold transition">Surat Masuk (10)</button>
-            <button type="button" onclick="filterTable('Surat Keluar')" class="btn-filter-ocr px-3 py-1 bg-white/10 hover:bg-white/20 text-indigo-200 rounded-lg font-semibold transition">Surat Keluar (10)</button>
-          </div>
-        </div>
+              <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
+                <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Total Berkas Penguji</div>
+                <div class="flex items-baseline space-x-2">
+                  <span class="text-3xl font-extrabold text-white">
+                    <%= typeof ocrStats !=='undefined' ? ocrStats.totalProcessed : 20 %>
+                  </span>
+                  <span class="text-xs text-blue-300 font-semibold">Berkas</span>
+                </div>
+                <p class="text-[11px] text-gray-300 mt-1">10 Surat Masuk + 10 Surat Keluar</p>
+              </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-gray-200">
-            <thead class="bg-white/10 uppercase tracking-wider text-[11px] text-indigo-200 font-bold border-b border-white/10">
-              <tr>
-                <th class="p-3">No</th>
-                <th class="p-3">Nama Berkas Uji</th>
-                <th class="p-3">Jenis</th>
-                <th class="p-3">Instansi / Tujuan</th>
-                <th class="p-3">Nomor Surat Terdeteksi</th>
-                <th class="p-3 text-center">Field Terdeteksi</th>
-                <th class="p-3 text-center">Keberhasilan (%)</th>
-                <th class="p-3 text-center">Kecepatan</th>
-                <th class="p-3 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-white/5" id="ocrTestTableBody">
-              <% if (typeof ocrStats !== 'undefined' && ocrStats.testFiles) { %>
-                <% ocrStats.testFiles.forEach(function(f, idx) { %>
-                <tr class="ocr-row hover:bg-white/5 transition" data-jenis="<%= f.jenis %>">
-                  <td class="p-3 font-mono font-bold text-gray-400"><%= idx + 1 %></td>
-                  <td class="p-3 font-semibold text-white">
-                    <div class="flex items-center space-x-2">
-                      <i class="fas <%= f.nama_berkas.endsWith('.pdf') ? 'fa-file-pdf text-red-400' : 'fa-file-image text-blue-400' %>"></i>
-                      <span><%= f.nama_berkas %></span>
-                    </div>
-                  </td>
-                  <td class="p-3">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <%= f.jenis === 'Surat Masuk' ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' %>">
-                      <%= f.jenis %>
-                    </span>
-                  </td>
-                  <td class="p-3 text-gray-300"><%= f.instansi %></td>
-                  <td class="p-3 font-mono text-xs text-yellow-300"><%= f.nomor %></td>
-                  <td class="p-3 text-center font-mono font-bold text-white"><%= f.matched_fields %> / <%= f.total_fields %></td>
-                  <td class="p-3 text-center font-mono font-extrabold text-sm <%= f.accuracy === 100 ? 'text-emerald-400' : 'text-yellow-400' %>">
-                    <%= f.accuracy %>%
-                  </td>
-                  <td class="p-3 text-center font-mono text-gray-300"><%= f.time_ms %> ms</td>
-                  <td class="p-3 text-center">
-                    <% if (f.accuracy === 100) { %>
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Sempurna</span>
-                    <% } else { %>
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">Baik</span>
-                    <% } %>
-                  </td>
-                </tr>
-                <% }); %>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
-      </div>
+              <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
+                <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Akurasi Per Jenis</div>
+                <div class="space-y-1 text-xs mt-1">
+                  <div class="flex justify-between"><span class="text-gray-300">Surat Masuk (10):</span> <span
+                      class="font-bold text-blue-400">
+                      <%= ocrStats.masukAccuracy %>%
+                    </span></div>
+                  <div class="flex justify-between"><span class="text-gray-300">Surat Keluar (10):</span> <span
+                      class="font-bold text-emerald-400">
+                      <%= ocrStats.keluarAccuracy %>%
+                    </span></div>
+                </div>
+              </div>
+
+              <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-xl p-4">
+                <div class="text-xs font-bold text-indigo-300 uppercase tracking-wider mb-1">Kecepatan Rata-Rata</div>
+                <div class="flex items-baseline space-x-2">
+                  <span class="text-3xl font-extrabold text-yellow-300">
+                    <%= typeof ocrStats !=='undefined' ? ocrStats.avgTimeSeconds : 0.96 %>s
+                  </span>
+                  <span class="text-xs text-yellow-200 font-semibold">/ Berkas</span>
+                </div>
+                <p class="text-[11px] text-gray-300 mt-1">Pemrosesan Tesseract OCR tanpa antrean</p>
+              </div>
+            </div>
+
+            <!-- OCR Breakdown Tables & Bars -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+
+              <!-- Field Level Accuracy -->
+              <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
+                <h3 class="text-sm font-bold text-white flex items-center justify-between">
+                  <span class="flex items-center"><i class="fas fa-list-check text-indigo-400 mr-2"></i> Akurasi per
+                    Field Extracted (20 Berkas)</span>
+                  <span class="text-xs font-normal text-indigo-300">Skor Persentase</span>
+                </h3>
+
+                <div class="space-y-3">
+                  <% if (typeof ocrStats !=='undefined' && ocrStats.fieldAccuracy) { %>
+                    <% ocrStats.fieldAccuracy.forEach(function(f) { %>
+                      <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                          <span class="text-gray-200">
+                            <%= f.field %>
+                          </span>
+                          <span class="text-emerald-400 font-mono font-bold">
+                            <%= f.accuracy %>%
+                          </span>
+                        </div>
+                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                          <div class="bg-emerald-400 h-full rounded-full transition-all duration-500"
+                            style="width: <%= f.accuracy %>%"></div>
+                        </div>
+                      </div>
+                      <% }); %>
+                        <% } %>
+                </div>
+              </div>
+
+              <!-- Category Level Accuracy -->
+              <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
+                <h3 class="text-sm font-bold text-white flex items-center justify-between">
+                  <span class="flex items-center"><i class="fas fa-folder-open text-purple-400 mr-2"></i> Rincian
+                    Keberhasilan Kategori</span>
+                  <span class="text-xs font-normal text-purple-300">100 Field Target</span>
+                </h3>
+
+                <div class="space-y-3">
+                  <% if (typeof ocrStats !=='undefined' && ocrStats.categoryAccuracy) { %>
+                    <% ocrStats.categoryAccuracy.forEach(function(cat) { %>
+                      <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                          <div class="p-2.5 bg-indigo-500/20 text-indigo-300 rounded-lg text-sm">
+                            <i class="fas <%= cat.icon %>"></i>
+                          </div>
+                          <div>
+                            <p class="text-xs font-bold text-white">
+                              <%= cat.category %>
+                            </p>
+                            <p class="text-[11px] text-gray-300">Tingkat pencocokan metadata otomatis</p>
+                          </div>
+                        </div>
+                        <div class="text-right">
+                          <span class="text-sm font-extrabold text-emerald-400 font-mono">
+                            <%= cat.accuracy %>%
+                          </span>
+                          <p class="text-[10px] text-emerald-300 font-semibold">Tinggi</p>
+                        </div>
+                      </div>
+                      <% }); %>
+                        <% } %>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Detailed 20 Test Documents Table -->
+            <div class="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
+              <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div>
+                  <h3 class="text-sm font-bold text-white flex items-center">
+                    <i class="fas fa-table-list text-yellow-400 mr-2"></i> Rincian Hasil Pengujian 20 Berkas OCR
+                  </h3>
+                  <p class="text-xs text-indigo-200 mt-0.5">Daftar lengkap 10 Berkas Surat Masuk & 10 Berkas Surat
+                    Keluar</p>
+                </div>
+                <div class="flex items-center space-x-2 text-xs">
+                  <button type="button" onclick="filterTable('semua')"
+                    class="btn-filter-ocr active px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold transition">Semua
+                    (20)</button>
+                  <button type="button" onclick="filterTable('Surat Masuk')"
+                    class="btn-filter-ocr px-3 py-1 bg-white/10 hover:bg-white/20 text-indigo-200 rounded-lg font-semibold transition">Surat
+                    Masuk (10)</button>
+                  <button type="button" onclick="filterTable('Surat Keluar')"
+                    class="btn-filter-ocr px-3 py-1 bg-white/10 hover:bg-white/20 text-indigo-200 rounded-lg font-semibold transition">Surat
+                    Keluar (10)</button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-gray-200">
+                  <thead
+                    class="bg-white/10 uppercase tracking-wider text-[11px] text-indigo-200 font-bold border-b border-white/10">
+                    <tr>
+                      <th class="p-3">No</th>
+                      <th class="p-3">Nama Berkas Uji</th>
+                      <th class="p-3">Jenis</th>
+                      <th class="p-3">Instansi / Tujuan</th>
+                      <th class="p-3">Nomor Surat Terdeteksi</th>
+                      <th class="p-3 text-center">Field Terdeteksi</th>
+                      <th class="p-3 text-center">Keberhasilan (%)</th>
+                      <th class="p-3 text-center">Kecepatan</th>
+                      <th class="p-3 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-white/5" id="ocrTestTableBody">
+                    <% if (typeof ocrStats !=='undefined' && ocrStats.testFiles) { %>
+                      <% ocrStats.testFiles.forEach(function(f, idx) { %>
+                        <tr class="ocr-row hover:bg-white/5 transition" data-jenis="<%= f.jenis %>">
+                          <td class="p-3 font-mono font-bold text-gray-400">
+                            <%= idx + 1 %>
+                          </td>
+                          <td class="p-3 font-semibold text-white">
+                            <div class="flex items-center space-x-2">
+                              <i
+                                class="fas <%= f.nama_berkas.endsWith('.pdf') ? 'fa-file-pdf text-red-400' : 'fa-file-image text-blue-400' %>"></i>
+                              <span>
+                                <%= f.nama_berkas %>
+                              </span>
+                            </div>
+                          </td>
+                          <td class="p-3">
+                            <span
+                              class="px-2 py-0.5 rounded-full text-[10px] font-bold <%= f.jenis === 'Surat Masuk' ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' %>">
+                              <%= f.jenis %>
+                            </span>
+                          </td>
+                          <td class="p-3 text-gray-300">
+                            <%= f.instansi %>
+                          </td>
+                          <td class="p-3 font-mono text-xs text-yellow-300">
+                            <%= f.nomor %>
+                          </td>
+                          <td class="p-3 text-center font-mono font-bold text-white">
+                            <%= f.matched_fields %> / <%= f.total_fields %>
+                          </td>
+                          <td
+                            class="p-3 text-center font-mono font-extrabold text-sm <%= f.accuracy === 100 ? 'text-emerald-400' : 'text-yellow-400' %>">
+                            <%= f.accuracy %>%
+                          </td>
+                          <td class="p-3 text-center font-mono text-gray-300">
+                            <%= f.time_ms %> ms
+                          </td>
+                          <td class="p-3 text-center">
+                            <% if (f.accuracy===100) { %>
+                              <span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Sempurna</span>
+                              <% } else { %>
+                                <span
+                                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">Baik</span>
+                                <% } %>
+                          </td>
+                        </tr>
+                        <% }); %>
+                          <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <script>
+            function filterTable(jenis) {
+              const rows = document.querySelectorAll('.ocr-row');
+              const btns = document.querySelectorAll('.btn-filter-ocr');
+
+              btns.forEach(btn => {
+                btn.classList.remove('bg-white/20', 'text-white', 'font-bold');
+                btn.classList.add('bg-white/10', 'text-indigo-200', 'font-semibold');
+              });
+
+              event.target.classList.remove('bg-white/10', 'text-indigo-200', 'font-semibold');
+              event.target.classList.add('bg-white/20', 'text-white', 'font-bold');
+
+              rows.forEach(row => {
+                if (jenis === 'semua' || row.dataset.jenis === jenis) {
+                  row.style.display = '';
+                } else {
+                  row.style.display = 'none';
+                }
+              });
+            }
+          </script>
+
+          <!-- Visual Charts & Progress Breakdown -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Chart 1: Rekapitulasi Bulanan -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
+              <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 class="font-bold text-gray-800 text-base flex items-center">
+                  <i class="fas fa-chart-line text-blue-600 mr-2"></i> Grafik Pergerakan Surat 2026
+                </h3>
+                <span class="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">Tahun Ini</span>
+              </div>
+
+              <div class="space-y-3 pt-2">
+                <div>
+                  <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                    <span>Maret - Mei 2026</span>
+                    <span class="text-blue-600">35 Surat Masuk / 28 Surat Keluar</span>
+                  </div>
+                  <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden flex">
+                    <div class="bg-blue-600 h-full rounded-l-full" style="width: 55%"></div>
+                    <div class="bg-emerald-500 h-full rounded-r-full" style="width: 45%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                    <span>Juni 2026</span>
+                    <span class="text-blue-600">42 Surat Masuk / 31 Surat Keluar</span>
+                  </div>
+                  <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden flex">
+                    <div class="bg-blue-600 h-full rounded-l-full" style="width: 58%"></div>
+                    <div class="bg-emerald-500 h-full rounded-r-full" style="width: 42%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
+                    <span>Juli 2026 (Berjalan)</span>
+                    <span class="text-blue-600">28 Surat Masuk / 19 Surat Keluar</span>
+                  </div>
+                  <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden flex">
+                    <div class="bg-blue-600 h-full rounded-l-full" style="width: 60%"></div>
+                    <div class="bg-emerald-500 h-full rounded-r-full" style="width: 40%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center justify-center space-x-6 text-xs font-bold text-gray-600 pt-3 border-t border-gray-100">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 bg-blue-600 rounded-full inline-block"></span>
+                  <span>Surat Masuk</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span>
+                  <span>Surat Keluar</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart 2: Persentase Status Persetujuan -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
+              <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 class="font-bold text-gray-800 text-base flex items-center">
+                  <i class="fas fa-pie-chart text-purple-600 mr-2"></i> Status Verifikasi & Persetujuan
+                </h3>
+                <span
+                  class="text-xs font-semibold px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full">Pimpinan</span>
+              </div>
+
+              <div class="space-y-4 pt-1">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    <span class="text-xs font-bold text-gray-700">Disetujui Pimpinan</span>
+                  </div>
+                  <span class="text-xs font-bold text-emerald-600">82%</span>
+                </div>
+                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 82%"></div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-amber-500 rounded-full"></div>
+                    <span class="text-xs font-bold text-gray-700">Menunggu Persetujuan (Pending)</span>
+                  </div>
+                  <span class="text-xs font-bold text-amber-600">14%</span>
+                </div>
+                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full" style="width: 14%"></div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span class="text-xs font-bold text-gray-700">Dikembalikan / Ditolak</span>
+                  </div>
+                  <span class="text-xs font-bold text-red-600">4%</span>
+                </div>
+                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                  <div class="bg-red-500 h-full rounded-full" style="width: 4%"></div>
+                </div>
+              </div>
+
+              <div class="pt-2 text-right">
+                <a href="<%= url_for('laporan.cetak') %>" class="text-xs font-bold text-blue-600 hover:underline">
+                  Lihat Laporan Cetak Lengkap &rarr;
+                </a>
+              </div>
+            </div>
+
+          </div>
 
     </div>
-
-    <script>
-      function filterTable(jenis) {
-        const rows = document.querySelectorAll('.ocr-row');
-        const btns = document.querySelectorAll('.btn-filter-ocr');
-        
-        btns.forEach(btn => {
-          btn.classList.remove('bg-white/20', 'text-white', 'font-bold');
-          btn.classList.add('bg-white/10', 'text-indigo-200', 'font-semibold');
-        });
-
-        event.target.classList.remove('bg-white/10', 'text-indigo-200', 'font-semibold');
-        event.target.classList.add('bg-white/20', 'text-white', 'font-bold');
-
-        rows.forEach(row => {
-          if (jenis === 'semua' || row.dataset.jenis === jenis) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
-      }
-    </script>
-
-    <!-- Visual Charts & Progress Breakdown -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Chart 1: Rekapitulasi Bulanan -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-          <h3 class="font-bold text-gray-800 text-base flex items-center">
-            <i class="fas fa-chart-line text-blue-600 mr-2"></i> Grafik Pergerakan Surat 2026
-          </h3>
-          <span class="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">Tahun Ini</span>
-        </div>
-
-        <div class="space-y-3 pt-2">
-          <div>
-            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-              <span>Maret - Mei 2026</span>
-              <span class="text-blue-600">35 Surat Masuk / 28 Surat Keluar</span>
-            </div>
-            <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden flex">
-              <div class="bg-blue-600 h-full rounded-l-full" style="width: 55%"></div>
-              <div class="bg-emerald-500 h-full rounded-r-full" style="width: 45%"></div>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-              <span>Juni 2026</span>
-              <span class="text-blue-600">42 Surat Masuk / 31 Surat Keluar</span>
-            </div>
-            <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden flex">
-              <div class="bg-blue-600 h-full rounded-l-full" style="width: 58%"></div>
-              <div class="bg-emerald-500 h-full rounded-r-full" style="width: 42%"></div>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between text-xs font-bold text-gray-600 mb-1">
-              <span>Juli 2026 (Berjalan)</span>
-              <span class="text-blue-600">28 Surat Masuk / 19 Surat Keluar</span>
-            </div>
-            <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden flex">
-              <div class="bg-blue-600 h-full rounded-l-full" style="width: 60%"></div>
-              <div class="bg-emerald-500 h-full rounded-r-full" style="width: 40%"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-center space-x-6 text-xs font-bold text-gray-600 pt-3 border-t border-gray-100">
-          <div class="flex items-center space-x-2">
-            <span class="w-3 h-3 bg-blue-600 rounded-full inline-block"></span>
-            <span>Surat Masuk</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span>
-            <span>Surat Keluar</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chart 2: Persentase Status Persetujuan -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-          <h3 class="font-bold text-gray-800 text-base flex items-center">
-            <i class="fas fa-pie-chart text-purple-600 mr-2"></i> Status Verifikasi & Persetujuan
-          </h3>
-          <span class="text-xs font-semibold px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full">Pimpinan</span>
-        </div>
-
-        <div class="space-y-4 pt-1">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="w-3 h-3 bg-emerald-500 rounded-full"></div>
-              <span class="text-xs font-bold text-gray-700">Disetujui Pimpinan</span>
-            </div>
-            <span class="text-xs font-bold text-emerald-600">82%</span>
-          </div>
-          <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-            <div class="bg-emerald-500 h-full rounded-full" style="width: 82%"></div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="w-3 h-3 bg-amber-500 rounded-full"></div>
-              <span class="text-xs font-bold text-gray-700">Menunggu Persetujuan (Pending)</span>
-            </div>
-            <span class="text-xs font-bold text-amber-600">14%</span>
-          </div>
-          <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-            <div class="bg-amber-500 h-full rounded-full" style="width: 14%"></div>
-          </div>
-
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span class="text-xs font-bold text-gray-700">Dikembalikan / Ditolak</span>
-            </div>
-            <span class="text-xs font-bold text-red-600">4%</span>
-          </div>
-          <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-            <div class="bg-red-500 h-full rounded-full" style="width: 4%"></div>
-          </div>
-        </div>
-
-        <div class="pt-2 text-right">
-          <a href="<%= url_for('laporan.cetak') %>" class="text-xs font-bold text-blue-600 hover:underline">
-            Lihat Laporan Cetak Lengkap &rarr;
-          </a>
-        </div>
-      </div>
-
-    </div>
-
   </div>
-</div>
 
-<%- include('../layouts/base-footer') %>
+  <%- include('../layouts/base-footer') %>

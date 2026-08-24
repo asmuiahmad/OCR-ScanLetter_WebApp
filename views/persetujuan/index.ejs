@@ -9,7 +9,7 @@
       <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
       
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-4 justify-start text-left w-full md:w-auto">
           <div class="w-13 h-13 bg-amber-500/20 border border-amber-400/40 rounded-2xl flex items-center justify-center text-2xl text-amber-400 shadow-inner shrink-0">
             <i class="fas fa-file-signature"></i>
           </div>
@@ -159,7 +159,7 @@
                     </button>
 
                     <!-- Approve Form Button -->
-                    <form action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin MENYETUJUI surat ini?')">
+                    <form action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="event.preventDefault(); openCustomApproveModal(this);">
                       <input type="hidden" name="id" value="<%= s.id %>">
                       <input type="hidden" name="type" value="<%= s.type %>">
                       <input type="hidden" name="action" value="setujui">
@@ -171,7 +171,7 @@
                     </form>
 
                     <!-- Reject Form Button -->
-                    <form action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin MENOLAK surat ini?')">
+                    <form action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="event.preventDefault(); openCustomRejectModal(this);">
                       <input type="hidden" name="id" value="<%= s.id %>">
                       <input type="hidden" name="type" value="<%= s.type %>">
                       <input type="hidden" name="action" value="tolak">
@@ -375,7 +375,7 @@
         <span>Data surat tersimpan sah di database Pengadilan Agama Banjarbaru</span>
       </div>
       <div class="flex items-center gap-2">
-        <form id="modalApproveForm" action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin MENYETUJUI surat ini?')">
+        <form id="modalApproveForm" action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="event.preventDefault(); openCustomApproveModal(this);">
           <input type="hidden" name="id" id="modalApproveId">
           <input type="hidden" name="type" id="modalApproveType">
           <input type="hidden" name="action" value="setujui">
@@ -384,7 +384,7 @@
           </button>
         </form>
 
-        <form id="modalRejectForm" action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin MENOLAK surat ini?')">
+        <form id="modalRejectForm" action="/persetujuan/surat-masuk" method="POST" class="inline" onsubmit="event.preventDefault(); openCustomRejectModal(this);">
           <input type="hidden" name="id" id="modalRejectId">
           <input type="hidden" name="type" id="modalRejectType">
           <input type="hidden" name="action" value="tolak">
@@ -650,6 +650,122 @@ function toggleModalFullscreen(modalId) {
     card.classList.remove('max-w-3xl', 'max-h-[92vh]');
   }
 }
+
+// Custom Modal Variables
+let currentApproveForm = null;
+let currentRejectForm = null;
+
+function openCustomApproveModal(formElement) {
+  currentApproveForm = formElement;
+  const modal = document.getElementById('customApproveModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeCustomApproveModal() {
+  currentApproveForm = null;
+  const modal = document.getElementById('customApproveModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function confirmCustomApprove() {
+  if (currentApproveForm) {
+    currentApproveForm.submit();
+  }
+}
+
+function openCustomRejectModal(formElement) {
+  currentRejectForm = formElement;
+  const modal = document.getElementById('customRejectModal');
+  if (modal) {
+    const textarea = modal.querySelector('textarea[name="alasan_penolakan_input"]');
+    if (textarea) textarea.value = '';
+    modal.classList.remove('hidden');
+  }
+}
+
+function closeCustomRejectModal() {
+  currentRejectForm = null;
+  const modal = document.getElementById('customRejectModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function confirmCustomReject() {
+  const modal = document.getElementById('customRejectModal');
+  if (!modal || !currentRejectForm) return;
+
+  const textarea = modal.querySelector('textarea[name="alasan_penolakan_input"]');
+  const reason = textarea ? textarea.value.trim() : '';
+  
+  if (!reason) {
+    alert('Alasan penolakan wajib diisi!');
+    return;
+  }
+
+  // Create a hidden input to submit the reason
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'alasan_penolakan';
+  hiddenInput.value = reason;
+  currentRejectForm.appendChild(hiddenInput);
+
+  currentRejectForm.submit();
+}
 </script>
+
+<!-- Custom Approve Modal -->
+<div id="customApproveModal" class="fixed inset-0 z-[99999] hidden flex items-center justify-center">
+  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeCustomApproveModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm p-6 transform transition-all">
+    <div class="flex items-center gap-3 mb-4 text-emerald-600">
+      <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+        <i class="fas fa-check-circle text-xl"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-800">Setujui Surat</h3>
+    </div>
+    <p class="text-sm text-slate-600 mb-6 font-medium">Apakah Anda yakin ingin MENYETUJUI surat ini dan menerbitkan tanda tangan digital?</p>
+    <div class="flex items-center justify-end gap-2">
+      <button type="button" onclick="closeCustomApproveModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">
+        Batal
+      </button>
+      <button type="button" onclick="confirmCustomApprove()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition shadow-sm">
+        Ya, Setujui
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Reject Modal -->
+<div id="customRejectModal" class="fixed inset-0 z-[99999] hidden flex items-center justify-center">
+  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeCustomRejectModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 transform transition-all">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3 text-rose-600">
+        <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
+          <i class="fas fa-times-circle text-xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">Tolak Surat</h3>
+      </div>
+      <button type="button" onclick="closeCustomRejectModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 transition">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="mb-5">
+      <p class="text-sm text-slate-600 font-medium mb-3">Sebutkan alasan penolakan surat ini agar dapat diperbaiki oleh staf terkait.</p>
+      <div class="bg-rose-50 border border-rose-100 p-1 rounded-xl">
+        <textarea name="alasan_penolakan_input" rows="3" class="w-full bg-transparent border-none p-3 text-sm focus:ring-0 resize-none font-medium text-slate-800 placeholder-rose-300" placeholder="Contoh: Lampiran kurang lengkap, mohon periksa kembali..."></textarea>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end gap-2">
+      <button type="button" onclick="closeCustomRejectModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">
+        Batal
+      </button>
+      <button type="button" onclick="confirmCustomReject()" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+        <i class="fas fa-paper-plane"></i> Kirim Penolakan
+      </button>
+    </div>
+  </div>
+</div>
 
 <%- include('../layouts/base-footer') %>

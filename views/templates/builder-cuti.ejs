@@ -1,0 +1,554 @@
+<%- include('../layouts/base-header') %>
+
+<!-- Include html2pdf.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Include qrcodejs for generating QR code -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<div class="container mx-auto py-6 px-4 max-w-7xl">
+  
+  <!-- Header Title -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl shadow-sm border border-emerald-200">
+        <i class="fas fa-file-signature"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-gray-900">Builder Formulir Cuti</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Buat formulir permintaan cuti dan unduh sebagai PDF</p>
+      </div>
+    </div>
+    
+    <button type="button" onclick="downloadPDF()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition flex items-center space-x-2 shadow-sm">
+      <i class="fas fa-file-pdf"></i>
+      <span>Unduh PDF</span>
+    </button>
+  </div>
+
+  <div class="space-y-8">
+    
+    <!-- Top Section: Form Builder -->
+    <div class="space-y-4">
+      <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+        <h2 class="text-sm font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+          <i class="fas fa-pen-nib text-emerald-500"></i> Pengisian Data Cuti
+        </h2>
+        
+        <form id="builderForm" class="space-y-4 text-sm">
+          
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <h3 class="text-xs font-bold text-slate-800 mb-2">I. Data Pegawai</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Pilih Pegawai</label>
+                <select id="selectPegawai" onchange="handlePegawaiChange()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition text-sm bg-white">
+                  <option value="">-- Pilih Pegawai --</option>
+                  <% pegawaiList.forEach(p => { %>
+                    <option value="<%= p.id %>" data-nama="<%= p.nama %>" data-nip="<%= p.nip %>" data-jabatan="<%= p.jabatan %>" data-golongan="<%= p.golongan %>" data-unit="<%= p.unit %>" data-telepon="<%= p.telepon %>"><%= p.nama %></option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mt-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                <input type="text" id="inputNama" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">NIP</label>
+                <input type="text" id="inputNip" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Jabatan</label>
+                <input type="text" id="inputJabatan" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Golongan/Ruang</label>
+                <input type="text" id="inputGolongan" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Unit Kerja</label>
+                <input type="text" id="inputUnitKerja" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Masa Kerja</label>
+                <input type="text" id="inputMasaKerja" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Contoh: 10 Tahun 5 Bulan">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Alamat Lengkap</label>
+                <input type="text" id="inputAlamat" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Nomor Telepon</label>
+                <input type="text" id="inputTelepon" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+            <h3 class="text-xs font-bold text-indigo-900 mb-2">II. Jenis Cuti & III. Detail Permohonan</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-indigo-700 mb-1">Jenis Cuti</label>
+                <select id="inputJenisCuti" oninput="updatePreview()" class="w-full px-3 py-2 border border-indigo-200 rounded-lg bg-white">
+                  <option value="Tahunan">Cuti Tahunan</option>
+                  <option value="Besar">Cuti Besar</option>
+                  <option value="Sakit">Cuti Sakit</option>
+                  <option value="Melahirkan">Cuti Melahirkan</option>
+                  <option value="Alasan Penting">Cuti Alasan Penting</option>
+                  <option value="Luar Negara">Cuti Luar Negara</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-indigo-700 mb-1">Alasan Cuti</label>
+                <input type="text" id="inputAlasan" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-indigo-200 rounded-lg">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-indigo-700 mb-1">Lama Cuti</label>
+                <input type="text" id="inputLama" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-indigo-200 rounded-lg" placeholder="Contoh: 8 hari">
+              </div>
+              <div class="flex gap-2">
+                <div class="w-1/2">
+                  <label class="block text-xs font-bold text-indigo-700 mb-1">Tanggal Mulai</label>
+                  <input type="date" id="inputTglMulai" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-indigo-200 rounded-lg">
+                </div>
+                <div class="w-1/2">
+                  <label class="block text-xs font-bold text-indigo-700 mb-1">Tanggal Selesai</label>
+                  <input type="date" id="inputTglSelesai" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-indigo-200 rounded-lg">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-indigo-700 mb-1">Nomor Surat Masuk</label>
+                <input type="text" id="inputNomorSurat" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-indigo-200 rounded-lg font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-indigo-700 mb-1">Tanggal Formulir</label>
+                <input type="date" id="inputTglForm" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-indigo-200 rounded-lg">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+            <h3 class="text-xs font-bold text-amber-900 mb-2">Penandatangan & Keputusan</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-amber-700 mb-1">Pejabat Atasan Langsung (Mengetahui)</label>
+                <input type="text" id="inputAtasanNama" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-amber-300 rounded-lg mb-2" placeholder="Nama Atasan">
+                <input type="text" id="inputAtasanNip" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-amber-300 rounded-lg font-mono" placeholder="NIP Atasan">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-amber-700 mb-1">Pejabat Yang Berwenang</label>
+                <input type="text" id="inputBerwenangNama" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-amber-300 rounded-lg mb-2" placeholder="Nama Pejabat Berwenang">
+                <input type="text" id="inputBerwenangNip" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-amber-300 rounded-lg mb-2 font-mono" placeholder="NIP Pejabat Berwenang">
+                <input type="text" id="inputBerwenangTgl" value="" oninput="updatePreview()" class="w-full px-3 py-2 border border-amber-300 rounded-lg" placeholder="Tanggal TTD Pejabat Berwenang">
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Bottom Section: Live Preview (A4 Paper Mode) -->
+    <div>
+      <div id="previewContainer" class="bg-gray-100 p-4 rounded-2xl border border-gray-200 shadow-inner overflow-y-auto overflow-x-hidden flex justify-center scrollbar-thin max-h-[85vh]">
+        
+        <!-- Document Container (Target for PDF) -->
+        <div id="suratDocument" class="bg-white border border-gray-300 shadow-lg shrink-0 relative overflow-hidden origin-top flex flex-col" style="width: 210mm; min-height: 297mm; padding: 25mm 20mm 20mm 20mm; font-family: 'Times New Roman', Times, serif; color: black; line-height: 1.5; transition: transform 0.2s ease;">
+          
+          <!-- Kop Surat -->
+          <div style="margin-bottom: 5px;">
+            <table style="width: 100%; border-bottom: 2px solid #166534; padding-bottom: 0.5rem;" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="width: 100px; text-align: left; vertical-align: middle;">
+                  <img src="/static/assets/images/logo_pa_original.png" alt="Logo" style="width: 90px; height: auto;">
+                </td>
+                <td style="text-align: center; vertical-align: middle; padding: 0 10px; font-family: 'Times New Roman', Times, serif; color: #166534;">
+                  <div style="font-size: 16pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">PENGADILAN AGAMA BANJARBARU</div>
+                  <div style="font-size: 14pt; font-weight: bold; text-transform: uppercase;">Mahkamah Agung Republik Indonesia</div>
+                  <div style="font-size: 10pt; font-style: italic; color: #4b5563; margin-top: 4px;">Jl. Trikora No. 10, Kelurahan Guntung Payung, Kecamatan Landasan Ulin, Kota Banjarbaru, Kalimantan Selatan</div>
+                  <div style="font-size: 10pt; font-style: italic; color: #4b5563;">Telp: (0511) 4773321, Fax: (0511) 4773322, E-mail: pa.banjarbaru@yahoo.com</div>
+                </td>
+              </tr>
+            </table>
+            <div style="border-bottom: 1px solid #166534; margin-top: 2px;"></div>
+          </div>
+
+          <!-- Title Box -->
+          <div style="border: 1px solid #4b5563; padding: 10px; text-align: center; margin-top: 15px; border-radius: 4px; background: #f8fafc;">
+             <div style="font-size: 16pt; font-weight: bold; letter-spacing: 2px; color: #166534;">FORMULIR PERMINTAAN CUTI</div>
+             <div style="font-size: 12pt; font-style: italic; color: #6b7280;">Pegawai Negeri Sipil</div>
+          </div>
+
+          <!-- Layout I and II -->
+          <div style="display: flex; gap: 15px; margin-top: 15px;">
+            
+            <!-- Section I -->
+            <div style="flex: 1.1;">
+              <div style="font-weight: bold; font-size: 12pt; border-bottom: 2px solid #166534; color: #166534; padding-bottom: 2px; margin-bottom: 8px;">I. DATA PEGAWAI</div>
+              <table style="width: 100%; font-size: 10pt; border-collapse: collapse;">
+                <tr>
+                   <td style="width: 40%; border: 1px solid #e5e7eb; padding: 6px;">Nama Lengkap</td>
+                   <td style="width: 5%; text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevNama"></span></td>
+                </tr>
+                <tr>
+                   <td style="border: 1px solid #e5e7eb; padding: 6px;">Nomor Induk Pegawai<br>(NIP)</td>
+                   <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevNip"></span></td>
+                </tr>
+                <tr>
+                   <td style="border: 1px solid #e5e7eb; padding: 6px;">Jabatan</td>
+                   <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevJabatan"></span></td>
+                </tr>
+                <tr>
+                   <td style="border: 1px solid #e5e7eb; padding: 6px;">Golongan/Ruang</td>
+                   <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevGolongan"></span></td>
+                </tr>
+                <tr>
+                   <td style="border: 1px solid #e5e7eb; padding: 6px;">Unit Kerja</td>
+                   <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevUnitKerja"></span></td>
+                </tr>
+                <tr>
+                   <td style="border: 1px solid #e5e7eb; padding: 6px;">Masa Kerja</td>
+                   <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevMasaKerja"></span></td>
+                </tr>
+                <tr>
+                   <td style="border: 1px solid #e5e7eb; padding: 6px;">Alamat Lengkap</td>
+                   <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevAlamat"></span></td>
+                </tr>
+                <tr>
+                   <td style="border: 1px solid #e5e7eb; padding: 6px;">Nomor Telepon</td>
+                   <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                   <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevTelepon"></span></td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Section II -->
+            <div style="flex: 0.9;">
+              <div style="font-weight: bold; font-size: 12pt; border-bottom: 2px solid #166534; color: #166534; padding-bottom: 2px; margin-bottom: 8px;">II. JENIS CUTI YANG DIMOHON</div>
+              <div style="display: flex; gap: 8px; font-size: 10pt;">
+                <div style="flex: 1; border: 1px solid #e5e7eb; padding: 10px; border-radius: 4px;">
+                   <div><span style="display:inline-block; width: 14px; height: 14px; border: 1px solid black; text-align: center; line-height: 12px; margin-right: 6px;" id="cbTahunan"></span> Cuti Tahunan</div>
+                   <div style="margin-top: 15px;"><span style="display:inline-block; width: 14px; height: 14px; border: 1px solid black; text-align: center; line-height: 12px; margin-right: 6px;" id="cbSakit"></span> Cuti Sakit</div>
+                   <div style="margin-top: 15px;"><span style="display:inline-block; width: 14px; height: 14px; border: 1px solid black; text-align: center; line-height: 12px; margin-right: 6px;" id="cbAlasanPenting"></span> Cuti Alasan Penting</div>
+                </div>
+                <div style="flex: 1; border: 1px solid #e5e7eb; padding: 10px; border-radius: 4px;">
+                   <div><span style="display:inline-block; width: 14px; height: 14px; border: 1px solid black; text-align: center; line-height: 12px; margin-right: 6px;" id="cbBesar"></span> Cuti Besar</div>
+                   <div style="margin-top: 15px;"><span style="display:inline-block; width: 14px; height: 14px; border: 1px solid black; text-align: center; line-height: 12px; margin-right: 6px;" id="cbMelahirkan"></span> Cuti Melahirkan</div>
+                   <div style="margin-top: 15px;"><span style="display:inline-block; width: 14px; height: 14px; border: 1px solid black; text-align: center; line-height: 12px; margin-right: 6px;" id="cbLuarNegara"></span> Cuti Luar Negara</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Section III -->
+          <div style="margin-top: 15px;">
+            <div style="font-weight: bold; font-size: 12pt; border-bottom: 2px solid #166534; color: #166534; padding-bottom: 2px; margin-bottom: 8px;">III. DETAIL PERMOHONAN CUTI</div>
+            <table style="width: 100%; font-size: 10pt; border-collapse: collapse;">
+              <tr>
+                 <td style="width: 25%; border: 1px solid #e5e7eb; padding: 6px;">Alasan Cuti</td>
+                 <td style="width: 3%; text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                 <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevAlasan"></span></td>
+              </tr>
+              <tr>
+                 <td style="border: 1px solid #e5e7eb; padding: 6px;">Lama Cuti</td>
+                 <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                 <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevLama"></span></td>
+              </tr>
+              <tr>
+                 <td style="border: 1px solid #e5e7eb; padding: 6px;">Tanggal Mulai Cuti</td>
+                 <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                 <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevTglMulai"></span></td>
+              </tr>
+              <tr>
+                 <td style="border: 1px solid #e5e7eb; padding: 6px;">Tanggal Selesai Cuti</td>
+                 <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                 <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevTglSelesai"></span></td>
+              </tr>
+              <tr>
+                 <td style="border: 1px solid #e5e7eb; padding: 6px;">Nomor Surat Masuk</td>
+                 <td style="text-align: center; border: 1px solid #e5e7eb; border-right: none;">:</td>
+                 <td style="border: 1px solid #e5e7eb; border-left: none; padding: 6px;"><span id="prevNomorSurat"></span></td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Date right aligned -->
+          <div style="text-align: right; margin-top: 15px; font-weight: bold; font-size: 12pt; padding-right: 15px;">
+            <span id="prevTglForm"></span>
+          </div>
+
+          <!-- Signatures Row 1 -->
+          <div style="display: flex; gap: 15px; margin-top: 5px;">
+            <div style="flex: 1; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; background: #f9fafb; text-align: center; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-weight: bold; font-size: 11pt; color: #166534;">Mengetahui</div>
+                <div style="font-size: 9pt; font-style: italic; color: #6b7280;">Atasan Langsung</div>
+              </div>
+              <div style="margin-top: 40px; font-size: 10pt;">
+                <div style="font-weight: bold;" id="prevAtasanNama">(_________________________)</div>
+                <div>NIP: <span id="prevAtasanNip">____________________</span></div>
+              </div>
+            </div>
+            
+            <div style="flex: 1; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; background: #f9fafb; text-align: center; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="font-weight: bold; font-size: 11pt; color: #166534;">Pemohon</div>
+                <div style="font-size: 9pt; font-style: italic; color: #6b7280;">Yang Mengajukan Cuti</div>
+              </div>
+              <div style="margin-top: 40px; font-size: 10pt;">
+                <div style="font-weight: bold;" id="prevPemohonNama"></div>
+                <div>NIP: <span id="prevPemohonNip"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signatures Row 2 -->
+          <div style="display: flex; gap: 15px; margin-top: 15px;">
+            
+            <!-- Keputusan -->
+            <div style="flex: 1; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; font-size: 10pt;">
+              <div style="font-weight: bold; text-align: center; margin-bottom: 10px;">Keputusan</div>
+              <div style="margin-bottom: 5px;"><span style="display:inline-block; width: 12px; height: 12px; border: 1px solid black; margin-right: 5px;"></span> Disetujui</div>
+              <div style="margin-bottom: 5px;"><span style="display:inline-block; width: 12px; height: 12px; border: 1px solid black; margin-right: 5px;"></span> Ditolak</div>
+              <div style="margin-bottom: 10px;"><span style="display:inline-block; width: 12px; height: 12px; border: 1px solid black; margin-right: 5px;"></span> Ditangguhkan</div>
+              <div style="border: 1px solid #e5e7eb; padding: 5px; min-height: 60px; font-size: 9pt;">
+                <strong>Catatan:</strong>
+              </div>
+            </div>
+
+            <!-- Pejabat yang Berwenang -->
+            <div style="flex: 1; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; font-size: 10pt;">
+              <div style="font-weight: bold;">Pejabat yang Berwenang</div>
+              <div style="margin-top: 40px; text-align: left; padding-left: 10px;">
+                <div style="border-bottom: 1px solid black; width: 80%; margin: 0 auto 5px auto;"></div>
+                <div style="font-weight: bold; text-align: center;" id="prevBerwenangNama">(_________________________)</div>
+                <div>NIP: <span id="prevBerwenangNip">____________________</span></div>
+                <div>Tanggal: <span id="prevBerwenangTgl">_________________</span></div>
+              </div>
+            </div>
+
+            <!-- Verifikasi Digital -->
+            <div style="flex: 1; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+              <div style="font-weight: bold; font-size: 10pt; margin-bottom: 10px;">Verifikasi Digital</div>
+              <div id="qrcodePreview" style="width: 100px; height: 100px; padding: 5px; border: 1px dashed #ccc;"></div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let qrCodeObj = null;
+
+  function adjustScale() {
+    const container = document.getElementById('previewContainer');
+    const doc = document.getElementById('suratDocument');
+    if (!container || !doc) return;
+    
+    // Temporarily reset to get real dimensions
+    doc.style.transition = 'none';
+    doc.style.transform = 'none';
+    doc.style.marginBottom = '0px';
+    
+    const docWidth = doc.offsetWidth || 794; 
+    const docHeight = doc.offsetHeight || 1123;
+    const containerWidth = container.clientWidth - 32; 
+    
+    let scale = containerWidth / docWidth;
+    if (scale > 1.0) scale = 1.0; // Cap max zoom
+    
+    doc.style.transform = `scale(${scale})`;
+    
+    const scaledHeight = docHeight * scale;
+    doc.style.marginBottom = `-${docHeight - scaledHeight}px`; 
+    
+    // Restore transition
+    setTimeout(() => {
+      doc.style.transition = 'transform 0.2s ease';
+    }, 50);
+  }
+
+  function handlePegawaiChange() {
+    const select = document.getElementById('selectPegawai');
+    const selected = select.options[select.selectedIndex];
+    
+    if (selected && selected.value) {
+      document.getElementById('inputNama').value = selected.getAttribute('data-nama');
+      document.getElementById('inputNip').value = selected.getAttribute('data-nip');
+      document.getElementById('inputJabatan').value = selected.getAttribute('data-jabatan');
+      document.getElementById('inputGolongan').value = selected.getAttribute('data-golongan');
+      document.getElementById('inputUnitKerja').value = selected.getAttribute('data-unit') || 'Pengadilan Agama Banjarbaru';
+      document.getElementById('inputTelepon').value = selected.getAttribute('data-telepon');
+    } else {
+      document.getElementById('inputNama').value = '';
+      document.getElementById('inputNip').value = '';
+      document.getElementById('inputJabatan').value = '';
+      document.getElementById('inputGolongan').value = '';
+      document.getElementById('inputUnitKerja').value = '';
+      document.getElementById('inputTelepon').value = '';
+    }
+    
+    updatePreview();
+  }
+
+  function formatTgl(tglVal) {
+    if (!tglVal) return "";
+    const d = new Date(tglVal);
+    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    if (!isNaN(d.getTime())) {
+      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+    return tglVal;
+  }
+
+  function updatePreview() {
+    document.getElementById('prevNama').innerText = document.getElementById('inputNama').value;
+    document.getElementById('prevNip').innerText = document.getElementById('inputNip').value;
+    document.getElementById('prevJabatan').innerText = document.getElementById('inputJabatan').value;
+    document.getElementById('prevGolongan').innerText = document.getElementById('inputGolongan').value;
+    document.getElementById('prevUnitKerja').innerText = document.getElementById('inputUnitKerja').value;
+    document.getElementById('prevMasaKerja').innerText = document.getElementById('inputMasaKerja').value;
+    document.getElementById('prevAlamat').innerText = document.getElementById('inputAlamat').value;
+    document.getElementById('prevTelepon').innerText = document.getElementById('inputTelepon').value;
+
+    document.getElementById('prevAlasan').innerText = document.getElementById('inputAlasan').value;
+    document.getElementById('prevLama').innerText = document.getElementById('inputLama').value;
+    document.getElementById('prevTglMulai').innerText = formatTgl(document.getElementById('inputTglMulai').value);
+    document.getElementById('prevTglSelesai').innerText = formatTgl(document.getElementById('inputTglSelesai').value);
+    document.getElementById('prevNomorSurat').innerText = document.getElementById('inputNomorSurat').value;
+    document.getElementById('prevTglForm').innerText = formatTgl(document.getElementById('inputTglForm').value);
+
+    // Pemohon signatures
+    document.getElementById('prevPemohonNama').innerText = document.getElementById('inputNama').value || '__________________';
+    document.getElementById('prevPemohonNip').innerText = document.getElementById('inputNip').value || '__________________';
+
+    // Mengetahui
+    let atasanNama = document.getElementById('inputAtasanNama').value;
+    let atasanNip = document.getElementById('inputAtasanNip').value;
+    document.getElementById('prevAtasanNama').innerText = atasanNama ? atasanNama : '(_________________________)';
+    document.getElementById('prevAtasanNip').innerText = atasanNip ? atasanNip : '____________________';
+
+    // Pejabat Berwenang
+    let bwNama = document.getElementById('inputBerwenangNama').value;
+    let bwNip = document.getElementById('inputBerwenangNip').value;
+    let bwTgl = document.getElementById('inputBerwenangTgl').value;
+    document.getElementById('prevBerwenangNama').innerText = bwNama ? bwNama : '(_________________________)';
+    document.getElementById('prevBerwenangNip').innerText = bwNip ? bwNip : '____________________';
+    document.getElementById('prevBerwenangTgl').innerText = bwTgl ? formatTgl(bwTgl) : '_________________';
+
+    // Checkboxes reset
+    const cbs = ['cbTahunan', 'cbSakit', 'cbAlasanPenting', 'cbBesar', 'cbMelahirkan', 'cbLuarNegara'];
+    cbs.forEach(id => document.getElementById(id).innerHTML = '');
+    
+    // Set checked box
+    const jc = document.getElementById('inputJenisCuti').value;
+    let cbId = '';
+    if (jc === 'Tahunan') cbId = 'cbTahunan';
+    if (jc === 'Sakit') cbId = 'cbSakit';
+    if (jc === 'Alasan Penting') cbId = 'cbAlasanPenting';
+    if (jc === 'Besar') cbId = 'cbBesar';
+    if (jc === 'Melahirkan') cbId = 'cbMelahirkan';
+    if (jc === 'Luar Negara') cbId = 'cbLuarNegara';
+    
+    if (cbId) {
+      document.getElementById(cbId).innerHTML = '<i class="fas fa-check"></i>';
+    }
+
+    // Update QR Code
+    const qrContainer = document.getElementById('qrcodePreview');
+    qrContainer.innerHTML = ''; // clear
+    const nipPemohon = document.getElementById('inputNip').value || 'UNKNOWN';
+    const uniqueText = "CUTI_VERIFIED_" + nipPemohon + "_" + Date.now();
+    
+    if (qrCodeObj) {
+      qrCodeObj.clear();
+      qrCodeObj.makeCode(uniqueText);
+    } else {
+      qrCodeObj = new QRCode(qrContainer, {
+        text: uniqueText,
+        width: 90,
+        height: 90,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.L
+      });
+    }
+    
+    adjustScale();
+  }
+
+  function downloadPDF() {
+    const element = document.getElementById('suratDocument');
+    const nama = document.getElementById('inputNama').value.replace(/[^a-zA-Z0-9-]/g, '_') || 'Tanpa_Nama';
+    
+    const oldTransform = element.style.transform;
+    const oldMarginBottom = element.style.marginBottom;
+    const oldClass = element.className;
+    const oldTransition = element.style.transition;
+    
+    element.style.transition = 'none';
+    element.style.transform = 'none';
+    element.style.marginBottom = '0px';
+    element.className = 'bg-white shrink-0 relative overflow-hidden flex flex-col';
+    
+    // Exact A4 dimensions
+    element.style.width = '170mm'; // 210 - 40 margin
+    element.style.padding = '0mm'; // padding handled by margin opt
+    element.style.height = 'auto';
+    element.style.minHeight = 'auto';
+
+    const opt = {
+      margin:       [15, 20, 15, 20], // top, left, bottom, right
+      filename:     `Formulir_Cuti_${nama}.pdf`,
+      image:        { type: 'jpeg', quality: 1 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    setTimeout(() => {
+      html2pdf().set(opt).from(element).save().then(() => {
+        element.className = oldClass;
+        element.style.transform = oldTransform;
+        element.style.marginBottom = oldMarginBottom;
+        element.style.transition = oldTransition;
+        element.style.width = '210mm';
+        element.style.padding = '25mm 20mm 20mm 20mm';
+        element.style.minHeight = '297mm';
+        adjustScale();
+      });
+    }, 50);
+  }
+
+  window.addEventListener('resize', adjustScale);
+
+  // Initialize preview on load
+  document.addEventListener('DOMContentLoaded', () => {
+    updatePreview();
+    setTimeout(adjustScale, 200);
+  });
+</script>
+
+<style>
+  /* Styling check marks for cuti pdf */
+  .fa-check {
+    font-size: 10px;
+    color: black;
+  }
+</style>
+
+<%- include('../layouts/base-footer') %>
