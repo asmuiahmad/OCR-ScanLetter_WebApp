@@ -994,7 +994,7 @@ app.post(['/ocr/surat-masuk', '/ocr/ocr_surat_masuk', '/ocr_surat_masuk'], requi
     }
 
     const newSurat: Surat = {
-      id: suratMasukList.length + 1,
+      id: suratMasukList.length > 0 ? Math.max(...suratMasukList.map(s => s.id)) + 1 : 1,
       tanggal: tanggal || new Date().toISOString().split('T')[0],
       pengirim: pengirim || 'Pengadilan Tinggi Agama Banjarmasin',
       penerima: penerima || 'Ketua Pengadilan Agama Banjarbaru',
@@ -1079,7 +1079,7 @@ app.post(['/ocr/surat-keluar', '/ocr/ocr_surat_keluar', '/ocr_surat_keluar'], re
     }
 
     const newSurat: Surat = {
-      id: suratKeluarList.length + 1,
+      id: suratKeluarList.length > 0 ? Math.max(...suratKeluarList.map(s => s.id)) + 1 : 1,
       tanggal: tanggal || new Date().toISOString().split('T')[0],
       pengirim: pengirim || 'Pengadilan Agama Banjarbaru',
       penerima: penerima || 'Ketua Pengadilan Tinggi Agama Banjarmasin',
@@ -1174,7 +1174,7 @@ app.post(['/ocr/ocr-cuti', '/ocr/cuti', '/ocr_cuti'], requireAuth, upload.single
     }
 
     const newCuti = {
-      id: cutiList.length + 1,
+      id: cutiList.length > 0 ? Math.max(...cutiList.map(s => s.id)) + 1 : 1,
       nama_pegawai: nama_pegawai || 'Pegawai PA Banjarbaru',
       nip: nip || '-',
       jabatan: jabatan || 'Pegawai',
@@ -1276,7 +1276,7 @@ app.get('/pegawai', requireAuth, (req, res) => {
 app.post('/pegawai/tambah', requireAuth, (req, res) => {
   const { nama, nip, jabatan, golongan, email, telepon } = req.body;
   const newPegawai = {
-    id: pegawaiList.length + 1,
+    id: pegawaiList.length > 0 ? Math.max(...pegawaiList.map(s => s.id)) + 1 : 1,
     nama: nama || '',
     nip: nip || '',
     jabatan: jabatan || '',
@@ -1307,7 +1307,7 @@ app.get('/cuti', requireAuth, (req, res) => {
 app.post('/cuti/baru', requireAuth, (req, res) => {
   const { nama_pegawai, nip, jenis_cuti, tanggal_mulai, tanggal_selesai, lama_hari, alasan } = req.body;
   const newCuti = {
-    id: cutiList.length + 1,
+    id: cutiList.length > 0 ? Math.max(...cutiList.map(s => s.id)) + 1 : 1,
     nama_pegawai: nama_pegawai || '',
     nip: nip || '',
     jenis_cuti: jenis_cuti || '',
@@ -1354,7 +1354,7 @@ app.get('/disposisi', requireAuth, (req, res) => {
 app.post('/disposisi/buat', requireAuth, (req, res) => {
   const { nomor_surat, tujuan, instruksi, sifat } = req.body;
   const newDisp = {
-    id: disposisiList.length + 1,
+    id: disposisiList.length > 0 ? Math.max(...disposisiList.map(s => s.id)) + 1 : 1,
     nomor_surat: nomor_surat || '',
     tanggal_disposisi: new Date().toISOString().split('T')[0],
     tujuan: tujuan || '',
@@ -1518,7 +1518,7 @@ app.get('/surat-masuk/input', requireAuth, (req, res) => {
 
 app.post('/surat-masuk/input', requireAuth, upload.single('file'), (req, res) => {
   if (req.file) {
-    const ext = require('path').extname(req.file.originalname).toLowerCase();
+    const ext = path.extname(req.file.originalname).toLowerCase();
     if (!['.pdf', '.png', '.jpg', '.jpeg'].includes(ext)) {
       return res.render('input_surat_masuk/index', {
         breadcrumb_active: 'Input Surat Masuk',
@@ -1529,7 +1529,7 @@ app.post('/surat-masuk/input', requireAuth, upload.single('file'), (req, res) =>
   }
   const { tanggal, nomor, pengirim, penerima, isi } = req.body;
   const newSurat: Surat = {
-    id: suratMasukList.length + 1,
+    id: suratMasukList.length > 0 ? Math.max(...suratMasukList.map(s => s.id)) + 1 : 1,
     tanggal: tanggal || new Date().toISOString().split('T')[0],
     pengirim: pengirim || '',
     penerima: penerima || '',
@@ -1559,7 +1559,7 @@ app.get('/surat-keluar/input', requireAuth, (req, res) => {
 
 app.post('/surat-keluar/input', requireAuth, upload.single('file'), (req, res) => {
   if (req.file) {
-    const ext = require('path').extname(req.file.originalname).toLowerCase();
+    const ext = path.extname(req.file.originalname).toLowerCase();
     if (!['.pdf', '.png', '.jpg', '.jpeg'].includes(ext)) {
       return res.render('input_surat_keluar/index', {
         breadcrumb_active: 'Input Surat Keluar',
@@ -1570,7 +1570,7 @@ app.post('/surat-keluar/input', requireAuth, upload.single('file'), (req, res) =
   }
   const { tanggal, nomor, pengirim, penerima, isi } = req.body;
   const newSurat: Surat = {
-    id: suratKeluarList.length + 1,
+    id: suratKeluarList.length > 0 ? Math.max(...suratKeluarList.map(s => s.id)) + 1 : 1,
     tanggal: tanggal || new Date().toISOString().split('T')[0],
     pengirim: pengirim || 'Pengadilan Agama Banjarbaru',
     penerima: penerima || '',

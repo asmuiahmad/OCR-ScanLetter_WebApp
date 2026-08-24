@@ -1,322 +1,377 @@
 <%- include('../layouts/base-header') %>
 
-<div class="container mx-auto py-6 px-4">
-  <div class="max-w-6xl mx-auto">
-    <!-- Page Header -->
-    <div class="bg-gradient-to-r from-teal-700 via-emerald-600 to-teal-800 rounded-xl shadow-lg p-6 mb-6 text-white flex flex-col md:flex-row items-center justify-between">
-      <div class="flex items-center space-x-4 mb-4 md:mb-0">
-        <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
-          <i class="fas fa-calendar-check text-yellow-300"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight">OCR Cuti & Formulir Cuti</h1>
-          <p class="text-teal-100 text-sm mt-1">Ekstraksi Teks Otomatis Berkas Scan / Foto Formulir Permohonan Cuti Pegawai</p>
-        </div>
-      </div>
-      <a href="<%= url_for('cuti.daftar') %>" class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg text-sm font-medium transition backdrop-blur-sm border border-white/20">
-        <i class="fas fa-list mr-2"></i> Lihat Daftar Permohonan Cuti
-      </a>
-    </div>
-
-    <!-- Alert Notifications -->
-    <% if (typeof success !== 'undefined' && success) { %>
-    <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-xl shadow-sm mb-6 flex items-center justify-between">
-      <div class="flex items-center">
-        <i class="fas fa-check-circle text-emerald-500 text-xl mr-3"></i>
-        <div>
-          <p class="font-semibold"><%= success %></p>
-        </div>
-      </div>
-      <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fas fa-times"></i></button>
-    </div>
-    <% } %>
-
-    <% if (typeof error !== 'undefined' && error) { %>
-    <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-r-xl shadow-sm mb-6 flex items-center justify-between">
-      <div class="flex items-center">
-        <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
-        <div>
-          <p class="font-semibold"><%= error %></p>
-        </div>
-      </div>
-      <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700"><i class="fas fa-times"></i></button>
-    </div>
-    <% } %>
-
-    <!-- Grid Container: Upload & Processing -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-      
-      <!-- Upload Dropzone -->
-      <div class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
-        <div>
-          <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-            <i class="fas fa-cloud-upload-alt text-teal-600 mr-2"></i> Upload Berkas Formulir Cuti
-          </h3>
-          
-          <form id="ocrUploadForm" action="<%= url_for('ocr.ocr_cuti') %>" method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="showOcrLoading()">
-            <input type="hidden" name="action" value="process">
-            
-            <!-- Drag and Drop Box -->
-            <div id="dropzone" class="border-2 border-dashed border-teal-300 hover:border-teal-500 bg-teal-50/50 hover:bg-teal-50 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[160px]">
-              <i class="fas fa-file-invoice text-4xl text-teal-500 mb-3 animate-bounce"></i>
-              <p class="text-sm font-medium text-gray-700">Tarik & Lepas file formulir cuti di sini, atau <span class="text-teal-600 underline">Pilih File</span></p>
-              <p class="text-xs text-gray-500 mt-1">Format didukung: JPG, JPEG, PNG, PDF (Maks 10MB)</p>
-              <input type="file" id="fileInput" name="file" accept="image/*,.pdf" class="hidden" onchange="handleFileSelect(this)">
-            </div>
-
-            <!-- Selected File Indicator -->
-            <div id="selectedFileInfo" class="hidden bg-teal-50 border border-teal-200 p-3 rounded-lg flex items-center justify-between text-sm text-teal-800">
-              <div class="flex items-center space-x-2 truncate">
-                <i class="fas fa-paperclip text-teal-600"></i>
-                <span id="fileNameDisplay" class="font-medium truncate">file.jpg</span>
-              </div>
-              <button type="button" onclick="clearSelectedFile()" class="text-red-500 hover:text-red-700 ml-2">
-                <i class="fas fa-times-circle"></i>
-              </button>
-            </div>
-
-            <button type="submit" id="btnProcessOCR" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2 mt-4">
-              <i class="fas fa-eye" id="btnOcrIcon"></i>
-              <span id="btnOcrText">Proses OCR & Ekstraksi Formulir Cuti</span>
-            </button>
-          </form>
-        </div>
-
-        <div class="mt-4 pt-4 border-t text-xs text-gray-500 flex items-center justify-between">
-          <span><i class="fas fa-shield-alt text-teal-600 mr-1"></i> Keamanan Berkas Terjamin</span>
-          <span>Tesseract OCR + Smart Cuti Regex v5.0</span>
-        </div>
-      </div>
-
-      <!-- OCR Result Form & Preview -->
-      <div class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
-        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center justify-between">
-          <span class="flex items-center">
-            <i class="fas fa-clipboard-check text-teal-600 mr-2"></i> Hasil Ekstraksi Formulir Cuti Pegawai
-          </span>
-          <% if (typeof activeOcr !== 'undefined' && activeOcr) { %>
-          <span class="px-2.5 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-semibold">Berhasil Diekstraksi via Regex</span>
-          <% } else { %>
-          <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold">Siap Memproses</span>
-          <% } %>
-        </h3>
-
-        <% if (typeof activeOcr !== 'undefined' && activeOcr) { %>
-        <!-- Interactive Preview + Editable Form -->
-        <div class="space-y-4 flex-1">
-          
-          <!-- Image Zoom Modal / Box -->
-          <div class="bg-gray-900 rounded-xl p-3 relative overflow-hidden text-center group min-h-[200px] flex items-center justify-center">
-            <img id="ocrPreviewImage" src="<%= activeOcr.imageUrl %>" alt="Scan Formulir Cuti" class="max-h-[240px] object-contain transition-transform duration-200 cursor-zoom-in" onclick="openZoomModal('<%= activeOcr.imageUrl %>')">
-            
-            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md rounded-lg p-1.5 flex items-center space-x-2 text-white text-xs">
-              <button onclick="zoomImage(1.2)" title="Zoom In" class="px-2 py-1 hover:bg-white/20 rounded"><i class="fas fa-search-plus"></i></button>
-              <button onclick="zoomImage(0.8)" title="Zoom Out" class="px-2 py-1 hover:bg-white/20 rounded"><i class="fas fa-search-minus"></i></button>
-              <button onclick="resetZoom()" title="Reset" class="px-2 py-1 hover:bg-white/20 rounded"><i class="fas fa-undo"></i></button>
-              <button onclick="openZoomModal('<%= activeOcr.imageUrl %>')" class="px-2 py-1 bg-teal-600 hover:bg-teal-700 rounded text-white font-medium flex items-center space-x-1">
-                <i class="fas fa-expand"></i>
-                <span>Lihat Penuh</span>
-              </button>
-            </div>
+  <div class="container mx-auto py-6 px-4">
+    <div class="max-w-6xl mx-auto">
+      <!-- Page Header -->
+      <div
+        class="bg-gradient-to-r from-teal-700 via-emerald-600 to-teal-800 rounded-xl shadow-lg p-6 mb-6 text-white flex flex-col md:flex-row items-center justify-between">
+        <div class="flex items-center space-x-4 mb-4 md:mb-0">
+          <div class="p-3 bg-white/10 backdrop-blur-md rounded-xl text-2xl">
+            <i class="fas fa-calendar-check text-yellow-300"></i>
           </div>
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight">OCR Cuti & Formulir Cuti</h1>
+            <p class="text-teal-100 text-sm mt-1">Ekstraksi Teks Otomatis Berkas Scan / Foto Formulir Permohonan Cuti
+              Pegawai</p>
+          </div>
+        </div>
+        <a href="<%= url_for('cuti.daftar') %>"
+          class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg text-sm font-medium transition backdrop-blur-sm border border-white/20">
+          <i class="fas fa-list mr-2"></i> Lihat Daftar Permohonan Cuti
+        </a>
+      </div>
 
-          <!-- Save Form -->
-          <form action="<%= url_for('ocr.ocr_cuti') %>" method="POST" class="space-y-4 pt-2">
-            <input type="hidden" name="action" value="save">
-            <input type="hidden" name="filename" value="<%= activeOcr.filename %>">
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  Nama Pegawai <span class="text-teal-600 font-normal">(Regex Match)</span>
-                </label>
-                <input type="text" name="nama_pegawai" value="<%= activeOcr.nama_pegawai %>" required class="w-full bg-teal-50/40 border border-teal-300 rounded-lg p-2.5 text-sm font-bold text-gray-900 focus:ring-teal-500 focus:border-teal-500">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">
-                  NIP Pegawai
-                </label>
-                <input type="text" name="nip" value="<%= activeOcr.nip %>" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jabatan Pegawai</label>
-                <input type="text" name="jabatan" value="<%= activeOcr.jabatan %>" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Cuti</label>
-                <select name="jenis_cuti" required class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-                  <option value="Cuti Tahunan" <%= activeOcr.jenis_cuti === 'Cuti Tahunan' ? 'selected' : '' %>>Cuti Tahunan</option>
-                  <option value="Cuti Sakit" <%= activeOcr.jenis_cuti === 'Cuti Sakit' ? 'selected' : '' %>>Cuti Sakit</option>
-                  <option value="Cuti Alasan Penting" <%= activeOcr.jenis_cuti === 'Cuti Alasan Penting' ? 'selected' : '' %>>Cuti Alasan Penting</option>
-                  <option value="Cuti Besar" <%= activeOcr.jenis_cuti === 'Cuti Besar' ? 'selected' : '' %>>Cuti Besar</option>
-                  <option value="Cuti Melahirkan" <%= activeOcr.jenis_cuti === 'Cuti Melahirkan' ? 'selected' : '' %>>Cuti Melahirkan</option>
-                  <option value="Cuti di Luar Tanggungan Negara" <%= activeOcr.jenis_cuti === 'Cuti di Luar Tanggungan Negara' ? 'selected' : '' %>>Cuti di Luar Tanggungan Negara</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Mulai Cuti</label>
-                <input type="date" name="tanggal_mulai" value="<%= activeOcr.tanggal_mulai %>" required class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Selesai Cuti</label>
-                <input type="date" name="tanggal_selesai" value="<%= activeOcr.tanggal_selesai %>" required class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Lama Cuti (Hari)</label>
-                <input type="number" min="1" name="lama_hari" value="<%= activeOcr.lama_hari %>" required class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
-              </div>
-            </div>
-
+      <!-- Alert Notifications -->
+      <% if (typeof success !=='undefined' && success) { %>
+        <div
+          class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-r-xl shadow-sm mb-6 flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fas fa-check-circle text-emerald-500 text-xl mr-3"></i>
             <div>
-              <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alasan / Keperluan Cuti</label>
-              <textarea name="alasan" rows="3" required class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500"><%= activeOcr.alasan %></textarea>
+              <p class="font-semibold">
+                <%= success %>
+              </p>
             </div>
-
-            <!-- Collapsible Raw OCR Text -->
-            <% if (activeOcr.rawText) { %>
-            <details class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs">
-              <summary class="cursor-pointer font-semibold text-gray-700 hover:text-teal-600 select-none flex items-center space-x-1">
-                <i class="fas fa-code text-teal-500"></i>
-                <span>Lihat Teks Lengkap Mentah Hasil Pindaian OCR (Raw Tesseract Text)</span>
-              </summary>
-              <pre class="mt-2 p-2 bg-gray-900 text-gray-100 rounded overflow-x-auto text-[11px] font-mono leading-relaxed whitespace-pre-wrap"><%= activeOcr.rawText %></pre>
-            </details>
-            <% } %>
-
-            <div class="pt-2 flex items-center justify-end space-x-3">
-              <a href="<%= url_for('ocr.ocr_cuti') %>" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-sm font-semibold transition">
-                Reset Form
-              </a>
-              <button type="submit" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition flex items-center space-x-2">
-                <i class="fas fa-save"></i>
-                <span>Simpan Ke Daftar Cuti</span>
-              </button>
-            </div>
-          </form>
-
-        </div>
-        <% } else { %>
-        <!-- Empty State -->
-        <div class="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center flex flex-col items-center justify-center flex-1 my-auto">
-          <div class="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center text-2xl mb-3">
-            <i class="fas fa-calendar-alt"></i>
           </div>
-          <h4 class="text-base font-bold text-gray-700">Belum Ada Formulir Cuti Diproses</h4>
-          <p class="text-xs text-gray-500 max-w-sm mt-1">Silakan upload berkas scan/foto formulir cuti di panel sebelah kiri, kemudian klik tombol "Proses OCR & Ekstraksi Formulir Cuti".</p>
+          <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i
+              class="fas fa-times"></i></button>
         </div>
         <% } %>
 
+          <% if (typeof error !=='undefined' && error) { %>
+            <div
+              class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-r-xl shadow-sm mb-6 flex items-center justify-between">
+              <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
+                <div>
+                  <p class="font-semibold">
+                    <%= error %>
+                  </p>
+                </div>
+              </div>
+              <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700"><i
+                  class="fas fa-times"></i></button>
+            </div>
+            <% } %>
+
+              <!-- Grid Container: Upload & Processing -->
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+
+                <!-- Upload Dropzone -->
+                <div
+                  class="lg:col-span-5 bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                      <i class="fas fa-cloud-upload-alt text-teal-600 mr-2"></i> Upload Berkas Formulir Cuti
+                    </h3>
+
+                    <form id="ocrUploadForm" action="<%= url_for('ocr.ocr_cuti') %>" method="POST"
+                      enctype="multipart/form-data" class="space-y-4" onsubmit="showOcrLoading()">
+                      <input type="hidden" name="action" value="process">
+
+                      <!-- Drag and Drop Box -->
+                      <div id="dropzone"
+                        class="border-2 border-dashed border-teal-300 hover:border-teal-500 bg-teal-50/50 hover:bg-teal-50 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[160px]">
+                        <i class="fas fa-file-invoice text-4xl text-teal-500 mb-3 animate-bounce"></i>
+                        <p class="text-sm font-medium text-gray-700">Tarik & Lepas file formulir cuti di sini, atau
+                          <span class="text-teal-600 underline">Pilih File</span></p>
+                        <p class="text-xs text-gray-500 mt-1">Format didukung: JPG, JPEG, PNG, PDF (Maks 10MB)</p>
+                        <input type="file" id="fileInput" name="file" accept="image/*,.pdf" class="hidden"
+                          onchange="handleFileSelect(this)">
+                      </div>
+
+                      <!-- Selected File Indicator -->
+                      <div id="selectedFileInfo"
+                        class="hidden bg-teal-50 border border-teal-200 p-3 rounded-lg flex items-center justify-between text-sm text-teal-800">
+                        <div class="flex items-center space-x-2 truncate">
+                          <i class="fas fa-paperclip text-teal-600"></i>
+                          <span id="fileNameDisplay" class="font-medium truncate">file.jpg</span>
+                        </div>
+                        <button type="button" onclick="clearSelectedFile()"
+                          class="text-red-500 hover:text-red-700 ml-2">
+                          <i class="fas fa-times-circle"></i>
+                        </button>
+                      </div>
+
+                      <button type="submit" id="btnProcessOCR"
+                        class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2 mt-4">
+                        <i class="fas fa-eye" id="btnOcrIcon"></i>
+                        <span id="btnOcrText">Proses OCR</span>
+                      </button>
+                    </form>
+                  </div>
+
+                  <div class="mt-4 pt-4 border-t text-xs text-gray-500 flex items-center justify-between">
+                    <span><i class="fas fa-shield-alt text-teal-600 mr-1"></i> Keamanan Berkas Terjamin</span>
+                    <span>Tesseract OCR + Smart Cuti Regex v5.0</span>
+                  </div>
+                </div>
+
+                <!-- OCR Result Form & Preview -->
+                <div class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
+                  <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center justify-between">
+                    <span class="flex items-center">
+                      <i class="fas fa-clipboard-check text-teal-600 mr-2"></i> Hasil Ekstraksi Formulir Cuti Pegawai
+                    </span>
+                    <% if (typeof activeOcr !=='undefined' && activeOcr) { %>
+                      <span class="px-2.5 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-semibold">Berhasil
+                        Diekstraksi via Regex</span>
+                      <% } else { %>
+                        <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold">Siap
+                          Memproses</span>
+                        <% } %>
+                  </h3>
+
+                  <% if (typeof activeOcr !=='undefined' && activeOcr) { %>
+                    <!-- Interactive Preview + Editable Form -->
+                    <div class="space-y-4 flex-1">
+
+                      <!-- Image Zoom Modal / Box -->
+                      <div
+                        class="bg-gray-900 rounded-xl p-3 relative overflow-hidden text-center group min-h-[200px] flex items-center justify-center">
+                        <img id="ocrPreviewImage" src="<%= activeOcr.imageUrl %>" alt="Scan Formulir Cuti"
+                          class="max-h-[240px] object-contain transition-transform duration-200 cursor-zoom-in"
+                          onclick="openZoomModal('<%= activeOcr.imageUrl %>')">
+
+                        <div
+                          class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md rounded-lg p-1.5 flex items-center space-x-2 text-white text-xs">
+                          <button onclick="zoomImage(1.2)" title="Zoom In"
+                            class="px-2 py-1 hover:bg-white/20 rounded"><i class="fas fa-search-plus"></i></button>
+                          <button onclick="zoomImage(0.8)" title="Zoom Out"
+                            class="px-2 py-1 hover:bg-white/20 rounded"><i class="fas fa-search-minus"></i></button>
+                          <button onclick="resetZoom()" title="Reset" class="px-2 py-1 hover:bg-white/20 rounded"><i
+                              class="fas fa-undo"></i></button>
+                          <button onclick="openZoomModal('<%= activeOcr.imageUrl %>')"
+                            class="px-2 py-1 bg-teal-600 hover:bg-teal-700 rounded text-white font-medium flex items-center space-x-1">
+                            <i class="fas fa-expand"></i>
+                            <span>Lihat Penuh</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Save Form -->
+                      <form action="<%= url_for('ocr.ocr_cuti') %>" method="POST" class="space-y-4 pt-2">
+                        <input type="hidden" name="action" value="save">
+                        <input type="hidden" name="filename" value="<%= activeOcr.filename %>">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">
+                              Nama Pegawai <span class="text-teal-600 font-normal">(Regex Match)</span>
+                            </label>
+                            <input type="text" name="nama_pegawai" value="<%= activeOcr.nama_pegawai %>" required
+                              class="w-full bg-teal-50/40 border border-teal-300 rounded-lg p-2.5 text-sm font-bold text-gray-900 focus:ring-teal-500 focus:border-teal-500">
+                          </div>
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">
+                              NIP Pegawai
+                            </label>
+                            <input type="text" name="nip" value="<%= activeOcr.nip %>"
+                              class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+                          </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jabatan Pegawai</label>
+                            <input type="text" name="jabatan" value="<%= activeOcr.jabatan %>"
+                              class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+                          </div>
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Cuti</label>
+                            <select name="jenis_cuti" required
+                              class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+                              <option value="Cuti Tahunan" <%=activeOcr.jenis_cuti==='Cuti Tahunan' ? 'selected' : '' %>
+                                >Cuti Tahunan</option>
+                              <option value="Cuti Sakit" <%=activeOcr.jenis_cuti==='Cuti Sakit' ? 'selected' : '' %>
+                                >Cuti Sakit</option>
+                              <option value="Cuti Alasan Penting" <%=activeOcr.jenis_cuti==='Cuti Alasan Penting'
+                                ? 'selected' : '' %>>Cuti Alasan Penting</option>
+                              <option value="Cuti Besar" <%=activeOcr.jenis_cuti==='Cuti Besar' ? 'selected' : '' %>
+                                >Cuti Besar</option>
+                              <option value="Cuti Melahirkan" <%=activeOcr.jenis_cuti==='Cuti Melahirkan' ? 'selected'
+                                : '' %>>Cuti Melahirkan</option>
+                              <option value="Cuti di Luar Tanggungan Negara"
+                                <%=activeOcr.jenis_cuti==='Cuti di Luar Tanggungan Negara' ? 'selected' : '' %>>Cuti di
+                                Luar Tanggungan Negara</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Mulai
+                              Cuti</label>
+                            <input type="date" name="tanggal_mulai" value="<%= activeOcr.tanggal_mulai %>" required
+                              class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+                          </div>
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Selesai
+                              Cuti</label>
+                            <input type="date" name="tanggal_selesai" value="<%= activeOcr.tanggal_selesai %>" required
+                              class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+                          </div>
+                          <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Lama Cuti (Hari)</label>
+                            <input type="number" min="1" name="lama_hari" value="<%= activeOcr.lama_hari %>" required
+                              class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500">
+                          </div>
+                        </div>
+
+                        <div>
+                          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alasan / Keperluan
+                            Cuti</label>
+                          <textarea name="alasan" rows="3" required
+                            class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-teal-500 focus:border-teal-500"><%= activeOcr.alasan %></textarea>
+                        </div>
+
+                        <!-- Collapsible Raw OCR Text -->
+                        <% if (activeOcr.rawText) { %>
+                          <details class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs">
+                            <summary
+                              class="cursor-pointer font-semibold text-gray-700 hover:text-teal-600 select-none flex items-center space-x-1">
+                              <i class="fas fa-code text-teal-500"></i>
+                              <span>Lihat Teks Lengkap Mentah Hasil Pindaian OCR (Raw Tesseract Text)</span>
+                            </summary>
+                            <pre
+                              class="mt-2 p-2 bg-gray-900 text-gray-100 rounded overflow-x-auto text-[11px] font-mono leading-relaxed whitespace-pre-wrap"><%= activeOcr.rawText %></pre>
+                          </details>
+                          <% } %>
+
+                            <div class="pt-2 flex items-center justify-end space-x-3">
+                              <a href="<%= url_for('ocr.ocr_cuti') %>"
+                                class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-sm font-semibold transition">
+                                Reset Form
+                              </a>
+                              <button type="submit"
+                                class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition flex items-center space-x-2">
+                                <i class="fas fa-save"></i>
+                                <span>Simpan Ke Daftar Cuti</span>
+                              </button>
+                            </div>
+                      </form>
+
+                    </div>
+                    <% } else { %>
+                      <!-- Empty State -->
+                      <div
+                        class="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center flex flex-col items-center justify-center flex-1 my-auto">
+                        <div
+                          class="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center text-2xl mb-3">
+                          <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-gray-700">Belum Ada Formulir Cuti Diproses</h4>
+                        <p class="text-xs text-gray-500 max-w-sm mt-1">Silakan upload berkas scan/foto formulir cuti di
+                          panel sebelah kiri, kemudian klik tombol "Proses OCR & Ekstraksi Formulir Cuti".</p>
+                      </div>
+                      <% } %>
+
+                </div>
+
+              </div>
+    </div>
+  </div>
+
+  <!-- Full Image Zoom Modal -->
+  <div id="imageModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div
+      class="relative max-w-4xl w-full bg-gray-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-4 py-3 bg-gray-800 text-white flex items-center justify-between border-b border-gray-700">
+        <h3 class="text-sm font-semibold flex items-center space-x-2">
+          <i class="fas fa-image text-teal-400"></i>
+          <span>Pratinjau Berkas Formulir Cuti (OCR Viewer)</span>
+        </h3>
+        <button onclick="closeZoomModal()" class="text-gray-400 hover:text-white text-lg p-1">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-
+      <div class="p-4 overflow-auto flex-1 text-center bg-gray-950 flex items-center justify-center min-h-[400px]">
+        <img id="modalFullImage" src="" alt="Full Preview"
+          class="max-h-[75vh] object-contain mx-auto transition-transform duration-200">
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Full Image Zoom Modal -->
-<div id="imageModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
-  <div class="relative max-w-4xl w-full bg-gray-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-    <div class="px-4 py-3 bg-gray-800 text-white flex items-center justify-between border-b border-gray-700">
-      <h3 class="text-sm font-semibold flex items-center space-x-2">
-        <i class="fas fa-image text-teal-400"></i>
-        <span>Pratinjau Berkas Formulir Cuti (OCR Viewer)</span>
-      </h3>
-      <button onclick="closeZoomModal()" class="text-gray-400 hover:text-white text-lg p-1">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <div class="p-4 overflow-auto flex-1 text-center bg-gray-950 flex items-center justify-center min-h-[400px]">
-      <img id="modalFullImage" src="" alt="Full Preview" class="max-h-[75vh] object-contain mx-auto transition-transform duration-200">
-    </div>
-  </div>
-</div>
+  <script>
+    let currentZoom = 1;
 
-<script>
-  let currentZoom = 1;
+    function handleFileSelect(input) {
+      const selectedFileInfo = document.getElementById('selectedFileInfo');
+      const fileNameDisplay = document.getElementById('fileNameDisplay');
 
-  function handleFileSelect(input) {
-    const selectedFileInfo = document.getElementById('selectedFileInfo');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      fileNameDisplay.textContent = file.name;
-      selectedFileInfo.classList.remove('hidden');
-    }
-  }
-
-  function showOcrLoading() {
-    const btn = document.getElementById('btnProcessOCR');
-    const icon = document.getElementById('btnOcrIcon');
-    const text = document.getElementById('btnOcrText');
-    if (btn) {
-      btn.disabled = true;
-      btn.classList.add('opacity-80', 'cursor-wait');
-    }
-    if (icon) {
-      icon.className = 'fas fa-spinner fa-spin mr-2';
-    }
-    if (text) {
-      text.textContent = 'Sedang Memindai Teks OCR & Regex Formulir Cuti...';
-    }
-  }
-
-  function clearSelectedFile() {
-    const fileInput = document.getElementById('fileInput');
-    const selectedFileInfo = document.getElementById('selectedFileInfo');
-    if (fileInput) fileInput.value = '';
-    if (selectedFileInfo) selectedFileInfo.classList.add('hidden');
-  }
-
-  // Click dropzone to open file dialog
-  const dropzone = document.getElementById('dropzone');
-  if (dropzone) {
-    dropzone.addEventListener('click', (e) => {
-      if (e.target.tagName !== 'INPUT') {
-        document.getElementById('fileInput').click();
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        fileNameDisplay.textContent = file.name;
+        selectedFileInfo.classList.remove('hidden');
       }
-    });
-  }
-
-  function zoomImage(factor) {
-    const img = document.getElementById('ocrPreviewImage');
-    if (img) {
-      currentZoom *= factor;
-      img.style.transform = `scale(${currentZoom})`;
     }
-  }
 
-  function resetZoom() {
-    const img = document.getElementById('ocrPreviewImage');
-    if (img) {
-      currentZoom = 1;
-      img.style.transform = `scale(1)`;
+    function showOcrLoading() {
+      const btn = document.getElementById('btnProcessOCR');
+      const icon = document.getElementById('btnOcrIcon');
+      const text = document.getElementById('btnOcrText');
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-80', 'cursor-wait');
+      }
+      if (icon) {
+        icon.className = 'fas fa-spinner fa-spin mr-2';
+      }
+      if (text) {
+        text.textContent = 'Sedang Memindai Teks OCR & Regex Formulir Cuti...';
+      }
     }
-  }
 
-  function openZoomModal(src) {
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalFullImage');
-    if (modal && modalImg) {
-      modalImg.src = src;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    function clearSelectedFile() {
+      const fileInput = document.getElementById('fileInput');
+      const selectedFileInfo = document.getElementById('selectedFileInfo');
+      if (fileInput) fileInput.value = '';
+      if (selectedFileInfo) selectedFileInfo.classList.add('hidden');
     }
-  }
 
-  function closeZoomModal() {
-    const modal = document.getElementById('imageModal');
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+    // Click dropzone to open file dialog
+    const dropzone = document.getElementById('dropzone');
+    if (dropzone) {
+      dropzone.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'INPUT') {
+          document.getElementById('fileInput').click();
+        }
+      });
     }
-  }
-</script>
 
-<%- include('../layouts/base-footer') %>
+    function zoomImage(factor) {
+      const img = document.getElementById('ocrPreviewImage');
+      if (img) {
+        currentZoom *= factor;
+        img.style.transform = `scale(${currentZoom})`;
+      }
+    }
 
+    function resetZoom() {
+      const img = document.getElementById('ocrPreviewImage');
+      if (img) {
+        currentZoom = 1;
+        img.style.transform = `scale(1)`;
+      }
+    }
+
+    function openZoomModal(src) {
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalFullImage');
+      if (modal && modalImg) {
+        modalImg.src = src;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeZoomModal() {
+      const modal = document.getElementById('imageModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+  </script>
+
+  <%- include('../layouts/base-footer') %>
